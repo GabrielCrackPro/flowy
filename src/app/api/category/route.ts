@@ -37,6 +37,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(category, { status: 201 });
   } catch (error) {
-    return handleApiError(error, "No se pudo crear la categoría");
+    return handleApiError(error, "Could not create category");
   }
 }

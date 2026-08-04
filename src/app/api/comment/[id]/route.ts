@@ -29,7 +29,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(comment);
   } catch (error) {
-    return handleApiError(error, "No se pudo actualizar el comentario");
+    return handleApiError(error, "Could not update comment");
   }
 }
 
@@ -45,6 +45,6 @@ export async function DELETE(_: NextRequest, { params }: Params) {
     await CommentService.delete(auth.id, id);
     return noContent();
   } catch (error) {
-    return handleApiError(error, "No se pudo eliminar el comentario");
+    return handleApiError(error, "Could not delete comment");
   }
 }

@@ -36,7 +36,7 @@ export async function GET(_: NextRequest, { params }: Params) {
 
     return NextResponse.json(budget);
   } catch (error) {
-    return handleApiError(error, "No se pudo obtener el presupuesto");
+    return handleApiError(error, "Could not get budget");
   }
 }
 
@@ -58,7 +58,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(budget);
   } catch (error) {
-    return handleApiError(error, "No se pudo actualizar el presupuesto");
+    return handleApiError(error, "Could not update budget");
   }
 }
 
@@ -79,6 +79,6 @@ export async function DELETE(_: NextRequest, { params }: Params) {
 
     return noContent();
   } catch (error) {
-    return handleApiError(error, "No se pudo eliminar el presupuesto");
+    return handleApiError(error, "Could not delete budget");
   }
 }

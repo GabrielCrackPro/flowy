@@ -43,6 +43,6 @@ export async function POST(request: NextRequest) {
     );
     return NextResponse.json(space, { status: 201 });
   } catch (error) {
-    return handleApiError(error, "No se pudo procesar el espacio");
+    return handleApiError(error, "Could not process space");
   }
 }

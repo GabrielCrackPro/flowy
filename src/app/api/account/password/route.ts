@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { message: "No se pudo actualizar la contraseña" },
+      { message: "Could not update password" },
       { status: 500 },
     );
   }

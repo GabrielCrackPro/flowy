@@ -297,7 +297,7 @@ export const SpaceService = {
     }
 
     if (space.ownerId !== userId) {
-      throw new Error("No autorizado");
+      throw new Error("Unauthorized");
     }
 
     const otherMembers = await prisma.spaceMember.count({

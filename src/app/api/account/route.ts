@@ -24,7 +24,7 @@ export async function DELETE() {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { message: "No se pudo eliminar la cuenta" },
+      { message: "Could not delete account" },
       { status: 500 },
     );
   }

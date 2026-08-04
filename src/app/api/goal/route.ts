@@ -47,6 +47,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(goal, { status: 201 });
   } catch (error) {
-    return handleApiError(error, "No se pudo crear el objetivo");
+    return handleApiError(error, "Could not create goal");
   }
 }

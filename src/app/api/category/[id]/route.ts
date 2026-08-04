@@ -36,7 +36,7 @@ export async function GET(_: NextRequest, { params }: Params) {
 
     return NextResponse.json(category);
   } catch (error) {
-    return handleApiError(error, "No se pudo obtener la categoría");
+    return handleApiError(error, "Could not get category");
   }
 }
 
@@ -58,7 +58,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(category);
   } catch (error) {
-    return handleApiError(error, "No se pudo actualizar la categoría");
+    return handleApiError(error, "Could not update category");
   }
 }
 
@@ -79,6 +79,6 @@ export async function DELETE(_: NextRequest, { params }: Params) {
 
     return noContent();
   } catch (error) {
-    return handleApiError(error, "No se pudo eliminar la categoría");
+    return handleApiError(error, "Could not delete category");
   }
 }

@@ -5,29 +5,34 @@ import { ZodError } from "zod";
 import { getCurrentUser } from "@/lib/auth/user";
 
 const DOMAIN_ERROR_STATUS: Record<string, number> = {
-  "Categoría no encontrada": 404,
-  "Ya existe una categoría con ese nombre.": 409,
-  "Transacción no encontrada": 404,
-  "La categoría no pertenece al usuario": 400,
-  "Presupuesto no encontrado": 404,
-  "Objetivo no encontrado": 404,
-  "Comentario no encontrado": 404,
-  "Comentario padre no encontrado": 404,
-  "Perfil no encontrado": 404,
-  "Espacio no encontrado": 404,
-  "El nombre del espacio no puede estar vacío": 400,
-  "No puedes editar este espacio": 403,
-  "No autorizado": 403,
+  "Category not found": 404,
+  "A category with this name already exists": 409,
+  "Transaction not found": 404,
+  "The category does not belong to the user": 400,
+  "Budget not found": 404,
+  "Goal not found": 404,
+  "Comment not found": 404,
+  "Parent comment not found": 404,
+  "Profile not found": 404,
+  "Space not found": 404,
+  "Space name cannot be empty": 400,
+  "You cannot edit this space": 403,
+  "Unauthorized": 403,
 };
 
 export async function requireAuth(): Promise<User | NextResponse> {
-  const user = await getCurrentUser();
+  try {
+    const user = await getCurrentUser();
 
-  if (!user) {
-    return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    return user;
+  } catch (error) {
+    console.error("Auth error:", error);
+    return NextResponse.json({ message: "Authentication error" }, { status: 500 });
   }
-
-  return user;
 }
 
 export function isAuthResponse(
@@ -40,7 +45,7 @@ export function handleApiError(error: unknown, fallbackMessage: string) {
   if (error instanceof ZodError) {
     return NextResponse.json(
       {
-        message: "Datos inválidos",
+        message: "Invalid data",
         errors: error.flatten(),
       },
       { status: 400 },

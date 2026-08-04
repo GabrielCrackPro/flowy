@@ -21,6 +21,6 @@ export async function POST() {
       status: created ? 201 : 200,
     });
   } catch (error) {
-    return handleApiError(error, "No se pudo crear el perfil");
+    return handleApiError(error, "Could not create profile");
   }
 }

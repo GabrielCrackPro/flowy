@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     });
     return NextResponse.json(activities);
   } catch (error) {
-    return handleApiError(error, "No se pudo obtener la actividad");
+    return handleApiError(error, "Could not get activity");
   }
 }
 
@@ -44,6 +44,6 @@ export async function DELETE() {
     const result = await ActivityService.clearAll(auth.id);
     return NextResponse.json(result);
   } catch (error) {
-    return handleApiError(error, "No se pudo eliminar la actividad");
+    return handleApiError(error, "Could not delete activity");
   }
 }

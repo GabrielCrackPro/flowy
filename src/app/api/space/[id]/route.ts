@@ -56,7 +56,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       { status: 400 },
     );
   } catch (error) {
-    return handleApiError(error, "No se pudo actualizar el espacio");
+    return handleApiError(error, "Could not update space");
   }
 }
 
@@ -72,7 +72,7 @@ export async function DELETE(_: NextRequest, { params }: Params) {
     const result = await SpaceService.delete(auth.id, id);
     return NextResponse.json(result);
   } catch (error) {
-    return handleApiError(error, "No se pudo eliminar el espacio");
+    return handleApiError(error, "Could not delete space");
   }
 }
 
@@ -97,6 +97,6 @@ export async function GET(_: NextRequest, { params }: Params) {
 
     return NextResponse.json(space);
   } catch (error) {
-    return handleApiError(error, "No se pudo obtener el espacio");
+    return handleApiError(error, "Could not get space");
   }
 }

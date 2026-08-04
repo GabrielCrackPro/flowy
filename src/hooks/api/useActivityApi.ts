@@ -29,7 +29,7 @@ export function useActivityApi(filters?: ActivityFilters) {
       toast.error(
         error instanceof Error
           ? error.message
-          : "No se pudo eliminar la actividad",
+          : "Could not delete activity",
       );
     },
   });

@@ -35,7 +35,7 @@ export async function GET(_: NextRequest, { params }: Params) {
 
     return NextResponse.json(subscription);
   } catch (error) {
-    return handleApiError(error, "No se pudo obtener la suscripción");
+    return handleApiError(error, "Could not get subscription");
   }
 }
 
@@ -57,7 +57,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(subscription);
   } catch (error) {
-    return handleApiError(error, "No se pudo actualizar la suscripción");
+    return handleApiError(error, "Could not update subscription");
   }
 }
 
@@ -78,6 +78,6 @@ export async function DELETE(_: NextRequest, { params }: Params) {
 
     return noContent();
   } catch (error) {
-    return handleApiError(error, "No se pudo eliminar la suscripción");
+    return handleApiError(error, "Could not delete subscription");
   }
 }

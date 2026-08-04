@@ -29,14 +29,14 @@ export async function GET(_: NextRequest, { params }: Params) {
 
     if (!profile) {
       return NextResponse.json(
-        { message: "Perfil no encontrado" },
+        { message: "Profile not found" },
         { status: 404 },
       );
     }
 
     return NextResponse.json(profile);
   } catch (error) {
-    return handleApiError(error, "No se pudo obtener el perfil");
+    return handleApiError(error, "Could not get profile");
   }
 }
 
@@ -70,7 +70,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(profile);
   } catch (error) {
-    return handleApiError(error, "No se pudo actualizar el perfil");
+    return handleApiError(error, "Could not update profile");
   }
 }
 
@@ -87,6 +87,6 @@ export async function DELETE(_: NextRequest, { params }: Params) {
 
     return noContent();
   } catch (error) {
-    return handleApiError(error, "No se pudo eliminar el perfil");
+    return handleApiError(error, "Could not delete profile");
   }
 }

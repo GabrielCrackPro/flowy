@@ -46,6 +46,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error) {
-    return handleApiError(error, "No se pudo crear el comentario");
+    return handleApiError(error, "Could not create comment");
   }
 }

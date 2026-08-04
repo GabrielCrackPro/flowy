@@ -42,7 +42,7 @@ export async function GET(_: NextRequest, { params }: Params) {
 
     return NextResponse.json(transaction);
   } catch (error) {
-    return handleApiError(error, "No se pudo obtener la transacción");
+    return handleApiError(error, "Could not get transaction");
   }
 }
 
@@ -70,7 +70,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         { status: 400 },
       );
     }
-    return handleApiError(error, "No se pudo actualizar la transacción");
+    return handleApiError(error, "Could not update transaction");
   }
 }
 
@@ -91,6 +91,6 @@ export async function DELETE(_: NextRequest, { params }: Params) {
 
     return noContent();
   } catch (error) {
-    return handleApiError(error, "No se pudo eliminar la transacción");
+    return handleApiError(error, "Could not delete transaction");
   }
 }

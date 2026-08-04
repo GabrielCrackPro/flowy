@@ -136,6 +136,6 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    return handleApiError(error, "No se pudo procesar la solicitud");
+    return handleApiError(error, "Could not process request");
   }
 }

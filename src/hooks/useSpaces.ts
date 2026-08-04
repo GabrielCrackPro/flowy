@@ -62,7 +62,7 @@ export function useSpaces() {
       toast.success("Espacio creado");
       await invalidateSpaceDependent();
     },
-    onError: () => toast.error("No se pudo crear el espacio"),
+    onError: () => toast.error("Could not create space"),
   });
 
   const join = useMutation({
@@ -71,7 +71,7 @@ export function useSpaces() {
       toast.success("Te uniste al espacio");
       await invalidateSpaceDependent();
     },
-    onError: () => toast.error("No se pudo unir al espacio"),
+    onError: () => toast.error("Could not join space"),
   });
 
   const setActive = useMutation({
@@ -80,7 +80,7 @@ export function useSpaces() {
       toast.success("Espacio activo actualizado");
       await invalidateSpaceDependent();
     },
-    onError: () => toast.error("No se pudo actualizar el espacio"),
+    onError: () => toast.error("Could not update space"),
   });
 
   const leave = useMutation({
@@ -89,7 +89,7 @@ export function useSpaces() {
       toast.success("Saliste del espacio");
       await invalidateSpaceDependent();
     },
-    onError: () => toast.error("No se pudo salir del espacio"),
+    onError: () => toast.error("Could not leave space"),
   });
 
   const rename = useMutation({
@@ -106,7 +106,7 @@ export function useSpaces() {
       toast.success("Espacio actualizado");
       await invalidateSpaces();
     },
-    onError: () => toast.error("No se pudo actualizar el espacio"),
+    onError: () => toast.error("Could not update space"),
   });
 
   const remove = useMutation({
@@ -115,7 +115,7 @@ export function useSpaces() {
       toast.success("Espacio eliminado");
       await invalidateSpaceDependent();
     },
-    onError: () => toast.error("No se pudo eliminar el espacio"),
+    onError: () => toast.error("Could not delete space"),
   });
 
   const removeMemberMutation = useMutation({
@@ -130,7 +130,7 @@ export function useSpaces() {
       toast.success("Miembro eliminado");
       await invalidateSpaces();
     },
-    onError: () => toast.error("No se pudo eliminar el miembro"),
+    onError: () => toast.error("Could not delete member"),
   });
 
   const activeSpace: SpaceSummary | null =

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
 
   if (!user) {
-    return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   const user = await getCurrentUser();
 
   if (!user) {
-    return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     console.error(error);
 
     return NextResponse.json(
-      { message: "No se pudo crear la suscripción" },
+      { message: "Could not create subscription" },
       { status: 500 },
     );
   }

@@ -50,7 +50,7 @@ async function deleteOwnedSpaces(userId: string) {
 export const ProfileService = {
   async getById(userId: string, id: string) {
     if (userId !== id) {
-      throw new Error("No autorizado");
+      throw new Error("Unauthorized");
     }
 
     return prisma.profile.findUnique({
@@ -93,7 +93,7 @@ export const ProfileService = {
     data: UpdateProfileInput | UpdateThemeInput,
   ) {
     if (userId !== id) {
-      throw new Error("No autorizado");
+      throw new Error("Unauthorized");
     }
 
     const profile = await prisma.profile.findUnique({
@@ -101,7 +101,7 @@ export const ProfileService = {
     });
 
     if (!profile) {
-      throw new Error("Perfil no encontrado");
+      throw new Error("Profile not found");
     }
 
     return prisma.profile.update({
@@ -125,7 +125,7 @@ export const ProfileService = {
 
   async delete(userId: string, id: string) {
     if (userId !== id) {
-      throw new Error("No autorizado");
+      throw new Error("Unauthorized");
     }
 
     const profile = await prisma.profile.findUnique({
@@ -133,7 +133,7 @@ export const ProfileService = {
     });
 
     if (!profile) {
-      throw new Error("Perfil no encontrado");
+      throw new Error("Profile not found");
     }
 
     await deleteOwnedSpaces(userId);
