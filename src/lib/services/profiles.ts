@@ -53,38 +53,48 @@ export const ProfileService = {
       throw new Error("Unauthorized");
     }
 
-    return prisma.profile.findUnique({
-      where: { id },
-    });
+    try {
+      return prisma.profile.findUnique({
+        where: { id },
+      });
+    } catch (error) {
+      console.error("Profile fetch error:", error);
+      throw error;
+    }
   },
 
   async ensure(user: User) {
-    const existing = await prisma.profile.findUnique({
-      where: { id: user.id },
-    });
+    try {
+      const existing = await prisma.profile.findUnique({
+        where: { id: user.id },
+      });
 
-    if (existing) {
-      return { profile: existing, created: false };
+      if (existing) {
+        return { profile: existing, created: false };
+      }
+
+      const profile = await prisma.profile.create({
+        data: {
+          id: user.id,
+          email: user.email ?? null,
+          name: profileNameFromUser(user),
+        },
+      });
+
+      const personalSpace = await SpaceService.ensurePersonalSpace(profile.id);
+      await prisma.profile.update({
+        where: { id: profile.id },
+        data: { activeSpaceId: personalSpace.id },
+      });
+
+      return {
+        profile: { ...profile, activeSpaceId: personalSpace.id },
+        created: true,
+      };
+    } catch (error) {
+      console.error("Profile creation error:", error);
+      throw error;
     }
-
-    const profile = await prisma.profile.create({
-      data: {
-        id: user.id,
-        email: user.email ?? null,
-        name: profileNameFromUser(user),
-      },
-    });
-
-    const personalSpace = await SpaceService.ensurePersonalSpace(profile.id);
-    await prisma.profile.update({
-      where: { id: profile.id },
-      data: { activeSpaceId: personalSpace.id },
-    });
-
-    return {
-      profile: { ...profile, activeSpaceId: personalSpace.id },
-      created: true,
-    };
   },
 
   async update(

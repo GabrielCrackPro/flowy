@@ -27,3 +27,14 @@ jobs:
           echo "❌ Deployment failed!"
           echo "Check Vercel dashboard for details"
           exit 1
+
+      - name: Check Application Health
+        if: github.event.deployment_status.state == 'success'
+        run: |
+          echo "Checking application health..."
+          DEPLOY_URL="${{ github.event.deployment_status.environment_url }}"
+          if curl -f -s -o /dev/null "$DEPLOY_URL"; then
+            echo "✅ Application is responding"
+          else
+            echo "⚠️  Application deployed but not responding"
+          fi

@@ -14,41 +14,61 @@ jobs:
           # Add your Vercel token as a secret
           VERCEL_TOKEN="${{ secrets.VERCEL_TOKEN }}"
           PROJECT_ID="${{ secrets.VERCEL_PROJECT_ID }}"
-          
+
           if [ -z "$VERCEL_TOKEN" ] || [ -z "$PROJECT_ID" ]; then
-            echo "Error: VERCEL_TOKEN and VERCEL_PROJECT_ID secrets required"
-            exit 1
+            echo "⚠️  Warning: VERCEL_TOKEN and VERCEL_PROJECT_ID secrets required"
+            echo "This workflow is optional. Your Vercel deployments will still work without it."
+            echo "To enable monitoring, add these secrets in GitHub repository settings."
+            exit 0
           fi
-          
+
           echo "Monitoring Vercel deployments..."
           echo "Project ID: $PROJECT_ID"
-          
-          # Get recent deployments
-          curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v9/projects/$PROJECT_ID/deployments" | \
-            jq '.deployments[:5] | .[] | {id: .id, state: .state, url: .url, created: .created}'
+
+          # Get recent deployments with error handling
+          RESPONSE=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/$PROJECT_ID/deployments")
+
+          echo "API Response: $RESPONSE"
+
+          if echo "$RESPONSE" | jq -e '.deployments' > /dev/null 2>&1; then
+            echo "$RESPONSE" | jq '.deployments[:5] | .[] | {id: .id, state: .state, url: .url, created: .created}'
+          else
+            echo "⚠️  Could not fetch deployments. Check your Vercel token and project ID."
+            echo "This is optional - your deployments will still work via Vercel's GitHub integration."
+          fi
 
       - name: Check Latest Deployment
         run: |
           VERCEL_TOKEN="${{ secrets.VERCEL_TOKEN }}"
           PROJECT_ID="${{ secrets.VERCEL_PROJECT_ID }}"
-          
-          # Get latest deployment status
-          LATEST_DEPLOYMENT=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v9/projects/$PROJECT_ID/deployments?limit=1" | \
-            jq -r '.deployments[0]')
-          
-          STATE=$(echo $LATEST_DEPLOYMENT | jq -r '.state')
-          URL=$(echo $LATEST_DEPLOYMENT | jq -r '.url')
-          
-          echo "Latest deployment state: $STATE"
-          echo "Deployment URL: $URL"
-          
-          if [ "$STATE" = "READY" ]; then
-            echo "✅ Deployment is ready and live!"
-          elif [ "$STATE" = "ERROR" ]; then
-            echo "❌ Deployment has errors"
-            exit 1
+
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$PROJECT_ID" ]; then
+            echo "⏭️  Skipping deployment check - secrets not configured"
+            exit 0
+          fi
+
+          # Get latest deployment status with error handling
+          RESPONSE=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/$PROJECT_ID/deployments?limit=1")
+
+          if echo "$RESPONSE" | jq -e '.deployments[0]' > /dev/null 2>&1; then
+            LATEST_DEPLOYMENT=$(echo "$RESPONSE" | jq -r '.deployments[0]')
+            STATE=$(echo $LATEST_DEPLOYMENT | jq -r '.state')
+            URL=$(echo $LATEST_DEPLOYMENT | jq -r '.url')
+
+            echo "Latest deployment state: $STATE"
+            echo "Deployment URL: $URL"
+
+            if [ "$STATE" = "READY" ]; then
+              echo "✅ Deployment is ready and live!"
+            elif [ "$STATE" = "ERROR" ]; then
+              echo "❌ Deployment has errors"
+              exit 1
+            else
+              echo "⏳ Deployment is in progress: $STATE"
+            fi
           else
-            echo "⏳ Deployment is in progress: $STATE"
+            echo "⚠️  Could not fetch deployment status"
+            echo "This is optional - your deployments will still work via Vercel's GitHub integration."
           fi
