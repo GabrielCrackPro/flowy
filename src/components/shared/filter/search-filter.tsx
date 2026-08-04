@@ -1,3 +1,5 @@
+"use client";
+
 import { Icon } from "@/components/shared";
 import { Button, Input } from "@components/ui";
 import { Search, X } from "@/lib/icons";

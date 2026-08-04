@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import type { FilterField } from "@/types/ui";
 import { useDebounce } from "../useDebounce";

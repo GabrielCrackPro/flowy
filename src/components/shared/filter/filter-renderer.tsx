@@ -1,3 +1,5 @@
+"use client";
+
 import type { FilterField } from "@/types/ui";
 import { DateRangeFilter } from "./date-range-filter";
 import { MultiSelectFilter } from "./multi-select-filter";
