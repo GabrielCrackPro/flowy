@@ -1,9 +1,11 @@
 import {
+  applyRateLimitHeaders,
   handleApiError,
   isAuthResponse,
   requireAuth,
-} from "@lib/api/route-utils";
-import { ActivityService } from "@lib/services/activities";
+  withRateLimit,
+} from "@/lib/api/route-utils";
+import { ActivityService } from "@/lib/services/activities";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -11,6 +13,12 @@ export async function GET(request: NextRequest) {
 
   if (isAuthResponse(auth)) {
     return auth;
+  }
+
+  // Apply rate limiting (using default rate limit for activity feed)
+  const rateLimitResponse = await withRateLimit(auth.id, "default");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   try {
@@ -27,7 +35,8 @@ export async function GET(request: NextRequest) {
       type,
       entityType,
     });
-    return NextResponse.json(activities);
+    const response = NextResponse.json(activities);
+    return applyRateLimitHeaders(response, auth.id, "default");
   } catch (error) {
     return handleApiError(error, "Could not get activity");
   }
@@ -40,9 +49,16 @@ export async function DELETE() {
     return auth;
   }
 
+  // Apply rate limiting (using default rate limit for activity feed)
+  const rateLimitResponse = await withRateLimit(auth.id, "default");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const result = await ActivityService.clearAll(auth.id);
-    return NextResponse.json(result);
+    const response = NextResponse.json(result);
+    return applyRateLimitHeaders(response, auth.id, "default");
   } catch (error) {
     return handleApiError(error, "Could not delete activity");
   }

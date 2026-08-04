@@ -1,10 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import {
+  applyRateLimitHeaders,
   handleApiError,
   isAuthResponse,
   noContent,
   requireAuth,
+  withRateLimit,
 } from "@/lib/api/route-utils";
 import { updateTransactionSchema } from "@/lib/schemas";
 import { AlertsService } from "@/lib/services/alerts";
@@ -12,7 +14,7 @@ import { TransactionService } from "@/lib/services/transactions";
 import { ZodError } from "zod";
 
 // Type guard for ZodError with proper type narrowing
-function isZodError(error: unknown): error is ZodError<any> {
+function isZodError(error: unknown): error is ZodError {
   return error instanceof ZodError;
 }
 
@@ -30,6 +32,12 @@ export async function GET(_: NextRequest, { params }: Params) {
     return auth;
   }
 
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(auth.id, "transaction");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const transaction = await TransactionService.get(auth.id, id);
 
@@ -40,7 +48,8 @@ export async function GET(_: NextRequest, { params }: Params) {
       );
     }
 
-    return NextResponse.json(transaction);
+    const response = NextResponse.json(transaction);
+    return applyRateLimitHeaders(response, auth.id, "transaction");
   } catch (error) {
     return handleApiError(error, "Could not get transaction");
   }
@@ -54,6 +63,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     return auth;
   }
 
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(auth.id, "transaction");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const body = updateTransactionSchema.parse(await request.json());
     const transaction = await TransactionService.update(auth.id, id, body);
@@ -62,11 +77,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       console.error("Failed to evaluate alerts:", error);
     });
 
-    return NextResponse.json(transaction);
+    const response = NextResponse.json(transaction);
+    return applyRateLimitHeaders(response, auth.id, "transaction");
   } catch (error) {
     if (isZodError(error)) {
       return NextResponse.json(
-        { message: "Invalid transaction data", errors: (error as any).errors },
+        { message: "Invalid transaction data", errors: error.issues },
         { status: 400 },
       );
     }
@@ -82,6 +98,12 @@ export async function DELETE(_: NextRequest, { params }: Params) {
     return auth;
   }
 
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(auth.id, "transaction");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     await TransactionService.delete(auth.id, id);
 
@@ -89,7 +111,8 @@ export async function DELETE(_: NextRequest, { params }: Params) {
       console.error("Failed to evaluate alerts:", error);
     });
 
-    return noContent();
+    const response = noContent();
+    return applyRateLimitHeaders(response, auth.id, "transaction");
   } catch (error) {
     return handleApiError(error, "Could not delete transaction");
   }

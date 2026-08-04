@@ -1,9 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import {
+  applyRateLimitHeaders,
   handleApiError,
   isAuthResponse,
   requireAuth,
+  withRateLimit,
 } from "@/lib/api/route-utils";
 import { DashboardService } from "@/lib/services/dashboard";
 
@@ -12,6 +14,12 @@ export async function GET(request: NextRequest) {
 
   if (isAuthResponse(auth)) {
     return auth;
+  }
+
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(auth.id, "dashboard");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   try {
@@ -25,7 +33,8 @@ export async function GET(request: NextRequest) {
       year ? Number(year) : undefined,
     );
 
-    return NextResponse.json(data);
+    const response = NextResponse.json(data);
+    return applyRateLimitHeaders(response, auth.id, "dashboard");
   } catch (error) {
     return handleApiError(
       error,

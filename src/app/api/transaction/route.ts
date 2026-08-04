@@ -1,9 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import {
+  applyRateLimitHeaders,
   handleApiError,
   isAuthResponse,
   requireAuth,
+  withRateLimit,
 } from "@/lib/api/route-utils";
 import {
   createTransactionSchema,
@@ -15,7 +17,7 @@ import { AlertsService } from "@/lib/services/alerts";
 import { ZodError } from "zod";
 
 // Type guard for ZodError with proper type narrowing
-function isZodError(error: unknown): error is ZodError<any> {
+function isZodError(error: unknown): error is ZodError {
   return error instanceof ZodError;
 }
 
@@ -24,6 +26,12 @@ export async function GET(request: NextRequest) {
 
   if (isAuthResponse(auth)) {
     return auth;
+  }
+
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(auth.id, "transaction");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   try {
@@ -45,14 +53,18 @@ export async function GET(request: NextRequest) {
     const validatedPage = page ? parseInt(page, 10) : 1;
     const validatedLimit = limit ? parseInt(limit, 10) : 50;
 
-    if (validatedPage < 1 || isNaN(validatedPage)) {
+    if (validatedPage < 1 || Number.isNaN(validatedPage)) {
       return NextResponse.json(
         { message: "Invalid page number" },
         { status: 400 },
       );
     }
 
-    if (validatedLimit < 1 || validatedLimit > 100 || isNaN(validatedLimit)) {
+    if (
+      validatedLimit < 1 ||
+      validatedLimit > 100 ||
+      Number.isNaN(validatedLimit)
+    ) {
       return NextResponse.json(
         { message: "Invalid limit. Must be between 1 and 100" },
         { status: 400 },
@@ -76,11 +88,12 @@ export async function GET(request: NextRequest) {
         sortOrder === "asc" || sortOrder === "desc" ? sortOrder : undefined,
     });
 
-    return NextResponse.json(transactions);
+    const response = NextResponse.json(transactions);
+    return applyRateLimitHeaders(response, auth.id, "transaction");
   } catch (error) {
     if (isZodError(error)) {
       return NextResponse.json(
-        { message: "Invalid query parameters", errors: (error as any).errors },
+        { message: "Invalid query parameters", errors: error.issues },
         { status: 400 },
       );
     }
@@ -93,6 +106,12 @@ export async function POST(request: NextRequest) {
 
   if (isAuthResponse(auth)) {
     return auth;
+  }
+
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(auth.id, "transaction");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   try {
@@ -128,11 +147,12 @@ export async function POST(request: NextRequest) {
       console.error("Failed to evaluate alerts:", error);
     });
 
-    return NextResponse.json(transaction, { status: 201 });
+    const response = NextResponse.json(transaction, { status: 201 });
+    return applyRateLimitHeaders(response, auth.id, "transaction");
   } catch (error) {
     if (isZodError(error)) {
       return NextResponse.json(
-        { message: "Invalid transaction data", errors: (error as any).errors },
+        { message: "Invalid transaction data", errors: error.issues },
         { status: 400 },
       );
     }

@@ -1,9 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import {
+  applyRateLimitHeaders,
   handleApiError,
   isAuthResponse,
   requireAuth,
+  withRateLimit,
 } from "@/lib/api/route-utils";
 import { createBudgetSchema } from "@/lib/schemas";
 import { AlertsService } from "@/lib/services/alerts";
@@ -14,6 +16,12 @@ export async function GET(request: NextRequest) {
 
   if (isAuthResponse(auth)) {
     return auth;
+  }
+
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(auth.id, "budget");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   try {
@@ -29,7 +37,8 @@ export async function GET(request: NextRequest) {
       year: year ? Number(year) : undefined,
     });
 
-    return NextResponse.json(budgets);
+    const response = NextResponse.json(budgets);
+    return applyRateLimitHeaders(response, auth.id, "budget");
   } catch (error) {
     return handleApiError(error, "No se pudieron obtener los presupuestos");
   }
@@ -42,6 +51,12 @@ export async function POST(request: NextRequest) {
     return auth;
   }
 
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(auth.id, "budget");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const body = createBudgetSchema.parse(await request.json());
     const budget = await BudgetService.create(auth.id, body);
@@ -50,7 +65,8 @@ export async function POST(request: NextRequest) {
       console.error("Failed to evaluate alerts:", error);
     });
 
-    return NextResponse.json(budget, { status: 201 });
+    const response = NextResponse.json(budget, { status: 201 });
+    return applyRateLimitHeaders(response, auth.id, "budget");
   } catch (error) {
     return handleApiError(error, "Could not create budget");
   }

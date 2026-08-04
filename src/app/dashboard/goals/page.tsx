@@ -47,7 +47,7 @@ export default function GoalsPage() {
     if (!quickAddGoal) return;
 
     // Validate amount before proceeding
-    if (amount <= 0 || isNaN(amount)) {
+    if (amount <= 0 || Number.isNaN(amount)) {
       console.error("Invalid amount for quick add:", amount);
       return;
     }

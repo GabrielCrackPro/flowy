@@ -1,9 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import {
+  applyRateLimitHeaders,
   handleApiError,
   isAuthResponse,
   requireAuth,
+  withRateLimit,
 } from "@/lib/api/route-utils";
 import { SearchService } from "@/lib/services/search";
 
@@ -14,6 +16,12 @@ export async function GET(request: NextRequest) {
     return auth;
   }
 
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(auth.id, "search");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const q = request.nextUrl.searchParams.get("q");
 
@@ -22,7 +30,8 @@ export async function GET(request: NextRequest) {
     }
 
     const results = await SearchService.search(auth.id, q);
-    return NextResponse.json(results);
+    const response = NextResponse.json(results);
+    return applyRateLimitHeaders(response, auth.id, "search");
   } catch (error) {
     return handleApiError(
       error,

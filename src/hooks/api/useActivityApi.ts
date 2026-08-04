@@ -27,9 +27,7 @@ export function useActivityApi(filters?: ActivityFilters) {
     },
     onError: (error) => {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Could not delete activity",
+        error instanceof Error ? error.message : "Could not delete activity",
       );
     },
   });

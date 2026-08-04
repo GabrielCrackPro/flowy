@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/api/route-utils";
+import {
+  applyRateLimitHeaders,
+  isAuthResponse,
+  requireAuth,
+  withRateLimit,
+} from "@/lib/api/route-utils";
 import { ProfileService } from "@/lib/services/profiles";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function DELETE() {
   const auth = await requireAuth();
 
-  if (auth instanceof NextResponse) {
+  if (isAuthResponse(auth)) {
     return auth;
+  }
+
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(auth.id, "account");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   try {
@@ -20,7 +31,8 @@ export async function DELETE() {
       return NextResponse.json({ message: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ message: "Cuenta eliminada" });
+    const response = NextResponse.json({ message: "Cuenta eliminada" });
+    return applyRateLimitHeaders(response, auth.id, "account");
   } catch (error) {
     console.error(error);
     return NextResponse.json(
