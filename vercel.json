@@ -5,7 +5,6 @@
   "installCommand": "pnpm install",
   "framework": "nextjs",
   "regions": ["iad1"],
-  "postinstall": "prisma generate",
   "env": {
     "DATABASE_URL": "@database_url",
     "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
