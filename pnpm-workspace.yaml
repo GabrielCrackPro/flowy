@@ -1,0 +1,12 @@
+allowBuilds:
+  '@prisma/client': true
+  '@prisma/engines': true
+  core-js: true
+  prisma: true
+  sharp: true
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+
+overrides:
+  react-is: ^19.2.4

@@ -1,0 +1,321 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id                   String   @id @db.Uuid
+  email                String?  @db.Text
+  name                 String?  @db.Text
+  avatarUrl            String?  @map("avatar_url") @db.Text
+  currency             String   @default("USD") @db.VarChar(8)
+  locale               String   @default("es") @db.VarChar(10)
+  showLanguageSelector Boolean  @default(true) @map("show_language_selector")
+  activeSpaceId        String?  @map("active_space_id") @db.Uuid
+  dashboardCards       Json?    @map("dashboard_cards")
+  primaryColor         String?  @map("primary_color") @db.Text
+  secondaryColor       String?  @map("secondary_color") @db.Text
+  accentColor          String?  @map("accent_color") @db.Text
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  categories           Category[]
+  transactions         Transaction[]
+  budgets              Budget[]
+  goals                Goal[]
+  subscriptions        Subscription[]
+  comments             Comment[]
+  activities           Activity[]
+  updatedCategories    Category[]         @relation("CategoryUpdatedBy")
+  updatedTransactions  Transaction[]      @relation("TransactionUpdatedBy")
+  updatedBudgets       Budget[]           @relation("BudgetUpdatedBy")
+  updatedGoals         Goal[]             @relation("GoalUpdatedBy")
+  updatedSubscriptions Subscription[]     @relation("SubscriptionUpdatedBy")
+  ownedSpaces          Space[]            @relation("SpaceOwner")
+  spaceMemberships     SpaceMember[]
+  activeSpace          Space?             @relation("ActiveSpace", fields: [activeSpaceId], references: [id], onDelete: SetNull)
+  pushSubscriptions    PushSubscription[]
+  alerts               Alert[]
+
+  @@map("profiles")
+}
+
+model Space {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String   @db.Text
+  slug       String?  @db.Text
+  joinCode   String?  @map("join_code") @db.Text
+  ownerId    String   @map("owner_id") @db.Uuid
+  isPersonal Boolean  @default(false) @map("is_personal")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  owner          Profile        @relation("SpaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members        SpaceMember[]
+  activeProfiles Profile[]      @relation("ActiveSpace")
+  categories     Category[]
+  transactions   Transaction[]
+  budgets        Budget[]
+  goals          Goal[]
+  subscriptions  Subscription[]
+  comments       Comment[]
+  activities     Activity[]
+  alerts         Alert[]
+
+  @@unique([slug])
+  @@unique([joinCode])
+  @@index([ownerId])
+  @@map("spaces")
+}
+
+model SpaceMember {
+  id       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  spaceId  String   @map("space_id") @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  role     String   @default("member") @db.VarChar(20)
+  joinedAt DateTime @default(now()) @map("joined_at") @db.Timestamptz
+
+  space Space   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user  Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([spaceId, userId])
+  @@index([spaceId])
+  @@index([userId])
+  @@map("space_members")
+}
+
+model Category {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  spaceId   String?  @map("space_id") @db.Uuid
+  name      String   @db.Text
+  icon      String?  @db.Text
+  color     String?  @db.Text
+  type      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  updatedBy String?  @map("updated_by") @db.Uuid
+
+  user             Profile               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedByProfile Profile?              @relation("CategoryUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+  space            Space?                @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  transactionLinks TransactionCategory[]
+  budgets          Budget[]
+
+  @@unique([spaceId, name])
+  @@index([userId])
+  @@index([spaceId])
+  @@index([type])
+  @@index([updatedBy])
+  @@map("categories")
+}
+
+model Transaction {
+  id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId  String  @map("user_id") @db.Uuid
+  spaceId String? @map("space_id") @db.Uuid
+
+  type String
+
+  amount      Decimal @db.Decimal
+  description String? @db.Text
+
+  paymentMethod String? @map("payment_method") @db.Text
+
+  date DateTime? @db.Date
+
+  notes String? @db.Text
+
+  receiptUrl String? @map("receipt_url") @db.Text
+
+  isRecurring Boolean @default(false) @map("is_recurring")
+
+  budgetId String? @map("budget_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  updatedBy String?  @map("updated_by") @db.Uuid
+
+  user             Profile               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedByProfile Profile?              @relation("TransactionUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+  space            Space?                @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  budget           Budget?               @relation("BudgetTransactions", fields: [budgetId], references: [id], onDelete: SetNull)
+  tags             TransactionCategory[]
+
+  @@index([userId])
+  @@index([spaceId])
+  @@index([type])
+  @@index([date])
+  @@index([updatedBy])
+  @@index([budgetId])
+  @@map("transactions")
+}
+
+model TransactionCategory {
+  transactionId String   @map("transaction_id") @db.Uuid
+  categoryId    String   @map("category_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([transactionId, categoryId])
+  @@index([categoryId])
+  @@map("transaction_categories")
+}
+
+model Budget {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  spaceId     String?  @map("space_id") @db.Uuid
+  categoryId  String   @map("category_id") @db.Uuid
+  budgetLimit Decimal  @map("budget_limit") @db.Decimal
+  month       Int?
+  year        Int?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  updatedBy   String?  @map("updated_by") @db.Uuid
+
+  user             Profile       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedByProfile Profile?      @relation("BudgetUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+  space            Space?        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  category         Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  transactions     Transaction[] @relation("BudgetTransactions")
+
+  @@index([userId])
+  @@index([spaceId])
+  @@index([categoryId])
+  @@index([updatedBy])
+  @@map("budgets")
+}
+
+model Goal {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  spaceId      String?   @map("space_id") @db.Uuid
+  title        String    @db.Text
+  targetAmount Decimal   @map("target_amount") @db.Decimal
+  savedAmount  Decimal   @default(0) @map("saved_amount") @db.Decimal
+  deadline     DateTime? @db.Date
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  updatedBy    String?   @map("updated_by") @db.Uuid
+
+  user             Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedByProfile Profile? @relation("GoalUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+  space            Space?   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([spaceId])
+  @@index([updatedBy])
+  @@map("goals")
+}
+
+model Subscription {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  spaceId      String?   @map("space_id") @db.Uuid
+  merchant     String?   @db.Text
+  amount       Decimal?  @db.Decimal
+  billingCycle String?   @map("billing_cycle") @db.Text
+  nextPayment  DateTime? @map("next_payment") @db.Date
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  updatedBy    String?   @map("updated_by") @db.Uuid
+
+  user             Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedByProfile Profile? @relation("SubscriptionUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+  space            Space?   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([spaceId])
+  @@index([updatedBy])
+  @@map("subscriptions")
+}
+
+model Comment {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  spaceId    String?  @map("space_id") @db.Uuid
+  entityType String   @map("entity_type") @db.VarChar(50)
+  entityId   String   @map("entity_id") @db.Uuid
+  parentId   String?  @map("parent_id") @db.Uuid
+  content    String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user    Profile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  space   Space?    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+
+  @@index([userId])
+  @@index([spaceId])
+  @@index([entityType, entityId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model Activity {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  spaceId    String?  @map("space_id") @db.Uuid
+  actorId    String?  @map("actor_id") @db.Uuid
+  type       String   @db.VarChar(50)
+  entityType String?  @map("entity_type") @db.VarChar(50)
+  entityId   String?  @map("entity_id") @db.Uuid
+  metadata   Json?    @db.Json
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user  Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  space Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([spaceId])
+  @@map("activities")
+}
+
+model PushSubscription {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  endpoint  String   @db.Text
+  p256dh    String   @db.Text
+  auth      String   @db.Text
+  userAgent String?  @map("user_agent") @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([endpoint])
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+model Alert {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  spaceId     String?   @map("space_id") @db.Uuid
+  type        String    @db.VarChar(50)
+  severity    String    @db.VarChar(20)
+  fingerprint String    @db.Text
+  title       String    @db.Text
+  description String?   @db.Text
+  data        Json?     @db.Json
+  sentAt      DateTime? @map("sent_at") @db.Timestamptz
+  readAt      DateTime? @map("read_at") @db.Timestamptz
+  resolvedAt  DateTime? @map("resolved_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user  Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  space Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, fingerprint])
+  @@index([userId, resolvedAt])
+  @@index([userId, createdAt])
+  @@map("alerts")
+}

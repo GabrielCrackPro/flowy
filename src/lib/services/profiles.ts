@@ -1,0 +1,180 @@
+import type { User } from "@supabase/supabase-js";
+
+import { prisma } from "@/lib/prisma/client";
+import type {
+  UpdateProfileInput,
+  UpdateThemeInput,
+} from "@/lib/schemas/profile";
+import { SpaceService } from "./spaces/space-service";
+import { deleteAvatar, deleteReceipt } from "./storage";
+
+function profileNameFromUser(user: User) {
+  const metadata = user.user_metadata as { full_name?: string } | undefined;
+
+  if (metadata?.full_name) {
+    return metadata.full_name;
+  }
+
+  if (user.email) {
+    return user.email.split("@")[0];
+  }
+
+  return null;
+}
+
+async function deleteOwnedSpaces(userId: string) {
+  const ownedSpaces = await prisma.space.findMany({
+    where: { ownerId: userId },
+    include: {
+      members: {
+        orderBy: { joinedAt: "asc" },
+        select: { userId: true },
+      },
+    },
+  });
+
+  for (const space of ownedSpaces) {
+    const otherMembers = space.members.filter((m) => m.userId !== userId);
+
+    if (space.isPersonal || otherMembers.length === 0) {
+      await prisma.space.delete({ where: { id: space.id } });
+    } else {
+      await prisma.space.update({
+        where: { id: space.id },
+        data: { ownerId: otherMembers[0].userId },
+      });
+    }
+  }
+}
+
+export const ProfileService = {
+  async getById(userId: string, id: string) {
+    if (userId !== id) {
+      throw new Error("No autorizado");
+    }
+
+    return prisma.profile.findUnique({
+      where: { id },
+    });
+  },
+
+  async ensure(user: User) {
+    const existing = await prisma.profile.findUnique({
+      where: { id: user.id },
+    });
+
+    if (existing) {
+      return { profile: existing, created: false };
+    }
+
+    const profile = await prisma.profile.create({
+      data: {
+        id: user.id,
+        email: user.email ?? null,
+        name: profileNameFromUser(user),
+      },
+    });
+
+    const personalSpace = await SpaceService.ensurePersonalSpace(profile.id);
+    await prisma.profile.update({
+      where: { id: profile.id },
+      data: { activeSpaceId: personalSpace.id },
+    });
+
+    return {
+      profile: { ...profile, activeSpaceId: personalSpace.id },
+      created: true,
+    };
+  },
+
+  async update(
+    userId: string,
+    id: string,
+    data: UpdateProfileInput | UpdateThemeInput,
+  ) {
+    if (userId !== id) {
+      throw new Error("No autorizado");
+    }
+
+    const profile = await prisma.profile.findUnique({
+      where: { id },
+    });
+
+    if (!profile) {
+      throw new Error("Perfil no encontrado");
+    }
+
+    return prisma.profile.update({
+      where: { id },
+      data: {
+        name: (data as UpdateProfileInput).name,
+        avatarUrl: (data as UpdateProfileInput).avatarUrl,
+        currency: (data as UpdateProfileInput).currency,
+        locale: (data as UpdateProfileInput).locale,
+        showLanguageSelector: (data as UpdateProfileInput).showLanguageSelector,
+        dashboardCards:
+          (data as UpdateProfileInput).dashboardCards === undefined
+            ? undefined
+            : (data as UpdateProfileInput).dashboardCards,
+        primaryColor: (data as UpdateThemeInput).primaryColor,
+        secondaryColor: (data as UpdateThemeInput).secondaryColor,
+        accentColor: (data as UpdateThemeInput).accentColor,
+      },
+    });
+  },
+
+  async delete(userId: string, id: string) {
+    if (userId !== id) {
+      throw new Error("No autorizado");
+    }
+
+    const profile = await prisma.profile.findUnique({
+      where: { id },
+    });
+
+    if (!profile) {
+      throw new Error("Perfil no encontrado");
+    }
+
+    await deleteOwnedSpaces(userId);
+
+    await prisma.profile.delete({
+      where: { id },
+    });
+  },
+
+  async deleteAccount(userId: string) {
+    const profile = await prisma.profile.findUnique({
+      where: { id: userId },
+    });
+
+    if (!profile) {
+      return;
+    }
+
+    await deleteOwnedSpaces(userId);
+
+    const receipts = await prisma.transaction.findMany({
+      where: { userId },
+      select: { receiptUrl: true },
+    });
+
+    await prisma.profile.delete({
+      where: { id: userId },
+    });
+
+    const cleanups: Promise<unknown>[] = [];
+
+    if (profile.avatarUrl) {
+      cleanups.push(deleteAvatar(profile.avatarUrl).catch(() => {}));
+    }
+
+    for (const transaction of receipts) {
+      if (transaction.receiptUrl) {
+        cleanups.push(deleteReceipt(transaction.receiptUrl).catch(() => {}));
+      }
+    }
+
+    await Promise.all(cleanups);
+  },
+};

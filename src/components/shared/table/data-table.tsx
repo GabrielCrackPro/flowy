@@ -1,0 +1,369 @@
+"use client";
+
+import { Icon, Skeleton } from "@components/shared";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@components/ui";
+import { cn } from "@lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "@/lib/icons";
+
+export interface Column<T> {
+  header: ReactNode;
+  cell: (item: T) => ReactNode;
+  className?: string;
+  sortable?: boolean;
+  sortValue?: (item: T) => string | number;
+}
+
+interface DataTableProps<T> {
+  columns: Column<T>[];
+  data: T[];
+  keyExtractor: (item: T) => string;
+  loading: boolean;
+  emptyState?: ReactNode;
+  pageSize?: number;
+  pageSizes?: number[];
+  onRowClick?: (item: T) => void;
+  stickyHeader?: boolean;
+}
+
+function createColumnKeys<T>(columns: Column<T>[]) {
+  const counts = new Map<string, number>();
+
+  return columns.map((column) => {
+    const headerText =
+      typeof column.header === "string" ? column.header : "column";
+    const baseKey = `${headerText}-${column.className ?? "default"}-${
+      column.sortable ? "sortable" : "static"
+    }`;
+    const nextCount = (counts.get(baseKey) ?? 0) + 1;
+    counts.set(baseKey, nextCount);
+
+    return {
+      key: `${baseKey}-${nextCount}`,
+      column,
+    };
+  });
+}
+
+function RowSkeleton({ columns }: { columns: number }) {
+  const cells = Array.from({ length: columns }, (_, value) => value + 1);
+
+  return (
+    <TableRow>
+      {cells.map((cell) => (
+        <TableCell key={cell}>
+          <div className={cn(cell === 1 ? "w-3/5" : "w-4/5")}>
+            <Skeleton className="h-4" />
+          </div>
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+}
+
+export function DataTable<T>({
+  columns,
+  data,
+  keyExtractor,
+  loading,
+  emptyState,
+  pageSize: initialPageSize = 20,
+  pageSizes = [10, 20, 50],
+  onRowClick,
+  stickyHeader = true,
+}: DataTableProps<T>) {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(initialPageSize);
+  const [pageSizeOpen, setPageSizeOpen] = useState(false);
+  const [sortColumn, setSortColumn] = useState<number | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const columnMeta = useMemo(() => createColumnKeys(columns), [columns]);
+  const skeletonRows = useMemo(
+    () => Array.from({ length: 8 }, (_, value) => value + 1),
+    [],
+  );
+
+  const handleSort = useCallback(
+    (colIndex: number) => {
+      if (sortColumn === colIndex) {
+        setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
+      } else {
+        setSortColumn(colIndex);
+        setSortDirection("asc");
+      }
+      setPage(1);
+    },
+    [sortColumn],
+  );
+
+  const sorted = useMemo(() => {
+    if (sortColumn === null) return data;
+    const col = columnMeta[sortColumn]?.column;
+    if (!col) return data;
+    if (!col.sortable) return data;
+    const getValue =
+      col.sortValue ?? ((item: T) => String(col.cell(item) ?? ""));
+    return [...data].sort((a, b) => {
+      const va = getValue(a);
+      const vb = getValue(b);
+      let cmp = 0;
+      if (typeof va === "number" && typeof vb === "number") {
+        cmp = va - vb;
+      } else {
+        cmp = String(va).localeCompare(String(vb));
+      }
+      return sortDirection === "asc" ? cmp : -cmp;
+    });
+  }, [columnMeta, data, sortColumn, sortDirection]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const paginatedData = useMemo(
+    () => sorted.slice((page - 1) * pageSize, page * pageSize),
+    [sorted, page, pageSize],
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, []);
+
+  const renderHeader = (className?: string) => (
+    <TableHeader
+      className={cn(
+        stickyHeader && "sticky top-0 z-10",
+        "bg-background/95 backdrop-blur-sm",
+        className,
+      )}
+    >
+      <TableRow className="border-b border-border/30 bg-gradient-to-r from-muted/10 to-muted/5">
+        {columnMeta.map(({ key, column: col }, index) => (
+          <TableHead
+            key={key}
+            className={cn(
+              "h-14 px-4 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70",
+              col.className,
+              col.sortable &&
+                "cursor-pointer select-none transition-all duration-200 hover:text-foreground/90 hover:bg-muted/30",
+            )}
+            onClick={col.sortable ? () => handleSort(index) : undefined}
+          >
+            <span className="inline-flex items-center gap-1.5">
+              {col.header}
+              {col.sortable && (
+                <span className="flex flex-col -space-y-1">
+                  <motion.div
+                    animate={{
+                      opacity:
+                        sortColumn === index && sortDirection === "asc"
+                          ? 1
+                          : 0.3,
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Icon
+                      icon={ChevronUp}
+                      className={cn(
+                        "size-3",
+                        sortColumn === index && sortDirection === "asc"
+                          ? "text-primary"
+                          : "text-muted-foreground/30",
+                      )}
+                    />
+                  </motion.div>
+                  <motion.div
+                    animate={{
+                      opacity:
+                        sortColumn === index && sortDirection === "desc"
+                          ? 1
+                          : 0.3,
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Icon
+                      icon={ChevronDown}
+                      className={cn(
+                        "size-3",
+                        sortColumn === index && sortDirection === "desc"
+                          ? "text-primary"
+                          : "text-muted-foreground/30",
+                      )}
+                    />
+                  </motion.div>
+                </span>
+              )}
+            </span>
+          </TableHead>
+        ))}
+      </TableRow>
+    </TableHeader>
+  );
+
+  if (loading && data.length === 0) {
+    return (
+      <div className="overflow-hidden rounded-xl border border-border/30 shadow-sm">
+        <Table>
+          {renderHeader()}
+          <TableBody>
+            {skeletonRows.map((row) => (
+              <RowSkeleton key={row} columns={columns.length} />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="overflow-hidden rounded-xl border border-border/30 shadow-sm bg-gradient-to-br from-card to-card/50">
+        <Table>
+          {renderHeader()}
+          <TableBody>
+            {data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="p-0">
+                  {emptyState}
+                </TableCell>
+              </TableRow>
+            ) : (
+              <AnimatePresence mode="popLayout">
+                {paginatedData.map((item, index) => (
+                  <motion.tr
+                    key={keyExtractor(item)}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2, delay: index * 0.02 }}
+                    className={cn(
+                      "group transition-all duration-200 border-b border-border/20 last:border-b-0",
+                      onRowClick && "cursor-pointer hover:bg-primary/5",
+                    )}
+                    onClick={onRowClick ? () => onRowClick(item) : undefined}
+                  >
+                    {columnMeta.map(({ key, column: col }) => (
+                      <TableCell
+                        key={key}
+                        className={cn(
+                          col.className,
+                          "px-4 py-4 group-hover:bg-primary/[0.02] transition-colors",
+                        )}
+                      >
+                        {col.cell(item)}
+                      </TableCell>
+                    ))}
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {data.length > 0 && (
+        <div className="flex items-center justify-between border-t border-border/30 bg-gradient-to-r from-muted/10 to-muted/5 px-4 py-3 rounded-b-xl">
+          <div className="flex items-center gap-3">
+            <p className="text-xs text-muted-foreground/70">
+              {(page - 1) * pageSize + 1}–
+              {Math.min(page * pageSize, sorted.length)} de {sorted.length}
+            </p>
+            <div className="relative">
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setPageSizeOpen(!pageSizeOpen)}
+                className="flex h-8 items-center gap-1.5 rounded-lg border border-border/30 bg-card pl-2.5 pr-2 text-xs font-medium text-muted-foreground/80 transition-all duration-200 hover:border-border/50 hover:bg-muted/30 hover:text-foreground focus:border-ring focus:ring-2 focus:ring-primary/20 shadow-sm"
+              >
+                {pageSize}
+                <motion.div
+                  animate={{ rotate: pageSizeOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Icon icon={ChevronDown} className="size-3.5" />
+                </motion.div>
+              </motion.button>
+              <AnimatePresence>
+                {pageSizeOpen && (
+                  <>
+                    <motion.button
+                      type="button"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      aria-label="Close page size menu"
+                      className="fixed inset-0 z-40"
+                      onClick={() => setPageSizeOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                      className="absolute bottom-full left-0 z-50 mb-1 min-w-20 overflow-hidden rounded-lg border border-border/30 bg-popover py-1 shadow-lg"
+                    >
+                      {pageSizes.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => {
+                            setPageSize(s);
+                            setPageSizeOpen(false);
+                          }}
+                          className={cn(
+                            "flex w-full items-center px-3 py-1.5 text-xs transition-all",
+                            s === pageSize
+                              ? "bg-gradient-to-r from-primary/20 to-primary/10 font-semibold text-primary"
+                              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                          )}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <motion.button
+              type="button"
+              disabled={page <= 1}
+              whileHover={{ scale: page > 1 ? 1.05 : 1 }}
+              whileTap={{ scale: page > 1 ? 0.95 : 1 }}
+              onClick={() => setPage((p) => p - 1)}
+              className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition-all duration-200 hover:bg-muted/30 hover:text-foreground disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-transparent"
+            >
+              <Icon icon={ChevronLeft} className="size-4" />
+            </motion.button>
+            <span className="min-w-8 text-center text-xs font-semibold tabular-nums text-foreground/90">
+              {page}/{totalPages}
+            </span>
+            <motion.button
+              type="button"
+              disabled={page >= totalPages}
+              whileHover={{ scale: page < totalPages ? 1.05 : 1 }}
+              whileTap={{ scale: page < totalPages ? 0.95 : 1 }}
+              onClick={() => setPage((p) => p + 1)}
+              className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition-all duration-200 hover:bg-muted/30 hover:text-foreground disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-transparent"
+            >
+              <Icon icon={ChevronRight} className="size-4" />
+            </motion.button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
