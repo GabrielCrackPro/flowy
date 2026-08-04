@@ -1,12 +1,14 @@
 import { Icon } from "@/components/shared";
 import { Button, Input } from "@components/ui";
 import { Search, X } from "@/lib/icons";
+import { useDebounce } from "@/hooks";
 
 interface SearchFilterProps {
   value: string;
   placeholder: string;
   onChange: (value: string) => void;
   onClear: () => void;
+  debounceMs?: number;
 }
 
 export function SearchFilter({
@@ -14,7 +16,10 @@ export function SearchFilter({
   placeholder,
   onChange,
   onClear,
+  debounceMs = 300,
 }: SearchFilterProps) {
+  const debouncedOnChange = useDebounce(onChange, debounceMs);
+
   return (
     <div className="relative">
       <Icon
@@ -24,7 +29,7 @@ export function SearchFilter({
 
       <Input
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => debouncedOnChange(e.target.value)}
         placeholder={placeholder}
         className="h-10 pl-9 pr-9 text-sm"
       />

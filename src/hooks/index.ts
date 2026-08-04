@@ -18,3 +18,4 @@ export { useReactForm } from "./useReactForm";
 export * from "./useSelection";
 export * from "./useSignOut";
 export * from "./useSpaces";
+export * from "./useThrottle";

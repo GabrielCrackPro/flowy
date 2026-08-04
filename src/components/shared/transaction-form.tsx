@@ -1,7 +1,12 @@
 "use client";
 
 import { Icon } from "@/components/shared";
-import { useAmountInput, useCurrencyFormatting, useDateLocale } from "@/hooks";
+import {
+  useAmountInput,
+  useCurrencyFormatting,
+  useDateLocale,
+  useThrottle,
+} from "@/hooks";
 import { BackHeader } from "@components/dashboard";
 import { Button, FormAlert, FormField, Input } from "@components/ui";
 import { useCategoryApi } from "@hooks/api";
@@ -128,6 +133,13 @@ export function TransactionForm({
       await onSubmit({ ...values, description: descriptionValue });
       onSuccess?.();
     },
+  });
+
+  // Throttle form submission to prevent double submissions
+  const throttledSubmit = useThrottle(() => handleSubmit(), {
+    delay: 1000,
+    leading: true,
+    trailing: false,
   });
 
   const {
@@ -498,7 +510,7 @@ export function TransactionForm({
           >
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
-                onClick={() => handleSubmit()}
+                onClick={throttledSubmit}
                 disabled={!isFormValid || busy}
                 size="lg"
                 className={cn(

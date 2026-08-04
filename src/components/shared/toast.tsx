@@ -9,10 +9,18 @@ import {
   TriangleAlert,
   X,
   XCircle,
+  Clock,
 } from "@/lib/icons";
 import { toast as sonnerToast, type ExternalToast } from "sonner";
+import { useEffect, useState } from "react";
 
-type ToastVariant = "success" | "error" | "info" | "warning" | "loading";
+type ToastVariant =
+  | "success"
+  | "error"
+  | "info"
+  | "warning"
+  | "loading"
+  | "rate_limit";
 
 interface AppToastProps {
   id: number | string;
@@ -48,6 +56,10 @@ const variants: Record<
   loading: {
     Icon: LoaderCircle,
     tone: "default",
+  },
+  rate_limit: {
+    Icon: Clock,
+    tone: "warning",
   },
 };
 
@@ -96,6 +108,26 @@ export function AppToast({
   action,
 }: AppToastProps) {
   const { Icon: IconComponent, tone } = variants[variant];
+
+  // Countdown timer for rate limit errors
+  const [countdown, setCountdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (variant === "rate_limit" && typeof description === "number") {
+      setCountdown(description);
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === null || prev <= 1) {
+            clearInterval(timer);
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [variant, description]);
 
   return (
     <Animated.div
@@ -165,7 +197,20 @@ export function AppToast({
         >
           {title}
         </Animated.p>
-        {description ? (
+        {variant === "rate_limit" && countdown !== null ? (
+          <Animated.p
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.4,
+              delay: 0.25,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
+            className="text-[13px] leading-relaxed text-muted-foreground/70"
+          >
+            Retrying in {countdown} seconds...
+          </Animated.p>
+        ) : description && typeof description !== "number" ? (
           <Animated.p
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -226,7 +271,11 @@ function show(
   const { action, ...rest } = options ?? {};
   const duration =
     rest.duration ??
-    (variant === "error" ? 5000 : variant === "loading" ? Infinity : 4000);
+    (variant === "error" || variant === "rate_limit"
+      ? 5000
+      : variant === "loading"
+        ? Infinity
+        : 4000);
 
   return sonnerToast.custom(
     (id) => (
@@ -268,6 +317,11 @@ export const toast = {
     description?: React.ReactNode,
     options?: ToastOptions,
   ) => show("loading", title, description, options),
+  rateLimit: (
+    title: React.ReactNode,
+    retryAfter?: number,
+    options?: ToastOptions,
+  ) => show("rate_limit", title, retryAfter, options),
   message: (
     title: React.ReactNode,
     description?: React.ReactNode,

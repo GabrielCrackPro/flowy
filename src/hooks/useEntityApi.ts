@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { toast } from "@/components/shared/toast";
 import { useProfile } from "@/hooks/useProfile";
+import { isRateLimitError } from "@/lib/api/client";
 
 interface EntityApiConfig<T, F, C, U> {
   queryKey: string;
@@ -107,7 +108,11 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
       invalidateEntityQueries(queryClient);
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Error al crear");
+      if (isRateLimitError(error)) {
+        toast.rateLimit("Too many requests", error.retryAfter);
+      } else {
+        toast.error(error instanceof Error ? error.message : "Error al crear");
+      }
     },
   });
 
@@ -150,9 +155,13 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
         [queryKey, activeSpaceId, filters],
         context?.previous,
       );
-      toast.error(
-        error instanceof Error ? error.message : "Error al actualizar",
-      );
+      if (isRateLimitError(error)) {
+        toast.rateLimit("Too many requests", error.retryAfter);
+      } else {
+        toast.error(
+          error instanceof Error ? error.message : "Error al actualizar",
+        );
+      }
     },
     onSuccess: (entity) => {
       queryClient.setQueryData<QueryData<T>>(
@@ -220,7 +229,13 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
         [queryKey, activeSpaceId, filters],
         context?.previous,
       );
-      toast.error(error instanceof Error ? error.message : "Error al eliminar");
+      if (isRateLimitError(error)) {
+        toast.rateLimit("Too many requests", error.retryAfter);
+      } else {
+        toast.error(
+          error instanceof Error ? error.message : "Error al eliminar",
+        );
+      }
     },
     onSuccess: () => {
       toast.success(`${entityName ?? "Elemento"} eliminado correctamente`);
