@@ -1,20 +1,29 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import type { ComponentProps } from "react";
+import { type ComponentProps, useEffect, useState } from "react";
 import { Toaster as SonnerToaster } from "sonner";
 
 type ToasterProps = ComponentProps<typeof SonnerToaster>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 600px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   return (
     <SonnerToaster
       theme={theme as ToasterProps["theme"]}
-      position="top-right"
+      position={isMobile ? "bottom-right" : "top-right"}
       offset={{ top: 76, right: 16 }}
-      mobileOffset={{ top: 76, right: 12 }}
+      mobileOffset={{ top: 76, right: 12, bottom: 16 }}
       gap={12}
       visibleToasts={5}
       duration={4000}

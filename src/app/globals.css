@@ -205,3 +205,18 @@ phantom-ui {
     transform: translateX(100%);
   }
 }
+
+/* Mobile toasts: bottom-centered compact cards instead of full-width top bars */
+@media (max-width: 600px) {
+  [data-sonner-toaster][data-y-position="bottom"] {
+    right: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  [data-sonner-toaster][data-y-position="bottom"] [data-sonner-toast] {
+    width: calc(100vw - 2.5rem) !important;
+    max-width: 22rem !important;
+    margin-inline: auto !important;
+  }
+}

@@ -194,7 +194,10 @@ export function SidebarProfile({
 
           <DropdownMenuItem
             variant="destructive"
-            onClick={handleSignOut}
+            onClick={() => {
+              handleSignOut();
+              onNavigate?.();
+            }}
             className={cn(
               "gap-2 rounded-md font-medium",
               mobile ? "py-2.5" : "py-1.5",

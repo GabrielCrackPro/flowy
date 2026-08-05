@@ -68,7 +68,7 @@ export default function RegisterPage() {
       }
 
       if (data.session) {
-        router.replace("/");
+        router.replace("/dashboard");
         router.refresh();
         return;
       }
@@ -81,13 +81,13 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace("/");
+      router.replace("/dashboard");
     }
   }, [loading, user, router]);
 
   return (
     <div className="space-y-8">
-      <AuthHeader type="register" />
+      {/* <AuthHeader type="register" /> */}
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}

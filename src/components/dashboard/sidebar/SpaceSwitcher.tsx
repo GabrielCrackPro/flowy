@@ -192,6 +192,7 @@ export function SpaceSwitcher({
                     onClick={() => {
                       if (!isActive) {
                         setActive.mutate(space.id);
+                        onNavigate?.();
                       }
                     }}
                     className="flex items-center gap-2.5 rounded-md px-2 py-2"

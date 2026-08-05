@@ -203,9 +203,9 @@ export function SidebarContent({
               collapsed ? t("nav.expandSidebar") : t("nav.collapseSidebar")
             }
             onClick={state.toggleCollapsed}
-            whileHover={{ scale: 1.12 }}
-            whileTap={{ scale: 0.9 }}
-            className="absolute -right-3 top-1/2 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-border/40 bg-card text-muted-foreground shadow-md outline-none transition-all duration-200 hover:border-primary/50 hover:text-foreground hover:shadow-lg hover:shadow-primary/20 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:border-primary/50"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.88 }}
+            className="absolute -right-3 top-1/2 z-10 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-border/50 bg-card text-foreground/60 shadow-[0_2px_8px_rgba(0,0,0,0.08)] outline-none transition-all duration-200 hover:border-primary/60 hover:bg-primary/10 hover:text-primary hover:shadow-[0_2px_12px_rgba(0,0,0,0.12)] hover:shadow-primary/10 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:border-primary/50"
           >
             <motion.div
               animate={{ rotate: collapsed ? 180 : 0 }}
@@ -216,7 +216,7 @@ export function SidebarContent({
                 mass: 0.9,
               }}
             >
-              <Icon icon={ChevronLeft} className="h-4 w-4" />
+              <Icon icon={ChevronLeft} className="h-3.5 w-3.5" />
             </motion.div>
           </motion.button>
         ) : (
@@ -356,6 +356,7 @@ export function SidebarContent({
           <SidebarProfile
             variant={variant}
             collapsed={collapsed && variant === "desktop"}
+            onNavigate={onNavigate}
             className="border-t-0"
           />
         </div>

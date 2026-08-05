@@ -422,20 +422,27 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
                         (entry: {
                           value?: string | number;
                           color?: string;
-                        }) => (
-                          <div
-                            key={`${entry.value}-${entry.color}`}
-                            className="flex items-center gap-1.5"
-                          >
+                        }) => {
+                          const key = String(
+                            entry.value,
+                          ) as keyof typeof chartConfig;
+                          const label =
+                            chartConfig[key]?.label ?? String(entry.value);
+                          return (
                             <div
-                              className="size-3 rounded-sm"
-                              style={{ backgroundColor: entry.color }}
-                            />
-                            <span className="text-xs text-muted-foreground">
-                              {entry.value}
-                            </span>
-                          </div>
-                        ),
+                              key={`${entry.value}-${entry.color}`}
+                              className="flex items-center gap-1.5"
+                            >
+                              <div
+                                className="size-3 rounded-sm"
+                                style={{ backgroundColor: entry.color }}
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                {label}
+                              </span>
+                            </div>
+                          );
+                        },
                       )}
                     </div>
                   );

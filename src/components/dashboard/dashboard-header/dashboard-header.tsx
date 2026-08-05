@@ -113,25 +113,40 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
-              className="flex min-w-0 items-center gap-2 rounded-full border border-border/30 bg-card/70 py-1.5 pl-2 pr-1.5 text-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)] backdrop-blur-sm"
+              className={cn(
+                "flex min-w-0 items-center gap-2 rounded-full border py-1.5 pl-2 pr-1.5 text-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)] backdrop-blur-sm transition-colors",
+                isFetching
+                  ? "border-primary/30 bg-primary/[0.04]"
+                  : "border-border/30 bg-card/70",
+              )}
             >
               <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Icon icon={CalendarDays} className="h-3.5 w-3.5" />
               </span>
-              <RelativeTime
-                date={dataUpdatedAt}
-                prefix={t("dashboard.updated")}
-                className="min-w-0 truncate text-xs sm:text-sm"
-              />
+              {isFetching ? (
+                <span
+                  className="min-w-0 truncate text-xs font-medium text-primary/90 sm:text-sm"
+                  aria-live="polite"
+                >
+                  {t("dashboard.updating")}
+                </span>
+              ) : (
+                <RelativeTime
+                  date={dataUpdatedAt}
+                  prefix={t("dashboard.updated")}
+                  className="min-w-0 truncate text-xs sm:text-sm"
+                />
+              )}
               <span aria-hidden className="h-4 w-px bg-border/70" />
               <motion.button
                 type="button"
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleRefresh}
                 disabled={isFetching}
                 aria-label={t("dashboard.refresh")}
-                className="flex h-7 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-full px-1.5 text-xs font-medium text-muted-foreground/70 transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 sm:px-2"
+                aria-busy={isFetching}
+                className="flex h-7 shrink-0 cursor-pointer items-center justify-center rounded-full px-1.5 text-xs font-medium text-muted-foreground/70 transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 sm:px-2"
               >
                 <Icon
                   icon={RefreshCcw}

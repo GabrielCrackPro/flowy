@@ -265,16 +265,25 @@ export type AppTranslationMessages = {
     statsNotLoaded: string;
     retry: string;
     updated: string;
+    updating: string;
     refresh: string;
     prevMonth: string;
     nextMonth: string;
     prevYear: string;
     nextYear: string;
     backToToday: string;
+    selectMonth: string;
     customize: string;
     customizeTitle: string;
     customizeDescription: string;
     customizeReset: string;
+    customizeVisible: string;
+    customizeShowAll: string;
+    customizeHideAll: string;
+    customizeAllHidden: string;
+    customizeError: string;
+    customizeResetSuccess: string;
+    customizeResetError: string;
     cards: {
       stats: string;
       cashFlow: string;

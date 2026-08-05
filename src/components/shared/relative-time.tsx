@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface RelativeTimeProps {
   date?: Date | string | number | null;
@@ -63,48 +63,31 @@ export function RelativeTime({
 }: RelativeTimeProps) {
   const [text, setText] = useState("");
 
-  const parsedDateRef = useRef<Date | null>(null);
-  const localeRef = useRef(locale);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
-    undefined,
-  );
-
-  // Update refs when props change
   useEffect(() => {
-    parsedDateRef.current = date ? new Date(date) : null;
-    localeRef.current = locale;
-
-    // Clear existing timeout when date/locale changes
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-  }, [date, locale]);
-
-  useEffect(() => {
-    const currentParsedDate = parsedDateRef.current;
-    const currentLocale = localeRef.current;
-
-    if (!currentParsedDate) {
+    if (!date) {
       setText("");
       return;
     }
 
+    const parsed = new Date(date);
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
     const update = () => {
-      const { text, nextUpdateIn } = formatRelativeTime(
-        currentParsedDate,
-        currentLocale,
+      const { text: nextText, nextUpdateIn } = formatRelativeTime(
+        parsed,
+        locale,
       );
-      setText(text);
-      timeoutRef.current = setTimeout(update, nextUpdateIn);
+      setText(nextText);
+      timeout = setTimeout(update, nextUpdateIn);
     };
 
     update();
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (timeout) {
+        clearTimeout(timeout);
       }
     };
-  }, []); // Empty dependency array - only run once on mount
+  }, [date, locale]);
 
   if (!date) return null;
 

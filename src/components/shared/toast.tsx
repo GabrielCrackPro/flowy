@@ -2,17 +2,71 @@
 
 import { Animated, Icon, type IconProps } from "@components/shared";
 import { cn } from "@lib/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { type ExternalToast, toast as sonnerToast } from "sonner";
 import {
   CheckCircle2,
+  Clock,
   Info,
   LoaderCircle,
   TriangleAlert,
   X,
   XCircle,
-  Clock,
 } from "@/lib/icons";
-import { toast as sonnerToast, type ExternalToast } from "sonner";
-import { useEffect, useState } from "react";
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia(query).matches : false,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const update = () => setMatches(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, [query]);
+
+  return matches;
+}
+
+function useToastProgress(durationMs: number | null) {
+  const [progress, setProgress] = useState(1);
+  const pausedRef = useRef(false);
+  const elapsedRef = useRef(0);
+  const lastRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (durationMs == null) {
+      setProgress(1);
+      return;
+    }
+
+    pausedRef.current = false;
+    elapsedRef.current = 0;
+    lastRef.current = null;
+
+    let raf: number;
+    const tick = (now: number) => {
+      if (lastRef.current == null) lastRef.current = now;
+      const dt = now - lastRef.current;
+      lastRef.current = now;
+      if (!pausedRef.current) {
+        elapsedRef.current += dt;
+        setProgress(Math.max(0, 1 - elapsedRef.current / durationMs));
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [durationMs]);
+
+  const setPaused = useCallback((paused: boolean) => {
+    pausedRef.current = paused;
+  }, []);
+
+  return { progress, setPaused };
+}
 
 type ToastVariant =
   | "success"
@@ -28,6 +82,7 @@ interface AppToastProps {
   title: React.ReactNode;
   description?: React.ReactNode;
   action?: React.ReactNode;
+  duration?: number;
 }
 
 const variants: Record<
@@ -100,14 +155,48 @@ const toneBgClasses: Record<
   warning: "from-amber-500/8 via-amber-500/[0.03] to-transparent",
 };
 
+const toneBarClasses: Record<
+  "positive" | "negative" | "info" | "warning" | "default",
+  string
+> = {
+  default: "from-primary via-primary/70 to-primary/20",
+  positive: "from-emerald-400 via-emerald-500 to-emerald-500/20",
+  negative: "from-rose-400 via-rose-500 to-rose-500/20",
+  info: "from-blue-400 via-blue-500 to-blue-500/20",
+  warning: "from-amber-400 via-amber-500 to-amber-500/20",
+};
+
+const toneGlowClasses: Record<
+  "positive" | "negative" | "info" | "warning" | "default",
+  string
+> = {
+  default: "shadow-[0_-2px_12px_rgba(37,99,235,0.5)]",
+  positive: "shadow-[0_-2px_12px_rgba(16,185,129,0.5)]",
+  negative: "shadow-[0_-2px_12px_rgba(244,63,94,0.5)]",
+  info: "shadow-[0_-2px_12px_rgba(59,130,246,0.5)]",
+  warning: "shadow-[0_-2px_12px_rgba(245,158,11,0.5)]",
+};
+
 export function AppToast({
   id,
   variant,
   title,
   description,
   action,
+  duration,
 }: AppToastProps) {
   const { Icon: IconComponent, tone } = variants[variant];
+  const isMobile = useMediaQuery("(max-width: 600px)");
+
+  const enterAnimation = isMobile
+    ? { opacity: 0, y: 48, scale: 0.95 }
+    : { opacity: 0, x: 60, scale: 0.92, y: -10 };
+
+  const hasProgress =
+    typeof duration === "number" && Number.isFinite(duration) && duration > 0;
+  const { progress, setPaused } = useToastProgress(
+    hasProgress ? duration : null,
+  );
 
   // Countdown timer for rate limit errors
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -131,15 +220,17 @@ export function AppToast({
 
   return (
     <Animated.div
-      initial={{ opacity: 0, x: 60, scale: 0.92, y: -10 }}
+      initial={enterAnimation}
       animate={{ opacity: 1, x: 0, scale: 1, y: 0 }}
-      exit={{ opacity: 0, x: 60, scale: 0.92, y: -10 }}
+      exit={enterAnimation}
       transition={{
         duration: 0.4,
         ease: [0.25, 0.1, 0.25, 1],
         layout: { duration: 0.3 },
       }}
-      className="group relative flex w-full items-start gap-4 overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 transition-all duration-500 ease-out hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      className="group relative flex w-full items-start gap-4 max-[600px]:gap-2.5 overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 max-[600px]:p-3.5 transition-all duration-500 ease-out hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1"
     >
       {/* Background gradient */}
       <Animated.div
@@ -177,18 +268,21 @@ export function AppToast({
         whileHover={{ scale: 1.15, rotate: 8 }}
         whileTap={{ scale: 0.9 }}
         className={cn(
-          "relative flex size-10 shrink-0 items-center justify-center rounded-xl transition-transform",
+          "relative flex size-10 max-[600px]:size-8 shrink-0 items-center justify-center rounded-xl transition-transform",
           toneAccentClasses[tone],
         )}
       >
         <Icon
           icon={IconComponent}
-          className={cn("size-5", variant === "loading" && "animate-spin")}
+          className={cn(
+            "size-5 max-[600px]:size-4",
+            variant === "loading" && "animate-spin",
+          )}
         />
       </Animated.div>
 
       {/* Content */}
-      <div className="relative flex min-w-0 flex-1 flex-col gap-2.5 py-0.5">
+      <div className="relative flex min-w-0 flex-1 flex-col gap-2.5 max-[600px]:gap-1.5 py-0.5">
         <Animated.p
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -233,7 +327,7 @@ export function AppToast({
               delay: 0.3,
               ease: [0.25, 0.1, 0.25, 1],
             }}
-            className="mt-2"
+            className="mt-2 max-[600px]:mt-1.5"
           >
             {action}
           </Animated.div>
@@ -250,10 +344,26 @@ export function AppToast({
         type="button"
         onClick={() => sonnerToast.dismiss(id)}
         aria-label="Cerrar notificación"
-        className="relative -m-1 flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground/50 transition-colors hover:bg-muted/80 hover:text-foreground"
+        className="relative -m-1 flex size-8 max-[600px]:size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground/50 transition-colors hover:bg-muted/80 hover:text-foreground"
       >
         <Icon icon={X} className="size-4" />
       </Animated.button>
+
+      {/* Progress bar */}
+      {hasProgress ? (
+        <div className="absolute inset-x-0 bottom-0 h-0.5 rounded-b-2xl bg-foreground/[0.05]">
+          <div className="h-full w-full overflow-hidden rounded-b-2xl">
+            <Animated.motion.div
+              style={{ scaleX: progress }}
+              className={cn(
+                "h-full w-full origin-left bg-gradient-to-r",
+                toneBarClasses[tone],
+                toneGlowClasses[tone],
+              )}
+            />
+          </div>
+        </div>
+      ) : null}
     </Animated.div>
   );
 }
@@ -285,6 +395,7 @@ function show(
         title={title}
         description={description}
         action={action}
+        duration={duration}
       />
     ),
     { duration, ...rest },
