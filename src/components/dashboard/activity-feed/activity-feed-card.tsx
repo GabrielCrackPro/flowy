@@ -1,18 +1,14 @@
 "use client";
 
+import { Button } from "@components/ui";
 import {
-  BudgetIcon,
   CardSkeleton,
-  CategoryIcon,
   ConfirmDialog,
   EmptyState,
-  GoalIcon,
   Icon,
   RelativeTime,
   SectionCard,
-  SubscriptionIcon,
 } from "@components/shared";
-import { Button } from "@components/ui";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,8 +22,12 @@ import {
   ArrowUpCircle,
   CornerDownRight,
   MessageSquare,
+  Tag,
+  Target,
   Trash2,
   Users,
+  Wallet,
+  Repeat2,
 } from "@/lib/icons";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { Activity } from "@/types/Activity";
@@ -94,21 +94,21 @@ function getActivityMessage(
 
 const ACTIVITY_STYLES = {
   budget: {
-    Icon: BudgetIcon,
+    Icon: Wallet,
     className:
       "bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400",
   },
   goal: {
-    Icon: GoalIcon,
+    Icon: Target,
     className:
       "bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400",
   },
   subscription: {
-    Icon: SubscriptionIcon,
+    Icon: Repeat2,
     className: "bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-400",
   },
   category: {
-    Icon: CategoryIcon,
+    Icon: Tag,
     className:
       "bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-400",
   },
@@ -171,7 +171,7 @@ export function ActivityFeedCard({
   const queryClient = useQueryClient();
   const activeSpaceId = profile?.activeSpaceId ?? null;
   const { data, isLoading: loading } = useDashboardData(month, year);
-  const activities = data?.activities ?? [];
+  const activities = (data as { activities?: Activity[] })?.activities ?? [];
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const clearMutation = useMutation({

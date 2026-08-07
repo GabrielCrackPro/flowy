@@ -8,6 +8,7 @@ import { buildDashboardCards } from "@utils/dashboard";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { StatsCard, type StatsCardProps } from "./stats-card";
+import type { DashboardData } from "@/types/Dashboard";
 
 interface StatsCardGroupProps {
   month: number;
@@ -76,7 +77,7 @@ function StatsCardSkeleton() {
 
 export function StatsCardGroup({ month, year }: StatsCardGroupProps) {
   const { data, isLoading } = useDashboardData(month, year);
-  const stats = data?.stats;
+  const stats = (data as DashboardData)?.stats;
   const { profile } = useProfile();
   const { t } = useTranslation();
   const locale = profile?.locale ?? "es-ES";

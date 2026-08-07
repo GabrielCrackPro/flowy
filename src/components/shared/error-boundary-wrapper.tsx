@@ -13,7 +13,7 @@ interface ErrorBoundaryWrapperProps {
 /**
  * Wrapper component that provides translation function to ErrorBoundary
  */
-export function ErrorBoundary({
+export function ErrorBoundaryWrapper({
   children,
   fallback,
   onError,

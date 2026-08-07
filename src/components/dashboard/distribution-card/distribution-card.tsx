@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { ArrowDownRight, ArrowUpRight, TrendingUp, Wallet } from "@/lib/icons";
 import { cn, formatCurrency } from "@/lib/utils";
 import { NewTransaction } from "../new-transaction";
+import type { DashboardData } from "@/types/Dashboard";
 
 interface DistributionCardProps {
   month: number;
@@ -22,7 +23,7 @@ interface DistributionCardProps {
 
 export function DistributionCard({ month, year }: DistributionCardProps) {
   const { data, isLoading } = useDashboardData(month, year);
-  const stats = data?.stats;
+  const stats = (data as DashboardData)?.stats;
   const { profile } = useProfile();
   const { t } = useTranslation();
 

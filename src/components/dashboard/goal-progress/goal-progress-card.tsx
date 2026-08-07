@@ -15,6 +15,7 @@ import { cn, formatCurrency } from "@lib/utils";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Target, TrendingUp } from "@/lib/icons";
+import type { DashboardData } from "@/types/Dashboard";
 
 interface GoalProgressCardProps {
   month: number;
@@ -23,7 +24,7 @@ interface GoalProgressCardProps {
 
 export function GoalProgressCard({ month, year }: GoalProgressCardProps) {
   const { data, isLoading } = useDashboardData(month, year);
-  const goals = data?.goals ?? [];
+  const goals = (data as DashboardData)?.goals ?? [];
   const { profile } = useProfile();
   const { t } = useTranslation();
 
@@ -40,7 +41,7 @@ export function GoalProgressCard({ month, year }: GoalProgressCardProps) {
         <CardSkeleton variant="bar" />
       ) : topGoals.length === 0 ? (
         <EmptyState
-          icon={<GoalIcon size="lg" />}
+          icon={<Icon icon={Target} size="lg" />}
           title={t("dashboard.noGoals")}
           iconClassName="from-amber-500/20 to-amber-500/10 text-amber-600 dark:from-amber-500/30 dark:to-amber-500/20 dark:text-amber-400"
         />

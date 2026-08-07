@@ -18,6 +18,7 @@ import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { DashboardData } from "@/types/Dashboard";
 import { Cell, Pie, PieChart } from "recharts";
 import {
   ArrowDownCircle,
@@ -50,7 +51,7 @@ export function ExpenseDistributionChart({
   year,
 }: ExpenseDistributionChartProps) {
   const { data: dashboard, isLoading } = useDashboardData(month, year);
-  const stats = dashboard?.stats;
+  const stats = (dashboard as DashboardData)?.stats;
   const { profile } = useProfile();
   const { t } = useTranslation();
   const [view, setView] = useState<DistributionView>(

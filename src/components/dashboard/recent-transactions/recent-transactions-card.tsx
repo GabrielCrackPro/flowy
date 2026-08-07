@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { parseDateOnly } from "@/lib/date-only";
 import { ArrowRight, Receipt } from "@/lib/icons";
+import type { DashboardData } from "@/types/Dashboard";
 
 interface RecentTransactionsCardProps {
   month: number;
@@ -34,10 +35,13 @@ export function RecentTransactionsCard({
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
 
-  const recent = (data?.recentTransactions ?? []).map((tx) => ({
-    ...tx,
-    amount: typeof tx.amount === "number" ? tx.amount : Number(tx.amount) || 0,
-  }));
+  const recent = ((data as DashboardData)?.recentTransactions ?? []).map(
+    (tx) => ({
+      ...tx,
+      amount:
+        typeof tx.amount === "number" ? tx.amount : Number(tx.amount) || 0,
+    }),
+  );
 
   return (
     <SectionCard

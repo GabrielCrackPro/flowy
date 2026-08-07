@@ -18,6 +18,7 @@ import { useBudgetApi } from "@hooks/api/useBudgetApi";
 import { useGoalApi } from "@hooks/api/useGoalApi";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
+import type { DashboardData } from "@/types/Dashboard";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -58,7 +59,7 @@ interface CashFlowChartProps {
 
 export function CashFlowChart({ month, year }: CashFlowChartProps) {
   const { data: dashboard, isLoading } = useDashboardData(month, year);
-  const stats = dashboard?.stats;
+  const stats = (dashboard as DashboardData)?.stats;
   const { budgets } = useBudgetApi();
   const { goals } = useGoalApi();
   const { profile } = useProfile();

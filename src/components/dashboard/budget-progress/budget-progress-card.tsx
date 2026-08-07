@@ -3,7 +3,6 @@
 import { resolveCategoryIcon } from "@components/categories/category-icons";
 import {
   AnimatedNumber,
-  BudgetIcon,
   CardSkeleton,
   EmptyState,
   Icon,
@@ -14,7 +13,8 @@ import { useProfile } from "@hooks/useProfile";
 import { cn, formatCurrency } from "@lib/utils";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, ArrowDownCircle, Wallet } from "@/lib/icons";
+import { AlertTriangle, ArrowDownCircle, Wallet, Tag } from "@/lib/icons";
+import type { DashboardData } from "@/types/Dashboard";
 
 interface BudgetProgressCardProps {
   month: number;
@@ -23,7 +23,7 @@ interface BudgetProgressCardProps {
 
 export function BudgetProgressCard({ month, year }: BudgetProgressCardProps) {
   const { data, isLoading } = useDashboardData(month, year);
-  const budgets = data?.budgets ?? [];
+  const budgets = (data as DashboardData)?.budgets ?? [];
   const { profile } = useProfile();
   const { t } = useTranslation();
 
@@ -39,7 +39,7 @@ export function BudgetProgressCard({ month, year }: BudgetProgressCardProps) {
         <CardSkeleton variant="bar" />
       ) : budgets.length === 0 ? (
         <EmptyState
-          icon={<BudgetIcon size="lg" />}
+          icon={<Icon icon={Wallet} size="lg" />}
           title={t("dashboard.noBudgets")}
           iconClassName="from-indigo-500/20 to-indigo-500/10 text-indigo-600 dark:from-indigo-500/30 dark:to-indigo-500/20 dark:text-indigo-400"
         />

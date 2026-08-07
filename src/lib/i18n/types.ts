@@ -711,6 +711,66 @@ export type AppTranslationMessages = {
     retry: string;
     goHome: string;
     help: string;
+    goBack: string;
+    contactSupport: string;
+    somethingWentWrong: string;
+    failedToLoad: string;
+    network: {
+      message: string;
+      hint: string;
+    };
+    validation: {
+      message: string;
+      hint: string;
+    };
+    authentication: {
+      message: string;
+      hint: string;
+    };
+    authorization: {
+      message: string;
+      hint: string;
+    };
+    notFound: {
+      message: string;
+      hint: string;
+    };
+    server: {
+      message: string;
+      hint: string;
+    };
+    database: {
+      message: string;
+      hint: string;
+    };
+    rateLimit: {
+      message: string;
+      hint: string;
+      title: string;
+      description: string;
+      waitTime: string;
+      retryNow: string;
+      retryingIn: string;
+    };
+    serviceUnavailable: {
+      message: string;
+      hint: string;
+    };
+    unknown: {
+      message: string;
+      hint: string;
+    };
+    default: {
+      hint: string;
+    };
+    actions: {
+      retry: string;
+      goBack: string;
+      goHome: string;
+      contactSupport: string;
+      fixErrors: string;
+      signIn: string;
+    };
   };
   search: {
     placeholder: string;
