@@ -747,7 +747,70 @@ export const app: AppTranslationMessages = {
     description: "An unexpected error occurred. Please try again.",
     retry: "Try again",
     goHome: "Go to dashboard",
+    goBack: "Go back",
     help: "If the problem persists, please contact support.",
+    contactSupport: "Contact support if problem persists",
+    somethingWentWrong: "Something went wrong",
+    failedToLoad: "Failed to load",
+    network: {
+      message:
+        "Unable to connect to the server. Please check your internet connection.",
+      hint: "Check your internet connection and try again",
+    },
+    validation: {
+      message: "Please check your input and try again.",
+      hint: "Please check your input and try again",
+    },
+    authentication: {
+      message: "Please sign in to continue.",
+      hint: "You may need to sign in again",
+    },
+    authorization: {
+      message: "You don't have permission to perform this action.",
+      hint: "You don't have permission for this action",
+    },
+    notFound: {
+      message: "The requested resource was not found.",
+      hint: "Try refreshing the page or go back to the dashboard",
+    },
+    server: {
+      message: "Something went wrong on our end. Please try again later.",
+      hint: "Try refreshing the page or go back to the dashboard",
+    },
+    database: {
+      message: "Unable to save your changes. Please try again.",
+      hint: "Try refreshing the page or go back to the dashboard",
+    },
+    rateLimit: {
+      message: "You're making too many requests. Please wait a moment.",
+      hint: "Please wait a moment before trying again",
+      title: "Rate limit exceeded",
+      description:
+        "You've reached the request limit. Please wait before trying again.",
+      waitTime: "Wait time",
+      retryNow: "Retry now available",
+      retryingIn: "Retrying in",
+    },
+    serviceUnavailable: {
+      message:
+        "The service is temporarily unavailable. Please try again later.",
+      hint: "The service is temporarily unavailable. Please try again later",
+    },
+    unknown: {
+      message: "An unexpected error occurred. Please try again.",
+      hint: "Try refreshing the page or go back to the dashboard",
+    },
+    default: {
+      hint: "Try refreshing the page or go back to the dashboard",
+    },
+    actions: {
+      retry: "Try again",
+      goBack: "Go back",
+      goHome: "Go to dashboard",
+      contactSupport: "Contact support",
+      fixErrors: "Fix errors",
+      signIn: "Sign in",
+    },
   },
   search: {
     placeholder: "Search Flowy…",

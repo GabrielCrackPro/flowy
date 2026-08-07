@@ -1,4 +1,5 @@
 import supabase from "@/lib/supabase/client";
+import { RateLimitError as AppRateLimitError } from "@/lib/errors/error-types";
 
 export async function getAccessToken(): Promise<string | null> {
   try {
@@ -15,6 +16,10 @@ export interface RateLimitError extends Error {
 }
 
 export function isRateLimitError(error: unknown): error is RateLimitError {
+  // Check for both the client interface and the AppError class
+  if (error instanceof AppRateLimitError) {
+    return true;
+  }
   return (
     error instanceof Error &&
     "isRateLimit" in error &&
@@ -30,7 +35,7 @@ export async function authenticatedRequest<T>(
   url: string,
   init?: RequestInit & { retryCount?: number },
 ): Promise<T> {
-  const maxRetries = 3;
+  const maxRetries = 3; // Number of retry attempts before showing rate limit error
   const retryCount = init?.retryCount ?? 0;
   const accessToken = await getAccessToken();
 
@@ -56,9 +61,13 @@ export async function authenticatedRequest<T>(
       const retryAfter = response.headers.get("Retry-After");
       const retryAfterSeconds = retryAfter ? parseInt(retryAfter, 10) : 5; // Default to 5 seconds if not provided
 
+      // Also check if body has retryAfter
+      const bodyRetryAfter = body?.retryAfter as number | undefined;
+      const finalRetryAfter = bodyRetryAfter ?? retryAfterSeconds;
+
       if (retryCount < maxRetries) {
         // Wait for the retry-after time plus some jitter
-        const waitTime = retryAfterSeconds * 1000 + Math.random() * 1000;
+        const waitTime = finalRetryAfter * 1000 + Math.random() * 1000;
         await sleep(waitTime);
 
         // Retry the request with incremented retry count
@@ -72,7 +81,7 @@ export async function authenticatedRequest<T>(
       const error = new Error(
         body?.message ?? "Too many requests. Please try again later.",
       ) as RateLimitError;
-      error.retryAfter = retryAfterSeconds;
+      error.retryAfter = finalRetryAfter;
       error.isRateLimit = true;
       throw error;
     }

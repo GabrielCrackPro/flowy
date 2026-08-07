@@ -11,6 +11,18 @@ import {
   getRateLimitStatus,
   RATE_LIMIT_ENABLED,
 } from "@/lib/rate-limit";
+import {
+  AppError,
+  AuthenticationError,
+  AuthorizationError,
+  classifyError,
+  ErrorCategory,
+  NetworkError,
+  NotFoundError,
+  RateLimitError,
+  ServiceUnavailableError,
+  ValidationError,
+} from "@/lib/errors/error-types";
 
 const DOMAIN_ERROR_STATUS: Record<string, number> = {
   "Category not found": 404,
@@ -53,27 +65,75 @@ export function isAuthResponse(
 }
 
 export function handleApiError(error: unknown, fallbackMessage: string) {
+  // Handle Zod validation errors
   if (error instanceof ZodError) {
+    const appError = new ValidationError(
+      "Invalid data provided",
+      Object.fromEntries(
+        error.issues.map((issue) => [issue.path.join("."), issue.message]),
+      ),
+    );
     return NextResponse.json(
       {
-        message: "Invalid data",
+        message: appError.message,
+        category: appError.category,
         errors: error.issues,
       },
-      { status: 400 },
+      { status: appError.statusCode },
     );
   }
 
+  // Handle AppError instances
+  if (error instanceof AppError) {
+    console.error(`[${error.category}] ${error.message}`, error.context);
+
+    const response = NextResponse.json(error.toResponse(), {
+      status: error.statusCode,
+    });
+
+    // Add rate limit headers for RateLimitError
+    if (error instanceof RateLimitError) {
+      const retryAfter = error.getRemainingTime();
+      if (retryAfter > 0) {
+        response.headers.set("Retry-After", retryAfter.toString());
+      }
+      if (error.retryAt) {
+        response.headers.set("X-RateLimit-Reset", error.retryAt.toISOString());
+      }
+    }
+
+    return response;
+  }
+
+  // Handle domain-specific errors with custom status codes
   if (error instanceof Error) {
     const status = DOMAIN_ERROR_STATUS[error.message];
-
     if (status) {
-      return NextResponse.json({ message: error.message }, { status });
+      const classifiedError = classifyError(error);
+      console.error(`[${classifiedError.category}] ${error.message}`);
+      return NextResponse.json(
+        {
+          message: error.message,
+          category: classifiedError.category,
+          isRetryable: classifiedError.isRetryable,
+        },
+        { status },
+      );
     }
   }
 
-  console.error(error);
+  // Classify unknown errors
+  const classifiedError = classifyError(error);
+  console.error(`[${classifiedError.category}] ${fallbackMessage}`, error);
 
-  return NextResponse.json({ message: fallbackMessage }, { status: 500 });
+  return NextResponse.json(
+    {
+      message: fallbackMessage,
+      category: classifiedError.category,
+      isRetryable: classifiedError.isRetryable,
+    },
+    { status: classifiedError.statusCode },
+  );
 }
 
 export function noContent() {

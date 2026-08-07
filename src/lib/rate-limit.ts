@@ -35,65 +35,65 @@ function getEnvNumber(key: string, defaultValue: number): number {
   return defaultValue;
 }
 
-// Check if rate limiting is enabled
+// Check if rate limiting is enabled (enabled by default)
 export const RATE_LIMIT_ENABLED = process.env.RATE_LIMIT_ENABLED !== "false";
 
 // Default rate limit configurations (can be overridden by environment variables)
 export const DEFAULT_RATE_LIMITS: Record<string, RateLimitConfig> = {
   // Stricter limits for write operations
   transaction: {
-    requests: getEnvNumber("RATE_LIMIT_TRANSACTION_REQUESTS", 10),
-    window: getEnvNumber("RATE_LIMIT_TRANSACTION_WINDOW", 60 * 1000),
+    requests: getEnvNumber("RATE_LIMIT_TRANSACTION_REQUESTS", 20),
+    window: getEnvNumber("RATE_LIMIT_TRANSACTION_WINDOW", 120 * 1000),
   },
   budget: {
-    requests: getEnvNumber("RATE_LIMIT_BUDGET_REQUESTS", 10),
-    window: getEnvNumber("RATE_LIMIT_BUDGET_WINDOW", 60 * 1000),
+    requests: getEnvNumber("RATE_LIMIT_BUDGET_REQUESTS", 20),
+    window: getEnvNumber("RATE_LIMIT_BUDGET_WINDOW", 120 * 1000),
   },
   goal: {
-    requests: getEnvNumber("RATE_LIMIT_GOAL_REQUESTS", 10),
-    window: getEnvNumber("RATE_LIMIT_GOAL_WINDOW", 60 * 1000),
+    requests: getEnvNumber("RATE_LIMIT_GOAL_REQUESTS", 20),
+    window: getEnvNumber("RATE_LIMIT_GOAL_WINDOW", 120 * 1000),
   },
   category: {
-    requests: getEnvNumber("RATE_LIMIT_CATEGORY_REQUESTS", 10),
-    window: getEnvNumber("RATE_LIMIT_CATEGORY_WINDOW", 60 * 1000),
+    requests: getEnvNumber("RATE_LIMIT_CATEGORY_REQUESTS", 20),
+    window: getEnvNumber("RATE_LIMIT_CATEGORY_WINDOW", 120 * 1000),
   },
   subscription: {
-    requests: getEnvNumber("RATE_LIMIT_SUBSCRIPTION_REQUESTS", 10),
-    window: getEnvNumber("RATE_LIMIT_SUBSCRIPTION_WINDOW", 60 * 1000),
+    requests: getEnvNumber("RATE_LIMIT_SUBSCRIPTION_REQUESTS", 20),
+    window: getEnvNumber("RATE_LIMIT_SUBSCRIPTION_WINDOW", 120 * 1000),
   },
   comment: {
-    requests: getEnvNumber("RATE_LIMIT_COMMENT_REQUESTS", 20),
-    window: getEnvNumber("RATE_LIMIT_COMMENT_WINDOW", 60 * 1000),
+    requests: getEnvNumber("RATE_LIMIT_COMMENT_REQUESTS", 30),
+    window: getEnvNumber("RATE_LIMIT_COMMENT_WINDOW", 120 * 1000),
   },
 
   // Moderate limits for read operations
   dashboard: {
     requests: getEnvNumber("RATE_LIMIT_DASHBOARD_REQUESTS", 30),
-    window: getEnvNumber("RATE_LIMIT_DASHBOARD_WINDOW", 60 * 1000),
+    window: getEnvNumber("RATE_LIMIT_DASHBOARD_WINDOW", 120 * 1000),
   },
   search: {
-    requests: getEnvNumber("RATE_LIMIT_SEARCH_REQUESTS", 20),
-    window: getEnvNumber("RATE_LIMIT_SEARCH_WINDOW", 60 * 1000),
+    requests: getEnvNumber("RATE_LIMIT_SEARCH_REQUESTS", 40),
+    window: getEnvNumber("RATE_LIMIT_SEARCH_WINDOW", 120 * 1000),
   },
   stats: {
-    requests: getEnvNumber("RATE_LIMIT_STATS_REQUESTS", 30),
-    window: getEnvNumber("RATE_LIMIT_STATS_WINDOW", 60 * 1000),
+    requests: getEnvNumber("RATE_LIMIT_STATS_REQUESTS", 50),
+    window: getEnvNumber("RATE_LIMIT_STATS_WINDOW", 120 * 1000),
   },
 
   // Permissive limits for profile/account operations
   profile: {
-    requests: getEnvNumber("RATE_LIMIT_PROFILE_REQUESTS", 20),
-    window: getEnvNumber("RATE_LIMIT_PROFILE_WINDOW", 60 * 1000),
+    requests: getEnvNumber("RATE_LIMIT_PROFILE_REQUESTS", 30),
+    window: getEnvNumber("RATE_LIMIT_PROFILE_WINDOW", 120 * 1000),
   },
   account: {
-    requests: getEnvNumber("RATE_LIMIT_ACCOUNT_REQUESTS", 10),
-    window: getEnvNumber("RATE_LIMIT_ACCOUNT_WINDOW", 60 * 1000),
+    requests: getEnvNumber("RATE_LIMIT_ACCOUNT_REQUESTS", 20),
+    window: getEnvNumber("RATE_LIMIT_ACCOUNT_WINDOW", 120 * 1000),
   },
 
   // Default limit for unconfigured routes
   default: {
-    requests: getEnvNumber("RATE_LIMIT_DEFAULT_REQUESTS", 100),
-    window: getEnvNumber("RATE_LIMIT_DEFAULT_WINDOW", 60 * 1000),
+    requests: getEnvNumber("RATE_LIMIT_DEFAULT_REQUESTS", 150),
+    window: getEnvNumber("RATE_LIMIT_DEFAULT_WINDOW", 120 * 1000),
   },
 };
 
@@ -171,10 +171,14 @@ export function createRateLimitResponse(
   remaining: number,
   resetTime: number,
 ): NextResponse {
+  const retryAfter = Math.ceil((resetTime - Date.now()) / 1000);
   const response = NextResponse.json(
     {
       message: "Too many requests. Please try again later.",
-      retryAfter: Math.ceil((resetTime - Date.now()) / 1000),
+      retryAfter,
+      retryAt: new Date(resetTime).toISOString(),
+      category: "rate_limit",
+      isRetryable: true,
     },
     { status: 429 },
   );
@@ -182,10 +186,7 @@ export function createRateLimitResponse(
   response.headers.set("X-RateLimit-Limit", "100");
   response.headers.set("X-RateLimit-Remaining", remaining.toString());
   response.headers.set("X-RateLimit-Reset", new Date(resetTime).toISOString());
-  response.headers.set(
-    "Retry-After",
-    Math.ceil((resetTime - Date.now()) / 1000).toString(),
-  );
+  response.headers.set("Retry-After", retryAfter.toString());
 
   return response;
 }

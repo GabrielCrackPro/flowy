@@ -755,7 +755,72 @@ export const app: AppTranslationMessages = {
     description: "Ocurrió un error inesperado. Intenta de nuevo.",
     retry: "Reintentar",
     goHome: "Ir al inicio",
+    goBack: "Volver",
     help: "Si el problema persiste, contacta al soporte.",
+    contactSupport: "Contacta al soporte si el problema persiste",
+    somethingWentWrong: "Algo salió mal",
+    failedToLoad: "Error al cargar",
+    network: {
+      message:
+        "No se puede conectar al servidor. Verifica tu conexión a internet.",
+      hint: "Verifica tu conexión a internet e intenta de nuevo",
+    },
+    validation: {
+      message: "Por favor, verifica tu entrada e intenta de nuevo.",
+      hint: "Por favor, verifica tu entrada e intenta de nuevo",
+    },
+    authentication: {
+      message: "Por favor, inicia sesión para continuar.",
+      hint: "Es posible que necesites iniciar sesión nuevamente",
+    },
+    authorization: {
+      message: "No tienes permiso para realizar esta acción.",
+      hint: "No tienes permiso para esta acción",
+    },
+    notFound: {
+      message: "El recurso solicitado no fue encontrado.",
+      hint: "Intenta actualizar la página o volver al panel",
+    },
+    server: {
+      message:
+        "Algo salió mal en nuestro servidor. Intenta de nuevo más tarde.",
+      hint: "Intenta actualizar la página o volver al panel",
+    },
+    database: {
+      message: "No se pudieron guardar tus cambios. Intenta de nuevo.",
+      hint: "Intenta actualizar la página o volver al panel",
+    },
+    rateLimit: {
+      message:
+        "Estás haciendo demasiadas solicitudes. Por favor espera un momento.",
+      hint: "Por favor espera un momento antes de intentar de nuevo",
+      title: "Límite de solicitudes excedido",
+      description:
+        "Has alcanzado el límite de solicitudes. Por favor espera antes de intentar de nuevo.",
+      waitTime: "Tiempo de espera",
+      retryNow: "Reintentar disponible ahora",
+      retryingIn: "Reintentando en",
+    },
+    serviceUnavailable: {
+      message:
+        "El servicio está temporalmente no disponible. Intenta de nuevo más tarde.",
+      hint: "El servicio está temporalmente no disponible. Intenta de nuevo más tarde",
+    },
+    unknown: {
+      message: "Ocurrió un error inesperado. Intenta de nuevo.",
+      hint: "Intenta actualizar la página o volver al panel",
+    },
+    default: {
+      hint: "Intenta actualizar la página o volver al panel",
+    },
+    actions: {
+      retry: "Reintentar",
+      goBack: "Volver",
+      goHome: "Ir al inicio",
+      contactSupport: "Contactar soporte",
+      fixErrors: "Corregir errores",
+      signIn: "Iniciar sesión",
+    },
   },
   search: {
     placeholder: "Buscar en Flowy…",

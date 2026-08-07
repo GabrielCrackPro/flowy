@@ -4,6 +4,8 @@ import { Animated, Icon, type IconProps } from "@components/shared";
 import { cn } from "@lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type ExternalToast, toast as sonnerToast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { ErrorTranslationKeys } from "@/lib/errors/error-types";
 import {
   CheckCircle2,
   Clock,
@@ -186,6 +188,7 @@ export function AppToast({
   duration,
 }: AppToastProps) {
   const { Icon: IconComponent, tone } = variants[variant];
+  const { t } = useTranslation();
   const isMobile = useMediaQuery("(max-width: 600px)");
 
   const enterAnimation = isMobile
@@ -217,6 +220,12 @@ export function AppToast({
       return () => clearInterval(timer);
     }
   }, [variant, description]);
+
+  // Translate rate limit title
+  const displayTitle =
+    variant === "rate_limit" && typeof title === "string"
+      ? t(ErrorTranslationKeys.RATE_LIMIT_TITLE)
+      : title;
 
   return (
     <Animated.div
@@ -289,7 +298,7 @@ export function AppToast({
           transition={{ duration: 0.4, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
           className="text-sm font-semibold leading-tight text-foreground"
         >
-          {title}
+          {displayTitle}
         </Animated.p>
         {variant === "rate_limit" && countdown !== null ? (
           <Animated.p
@@ -302,7 +311,7 @@ export function AppToast({
             }}
             className="text-[13px] leading-relaxed text-muted-foreground/70"
           >
-            Retrying in {countdown} seconds...
+            {t(ErrorTranslationKeys.RATE_LIMIT_RETRYING_IN)}: {countdown}s
           </Animated.p>
         ) : description && typeof description !== "number" ? (
           <Animated.p
@@ -432,7 +441,7 @@ export const toast = {
     title: React.ReactNode,
     retryAfter?: number,
     options?: ToastOptions,
-  ) => show("rate_limit", title, retryAfter, options),
+  ) => show("rate_limit", "", retryAfter, options),
   message: (
     title: React.ReactNode,
     description?: React.ReactNode,

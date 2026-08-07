@@ -5,6 +5,12 @@ import { useCallback } from "react";
 import { toast } from "@/components/shared/toast";
 import { useProfile } from "@/hooks/useProfile";
 import { isRateLimitError } from "@/lib/api/client";
+import {
+  classifyError,
+  RateLimitError,
+  ErrorTranslationKeys,
+} from "@/lib/errors/error-types";
+import { useTranslation } from "react-i18next";
 
 interface EntityApiConfig<T, F, C, U> {
   queryKey: string;
@@ -55,6 +61,7 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
   const queryClient = useQueryClient();
   const { profile } = useProfile();
   const activeSpaceId = profile?.activeSpaceId ?? null;
+  const { t } = useTranslation();
 
   // Refetch every query for this entity (any space, filter or view) plus the
   // queries that aggregate it, so no page keeps stale data after a mutation.
@@ -83,6 +90,15 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
     refetchOnReconnect: false, // Don't refetch on reconnect if data is fresh
     gcTime: 10000, // Keep cache for 10 seconds after inactive
     placeholderData: (previousData) => previousData, // Keep previous data while loading new data
+    onError: (error) => {
+      const classifiedError = classifyError(error);
+      if (classifiedError instanceof RateLimitError) {
+        toast.rateLimit(
+          t(ErrorTranslationKeys.RATE_LIMIT),
+          classifiedError.getRemainingTime(),
+        );
+      }
+    },
   });
 
   const createMutation = useMutation({
@@ -108,8 +124,12 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
       invalidateEntityQueries(queryClient);
     },
     onError: (error) => {
-      if (isRateLimitError(error)) {
-        toast.rateLimit("Too many requests", error.retryAfter);
+      const classifiedError = classifyError(error);
+      if (classifiedError instanceof RateLimitError) {
+        toast.rateLimit(
+          "Too many requests",
+          classifiedError.getRemainingTime(),
+        );
       } else {
         toast.error(error instanceof Error ? error.message : "Error al crear");
       }
@@ -155,8 +175,12 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
         [queryKey, activeSpaceId, filters],
         context?.previous,
       );
-      if (isRateLimitError(error)) {
-        toast.rateLimit("Too many requests", error.retryAfter);
+      const classifiedError = classifyError(error);
+      if (classifiedError instanceof RateLimitError) {
+        toast.rateLimit(
+          t(ErrorTranslationKeys.RATE_LIMIT),
+          classifiedError.getRemainingTime(),
+        );
       } else {
         toast.error(
           error instanceof Error ? error.message : "Error al actualizar",
@@ -229,8 +253,12 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
         [queryKey, activeSpaceId, filters],
         context?.previous,
       );
-      if (isRateLimitError(error)) {
-        toast.rateLimit("Too many requests", error.retryAfter);
+      const classifiedError = classifyError(error);
+      if (classifiedError instanceof RateLimitError) {
+        toast.rateLimit(
+          t(ErrorTranslationKeys.RATE_LIMIT),
+          classifiedError.getRemainingTime(),
+        );
       } else {
         toast.error(
           error instanceof Error ? error.message : "Error al eliminar",

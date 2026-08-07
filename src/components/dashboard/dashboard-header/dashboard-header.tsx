@@ -1,13 +1,13 @@
 "use client";
 
 import { DashboardCustomize } from "@components/dashboard";
-import { Alert, Icon, RelativeTime, Skeleton } from "@components/shared";
+import { Alert, Icon, RelativeTime, Skeleton, toast } from "@components/shared";
 import { Button } from "@components/ui";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocaleContext } from "@/context/LocaleContext";
 import {
@@ -19,6 +19,7 @@ import {
   Sunset,
 } from "@/lib/icons";
 import { getGreetingMessage } from "@/utils/dashboard";
+import { classifyError, RateLimitError } from "@/lib/errors/error-types";
 
 interface DashboardHeaderProps {
   month: number;
@@ -51,6 +52,19 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
   const profileLoading = !profile;
   const GreetingIcon = getGreetingIcon(locale);
   const greetingGradient = getGreetingGradient();
+
+  // Show rate limit notification when error occurs
+  useEffect(() => {
+    if (error) {
+      const classifiedError = classifyError(error);
+      if (classifiedError instanceof RateLimitError) {
+        toast.rateLimit(
+          "Too many requests",
+          classifiedError.getRemainingTime(),
+        );
+      }
+    }
+  }, [error]);
 
   const todayLabel = useMemo(() => {
     const formatted = new Intl.DateTimeFormat(locale, {
