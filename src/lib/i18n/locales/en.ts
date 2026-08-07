@@ -8,6 +8,17 @@ export const auth: AuthTranslationMessages = {
     languageLabel: "Language",
     english: "English",
     spanish: "Español",
+    title: "Find Your Financial Peace",
+    description:
+      "Manage your assets with the clarity and calm you deserve. An experience designed for your tranquility.",
+    smartAnalyticsTitle: "Smart Analytics",
+    smartAnalyticsDesc: "Track your spending patterns with AI-powered insights",
+    budgetControlTitle: "Budget Control",
+    budgetControlDesc: "Set limits and get notified before overspending",
+    securePrivateTitle: "Secure & Private",
+    securePrivateDesc: "Your financial data is encrypted and protected",
+    securityNote:
+      "Your financial data is encrypted and protected with Supabase Auth.",
   },
   common: {
     emailLabel: "Email address",
@@ -52,8 +63,8 @@ export const auth: AuthTranslationMessages = {
       "Credentials are sent securely and sessions are managed by Supabase Auth.",
     formTitle: "Sign in",
     formDescription: "Enter your credentials to continue.",
-    statusEmailSent: "A sign-in link has been sent. Check your inbox.",
-    createAccountLink: "Don’t have an account yet?",
+    statusEmailSent: "Check your email to confirm your account, then sign in.",
+    createAccountLink: "Create an account",
   },
   register: {
     badge: "Secure sign up",
@@ -68,7 +79,7 @@ export const auth: AuthTranslationMessages = {
     formTitle: "Sign up",
     formDescription: "Fill in the fields to create your account.",
     statusCreated: "Account created. Check your email to confirm sign in.",
-    haveAccountLink: "I already have an account",
+    haveAccountLink: "Sign in",
   },
   validation: {
     emailRequired: "Email is required",
@@ -78,6 +89,23 @@ export const auth: AuthTranslationMessages = {
     passwordsMustMatch: "Passwords do not match.",
     fullNameRequired: "Full name is required",
     acceptTermsRequired: "You must accept the terms and conditions.",
+  },
+  forgotPassword: {
+    title: "Reset your password",
+    description:
+      "Enter your email address and we'll send you a link to reset your password.",
+    emailLabel: "Email address",
+    emailPlaceholder: "you@example.com",
+    submitButton: "Send reset link",
+    submittingButton: "Sending…",
+    backToLogin: "Back to sign in",
+    successMessage: "We've sent a recovery link to",
+    successMessagePart2: "Check your inbox.",
+  },
+  pageTitles: {
+    login: "Sign in | Flowy",
+    register: "Create account | Flowy",
+    forgotPassword: "Reset password | Flowy",
   },
 };
 

@@ -8,6 +8,15 @@ export type AuthTranslationMessages = {
     languageLabel: string;
     english: string;
     spanish: string;
+    title: string;
+    description: string;
+    smartAnalyticsTitle: string;
+    smartAnalyticsDesc: string;
+    budgetControlTitle: string;
+    budgetControlDesc: string;
+    securePrivateTitle: string;
+    securePrivateDesc: string;
+    securityNote: string;
   };
   common: {
     emailLabel: string;
@@ -73,6 +82,22 @@ export type AuthTranslationMessages = {
     passwordsMustMatch: string;
     fullNameRequired: string;
     acceptTermsRequired: string;
+  };
+  forgotPassword: {
+    title: string;
+    description: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    submitButton: string;
+    submittingButton: string;
+    backToLogin: string;
+    successMessage: string;
+    successMessagePart2: string;
+  };
+  pageTitles: {
+    login: string;
+    register: string;
+    forgotPassword: string;
   };
 };
 

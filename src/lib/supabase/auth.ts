@@ -1,5 +1,5 @@
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
-import supabase from "./client";
+import supabase, { setRememberMe } from "./client";
 
 const redirectUrl =
   typeof window !== "undefined"
@@ -21,7 +21,12 @@ export async function signUpWithEmail(
   });
 }
 
-export async function signInWithEmail(email: string, password: string) {
+export async function signInWithEmail(
+  email: string,
+  password: string,
+  rememberMe = true,
+) {
+  setRememberMe(rememberMe);
   return supabase.auth.signInWithPassword({ email, password });
 }
 

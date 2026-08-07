@@ -9,7 +9,13 @@ import {
   useMemo,
   useState,
 } from "react";
-import { getLocaleCookie, normalizeLocale, setLocaleCookie } from "@/lib/i18n";
+import {
+  getLocaleCookie,
+  getLocaleStorage,
+  normalizeLocale,
+  setLocaleCookie,
+  setLocaleStorage,
+} from "@/lib/i18n";
 import { setI18nLocale } from "@/lib/i18n/client";
 
 export interface LocaleContextValue {
@@ -22,14 +28,16 @@ const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const { profile, update: updateProfile } = useProfile();
 
-  const [cookieLocale] = useState(getLocaleCookie);
+  const [storedLocale] = useState(
+    () => getLocaleStorage() ?? getLocaleCookie() ?? null,
+  );
 
   const locale = useMemo(() => {
     const fromProfile = profile?.locale;
+    if (storedLocale) return normalizeLocale(storedLocale);
     if (fromProfile) return normalizeLocale(fromProfile);
-    if (cookieLocale) return normalizeLocale(cookieLocale);
     return "es";
-  }, [profile?.locale, cookieLocale]);
+  }, [profile?.locale, storedLocale]);
 
   useEffect(() => {
     setI18nLocale(locale);
@@ -37,12 +45,14 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
 
   const setLocale = useCallback(
     async (newLocale: string) => {
-      setLocaleCookie(newLocale);
+      const normalized = normalizeLocale(newLocale);
+      setLocaleStorage(normalized);
+      setLocaleCookie(normalized);
       if (profile) {
         try {
-          await updateProfile({ locale: newLocale });
+          await updateProfile({ locale: normalized });
         } catch {
-          // Silently fail — cookie will keep the preference
+          // Silently fail — storage and cookie will keep the preference
         }
       }
     },

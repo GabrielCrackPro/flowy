@@ -13,6 +13,26 @@ export const locales = ["es", "en"] as const;
 export const defaultLocale: Locale = "es";
 
 export const LOCALE_COOKIE = "flowy-locale";
+export const LOCALE_STORAGE_KEY = "flowy-locale";
+
+export function setLocaleStorage(locale: string) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(LOCALE_STORAGE_KEY, normalizeLocale(locale));
+  } catch {
+    // Ignore: storage can be unavailable (private mode, disabled storage).
+  }
+}
+
+export function getLocaleStorage(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(LOCALE_STORAGE_KEY);
+  } catch {
+    // Ignore: storage can be unavailable (private mode, disabled storage).
+  }
+  return null;
+}
 
 export function setLocaleCookie(locale: string) {
   if (typeof document === "undefined") return;
@@ -47,7 +67,7 @@ export function normalizeLocale(locale?: string): Locale {
 
 export { resources };
 
-export async function getServerT(locale?: string) {
+export async function getServerT(locale?: string, defaultNS?: string) {
   const instance = i18next.createInstance();
   const normalizedLocale = normalizeLocale(locale);
   await instance.init({
@@ -55,7 +75,7 @@ export async function getServerT(locale?: string) {
     lng: normalizedLocale,
     fallbackLng: defaultLocale,
     ns: ["app", "auth"],
-    defaultNS: "app",
+    defaultNS: defaultNS || "app",
     interpolation: { escapeValue: false },
   });
   return instance.t.bind(instance);

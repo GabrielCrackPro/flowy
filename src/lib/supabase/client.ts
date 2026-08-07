@@ -13,6 +13,30 @@ if (!url || !anonKey) {
   );
 }
 
+const REMEMBER_ME_KEY = "flowy-remember-me";
+
+function rememberMeEnabled(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    return window.sessionStorage.getItem(REMEMBER_ME_KEY) !== "0";
+  } catch {
+    return true;
+  }
+}
+
+export function setRememberMe(enabled: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    if (enabled) {
+      window.sessionStorage.removeItem(REMEMBER_ME_KEY);
+    } else {
+      window.sessionStorage.setItem(REMEMBER_ME_KEY, "0");
+    }
+  } catch {
+    // Ignore: storage can be unavailable (private mode, disabled storage).
+  }
+}
+
 export const supabase = createBrowserClient(url, anonKey, {
   cookies: {
     getAll() {
@@ -28,34 +52,45 @@ export const supabase = createBrowserClient(url, anonKey, {
     },
     setAll(cookiesToSet) {
       if (!isBrowser()) return;
+      const remember = rememberMeEnabled();
       cookiesToSet.forEach(({ name, value, options }) => {
+        const isAuthCookie = name.startsWith("sb-");
+        const sessionOnly = isAuthCookie && value !== "" && !remember;
+        const cookieOptions = sessionOnly
+          ? { ...options, maxAge: undefined, expires: undefined }
+          : options;
+
         if ("cookieStore" in window) {
           const sameSite =
-            typeof options?.sameSite === "string"
-              ? options.sameSite
+            typeof cookieOptions?.sameSite === "string"
+              ? cookieOptions.sameSite
               : undefined;
 
           void window.cookieStore.set({
             name,
             value,
-            domain: options?.domain,
-            expires: options?.expires?.getTime(),
-            path: options?.path,
+            domain: cookieOptions?.domain,
+            expires: cookieOptions?.expires?.getTime(),
+            path: cookieOptions?.path,
             sameSite,
           });
           return;
         }
 
         const parts: string[] = [`${name}=${value}`];
-        if (options?.path) parts.push(`path=${options.path}`);
-        if (options?.domain) parts.push(`domain=${options.domain}`);
-        if (options?.secure) parts.push("secure");
-        if (options?.sameSite) parts.push(`samesite=${options.sameSite}`);
-        if (typeof options?.maxAge === "number") {
-          parts.push(`max-age=${options.maxAge}`);
+        if (cookieOptions?.path) parts.push(`path=${cookieOptions.path}`);
+        if (cookieOptions?.domain) {
+          parts.push(`domain=${cookieOptions.domain}`);
         }
-        if (options?.expires) {
-          parts.push(`expires=${options.expires.toUTCString()}`);
+        if (cookieOptions?.secure) parts.push("secure");
+        if (cookieOptions?.sameSite) {
+          parts.push(`samesite=${cookieOptions.sameSite}`);
+        }
+        if (typeof cookieOptions?.maxAge === "number") {
+          parts.push(`max-age=${cookieOptions.maxAge}`);
+        }
+        if (cookieOptions?.expires) {
+          parts.push(`expires=${cookieOptions.expires.toUTCString()}`);
         }
         /* biome-ignore lint/suspicious/noDocumentCookie: Cookie Store API fallback for browsers without support. */
         document.cookie = parts.join("; ");

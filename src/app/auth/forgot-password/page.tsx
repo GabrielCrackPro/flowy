@@ -1,8 +1,8 @@
 "use client";
 
-import { AuthHeader } from "@components/auth";
 import { Button, Input } from "@components/ui";
 import { FormAlert, FormField } from "@components/ui/form";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,8 +18,8 @@ export default function ForgotPasswordPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    document.title = "Recuperar contraseña | Flowy";
-  }, []);
+    document.title = t("pageTitles.forgotPassword");
+  }, [t]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,53 +40,96 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="space-y-8">
-      <AuthHeader type="login" />
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-2"
+      >
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          {t("forgotPassword.title")}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {t("forgotPassword.description")}
+        </p>
+      </motion.div>
 
-      <FormAlert message={error} variant="error" />
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
+        <FormAlert message={error} variant="error" />
+      </motion.div>
 
       {sent ? (
-        <div className="space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          className="space-y-6"
+        >
           <p className="text-sm text-muted-foreground">
-            Te hemos enviado un enlace de recuperación a{" "}
-            <span className="font-medium text-foreground">{email}</span>. Revisa
-            tu bandeja de entrada.
+            {t("forgotPassword.successMessage")}{" "}
+            <span className="font-medium text-foreground">{email}</span>.{" "}
+            {t("forgotPassword.successMessagePart2")}
           </p>
           <Link
             href="/auth/login"
             className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
           >
             <Icon icon={ArrowLeft} className="h-4 w-4" />
-            Volver al inicio de sesión
+            {t("forgotPassword.backToLogin")}
           </Link>
-        </div>
+        </motion.div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
-          <FormField label={t("common.emailLabel")} required>
-            <Input
-              type="email"
-              startIcon={<Icon icon={Mail} className="h-4 w-4" />}
-              placeholder={t("common.emailPlaceholder")}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </FormField>
-
-          <Button
-            type="submit"
-            className="h-11 w-full"
-            disabled={busy || !email}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
           >
-            {busy ? "Enviando…" : "Enviar enlace de recuperación"}
-          </Button>
+            <FormField label={t("forgotPassword.emailLabel")} required>
+              <Input
+                type="email"
+                startIcon={<Icon icon={Mail} className="h-4 w-4" />}
+                placeholder={t("forgotPassword.emailPlaceholder")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-11"
+              />
+            </FormField>
+          </motion.div>
 
-          <p className="text-center text-sm text-muted-foreground">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
+          >
+            <Button
+              type="submit"
+              className="h-11 w-full text-base"
+              disabled={busy || !email}
+            >
+              {busy
+                ? t("forgotPassword.submittingButton")
+                : t("forgotPassword.submitButton")}
+            </Button>
+          </motion.div>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+            className="text-center text-sm text-muted-foreground"
+          >
             <Link
               href="/auth/login"
               className="font-medium text-primary hover:underline"
             >
-              Volver al inicio de sesión
+              {t("forgotPassword.backToLogin")}
             </Link>
-          </p>
+          </motion.p>
         </form>
       )}
     </div>

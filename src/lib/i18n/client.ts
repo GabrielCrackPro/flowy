@@ -2,13 +2,20 @@
 
 import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
-import { defaultLocale, getLocaleCookie, normalizeLocale } from "./index";
+import {
+  defaultLocale,
+  getLocaleCookie,
+  getLocaleStorage,
+  normalizeLocale,
+} from "./index";
 import { resources } from "./resources";
 
 export const i18n = i18next.createInstance();
 
-// Get initial locale from cookie or use default
-const initialLocale = normalizeLocale(getLocaleCookie() || defaultLocale);
+// Get initial locale from localStorage, then cookie, or use default
+const initialLocale = normalizeLocale(
+  getLocaleStorage() || getLocaleCookie() || defaultLocale,
+);
 
 void i18n.use(initReactI18next).init({
   resources,

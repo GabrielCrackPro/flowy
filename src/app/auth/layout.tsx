@@ -5,14 +5,14 @@ import { getServerT, LOCALE_COOKIE, normalizeLocale } from "@/lib/i18n";
 import { BarChart3, Droplet, Shield, Sparkles, Wallet } from "@/lib/icons";
 
 export const metadata = {
-  title: "Autenticación",
+  title: "Authentication",
 };
 
 async function AuthContent({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const localeCookie = cookieStore.get(LOCALE_COOKIE)?.value;
   const locale = normalizeLocale(localeCookie);
-  const t = await getServerT(locale);
+  const t = await getServerT(locale, "auth");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 transition-colors dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 md:p-7">
@@ -44,10 +44,10 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
             <div className="max-w-md space-y-8">
               <div>
                 <h1 className="text-5xl font-bold leading-tight tracking-tight">
-                  {t("auth.title")}
+                  {t("layout.title")}
                 </h1>
                 <p className="mt-6 text-lg leading-7 text-white/80">
-                  {t("auth.description")}
+                  {t("layout.description")}
                 </p>
               </div>
 
@@ -57,9 +57,11 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
                     <Icon icon={BarChart3} className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-semibold">Smart Analytics</p>
+                    <p className="font-semibold">
+                      {t("layout.smartAnalyticsTitle")}
+                    </p>
                     <p className="text-sm text-white/70">
-                      Track your spending patterns with AI-powered insights
+                      {t("layout.smartAnalyticsDesc")}
                     </p>
                   </div>
                 </div>
@@ -69,9 +71,11 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
                     <Icon icon={Wallet} className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-semibold">Budget Control</p>
+                    <p className="font-semibold">
+                      {t("layout.budgetControlTitle")}
+                    </p>
                     <p className="text-sm text-white/70">
-                      Set limits and get notified before overspending
+                      {t("layout.budgetControlDesc")}
                     </p>
                   </div>
                 </div>
@@ -81,9 +85,11 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
                     <Icon icon={Shield} className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-semibold">Secure & Private</p>
+                    <p className="font-semibold">
+                      {t("layout.securePrivateTitle")}
+                    </p>
                     <p className="text-sm text-white/70">
-                      Your financial data is encrypted and protected
+                      {t("layout.securePrivateDesc")}
                     </p>
                   </div>
                 </div>
@@ -94,7 +100,21 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
 
         <main className="flex items-center justify-center bg-white/50 px-6 py-12 transition-colors dark:bg-slate-900/50 sm:px-10 lg:px-20 relative">
           <div className="w-full max-w-md text-slate-900 dark:text-slate-100">
+            <div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
+              <div className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-blue-600 text-white shadow-lg shadow-primary/25">
+                <Icon icon={Droplet} className="h-6 w-6" />
+              </div>
+              <span className="text-2xl font-bold tracking-tight text-foreground">
+                Flowy
+              </span>
+            </div>
+
             {children}
+
+            <p className="mt-8 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground/80">
+              <Icon icon={Shield} className="h-3.5 w-3.5" />
+              {t("layout.securityNote")}
+            </p>
           </div>
         </main>
       </div>

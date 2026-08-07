@@ -1,6 +1,6 @@
 "use client";
 
-import { Skeleton, Icon } from "@components/shared";
+import { Icon, Skeleton } from "@components/shared";
 import { motion } from "framer-motion";
 import { Wallet } from "@/lib/icons";
 

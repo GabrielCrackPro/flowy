@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthHeader } from "@components/auth";
 import { Button, Input } from "@components/ui";
 import {
   Form,
@@ -43,8 +42,8 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-    document.title = "Crear cuenta | Flowy";
-  }, []);
+    document.title = t("pageTitles.register");
+  }, [t]);
 
   const form = useReactForm({
     initialValues: {
@@ -86,24 +85,36 @@ export default function RegisterPage() {
   }, [loading, user, router]);
 
   return (
-    <div className="space-y-8">
-      {/* <AuthHeader type="register" /> */}
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-2"
+      >
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          {t("register.formTitle")}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {t("register.formDescription")}
+        </p>
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
       >
         <FormAlert message={error} variant="error" />
         <FormAlert message={status} variant="success" />
       </motion.div>
 
       <Form {...rhfForm}>
-        <form onSubmit={(e) => handleSubmit(e)} className="space-y-5">
+        <form onSubmit={(e) => handleSubmit(e)} className="space-y-4">
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
           >
             <RHFFormField
               name="fullName"
@@ -115,7 +126,7 @@ export default function RegisterPage() {
                       type="text"
                       startIcon={<Icon icon={User} className="h-4 w-4" />}
                       placeholder={t("common.fullNamePlaceholder")}
-                      className="h-12"
+                      className="h-11"
                       {...field}
                     />
                   </FormControl>
@@ -140,7 +151,7 @@ export default function RegisterPage() {
                       type="email"
                       startIcon={<Icon icon={Mail} className="h-4 w-4" />}
                       placeholder={t("common.emailPlaceholder")}
-                      className="h-12"
+                      className="h-11"
                       {...field}
                     />
                   </FormControl>
@@ -153,7 +164,7 @@ export default function RegisterPage() {
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
+            transition={{ duration: 0.3, delay: 0.25 }}
           >
             <RHFFormField
               name="password"
@@ -178,7 +189,7 @@ export default function RegisterPage() {
                         </button>
                       }
                       placeholder={t("common.passwordPlaceholder")}
-                      className="h-12"
+                      className="h-11"
                       {...field}
                     />
                   </FormControl>
@@ -191,7 +202,7 @@ export default function RegisterPage() {
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.4 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
           >
             <RHFFormField
               name="confirmPassword"
@@ -218,7 +229,7 @@ export default function RegisterPage() {
                         </button>
                       }
                       placeholder={t("common.confirmPasswordPlaceholder")}
-                      className="h-12"
+                      className="h-11"
                       {...field}
                     />
                   </FormControl>
@@ -231,7 +242,7 @@ export default function RegisterPage() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.5 }}
+            transition={{ duration: 0.3, delay: 0.35 }}
           >
             <RHFFormField
               name="acceptedTerms"
@@ -257,11 +268,11 @@ export default function RegisterPage() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.6 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
           >
             <Button
               type="submit"
-              className="h-12 w-full text-base"
+              className="h-11 w-full text-base"
               disabled={busy}
             >
               {busy ? (
@@ -280,20 +291,22 @@ export default function RegisterPage() {
         </form>
       </Form>
 
-      <motion.p
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.7 }}
-        className="text-center text-sm text-muted-foreground"
+        transition={{ duration: 0.3, delay: 0.45 }}
+        className="text-center"
       >
-        {t("common.haveAccount")}{" "}
-        <Link
-          href="/auth/login"
-          className="font-semibold text-primary hover:underline transition-colors"
-        >
-          {t("common.submitLogin")}
-        </Link>
-      </motion.p>
+        <p className="text-sm text-muted-foreground">
+          {t("common.haveAccount")}{" "}
+          <Link
+            href="/auth/login"
+            className="font-semibold text-primary hover:underline transition-colors"
+          >
+            {t("register.haveAccountLink")}
+          </Link>
+        </p>
+      </motion.div>
     </div>
   );
 }

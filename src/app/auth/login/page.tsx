@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthHeader } from "@components/auth";
 import { Button, Input } from "@components/ui";
 import {
   Form,
@@ -34,8 +33,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    document.title = "Iniciar sesión | Flowy";
-  }, []);
+    document.title = t("pageTitles.login");
+  }, [t]);
 
   const form = useReactForm({
     initialValues: {
@@ -48,6 +47,7 @@ export default function LoginPage() {
       const { data, error } = await signInWithEmail(
         values.email,
         values.password,
+        values.rememberMe,
       );
 
       if (error) {
@@ -75,23 +75,35 @@ export default function LoginPage() {
 
   return (
     <div className="space-y-8">
-      {/* <AuthHeader type="login" /> */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-2"
+      >
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          {t("login.formTitle")}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {t("login.formDescription")}
+        </p>
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
       >
         <FormAlert message={error} variant="error" />
         <FormAlert message={status} variant="success" />
       </motion.div>
 
       <Form {...rhfForm}>
-        <form onSubmit={(e) => handleSubmit(e)} className="space-y-5">
+        <form onSubmit={(e) => handleSubmit(e)} className="space-y-4">
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
           >
             <RHFFormField
               name="email"
@@ -103,7 +115,7 @@ export default function LoginPage() {
                       type="email"
                       startIcon={<Icon icon={Mail} className="h-4 w-4" />}
                       placeholder={t("common.emailPlaceholder")}
-                      className="h-12"
+                      className="h-11"
                       {...field}
                     />
                   </FormControl>
@@ -141,7 +153,7 @@ export default function LoginPage() {
                         </button>
                       }
                       placeholder={t("common.passwordPlaceholder")}
-                      className="h-12"
+                      className="h-11"
                       {...field}
                     />
                   </FormControl>
@@ -154,7 +166,7 @@ export default function LoginPage() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
+            transition={{ duration: 0.3, delay: 0.25 }}
             className="flex items-center justify-between"
           >
             <RHFFormField
@@ -183,11 +195,11 @@ export default function LoginPage() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.4 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
           >
             <Button
               type="submit"
-              className="h-12 w-full text-base"
+              className="h-11 w-full text-base"
               disabled={busy}
             >
               {busy ? (
@@ -206,20 +218,22 @@ export default function LoginPage() {
         </form>
       </Form>
 
-      <motion.p
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.5 }}
-        className="text-center text-sm text-muted-foreground"
+        transition={{ duration: 0.3, delay: 0.35 }}
+        className="text-center"
       >
-        {t("common.noAccount")}{" "}
-        <Link
-          href="/auth/register"
-          className="font-semibold text-primary hover:underline transition-colors"
-        >
-          {t("login.createAccountLink")}
-        </Link>
-      </motion.p>
+        <p className="text-sm text-muted-foreground">
+          {t("common.noAccount")}{" "}
+          <Link
+            href="/auth/register"
+            className="font-semibold text-primary hover:underline transition-colors"
+          >
+            {t("login.createAccountLink")}
+          </Link>
+        </p>
+      </motion.div>
     </div>
   );
 }

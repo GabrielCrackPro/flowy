@@ -10,6 +10,7 @@ export * from "./entity-list-view";
 export * from "./entity-sheet";
 export * from "./error-boundary";
 export * from "./error-boundary-wrapper";
+export { ErrorBoundaryWrapper } from "./error-boundary-wrapper";
 export * from "./error-display";
 export * from "./favicon";
 export * from "./file-upload";

@@ -8,6 +8,19 @@ export const auth: AuthTranslationMessages = {
     languageLabel: "Idioma",
     english: "English",
     spanish: "Español",
+    title: "Encuentra tu serenidad financiera.",
+    description:
+      "Gestiona tus activos con la claridad y calma que te mereces. Una experiencia diseñada para tu tranquilidad.",
+    smartAnalyticsTitle: "Análisis Inteligente",
+    smartAnalyticsDesc:
+      "Rastrea tus patrones de gasto con insights impulsados por IA",
+    budgetControlTitle: "Control de Presupuesto",
+    budgetControlDesc:
+      "Establece límites y recibe notificaciones antes de excederte",
+    securePrivateTitle: "Seguro y Privado",
+    securePrivateDesc: "Tus datos financieros están encriptados y protegidos",
+    securityNote:
+      "Tus datos financieros están cifrados y protegidos con Supabase Auth.",
   },
   common: {
     emailLabel: "Correo electrónico",
@@ -53,8 +66,8 @@ export const auth: AuthTranslationMessages = {
     formTitle: "Bienvenido de nuevo",
     formDescription: "Ingresa tus credenciales para acceder.",
     statusEmailSent:
-      "Se ha enviado un enlace de inicio de sesión. Revisa tu correo.",
-    createAccountLink: "¿No tienes una cuenta? Regístrate gratis",
+      "Revisa tu correo para confirmar tu cuenta y luego inicia sesión.",
+    createAccountLink: "Crea una cuenta",
   },
   register: {
     badge: "Crea tu cuenta",
@@ -69,7 +82,7 @@ export const auth: AuthTranslationMessages = {
     formDescription: "Empieza hoy mismo, es gratis por 30 días.",
     statusCreated:
       "Cuenta creada. Revisa tu correo para confirmar el inicio de sesión.",
-    haveAccountLink: "¿Ya tienes una cuenta? Inicia sesión",
+    haveAccountLink: "Inicia sesión",
   },
   validation: {
     emailRequired: "El correo es obligatorio",
@@ -79,6 +92,23 @@ export const auth: AuthTranslationMessages = {
     passwordsMustMatch: "Las contraseñas no coinciden.",
     fullNameRequired: "El nombre completo es obligatorio",
     acceptTermsRequired: "Debes aceptar los términos y condiciones.",
+  },
+  forgotPassword: {
+    title: "Recupera tu contraseña",
+    description:
+      "Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
+    emailLabel: "Correo electrónico",
+    emailPlaceholder: "tú@correo.com",
+    submitButton: "Enviar enlace de recuperación",
+    submittingButton: "Enviando…",
+    backToLogin: "Volver al inicio de sesión",
+    successMessage: "Te hemos enviado un enlace de recuperación a",
+    successMessagePart2: "Revisa tu bandeja de entrada.",
+  },
+  pageTitles: {
+    login: "Iniciar sesión | Flowy",
+    register: "Crear cuenta | Flowy",
+    forgotPassword: "Recuperar contraseña | Flowy",
   },
 };
 
