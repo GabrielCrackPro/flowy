@@ -118,6 +118,15 @@ The project deploys on Vercel. `vercel.json` pins the build command, the region,
 
 After deploying, run `pnpm prisma migrate deploy` against the production database once.
 
+## CI checks
+
+The repo ships two GitHub Actions workflows:
+
+- **`ci.yml`** — runs `pnpm lint`, `pnpm typecheck`, and `pnpm build` on every pull request and push to `main`, using a frozen lockfile. Merges through the GitHub UI bypass the local pre-commit hook, so this is the real quality gate.
+- **`commit-conventions.yml`** — validates pull request titles and commit messages against conventional commits (mirroring the local commit-msg hook) using `action-semantic-pull-request` and commitlint.
+
+To make these checks required before merging, enable branch protection on `main` and mark them as required status checks.
+
 ## Project structure
 
 ```text
