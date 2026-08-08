@@ -32,7 +32,7 @@ Flowy is a personal finance manager built with Next.js and Supabase. You track i
 
 ### Prerequisites
 
-- Node.js 20 or newer (the Next.js 16 requirement)
+- Node.js 22.13 or newer (pnpm 11 requires it; Next.js 16 needs 20.9+) — CI runs on Node 24
 - pnpm (this repo uses a pnpm workspace)
 - A Supabase project (free tier works)
 - A PostgreSQL connection string for Prisma
