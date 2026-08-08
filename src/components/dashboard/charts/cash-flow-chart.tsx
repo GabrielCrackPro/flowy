@@ -1,7 +1,7 @@
 "use client";
 
-import { ChartToggle } from "@components/charts";
 import type { ChartLayer } from "@components/charts";
+import { ChartToggle } from "@components/charts";
 import {
   AnimatedNumber,
   EmptyState,
@@ -17,10 +17,9 @@ import {
 } from "@components/ui";
 import { useBudgetApi } from "@hooks/api/useBudgetApi";
 import { useGoalApi } from "@hooks/api/useGoalApi";
-import { useDashboardData } from "@hooks/useDashboardData";
 import { useChartLayers } from "@hooks/useChartLayers";
+import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
-import type { DashboardData } from "@/types/Dashboard";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -47,6 +46,7 @@ import {
   TrendingUp,
 } from "@/lib/icons";
 import { cn, formatCurrency } from "@/lib/utils";
+import type { DashboardData } from "@/types/Dashboard";
 import { ChartCardSkeleton } from "./chart-card";
 
 type ChartType = "area" | "bar" | "line";
@@ -163,9 +163,7 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
   const [showOverlays, setShowOverlays] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => {
     const saved = localStorage.getItem("flowy-collapsed-groups");
-    return saved
-      ? new Set(JSON.parse(saved))
-      : new Set(["chartType"]);
+    return saved ? new Set(JSON.parse(saved)) : new Set(["chartType"]);
   });
 
   const { layers, handleLayerVisibilityChange } = useChartLayers(

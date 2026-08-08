@@ -137,7 +137,7 @@ export default function DashboardLoading() {
         className="space-y-4"
       >
         <div className="flex items-center gap-4">
-          <div className="h-10 w-10">
+          <div className="size-10">
             <Skeleton variant="rounded" />
           </div>
           <div className="space-y-2">
@@ -167,7 +167,7 @@ export default function DashboardLoading() {
               <div className="h-3 w-24">
                 <Skeleton />
               </div>
-              <div className="h-8 w-8">
+              <div className="size-8">
                 <Skeleton variant="rounded" />
               </div>
             </div>
@@ -200,7 +200,7 @@ export default function DashboardLoading() {
           <div className="xl:col-span-2 space-y-3 rounded-2xl border border-border/30 bg-card p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10">
+                <div className="size-10">
                   <Skeleton variant="rounded" />
                 </div>
                 <div className="space-y-2">
@@ -223,7 +223,7 @@ export default function DashboardLoading() {
           <div className="space-y-3 rounded-2xl border border-border/30 bg-card p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10">
+                <div className="size-10">
                   <Skeleton variant="rounded" />
                 </div>
                 <div className="space-y-2">
@@ -253,7 +253,7 @@ export default function DashboardLoading() {
         <div className="xl:col-span-2 space-y-6">
           <div className="space-y-3 rounded-2xl border border-border/30 bg-card p-6">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10">
+              <div className="size-10">
                 <Skeleton variant="rounded" />
               </div>
               <div className="space-y-2">
@@ -273,7 +273,7 @@ export default function DashboardLoading() {
                 {[1, 2].map((i) => (
                   <div key={i} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="h-7 w-7">
+                      <div className="size-7">
                         <Skeleton variant="rounded" />
                       </div>
                       <div className="h-4 w-24">
@@ -300,7 +300,7 @@ export default function DashboardLoading() {
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center gap-4 p-3">
-                  <div className="h-8 w-8">
+                  <div className="size-8">
                     <Skeleton variant="rounded" />
                   </div>
                   <div className="flex-1 space-y-2">

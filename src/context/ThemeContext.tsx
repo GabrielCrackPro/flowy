@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme as useNextTheme } from "next-themes";
 import {
   createContext,
   type ReactNode,
@@ -8,7 +9,6 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { useTheme as useNextTheme } from "next-themes";
 import { useProfileContext } from "./ProfileContext";
 
 export interface ThemeContextValue {
@@ -140,7 +140,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 
   const toggleTheme = useCallback(
-    (position?: { x: number; y: number }) => {
+    (_position?: { x: number; y: number }) => {
       const newTheme = resolvedTheme === "dark" ? "light" : "dark";
       setNextTheme(newTheme);
     },

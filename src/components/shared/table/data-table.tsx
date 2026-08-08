@@ -186,7 +186,7 @@ export function DataTable<T>({
               "h-14 px-4 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70",
               col.className,
               col.sortable &&
-                "cursor-pointer select-none transition-all duration-200 hover:text-foreground/90 hover:bg-muted/30",
+                "cursor-pointer select-none transition duration-200 hover:text-foreground/90 hover:bg-muted/30",
             )}
             onClick={col.sortable ? () => handleSort(index) : undefined}
           >
@@ -321,7 +321,7 @@ export function DataTable<T>({
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2, delay: index * 0.02 }}
                       className={cn(
-                        "group transition-all duration-200 border-b border-border/20 last:border-b-0",
+                        "group transition duration-200 border-b border-border/20 last:border-b-0",
                         onRowClick && "cursor-pointer hover:bg-primary/5",
                       )}
                       onClick={onRowClick ? () => onRowClick(item) : undefined}
@@ -380,7 +380,7 @@ export function DataTable<T>({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setPageSizeOpen(!pageSizeOpen)}
-                className="flex h-8 items-center gap-1.5 rounded-lg border border-border/30 bg-card pl-2.5 pr-2 text-xs font-medium text-muted-foreground/80 transition-all duration-200 hover:border-border/50 hover:bg-muted/30 hover:text-foreground focus:border-ring focus:ring-2 focus:ring-primary/20 shadow-sm"
+                className="flex h-8 items-center gap-1.5 rounded-lg border border-border/30 bg-card pl-2.5 pr-2 text-xs font-medium text-muted-foreground/80 transition duration-200 hover:border-border/50 hover:bg-muted/30 hover:text-foreground focus:border-ring focus:ring-2 focus:ring-primary/20 shadow-sm"
               >
                 {pageSize}
                 <motion.div
@@ -398,7 +398,7 @@ export function DataTable<T>({
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      aria-label="Close page size menu"
+                      aria-label={t("pagination.closePageSizeMenu")}
                       className="fixed inset-0 z-40"
                       onClick={() => setPageSizeOpen(false)}
                     />
@@ -417,7 +417,7 @@ export function DataTable<T>({
                             setPageSizeOpen(false);
                           }}
                           className={cn(
-                            "flex w-full items-center px-3 py-1.5 text-xs transition-all",
+                            "flex w-full items-center px-3 py-1.5 text-xs transition",
                             s === pageSize
                               ? "bg-gradient-to-r from-primary/20 to-primary/10 font-semibold text-primary"
                               : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -439,7 +439,7 @@ export function DataTable<T>({
               whileHover={{ scale: page > 1 ? 1.05 : 1 }}
               whileTap={{ scale: page > 1 ? 0.95 : 1 }}
               onClick={() => setPage((p) => p - 1)}
-              className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition-all duration-200 hover:bg-muted/30 hover:text-foreground disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-transparent"
+              className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition duration-200 hover:bg-muted/30 hover:text-foreground disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-transparent"
             >
               <Icon icon={ChevronLeft} className="size-4" />
             </motion.button>
@@ -452,7 +452,7 @@ export function DataTable<T>({
               whileHover={{ scale: page < totalPages ? 1.05 : 1 }}
               whileTap={{ scale: page < totalPages ? 0.95 : 1 }}
               onClick={() => setPage((p) => p + 1)}
-              className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition-all duration-200 hover:bg-muted/30 hover:text-foreground disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-transparent"
+              className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition duration-200 hover:bg-muted/30 hover:text-foreground disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-transparent"
             >
               <Icon icon={ChevronRight} className="size-4" />
             </motion.button>

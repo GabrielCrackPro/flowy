@@ -1,6 +1,5 @@
-import type { ReactNode } from "react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
 
 interface TransactionDetailsRowProps {
   icon: ReactNode;

@@ -35,7 +35,7 @@ export function RecentTransactionsCardSkeleton() {
           transition={{ duration: 0.3, delay: index * 0.05 }}
           className="flex items-center gap-4 border-t border-border/30 px-5 py-3.5 sm:px-6"
         >
-          <Skeleton variant="circular" className="h-10 w-10 shrink-0" />
+          <Skeleton variant="circular" className="size-10 shrink-0" />
           <div className="min-w-0 flex-1 space-y-1.5">
             <Skeleton
               className={cn("h-3.5", index % 2 === 0 ? "w-1/2" : "w-2/5")}
@@ -79,7 +79,7 @@ export function RecentTransactionsCard({
           className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
         >
           {t("dashboard.viewAll")}
-          <Icon icon={ArrowRight} className="h-3.5 w-3.5" />
+          <Icon icon={ArrowRight} className="size-3.5" />
         </Link>
       }
     >
@@ -113,7 +113,7 @@ export function RecentTransactionsCard({
             >
               <div
                 className={cn(
-                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-transform hover:scale-110",
+                  "flex size-10 shrink-0 items-center justify-center rounded-full transition-transform hover:scale-110",
                   tx.type === "INCOME"
                     ? "bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 text-emerald-600 dark:from-emerald-500/30 dark:to-emerald-500/20 dark:text-emerald-400"
                     : "bg-gradient-to-br from-rose-500/20 to-rose-500/10 text-rose-600 dark:from-rose-500/30 dark:to-rose-500/20 dark:text-rose-400",

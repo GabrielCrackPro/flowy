@@ -133,7 +133,6 @@ export function ThemeCustomizationSheet() {
                 onChange={(color) =>
                   setLocalColors({ ...localColors, primaryColor: color })
                 }
-                colorKey="primaryColor"
               />
             </div>
 
@@ -147,7 +146,6 @@ export function ThemeCustomizationSheet() {
                 onChange={(color) =>
                   setLocalColors({ ...localColors, secondaryColor: color })
                 }
-                colorKey="secondaryColor"
               />
             </div>
 
@@ -161,7 +159,6 @@ export function ThemeCustomizationSheet() {
                 onChange={(color) =>
                   setLocalColors({ ...localColors, accentColor: color })
                 }
-                colorKey="accentColor"
               />
             </div>
           </div>

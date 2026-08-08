@@ -1,5 +1,5 @@
-import type { ChangeEvent } from "react";
 import { motion } from "framer-motion";
+import type { ChangeEvent } from "react";
 import { cn } from "@/lib/utils";
 
 interface AmountInputProps {
@@ -65,7 +65,7 @@ export function AmountInput({
             whileTap={{ scale: 0.95 }}
             onClick={() => onQuickAmount(amount)}
             className={cn(
-              "rounded-full px-3 py-1 text-xs font-medium tabular-nums transition-all",
+              "rounded-full px-3 py-1 text-xs font-medium tabular-nums transition",
               parseFloat(rawAmount) === amount
                 ? isExpense
                   ? "bg-linear-to-r from-rose-500 to-rose-600 text-white shadow-md"

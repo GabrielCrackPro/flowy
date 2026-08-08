@@ -58,7 +58,7 @@ export function CategoryCard({
   return (
     <Card
       className={cn(
-        "group relative overflow-hidden p-4 transition-all duration-200",
+        "group relative overflow-hidden p-4 transition duration-200",
         "hover:-translate-y-0.5 hover:border-border/60 hover:shadow-md hover:shadow-primary/5",
       )}
     >

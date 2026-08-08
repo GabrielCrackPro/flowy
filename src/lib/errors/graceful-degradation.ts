@@ -140,22 +140,18 @@ export async function withProgressiveLoading<T>(
   loadEssential: () => Promise<T>,
   loadOptional?: () => Promise<Partial<T>>,
 ): Promise<ProgressiveData<T>> {
+  const essential = await loadEssential();
+
+  if (!loadOptional) {
+    return { essential, isPartial: false };
+  }
+
   try {
-    const essential = await loadEssential();
-
-    if (!loadOptional) {
-      return { essential, isPartial: false };
-    }
-
-    try {
-      const optional = await loadOptional();
-      return { essential, optional, isPartial: false };
-    } catch (error) {
-      console.warn("Failed to load optional data:", error);
-      return { essential, isPartial: true };
-    }
+    const optional = await loadOptional();
+    return { essential, optional, isPartial: false };
   } catch (error) {
-    throw error; // Essential data failed, no degradation possible
+    console.warn("Failed to load optional data:", error);
+    return { essential, isPartial: true };
   }
 }
 
@@ -170,11 +166,10 @@ export async function staleWhileRevalidate<T>(
     onBackgroundUpdate?: (freshData: T) => void;
   } = {},
 ): Promise<T> {
-  const { maxStale = 60000, onBackgroundUpdate } = options;
+  const { onBackgroundUpdate } = options;
 
   // Try to get cached data
   const cached = degradationCache.get(cacheKey);
-  const isStale = cached !== null;
 
   if (cached) {
     // Background refresh
@@ -300,7 +295,9 @@ export class ConnectionMonitor {
   };
 
   private notifyListeners = (online: boolean) => {
-    this.listeners.forEach((listener) => listener(online));
+    this.listeners.forEach((listener) => {
+      listener(online);
+    });
   };
 
   onStatusChange(listener: (online: boolean) => void): () => void {

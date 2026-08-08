@@ -29,7 +29,7 @@ setInterval(
 // Helper to get environment variable with fallback
 function getEnvNumber(key: string, defaultValue: number): number {
   const value = process.env[key];
-  if (value && !isNaN(Number(value))) {
+  if (value && !Number.isNaN(Number(value))) {
     return Number(value);
   }
   return defaultValue;

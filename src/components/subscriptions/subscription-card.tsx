@@ -159,7 +159,7 @@ export function SubscriptionCard({
           size="icon-xs"
           aria-label={t("subscriptions.quickPayment")}
           onClick={() => onQuickPayment(subscription)}
-          className="h-7 w-7 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+          className="size-7 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
         >
           <Icon icon={Plus} className="size-3.5" />
         </Button>
@@ -170,7 +170,7 @@ export function SubscriptionCard({
           size="icon-xs"
           aria-label={t("common.edit")}
           onClick={() => onEdit(subscription)}
-          className="h-7 w-7"
+          className="size-7"
         >
           <Icon icon={Pencil} className="size-3.5" />
         </Button>
@@ -181,7 +181,7 @@ export function SubscriptionCard({
           size="icon-xs"
           aria-label={t("common.delete")}
           onClick={() => onDelete(subscription)}
-          className="h-7 w-7 text-destructive hover:text-destructive"
+          className="size-7 text-destructive hover:text-destructive"
         >
           <Icon icon={Trash2} className="size-3.5" />
         </Button>

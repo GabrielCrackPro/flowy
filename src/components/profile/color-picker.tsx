@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { FormLabel } from "@/components/ui/form";
 import {
@@ -8,14 +9,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 interface ColorPickerProps {
   label: string;
   value: string | null;
   onChange: (color: string | null) => void;
-  colorKey: "primaryColor" | "secondaryColor" | "accentColor";
   className?: string;
 }
 
@@ -38,7 +37,6 @@ export function ColorPicker({
   label,
   value,
   onChange,
-  colorKey,
   className,
 }: ColorPickerProps) {
   const { t } = useTranslation();
@@ -59,7 +57,7 @@ export function ColorPicker({
             type="button"
           >
             <div
-              className="w-6 h-6 rounded border-2 shadow-sm group-hover:scale-110 transition-transform"
+              className="size-6 rounded border-2 shadow-sm group-hover:scale-110 transition-transform"
               style={{ backgroundColor: value || "#2563EB" }}
             />
             <span className="text-sm font-medium">
@@ -78,7 +76,7 @@ export function ColorPicker({
                   <button
                     key={color}
                     type="button"
-                    className="w-10 h-10 rounded-lg border-2 shadow-sm hover:scale-110 transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring/50"
+                    className="size-10 rounded-lg border-2 shadow-sm hover:scale-110 transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring/50"
                     style={{ backgroundColor: color }}
                     title={name}
                     onClick={() => {
@@ -99,7 +97,7 @@ export function ColorPicker({
                     type="color"
                     value={value || "#2563EB"}
                     onChange={(e) => handleColorChange(e.target.value)}
-                    className="w-12 h-12 rounded-lg cursor-pointer border-2 border-border/50 hover:border-border transition-colors"
+                    className="size-12 rounded-lg cursor-pointer border-2 border-border/50 hover:border-border transition-colors"
                   />
                   <div className="absolute inset-0 pointer-events-none rounded-lg ring-2 ring-inset ring-black/5" />
                 </div>

@@ -1,10 +1,10 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { TransactionForm } from "@/components/shared";
 import { useTransactionApi } from "@/hooks/api";
 import type { CreateTransactionSchema } from "@/lib/schemas";
-import { motion } from "framer-motion";
 
 export default function NewTransactionPage() {
   const router = useRouter();

@@ -61,13 +61,13 @@ export default function AuthLoading() {
           transition={{ duration: 0.4, delay: 0.3 }}
           className="flex items-center gap-2"
         >
-          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+          <div className="size-2 rounded-full bg-primary animate-pulse" />
           <div
-            className="h-2 w-2 rounded-full bg-primary/40 animate-pulse"
+            className="size-2 rounded-full bg-primary/40 animate-pulse"
             style={{ animationDelay: "75ms" }}
           />
           <div
-            className="h-2 w-2 rounded-full bg-primary/20 animate-pulse"
+            className="size-2 rounded-full bg-primary/20 animate-pulse"
             style={{ animationDelay: "150ms" }}
           />
         </motion.div>

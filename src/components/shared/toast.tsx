@@ -240,7 +240,7 @@ export function AppToast({
       }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className="group relative flex w-full items-start gap-4 max-[600px]:gap-2.5 overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 max-[600px]:p-3.5 transition-all duration-500 ease-out hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1"
+      className="group relative flex w-full items-start gap-4 max-[600px]:gap-2.5 overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 max-[600px]:p-3.5 transition duration-500 ease-out hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1"
     >
       {/* Background gradient */}
       <Animated.div

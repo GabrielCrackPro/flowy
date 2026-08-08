@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Badge, Textarea } from "@/components/ui";
 import { ChevronDown, StickyNote } from "@/lib/icons";
-import { cn } from "@/lib/utils";
 import { Icon } from "../icon";
 
 interface AdditionalOptionsProps {
@@ -79,10 +78,14 @@ export function AdditionalOptions({
             className="overflow-hidden"
           >
             <div className="flex flex-col gap-4 border-t border-border/30 px-5 py-4 sm:px-6">
-              <label className="text-sm font-medium text-foreground/90">
+              <label
+                htmlFor="additional-options-notes"
+                className="text-sm font-medium text-foreground/90"
+              >
                 {notesLabel}
               </label>
               <Textarea
+                id="additional-options-notes"
                 value={notes ?? ""}
                 onChange={onNotesChange}
                 placeholder={placeholder}

@@ -22,7 +22,8 @@ import { useCategoryApi } from "@hooks/api/useCategoryApi";
 import { useTransactionApi } from "@hooks/api/useTransactionApi";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   CategoryCard,
@@ -67,6 +68,48 @@ export default function CategoriesPage() {
   const [filter, setFilter] = useState<TypeFilter>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [view, setView] = useState<ViewMode>("grid");
+
+  // Keep the URL in sync so the list view is deep-linkable and survives
+  // refreshes. Search writes are debounced to match the transactions page.
+  const router = useRouter();
+  const pathname = usePathname();
+  const urlSyncInitialized = useRef(false);
+
+  // Seed tab/search/view from the URL once, after mount, so the initial
+  // render matches the server HTML (no hydration mismatch on deep links).
+  const seededFromUrl = useRef(false);
+  useEffect(() => {
+    if (seededFromUrl.current) return;
+    seededFromUrl.current = true;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const urlFilter = params.get("filter");
+    if (urlFilter === "INCOME" || urlFilter === "EXPENSE") {
+      setFilter(urlFilter);
+    }
+    const urlSearch = params.get("search");
+    if (urlSearch) setSearchQuery(urlSearch);
+    if (params.get("view") === "table") setView("table");
+  }, []);
+
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (!urlSyncInitialized.current) {
+      urlSyncInitialized.current = true;
+      return;
+    }
+    const params = new URLSearchParams();
+    if (filter !== "ALL") params.set("filter", filter);
+    if (debouncedSearch.trim()) params.set("search", debouncedSearch.trim());
+    if (view !== "grid") params.set("view", view);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [filter, debouncedSearch, view, pathname, router]);
 
   const {
     formOpen,

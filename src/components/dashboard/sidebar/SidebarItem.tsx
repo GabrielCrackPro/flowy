@@ -57,10 +57,10 @@ export function SidebarItem({
         }}
         onBlur={() => setTooltipOpen(false)}
         className={cn(
-          "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+          "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200",
           "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
           collapsed
-            ? "justify-center px-0 mx-auto h-10 w-10 hover:bg-muted/40"
+            ? "justify-center px-0 mx-auto size-10 hover:bg-muted/40"
             : "active:scale-[0.98]",
           active
             ? collapsed
@@ -71,7 +71,7 @@ export function SidebarItem({
       >
         <motion.span
           className={cn(
-            "absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full transition-all duration-200",
+            "absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full transition duration-200",
             active ? "bg-white/80 opacity-100" : "opacity-0",
             collapsed ? "hidden" : "",
           )}
@@ -82,15 +82,15 @@ export function SidebarItem({
           whileHover={{ scale: collapsed ? 1.15 : 1.1, rotate: active ? 0 : 5 }}
           transition={{ duration: 0.2 }}
           className={cn(
-            "flex shrink-0 items-center justify-center transition-all duration-200",
-            collapsed ? "h-8 w-8 rounded-lg" : "",
+            "flex shrink-0 items-center justify-center transition duration-200",
+            collapsed ? "size-8 rounded-lg" : "",
             collapsed && active ? "bg-white/10" : "",
           )}
         >
           <Icon
             icon={IconComponent}
             className={cn(
-              "h-5 w-5 shrink-0 transition-all duration-200",
+              "size-5 shrink-0 transition duration-200",
               !active && "text-muted-foreground group-hover:text-foreground",
             )}
           />
@@ -98,7 +98,7 @@ export function SidebarItem({
 
         <motion.div
           className={cn(
-            "flex flex-1 items-center gap-2 overflow-hidden transition-all duration-200",
+            "flex flex-1 items-center gap-2 overflow-hidden transition duration-200",
             collapsed ? "hidden" : "w-auto opacity-100 visible",
           )}
           initial={{ opacity: 0 }}

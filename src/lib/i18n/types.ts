@@ -21,6 +21,8 @@ export type AuthTranslationMessages = {
     passwordPlaceholder: string;
     confirmPasswordPlaceholder: string;
     fullNamePlaceholder: string;
+    showPassword: string;
+    hidePassword: string;
     haveAccount: string;
     noAccount: string;
     submitLogin: string;
@@ -223,6 +225,29 @@ export type AppTranslationMessages = {
       resetSuccess: string;
       resetError: string;
       default: string;
+      preview: {
+        sectionButtons: string;
+        buttonOutline: string;
+        buttonGhost: string;
+        buttonLink: string;
+        sectionCards: string;
+        totalBalance: string;
+        fromLastMonth: string;
+        goalsProgress: string;
+        completed: string;
+        sectionFormElements: string;
+        emailPlaceholder: string;
+        settingOption: string;
+        toggleDescription: string;
+        sectionBadges: string;
+        badgeDefault: string;
+        badgeCustom: string;
+        sectionInteractive: string;
+        sectionNavigation: string;
+        activeNavItem: string;
+        inactiveNavItem: string;
+        sectionPalette: string;
+      };
     };
   };
   header: {
@@ -739,8 +764,10 @@ export type AppTranslationMessages = {
   };
   pagination: {
     of: string;
+    closePageSizeMenu: string;
   };
   common: {
+    skipToContent: string;
     cancel: string;
     create: string;
     save: string;

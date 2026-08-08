@@ -1,11 +1,15 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useState } from "react";
 import {
-  useForm as useReactHookForm,
+  type DefaultValues,
+  type Path,
+  type PathValue,
+  type Resolver,
   type UseFormReturn,
+  useForm as useReactHookForm,
 } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 
 export type ReactFormErrors<T extends Record<string, unknown>> = Partial<
@@ -52,17 +56,23 @@ export function useReactForm<T extends Record<string, unknown>>({
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
   const form = useReactHookForm<T>({
-    defaultValues: initialValues as any,
-    resolver: schema ? (zodResolver(schema as any) as any) : undefined,
+    defaultValues: initialValues as unknown as DefaultValues<T>,
+    resolver: schema
+      ? (zodResolver(
+          schema as Parameters<typeof zodResolver>[0],
+        ) as unknown as Resolver<T>)
+      : undefined,
     mode: "onTouched",
   });
 
   const setFieldValue = useCallback(
     <K extends keyof T>(field: K, value: T[K]) => {
-      form.setValue(field as any, value as any);
-      form.clearErrors(field as any);
+      form.setValue(
+        field as unknown as Path<T>,
+        value as unknown as PathValue<T, Path<T>>,
+      );
+      form.clearErrors(field as unknown as Path<T>);
     },
     [form],
   );
@@ -134,7 +144,7 @@ export function useReactForm<T extends Record<string, unknown>>({
   );
 
   const reset = useCallback(() => {
-    form.reset(initialValues as any);
+    form.reset(initialValues);
     setStatus(null);
     setError(null);
     setBusy(false);
@@ -158,6 +168,6 @@ export function useReactForm<T extends Record<string, unknown>>({
     handleSubmit,
     validate,
     reset,
-    form,
+    form: form as unknown as UseFormReturn<T>,
   };
 }

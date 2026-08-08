@@ -1,13 +1,13 @@
-import { Icon, type IconProps } from "./Icon";
 import {
-  ArrowUpDown,
-  Tag,
-  Wallet,
-  Target,
-  Repeat2,
-  ArrowUpCircle,
   ArrowDownCircle,
+  ArrowUpCircle,
+  ArrowUpDown,
+  Repeat2,
+  Tag,
+  Target,
+  Wallet,
 } from "@/lib/icons";
+import { Icon, type IconProps } from "./Icon";
 
 /**
  * Feature-specific icon components

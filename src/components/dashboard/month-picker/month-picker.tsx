@@ -96,7 +96,7 @@ export function MonthPicker({ month, year, onChange }: MonthPickerProps) {
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger
           className={cn(
-            "group flex min-w-36 cursor-pointer items-center gap-2 rounded-xl border border-border/40 bg-muted/30 py-2 pl-2.5 pr-1.5 text-sm transition-all duration-150 sm:min-w-44 sm:gap-2.5 sm:pl-3 sm:pr-2",
+            "group flex min-w-36 cursor-pointer items-center gap-2 rounded-xl border border-border/40 bg-muted/30 py-2 pl-2.5 pr-1.5 text-sm transition duration-150 sm:min-w-44 sm:gap-2.5 sm:pl-3 sm:pr-2",
             "hover:border-primary/40 hover:bg-muted/50 active:scale-95",
             "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
             "data-open:border-primary/40 data-open:bg-muted/50 data-open:shadow-sm",

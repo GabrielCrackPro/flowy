@@ -140,7 +140,7 @@ export function MultiSelectFilter({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.2, delay: index * 0.04 }}
                   className={cn(
-                    "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-xs transition-all duration-200",
+                    "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-xs transition duration-200",
                     isSelected
                       ? "bg-gradient-to-r from-primary/12 to-primary/6 text-primary shadow-sm"
                       : "text-muted-foreground hover:bg-gradient-to-r hover:from-muted/60 hover:to-muted/40 hover:text-foreground",
@@ -150,7 +150,7 @@ export function MultiSelectFilter({
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     className={cn(
-                      "flex size-4.5 shrink-0 items-center justify-center rounded-lg border transition-all duration-200",
+                      "flex size-4.5 shrink-0 items-center justify-center rounded-lg border transition duration-200",
                       isSelected
                         ? "border-primary bg-gradient-to-br from-primary to-primary/90 text-primary-foreground shadow-md"
                         : "border-border/30 bg-card",

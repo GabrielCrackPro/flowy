@@ -400,7 +400,7 @@ export default function BudgetsPage() {
                 >
                   <div
                     className={cn(
-                      "relative rounded-2xl border bg-gradient-to-br p-5 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5",
+                      "relative rounded-2xl border bg-gradient-to-br p-5 shadow-sm transition hover:shadow-lg hover:-translate-y-0.5",
                       overBudget
                         ? "border-red-500/30 from-red-500/5 to-red-500/0"
                         : isNearLimit
@@ -447,7 +447,7 @@ export default function BudgetsPage() {
                           variant="ghost"
                           size="icon-xs"
                           onClick={() => openEdit(budget)}
-                          className="h-7 w-7"
+                          className="size-7"
                         >
                           <Icon icon={Pencil} className="size-3.5" />
                         </Button>
@@ -455,7 +455,7 @@ export default function BudgetsPage() {
                           variant="ghost"
                           size="icon-xs"
                           onClick={() => setDeleting(budget)}
-                          className="h-7 w-7 text-destructive hover:text-destructive"
+                          className="size-7 text-destructive hover:text-destructive"
                         >
                           <Icon icon={Trash2} className="size-3.5" />
                         </Button>

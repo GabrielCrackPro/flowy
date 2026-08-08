@@ -1,12 +1,12 @@
 import type { IconProps } from "@/components/shared";
 import {
-  ArrowUpDown,
-  Tag,
-  Wallet,
-  Target,
-  Repeat2,
-  ArrowUpCircle,
   ArrowDownCircle,
+  ArrowUpCircle,
+  ArrowUpDown,
+  Repeat2,
+  Tag,
+  Target,
+  Wallet,
 } from "@/lib/icons";
 
 /**

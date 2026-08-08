@@ -27,7 +27,7 @@ export function FiltersToggleButton({
       size="sm"
       onClick={onClick}
       className={cn(
-        "h-9 shrink-0 gap-1.5 rounded-xl transition-all duration-150",
+        "h-9 shrink-0 gap-1.5 rounded-xl transition duration-150",
         open && "ring-1 ring-primary/20",
       )}
     >

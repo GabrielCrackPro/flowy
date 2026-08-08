@@ -4,6 +4,12 @@ import { ZodError } from "zod";
 
 import { getCurrentUser } from "@/lib/auth/user";
 import {
+  AppError,
+  classifyError,
+  RateLimitError,
+  ValidationError,
+} from "@/lib/errors/error-types";
+import {
   addRateLimitHeaders,
   checkRateLimit,
   createRateLimitResponse,
@@ -11,18 +17,6 @@ import {
   getRateLimitStatus,
   RATE_LIMIT_ENABLED,
 } from "@/lib/rate-limit";
-import {
-  AppError,
-  AuthenticationError,
-  AuthorizationError,
-  classifyError,
-  ErrorCategory,
-  NetworkError,
-  NotFoundError,
-  RateLimitError,
-  ServiceUnavailableError,
-  ValidationError,
-} from "@/lib/errors/error-types";
 
 const DOMAIN_ERROR_STATUS: Record<string, number> = {
   "Category not found": 404,

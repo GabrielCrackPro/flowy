@@ -135,7 +135,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
               )}
             >
               <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Icon icon={CalendarDays} className="h-3.5 w-3.5" />
+                <Icon icon={CalendarDays} className="size-3.5" />
               </span>
               {isFetching ? (
                 <span
@@ -164,7 +164,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
               >
                 <Icon
                   icon={RefreshCcw}
-                  className={cn("h-3.5 w-3.5", isFetching && "animate-spin")}
+                  className={cn("size-3.5", isFetching && "animate-spin")}
                 />
               </motion.button>
             </motion.div>
@@ -184,7 +184,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
             className="border-rose-500/20 bg-rose-500/10 text-rose-600 hover:bg-rose-500/15 hover:text-rose-600 dark:text-rose-400"
             onClick={handleRefresh}
           >
-            <Icon icon={RotateCcw} className="w-4 h-4" />
+            <Icon icon={RotateCcw} className="size-4" />
             <span>{t("dashboard.retry")}</span>
           </Button>
         }

@@ -6,8 +6,8 @@ import {
   type ControllerProps,
   type FieldPath,
   type FieldValues,
-  useFormContext,
   FormProvider,
+  useFormContext,
 } from "react-hook-form";
 import { cn } from "@/lib/utils";
 
@@ -86,9 +86,11 @@ const FormLabel = React.forwardRef<
   HTMLLabelElement,
   React.LabelHTMLAttributes<HTMLLabelElement> & { required?: boolean }
 >(({ className, required, children, ...props }, ref) => {
+  const { formItemId } = useFormField();
   return (
     <label
       ref={ref}
+      htmlFor={formItemId}
       className={cn(
         "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
         className,

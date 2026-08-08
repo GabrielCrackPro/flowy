@@ -9,10 +9,10 @@ interface UserAvatarProps {
 }
 
 const sizeClasses = {
-  sm: "h-9 w-9 text-xs",
-  md: "h-10 w-10 text-xs",
-  lg: "h-11 w-11 text-sm",
-  xl: "h-20 w-20 text-2xl",
+  sm: "size-9 text-xs",
+  md: "size-10 text-xs",
+  lg: "size-11 text-sm",
+  xl: "size-20 text-2xl",
 };
 
 export function UserAvatar({

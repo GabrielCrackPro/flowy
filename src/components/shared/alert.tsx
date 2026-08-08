@@ -86,7 +86,7 @@ export function Alert({
   return (
     <div
       className={cn(
-        "relative flex items-center gap-5 overflow-hidden rounded-3xl border p-6 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300",
+        "relative flex items-center gap-5 overflow-hidden rounded-3xl border p-6 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition duration-300",
         "hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)]",
         style.container,
         className,
@@ -101,11 +101,11 @@ export function Alert({
 
       <div
         className={cn(
-          "relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] ring-1 ring-inset ring-foreground/5",
+          "relative flex size-14 shrink-0 items-center justify-center rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] ring-1 ring-inset ring-foreground/5",
           style.icon,
         )}
       >
-        <Icon icon={IconComponent} className="h-7 w-7" />
+        <Icon icon={IconComponent} className="size-7" />
       </div>
 
       <div className="min-w-0 flex-1">

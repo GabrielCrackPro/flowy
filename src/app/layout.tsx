@@ -5,6 +5,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { Favicon } from "@/components/shared/favicon";
+import { SkipLink } from "@/components/shared/skip-link";
 import { Providers } from "@/context";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,7 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-background text-foreground">
         <Providers>
+          <SkipLink />
           <Favicon />
           <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.16),transparent_42%)]">
             {children}

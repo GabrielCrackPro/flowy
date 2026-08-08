@@ -1,7 +1,7 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared";
-import { AtSign, Languages, UserRound } from "@/lib/icons";
 import { toast } from "@/components/shared/toast";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form";
@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useLocaleContext } from "@/context/LocaleContext";
-import { useReactForm } from "@/hooks/useReactForm";
 import { useProfile } from "@/hooks/useProfile";
-import { useTranslation } from "react-i18next";
+import { useReactForm } from "@/hooks/useReactForm";
+import { AtSign, Languages, UserRound } from "@/lib/icons";
 import { updateProfileSchema } from "@/lib/schemas/profile";
 import type { Profile } from "@/types/Profile";
 import { AvatarUploader } from "./avatar-uploader";

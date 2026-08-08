@@ -15,8 +15,8 @@ import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useAmountInput, useCurrencyFormatting } from "@/hooks";
-import { Minus, Plus, Settings, UserMinus } from "@/lib/icons";
+import { useAmountInput } from "@/hooks";
+import { Minus, Plus, Settings } from "@/lib/icons";
 import { cn, formatCurrency } from "@/lib/utils";
 import { Icon } from "./icon";
 
@@ -39,7 +39,6 @@ interface QuickActionDialogProps {
   isSubmitting?: boolean;
   quickAmounts?: number[];
   showProgress?: boolean;
-  progressLabel?: string;
   progressLabelSuffix?: string;
   hideAmountInput?: boolean;
 }
@@ -63,7 +62,6 @@ export function QuickActionDialog({
   isSubmitting = false,
   quickAmounts = DEFAULT_QUICK_AMOUNTS,
   showProgress = false,
-  progressLabel,
   progressLabelSuffix,
   hideAmountInput = false,
 }: QuickActionDialogProps) {
@@ -72,11 +70,6 @@ export function QuickActionDialog({
 
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
-
-  const { currencySymbol, formatCompactAmount } = useCurrencyFormatting({
-    locale,
-    currency,
-  });
 
   // Get currency symbol position
   const { currencySymbol: detectedSymbol, symbolPosition } = useMemo(() => {
@@ -111,7 +104,7 @@ export function QuickActionDialog({
     const amount = hideAmountInput ? 1 : parseFloat(amountInput.rawAmount) || 0;
 
     // Validate amount before calling onAction
-    if (amount <= 0 || isNaN(amount)) {
+    if (amount <= 0 || Number.isNaN(amount)) {
       console.error("Invalid amount in quick action:", amount);
       return;
     }
@@ -259,7 +252,7 @@ export function QuickActionDialog({
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleQuickAmount(amount)}
                       className={cn(
-                        "rounded-full px-3 py-1.5 text-xs font-medium tabular-nums transition-all",
+                        "rounded-full px-3 py-1.5 text-xs font-medium tabular-nums transition",
                         parseFloat(
                           amountInput.rawAmount.replace(/[^0-9.]/g, ""),
                         ) === amount

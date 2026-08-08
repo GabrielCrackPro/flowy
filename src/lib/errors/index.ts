@@ -3,5 +3,5 @@
  */
 
 export * from "./error-types";
-export * from "./retry";
 export * from "./graceful-degradation";
+export * from "./retry";

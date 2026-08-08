@@ -140,7 +140,7 @@ export function Header() {
                 className="rounded-xl hover:bg-muted/40 md:hidden"
                 onClick={() => setMobileNavOpen(true)}
               >
-                <Icon icon={Menu} className="h-5 w-5" />
+                <Icon icon={Menu} className="size-5" />
               </Button>
             </motion.div>
 
@@ -166,17 +166,14 @@ export function Header() {
                     {i > 0 && (
                       <Icon
                         icon={ChevronRight}
-                        className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40"
+                        className="size-3.5 shrink-0 text-muted-foreground/40"
                       />
                     )}
                     {isLast ? (
                       <span className="flex min-w-0 items-center gap-2 font-semibold text-foreground">
                         {IconComponent && (
                           <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                            <Icon
-                              icon={IconComponent}
-                              className="h-3.5 w-3.5"
-                            />
+                            <Icon icon={IconComponent} className="size-3.5" />
                           </span>
                         )}
                         <span className="truncate">{crumb.label}</span>
@@ -184,10 +181,10 @@ export function Header() {
                     ) : (
                       <Link
                         href={crumb.href}
-                        className="flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1 text-muted-foreground transition-all hover:bg-muted/40 hover:text-foreground"
+                        className="flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1 text-muted-foreground transition hover:bg-muted/40 hover:text-foreground"
                       >
                         {IconComponent && (
-                          <Icon icon={IconComponent} className="h-4 w-4" />
+                          <Icon icon={IconComponent} className="size-4" />
                         )}
                         {crumb.label}
                       </Link>
@@ -206,7 +203,7 @@ export function Header() {
               <Link
                 href="/dashboard/profile#spaces"
                 title={t("profile.spaces.manageSpaces")}
-                className="group inline-flex max-w-44 items-center gap-1.5 rounded-full border border-primary/20 bg-gradient-to-r from-primary/10 to-primary/5 py-1 pl-1.5 pr-2.5 text-xs font-medium text-primary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all hover:border-primary/40 hover:shadow-[0_2px_6px_rgba(0,0,0,0.05)]"
+                className="group inline-flex max-w-44 items-center gap-1.5 rounded-full border border-primary/20 bg-gradient-to-r from-primary/10 to-primary/5 py-1 pl-1.5 pr-2.5 text-xs font-medium text-primary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition hover:border-primary/40 hover:shadow-[0_2px_6px_rgba(0,0,0,0.05)]"
               >
                 <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-[0.6rem] font-bold text-primary-foreground shadow-sm shadow-primary/20">
                   {activeSpace?.name?.charAt(0).toUpperCase() ?? (
@@ -233,7 +230,7 @@ export function Header() {
                 className="rounded-xl hover:bg-muted/40 sm:hidden"
                 onClick={() => setSearchOpen(true)}
               >
-                <Icon icon={SearchIcon} className="h-4 w-4" />
+                <Icon icon={SearchIcon} className="size-4" />
               </Button>
             </motion.div>
 

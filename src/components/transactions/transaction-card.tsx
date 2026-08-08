@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@components/ui";
-import { Icon } from "@/components/shared";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
+import { Icon } from "@/components/shared";
 import { ArrowDownRight, ArrowUpRight } from "@/lib/icons";
 
 interface TransactionCardProps {
@@ -35,7 +35,7 @@ export function TransactionCard({ label, value, type }: TransactionCardProps) {
       transition={{ duration: 0.4, ease: "easeOut" }}
       whileHover={{ y: -2 }}
     >
-      <Card className="relative overflow-hidden rounded-2xl border border-border/30 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 group">
+      <Card className="relative overflow-hidden rounded-2xl border border-border/30 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition duration-300 group">
         {/* Background gradient */}
         <div
           className={cn(

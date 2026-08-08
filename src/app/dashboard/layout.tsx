@@ -21,7 +21,7 @@ export default function DashboardLayout({
         <Suspense fallback={null}>
           <Header />
         </Suspense>
-        <main className="flex-1 overflow-y-auto">
+        <main id="main" className="flex-1 overflow-y-auto">
           <Suspense
             fallback={
               <div className="mx-auto w-full max-w-7xl p-4">{children}</div>

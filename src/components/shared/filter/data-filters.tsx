@@ -124,7 +124,7 @@ export function DataFilters({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onClear}
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/30 px-2.5 text-xs font-medium text-muted-foreground/60 transition-all duration-200 hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:text-foreground"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/30 px-2.5 text-xs font-medium text-muted-foreground/60 transition duration-200 hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:text-foreground"
             >
               <Icon icon={X} className="size-3" />
 

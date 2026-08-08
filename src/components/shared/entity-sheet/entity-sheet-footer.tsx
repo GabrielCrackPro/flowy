@@ -2,8 +2,9 @@
 
 import { Button } from "@components/ui";
 import { motion } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { X } from "@/lib/icons";
+import { Sparkles, X } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { Icon } from "../icon";
 
@@ -13,7 +14,7 @@ interface EntitySheetFooterProps {
   submitLabel: string;
   isSubmitting?: boolean;
   canSubmit?: boolean;
-  submitIcon?: string;
+  submitIcon?: LucideIcon;
   className?: string;
 }
 
@@ -23,7 +24,7 @@ export function EntitySheetFooter({
   submitLabel,
   isSubmitting = false,
   canSubmit = true,
-  submitIcon = "Sparkles",
+  submitIcon = Sparkles,
   className,
 }: EntitySheetFooterProps) {
   const { t } = useTranslation();
@@ -61,7 +62,7 @@ export function EntitySheetFooter({
         ) : (
           <>
             {submitLabel}
-            <Icon icon={submitIcon as any} className="size-4" />
+            <Icon icon={submitIcon} className="size-4" />
           </>
         )}
       </Button>

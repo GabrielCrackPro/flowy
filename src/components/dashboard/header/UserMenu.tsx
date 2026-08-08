@@ -9,12 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
-import { ChevronRight, LogOut, Settings2, User as UserIcon } from "@/lib/icons";
 import Link from "next/link";
-import { UserAvatar, Icon } from "@/components/shared";
+import { useTranslation } from "react-i18next";
+import { Icon, UserAvatar } from "@/components/shared";
 import { useProfile } from "@/hooks/useProfile";
 import { useSignOut } from "@/hooks/useSignOut";
-import { useTranslation } from "react-i18next";
+import { ChevronRight, LogOut, Settings2, User as UserIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export function UserMenu() {
@@ -63,7 +63,7 @@ export function UserMenu() {
               href="/dashboard/profile"
               className="flex w-full items-center gap-2 px-1.5 py-1.5 rounded-md"
             >
-              <Icon icon={UserIcon} className="h-4 w-4" />
+              <Icon icon={UserIcon} className="size-4" />
               {t("profile.myProfile")}
             </Link>
           </DropdownMenuItem>
@@ -73,7 +73,7 @@ export function UserMenu() {
               href="/dashboard/profile#preferences"
               className="flex w-full items-center gap-2 px-1.5 py-1.5 rounded-md"
             >
-              <Icon icon={Settings2} className="h-4 w-4" />
+              <Icon icon={Settings2} className="size-4" />
               {t("profile.preferences")}
             </Link>
           </DropdownMenuItem>
@@ -86,11 +86,11 @@ export function UserMenu() {
           onClick={handleSignOut}
           className="gap-2 rounded-md py-1.5 font-medium"
         >
-          <Icon icon={LogOut} className="h-4 w-4" />
+          <Icon icon={LogOut} className="size-4" />
           {t("profile.signOut")}
           <span className="ml-auto text-[0.68rem] text-muted-foreground/70 font-normal flex items-center gap-0.5">
             {t("profile.esc")}
-            <Icon icon={ChevronRight} className="h-3 w-3" />
+            <Icon icon={ChevronRight} className="size-3" />
           </span>
         </DropdownMenuItem>
       </DropdownMenuContent>

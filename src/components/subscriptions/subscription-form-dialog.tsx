@@ -306,7 +306,7 @@ export function SubscriptionFormSheet({
               <Popover>
                 <PopoverTrigger
                   className={cn(
-                    "flex h-11 w-full items-center justify-between rounded-lg border border-border/30 bg-card/60 px-3 text-sm transition-all duration-200 outline-none",
+                    "flex h-11 w-full items-center justify-between rounded-lg border border-border/30 bg-card/60 px-3 text-sm transition duration-200 outline-none",
                     "hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:shadow-sm",
                     "focus-visible:border-primary/40 focus-visible:ring-3 focus-visible:ring-primary/20",
                     values.nextPayment

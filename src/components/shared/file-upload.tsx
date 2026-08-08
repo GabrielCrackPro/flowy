@@ -5,6 +5,7 @@ import {
   type ChangeEvent,
   type DragEvent,
   useCallback,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -72,9 +73,12 @@ export function FileUpload({
 }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<UploadState>({ status: "idle" });
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [_previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const labels = { ...DEFAULT_LABELS, ...userLabels };
+  const labels = useMemo(
+    () => ({ ...DEFAULT_LABELS, ...userLabels }),
+    [userLabels],
+  );
   const hasFile = !!value;
 
   const uploadFile = useCallback(
@@ -104,7 +108,10 @@ export function FileUpload({
       } catch (err) {
         setState({
           status: "error",
-          message: err instanceof Error ? err.message : labels.errorLabel!,
+          message:
+            err instanceof Error
+              ? err.message
+              : (labels.errorLabel ?? "Error al subir el archivo"),
         });
       }
     },
@@ -133,16 +140,17 @@ export function FileUpload({
   );
 
   const handleDrop = useCallback(
-    (e: DragEvent<HTMLDivElement>) => {
+    (e: DragEvent<HTMLElement>) => {
       e.preventDefault();
+      if (disabled) return;
       setState({ status: "idle" });
       const file = e.dataTransfer.files?.[0];
       if (file) handleFile(file);
     },
-    [handleFile],
+    [handleFile, disabled],
   );
 
-  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
+  const handleDragOver = useCallback((e: DragEvent<HTMLElement>) => {
     e.preventDefault();
     setState({ status: "dragging" });
   }, []);
@@ -168,6 +176,7 @@ export function FileUpload({
         <div className="overflow-hidden rounded-2xl border border-border/30 bg-linear-to-br from-muted/20 to-muted/10 shadow-md">
           {value && isImageUrl(value) ? (
             <div className="relative m-3 overflow-hidden rounded-xl bg-muted/30 ring-1 ring-border/20 shadow-sm">
+              {/* biome-ignore lint/performance/noImgElement: dynamic remote receipt URLs with unknown dimensions — next/image would require remotePatterns config and fixed sizing */}
               <img
                 src={value}
                 alt="Receipt"
@@ -186,7 +195,7 @@ export function FileUpload({
                   onClick={() => inputRef.current?.click()}
                   title={labels.changeLabel}
                   aria-label={labels.changeLabel}
-                  className="flex size-9 items-center justify-center rounded-full bg-linear-to-br from-black/45 to-black/35 text-white backdrop-blur-sm transition-all hover:from-black/65 hover:to-black/55 disabled:opacity-50 shadow-lg"
+                  className="flex size-9 items-center justify-center rounded-full bg-linear-to-br from-black/45 to-black/35 text-white backdrop-blur-sm transition hover:from-black/65 hover:to-black/55 disabled:opacity-50 shadow-lg"
                 >
                   <Icon icon={Upload} className="size-4" />
                 </motion.button>
@@ -198,7 +207,7 @@ export function FileUpload({
                   onClick={handleRemove}
                   title={labels.removeLabel}
                   aria-label={labels.removeLabel}
-                  className="flex size-9 items-center justify-center rounded-full bg-linear-to-br from-destructive/60 to-destructive/50 text-white backdrop-blur-sm transition-all hover:from-destructive/80 hover:to-destructive/70 disabled:opacity-50 shadow-lg shadow-destructive/20"
+                  className="flex size-9 items-center justify-center rounded-full bg-linear-to-br from-destructive/60 to-destructive/50 text-white backdrop-blur-sm transition hover:from-destructive/80 hover:to-destructive/70 disabled:opacity-50 shadow-lg shadow-destructive/20"
                 >
                   <Icon icon={Trash2} className="size-4" />
                 </motion.button>
@@ -223,7 +232,7 @@ export function FileUpload({
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Download"
-                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition-all hover:bg-linear-to-br hover:from-muted/50 hover:to-muted/30 hover:text-foreground"
+                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-linear-to-br hover:from-muted/50 hover:to-muted/30 hover:text-foreground"
                 >
                   <Icon icon={Download} className="size-4" />
                 </motion.a>
@@ -235,7 +244,7 @@ export function FileUpload({
                   onClick={() => inputRef.current?.click()}
                   title={labels.changeLabel}
                   aria-label={labels.changeLabel}
-                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition-all hover:bg-linear-to-br hover:from-muted/50 hover:to-muted/30 hover:text-primary"
+                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-linear-to-br hover:from-muted/50 hover:to-muted/30 hover:text-primary"
                 >
                   <Icon icon={Upload} className="size-4" />
                 </motion.button>
@@ -247,7 +256,7 @@ export function FileUpload({
                   onClick={handleRemove}
                   title={labels.removeLabel}
                   aria-label={labels.removeLabel}
-                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition-all hover:bg-linear-to-br hover:from-destructive/50 hover:to-destructive/30 hover:text-destructive"
+                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-linear-to-br hover:from-destructive/50 hover:to-destructive/30 hover:text-destructive"
                 >
                   <Icon icon={Trash2} className="size-4" />
                 </motion.button>
@@ -282,7 +291,7 @@ export function FileUpload({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleRetry}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-linear-to-r from-destructive to-destructive/90 px-4 py-2 text-sm font-medium text-destructive-foreground shadow-lg shadow-destructive/20 transition-all hover:from-destructive/90 hover:to-destructive/80 active:translate-y-px"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-linear-to-r from-destructive to-destructive/90 px-4 py-2 text-sm font-medium text-destructive-foreground shadow-lg shadow-destructive/20 transition hover:from-destructive/90 hover:to-destructive/80 active:translate-y-px"
           >
             <motion.div
               animate={{ rotate: 360 }}
@@ -294,23 +303,17 @@ export function FileUpload({
           </motion.button>
         </div>
       ) : (
-        <motion.div
-          role="button"
-          tabIndex={0}
+        <motion.button
+          type="button"
+          disabled={disabled}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
-          onClick={() => !disabled && inputRef.current?.click()}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              if (!disabled) inputRef.current?.click();
-            }
-          }}
+          onClick={() => inputRef.current?.click()}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           className={cn(
-            "group relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-300 select-none",
+            "group relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed p-6 text-center transition duration-300 select-none",
             "focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:outline-none",
             state.status === "dragging"
               ? "scale-[0.99] border-primary bg-linear-to-br from-primary/10 to-primary/5 shadow-lg shadow-primary/20"
@@ -357,7 +360,7 @@ export function FileUpload({
               {labels.fileTypesHint}
             </p>
           </div>
-        </motion.div>
+        </motion.button>
       )}
 
       <input

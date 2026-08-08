@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-
+import { ZodError } from "zod";
 import {
   applyRateLimitHeaders,
   handleApiError,
@@ -12,9 +12,8 @@ import {
   paymentMethodSchema,
   transactionTypeSchema,
 } from "@/lib/schemas";
-import { TransactionService } from "@/lib/services/transactions";
 import { AlertsService } from "@/lib/services/alerts";
-import { ZodError } from "zod";
+import { TransactionService } from "@/lib/services/transactions";
 
 // Type guard for ZodError with proper type narrowing
 function isZodError(error: unknown): error is ZodError {

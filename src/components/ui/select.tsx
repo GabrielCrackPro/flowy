@@ -61,7 +61,7 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "group flex w-fit items-center justify-between gap-1.5 rounded-lg border border-border/30 bg-card/60 py-1.5 pr-2 pl-3 text-sm whitespace-nowrap transition-all duration-200 outline-none select-none",
+        "group flex w-fit items-center justify-between gap-1.5 rounded-lg border border-border/30 bg-card/60 py-1.5 pr-2 pl-3 text-sm whitespace-nowrap transition duration-200 outline-none select-none",
         "hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:border-border/50 hover:shadow-sm",
         "focus-visible:border-primary/40 focus-visible:ring-3 focus-visible:ring-primary/20",
         "disabled:cursor-not-allowed disabled:opacity-50",
@@ -160,7 +160,7 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-default items-center gap-2 rounded-lg py-1.5 pr-8 pl-2 text-sm outline-hidden select-none transition-all",
+        "relative flex w-full cursor-default items-center gap-2 rounded-lg py-1.5 pr-8 pl-2 text-sm outline-hidden select-none transition",
         "hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:text-foreground",
         "focus:bg-gradient-to-r focus:from-muted/50 focus:to-muted/30 focus:text-foreground",
         "data-selected:bg-gradient-to-r data-selected:from-primary/10 data-selected:to-primary/5 data-selected:text-primary data-selected:font-medium",

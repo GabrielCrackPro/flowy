@@ -1,18 +1,11 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Button } from "@components/ui";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Droplet,
-  Home,
-  Settings,
-  Wallet,
-} from "@/lib/icons";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect } from "react";
-import { motion } from "framer-motion";
+import { Icon } from "@/components/shared";
+import { ArrowLeft, Droplet, Home, Settings, Wallet } from "@/lib/icons";
 
 export default function DashboardNotFound() {
   useEffect(() => {
@@ -70,7 +63,7 @@ export default function DashboardNotFound() {
             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
             className="flex size-6 items-center justify-center rounded-full bg-linear-to-br from-primary to-primary/80 text-primary-foreground shadow-md"
           >
-            <Icon icon={Droplet} className="h-3.5 w-3.5" />
+            <Icon icon={Droplet} className="size-3.5" />
           </motion.div>
           Flowy
           <span className="text-muted-foreground/30">·</span>
@@ -115,7 +108,7 @@ export default function DashboardNotFound() {
                 whileHover={{ x: 3 }}
                 transition={{ duration: 0.2 }}
               >
-                <Icon icon={Home} className="h-4 w-4" />
+                <Icon icon={Home} className="size-4" />
               </motion.div>
               Ir al resumen
             </Link>
@@ -131,7 +124,7 @@ export default function DashboardNotFound() {
               whileHover={{ x: -3 }}
               transition={{ duration: 0.2 }}
             >
-              <Icon icon={ArrowLeft} className="h-4 w-4" />
+              <Icon icon={ArrowLeft} className="size-4" />
             </motion.div>
             Retroceder
           </Button>
@@ -149,27 +142,27 @@ export default function DashboardNotFound() {
               href="/dashboard/transactions"
               className="flex items-center gap-1.5 transition-colors hover:text-foreground hover:bg-muted/30 rounded-lg px-2 py-1"
             >
-              <Icon icon={Wallet} className="h-3 w-3" />
+              <Icon icon={Wallet} className="size-3" />
               Transacciones
             </Link>
           </motion.div>
-          <span className="h-1 w-1 rounded-full bg-border/50" />
+          <span className="size-1 rounded-full bg-border/50" />
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link
               href="/dashboard/budgets"
               className="flex items-center gap-1.5 transition-colors hover:text-foreground hover:bg-muted/30 rounded-lg px-2 py-1"
             >
-              <Icon icon={Wallet} className="h-3 w-3" />
+              <Icon icon={Wallet} className="size-3" />
               Presupuestos
             </Link>
           </motion.div>
-          <span className="h-1 w-1 rounded-full bg-border/50" />
+          <span className="size-1 rounded-full bg-border/50" />
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link
               href="/dashboard/profile"
               className="flex items-center gap-1.5 transition-colors hover:text-foreground hover:bg-muted/30 rounded-lg px-2 py-1"
             >
-              <Icon icon={Settings} className="h-3 w-3" />
+              <Icon icon={Settings} className="size-3" />
               Ajustes
             </Link>
           </motion.div>

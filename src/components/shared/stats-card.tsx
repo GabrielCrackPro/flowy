@@ -241,7 +241,7 @@ export function StatsCard({
                     transition={{ duration: 0.3, delay: 0.15 }}
                     whileHover={{ y: -1 }}
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full py-1 pl-1.5 pr-2.5 ring-1 ring-inset transition-all duration-300 hover:ring-2",
+                      "inline-flex items-center gap-1.5 rounded-full py-1 pl-1.5 pr-2.5 ring-1 ring-inset transition duration-300 hover:ring-2",
                       trendGood
                         ? "bg-emerald-500/10 text-emerald-700 ring-emerald-500/15 hover:bg-emerald-500/15 dark:bg-emerald-500/15 dark:text-emerald-400 dark:ring-emerald-500/25"
                         : "bg-rose-500/10 text-rose-700 ring-rose-500/15 hover:bg-rose-500/15 dark:bg-rose-500/15 dark:text-rose-400 dark:ring-rose-500/25",

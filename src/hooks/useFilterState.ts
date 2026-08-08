@@ -25,8 +25,15 @@ export function useFilterState<T extends Record<string, string | undefined>>(
   );
 
   const handleClearFilters = useCallback(() => {
-    setFilters(initialState);
-  }, [initialState]);
+    // Clear every key rather than restoring initialState, so "clear"
+    // semantics hold even when initialState carries URL-derived values.
+    setFilters(
+      (prev) =>
+        Object.fromEntries(
+          Object.keys(prev).map((key) => [key, undefined]),
+        ) as T,
+    );
+  }, []);
 
   const hasFilters = Object.entries(filters).some(
     ([, v]) => v !== undefined && v !== "",

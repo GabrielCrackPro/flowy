@@ -3,7 +3,6 @@
 import { Button } from "@components/ui";
 import { motion } from "framer-motion";
 import { Component, type ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 import {
   type AppError,
   classifyError,
@@ -146,20 +145,18 @@ export class ErrorBoundary extends Component<Props, State> {
             className="flex flex-col sm:flex-row gap-3 flex-wrap justify-center"
           >
             {/* Primary recovery action */}
-            {error.recoveryActions && error.recoveryActions.length > 0 && (
-              <>
-                {error.recoveryActions.map((action, index) => (
-                  <Button
-                    key={index}
-                    onClick={() => this.executeRecoveryAction(action)}
-                    variant={action.primary ? "default" : "outline"}
-                    size="sm"
-                  >
-                    {t(action.label)}
-                  </Button>
-                ))}
-              </>
-            )}
+            {error.recoveryActions &&
+              error.recoveryActions.length > 0 &&
+              error.recoveryActions.map((action) => (
+                <Button
+                  key={action.label}
+                  onClick={() => this.executeRecoveryAction(action)}
+                  variant={action.primary ? "default" : "outline"}
+                  size="sm"
+                >
+                  {t(action.label)}
+                </Button>
+              ))}
 
             {/* Default fallback actions */}
             {(!error.recoveryActions || error.recoveryActions.length === 0) && (

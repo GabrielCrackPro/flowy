@@ -25,7 +25,7 @@ export function CommandPaletteInput({
     <div className="flex items-center gap-3 border-b border-border/30 px-4 py-2 transition-shadow focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-inset">
       <Icon
         icon={SearchIcon}
-        className="h-4 w-4 shrink-0 text-muted-foreground/50"
+        className="size-4 shrink-0 text-muted-foreground/50"
       />
       <Command.Input
         placeholder={placeholder}
@@ -37,7 +37,7 @@ export function CommandPaletteInput({
       {loading && (
         <Icon
           icon={Loader2}
-          className="h-4 w-4 shrink-0 animate-spin text-primary"
+          className="size-4 shrink-0 animate-spin text-primary"
         />
       )}
       {!loading && value.length > 0 && (
@@ -48,9 +48,9 @@ export function CommandPaletteInput({
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => onChange("")}
           aria-label={t("search.clearSearch")}
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted/50 text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
+          className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted/50 text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
         >
-          <Icon icon={X} className="h-3.5 w-3.5" />
+          <Icon icon={X} className="size-3.5" />
         </motion.button>
       )}
     </div>

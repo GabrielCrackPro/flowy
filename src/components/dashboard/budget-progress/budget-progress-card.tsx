@@ -123,7 +123,7 @@ export function BudgetProgressCard({ month, year }: BudgetProgressCardProps) {
               >
                 <div
                   className={cn(
-                    "relative rounded-xl border bg-gradient-to-br p-4 shadow-sm transition-all hover:shadow-md",
+                    "relative rounded-xl border bg-gradient-to-br p-4 shadow-sm transition hover:shadow-md",
                     overBudget
                       ? "border-red-500/30 from-red-500/5 to-red-500/0"
                       : isNearLimit

@@ -2,8 +2,8 @@
  * React hook for tracking rate limit status
  */
 
-import { useState, useEffect, useCallback } from "react";
-import { RateLimitError } from "@/lib/errors/error-types";
+import { useCallback, useEffect, useState } from "react";
+import type { RateLimitError } from "@/lib/errors/error-types";
 
 interface RateLimitStatus {
   isRateLimited: boolean;
@@ -43,7 +43,10 @@ export function useRateLimit() {
     if (!status.isRateLimited || !status.retryAt) return;
 
     const interval = setInterval(() => {
-      const remaining = Math.max(0, status.retryAt!.getTime() - Date.now());
+      const remaining = Math.max(
+        0,
+        (status.retryAt?.getTime() ?? 0) - Date.now(),
+      );
       const remainingSeconds = Math.ceil(remaining / 1000);
 
       setStatus((prev) => ({
@@ -120,7 +123,7 @@ export function useRateLimitAction(actionName: string) {
     const interval = setInterval(() => {
       const remaining = Math.max(
         0,
-        actionStatus.retryAt!.getTime() - Date.now(),
+        (actionStatus.retryAt?.getTime() ?? 0) - Date.now(),
       );
       const remainingSeconds = Math.ceil(remaining / 1000);
 

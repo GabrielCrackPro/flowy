@@ -1,15 +1,11 @@
 "use client";
 
-import { useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { toast } from "@/components/shared/toast";
-import { commentApi } from "@/lib/api/comment";
 import { useProfile } from "@/hooks/useProfile";
-import type {
-  Comment,
-  CreateCommentInput,
-  UpdateCommentInput,
-} from "@/types/Comment";
+import { commentApi } from "@/lib/api/comment";
+import type { Comment, CreateCommentInput } from "@/types/Comment";
 
 export function useComments(entityType: string, entityId: string | null) {
   const queryClient = useQueryClient();
@@ -20,7 +16,7 @@ export function useComments(entityType: string, entityId: string | null) {
 
   const query = useQuery({
     queryKey,
-    queryFn: () => commentApi.list(entityType, entityId!),
+    queryFn: () => commentApi.list(entityType, entityId ?? ""),
     enabled: !!entityType && !!entityId,
   });
 
@@ -28,7 +24,7 @@ export function useComments(entityType: string, entityId: string | null) {
     mutationFn: (data: { content: string; parentId?: string | null }) =>
       commentApi.create({
         entityType: entityType as CreateCommentInput["entityType"],
-        entityId: entityId!,
+        entityId: entityId ?? "",
         content: data.content,
         parentId: data.parentId,
       }),

@@ -111,7 +111,7 @@ export function ActiveFilterChips({
               duration: 0.2,
               ease: "easeOut",
             }}
-            className="group inline-flex items-center gap-2 rounded-xl border border-border/30 bg-gradient-to-r from-primary/8 via-primary/5 to-primary/[0.02] px-3 py-1.5 text-[11px] font-medium text-foreground/90 shadow-sm hover:shadow-md hover:border-primary/30 transition-all"
+            className="group inline-flex items-center gap-2 rounded-xl border border-border/30 bg-gradient-to-r from-primary/8 via-primary/5 to-primary/[0.02] px-3 py-1.5 text-[11px] font-medium text-foreground/90 shadow-sm hover:shadow-md hover:border-primary/30 transition"
           >
             <span className="text-muted-foreground/60">{chip.label}:</span>
             <span className="font-medium">{chip.value}</span>
@@ -133,7 +133,7 @@ export function ActiveFilterChips({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.15 }}
         onClick={onClearAll}
-        className="inline-flex items-center gap-1.5 rounded-xl border border-border/30 px-3 py-1.5 text-[11px] font-medium text-muted-foreground/50 transition-all hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/40 hover:to-muted/20 hover:text-foreground shadow-sm hover:shadow-md"
+        className="inline-flex items-center gap-1.5 rounded-xl border border-border/30 px-3 py-1.5 text-[11px] font-medium text-muted-foreground/50 transition hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/40 hover:to-muted/20 hover:text-foreground shadow-sm hover:shadow-md"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >

@@ -98,7 +98,7 @@ export function TransactionFilterToolbar({
                 onFilterChange("search", e.target.value || undefined)
               }
               placeholder={t("transactions.searchPlaceholder")}
-              className="h-9 w-full rounded-xl border-border/30 bg-muted/20 pl-9 pr-9 text-xs placeholder:text-muted-foreground/40 focus-visible:bg-background focus-visible:pl-9 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 transition-all shadow-sm sm:w-56"
+              className="h-9 w-full rounded-xl border-border/30 bg-muted/20 pl-9 pr-9 text-xs placeholder:text-muted-foreground/40 focus-visible:bg-background focus-visible:pl-9 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 transition shadow-sm sm:w-56"
             />
           </motion.div>
           <AnimatePresence>
@@ -130,7 +130,7 @@ export function TransactionFilterToolbar({
           whileTap={{ scale: 0.98 }}
           onClick={() => onFilterOpenChange(!filterOpen)}
           className={cn(
-            "relative inline-flex h-9 items-center gap-2 rounded-xl border px-4 text-xs font-medium transition-all duration-200 shadow-sm",
+            "relative inline-flex h-9 items-center gap-2 rounded-xl border px-4 text-xs font-medium transition duration-200 shadow-sm",
             filterOpen
               ? "border-primary/50 bg-linear-to-r from-primary/15 to-primary/8 text-primary shadow-md"
               : hasFilters

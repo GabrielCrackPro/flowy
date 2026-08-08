@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
 import type { ChangeEvent } from "react";
+import { useCallback, useState } from "react";
 
 interface UseAmountInputProps {
   initialValue: number;
@@ -19,16 +19,19 @@ export function useAmountInput({
   const [rawAmount, setRawAmount] = useState(
     initialValue > 0 ? initialValue.toFixed(2) : "",
   );
-  const [focused, setFocused] = useState(false);
+  const [_focused, setFocused] = useState(false);
 
   // Format number with thousand separators for display
-  const formatNumber = (num: number): string => {
-    if (num === 0) return "";
-    return num.toLocaleString(locale, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
-  };
+  const formatNumber = useCallback(
+    (num: number): string => {
+      if (num === 0) return "";
+      return num.toLocaleString(locale, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      });
+    },
+    [locale],
+  );
 
   const handleAmountChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {

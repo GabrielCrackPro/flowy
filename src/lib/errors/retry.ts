@@ -60,7 +60,7 @@ function calculateDelay(
   maxDelay: number,
   backoffMultiplier: number,
 ): number {
-  const delay = initialDelay * Math.pow(backoffMultiplier, attempt - 1);
+  const delay = initialDelay * backoffMultiplier ** (attempt - 1);
   return Math.min(delay, maxDelay);
 }
 
@@ -229,14 +229,17 @@ export class CircuitBreaker {
     this.failures++;
     this.lastFailureTime = Date.now();
 
-    if (this.failures >= this.options.failureThreshold!) {
+    if (this.failures >= (this.options.failureThreshold ?? 5)) {
       this.state = "open";
     }
   }
 
   private shouldAttemptReset(): boolean {
     if (!this.lastFailureTime) return false;
-    return Date.now() - this.lastFailureTime > this.options.recoveryTimeout!;
+    return (
+      Date.now() - this.lastFailureTime >
+      (this.options.recoveryTimeout ?? 60000)
+    );
   }
 
   getState(): "closed" | "open" | "half-open" {

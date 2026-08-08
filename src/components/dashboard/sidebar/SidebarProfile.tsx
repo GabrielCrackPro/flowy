@@ -57,14 +57,14 @@ export function SidebarProfile({
   if (!profile) {
     return collapsed ? (
       <div className={cn("border-t border-border p-3", className)}>
-        <div className="mx-auto h-11 w-11">
+        <div className="mx-auto size-11">
           <Skeleton variant="circular" />
         </div>
       </div>
     ) : (
       <div className={cn("border-t border-border px-3 py-2.5", className)}>
         <div className="flex items-center gap-3">
-          <div className="h-11 w-11 shrink-0">
+          <div className="size-11 shrink-0">
             <Skeleton variant="circular" />
           </div>
           <div className="flex-1 space-y-2 min-w-0">
@@ -126,7 +126,7 @@ export function SidebarProfile({
 
               <Icon
                 icon={ChevronUp}
-                className="ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-all duration-200 group-hover:-translate-y-0.5 group-hover:text-foreground"
+                className="ml-auto size-4 shrink-0 text-muted-foreground transition duration-200 group-hover:-translate-y-0.5 group-hover:text-foreground"
               />
             </>
           ) : null}
@@ -168,7 +168,7 @@ export function SidebarProfile({
                   mobile ? "py-2.5" : "py-1.5",
                 )}
               >
-                <Icon icon={UserIcon} className="h-4 w-4" />
+                <Icon icon={UserIcon} className="size-4" />
                 {t("profile.myProfile")}
               </Link>
             </DropdownMenuItem>
@@ -184,7 +184,7 @@ export function SidebarProfile({
                   mobile ? "py-2.5" : "py-1.5",
                 )}
               >
-                <Icon icon={Settings2} className="h-4 w-4" />
+                <Icon icon={Settings2} className="size-4" />
                 {t("profile.preferences")}
               </Link>
             </DropdownMenuItem>
@@ -203,11 +203,11 @@ export function SidebarProfile({
               mobile ? "py-2.5" : "py-1.5",
             )}
           >
-            <Icon icon={LogOut} className="h-4 w-4" />
+            <Icon icon={LogOut} className="size-4" />
             {t("profile.signOut")}
             <span className="ml-auto text-[0.68rem] text-muted-foreground/70 font-normal flex items-center gap-0.5">
               {t("profile.esc")}
-              <Icon icon={ChevronRight} className="h-3 w-3" />
+              <Icon icon={ChevronRight} className="size-3" />
             </span>
           </DropdownMenuItem>
         </DropdownMenuContent>

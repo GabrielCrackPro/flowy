@@ -4,33 +4,31 @@ import {
   Sheet,
   SheetClose,
   SheetContent,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@components/ui";
 import { cn, formatCurrency } from "@lib/utils";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { parseDateOnly } from "@/lib/date-only";
 import {
   ArrowDownCircle,
   ArrowUpCircle,
   Calendar,
   ExternalLink,
   Repeat2,
-  Tag,
   Wallet,
   X,
 } from "@/lib/icons";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { parseDateOnly } from "@/lib/date-only";
 import type { Category } from "@/types/Category";
 import type { Transaction, TransactionType } from "@/types/Transaction";
 import { PAYMENT_METHOD_KEY } from "@/utils/constants";
 import { AnimatedGradient } from "./animated-gradient";
 import { EntityAudit } from "./entity-audit";
-import { TagBadge } from "./tag-badge";
 import { CategoryIcon, Icon } from "./icon";
+import { TagBadge } from "./tag-badge";
 
 interface TransactionDetailModalProps {
   transaction: Transaction | null;
@@ -173,7 +171,7 @@ export function TransactionDetailModal({
               >
                 <Link
                   href={`/dashboard/transactions/${transaction.id}`}
-                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/40 transition-all duration-200 hover:bg-gradient-to-br hover:from-muted/50 hover:to-muted/30 hover:text-foreground"
+                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/40 transition duration-200 hover:bg-gradient-to-br hover:from-muted/50 hover:to-muted/30 hover:text-foreground"
                   onClick={onClose}
                 >
                   <Icon icon={ExternalLink} className="size-4" />
@@ -186,7 +184,7 @@ export function TransactionDetailModal({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <SheetClose className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/40 transition-all duration-200 hover:bg-gradient-to-br hover:from-muted/50 hover:to-muted/30 hover:text-foreground">
+                <SheetClose className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/40 transition duration-200 hover:bg-gradient-to-br hover:from-muted/50 hover:to-muted/30 hover:text-foreground">
                   <Icon icon={X} className="size-4" />
                 </SheetClose>
               </motion.div>
@@ -278,7 +276,7 @@ export function TransactionDetailModal({
                       whileTap={{ scale: 0.98 }}
                       onClick={handleToggleType}
                       className={cn(
-                        "relative flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition-all",
+                        "relative flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition",
                         active
                           ? isExpenseType
                             ? "text-rose-600 dark:text-rose-400"

@@ -57,7 +57,7 @@ export function SubscriptionCardList() {
           className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
         >
           {t("dashboard.viewAll")}
-          <Icon icon={ArrowRight} className="h-3.5 w-3.5" />
+          <Icon icon={ArrowRight} className="size-3.5" />
         </Link>
       }
     >

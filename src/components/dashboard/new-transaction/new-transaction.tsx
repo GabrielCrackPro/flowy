@@ -1,22 +1,21 @@
 "use client";
 
-import { TransactionForm, TransactionIcon, Icon } from "@/components/shared";
-import { useTransactionApi } from "@/hooks/api";
-import type { CreateTransactionSchema } from "@/lib/schemas";
 import { Button } from "@components/ui";
 import {
   Sheet,
   SheetContent,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@components/ui/sheet";
-import { useTranslation } from "react-i18next";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
-import { Plus, ArrowUpDown } from "@/lib/icons";
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Icon, TransactionForm, TransactionIcon } from "@/components/shared";
+import { useTransactionApi } from "@/hooks/api";
+import { Plus } from "@/lib/icons";
+import type { CreateTransactionSchema } from "@/lib/schemas";
 
 interface NewTransactionProps {
   size?: "sm" | "default";
@@ -44,7 +43,7 @@ export function NewTransaction({
   const isSmall = size === "sm";
 
   const triggerClassName = cn(
-    "gap-2 transition-all duration-300",
+    "gap-2 transition duration-300",
 
     isSmall
       ? "h-9 rounded-lg px-3 shadow-md"
@@ -67,7 +66,7 @@ export function NewTransaction({
         whileTap={{ scale: 0.9 }}
         transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
         className={cn(
-          "flex items-center justify-center rounded-lg bg-linear-to-br from-primary-foreground/20 to-primary-foreground/10 transition-all duration-300 shadow-sm",
+          "flex items-center justify-center rounded-lg bg-linear-to-br from-primary-foreground/20 to-primary-foreground/10 transition duration-300 shadow-sm",
 
           isSmall ? "size-5" : "size-6",
         )}

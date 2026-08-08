@@ -1,7 +1,7 @@
-import { createServerClient } from "@supabase/ssr";
+import { type CookieOptions, createServerClient } from "@supabase/ssr";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { LOCALE_COOKIE, defaultLocale, normalizeLocale } from "@/lib/i18n";
+import { defaultLocale, LOCALE_COOKIE, normalizeLocale } from "@/lib/i18n";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const supabaseKey =
@@ -22,42 +22,72 @@ export async function middleware(req: NextRequest) {
   const detectedLocale = normalizeLocale(acceptLanguage.split(",")[0]);
 
   if (!localeCookie) {
-    const response = NextResponse.next();
-    response.cookies.set(LOCALE_COOKIE, detectedLocale || defaultLocale, {
+    const localeResponse = NextResponse.next();
+    localeResponse.cookies.set(LOCALE_COOKIE, detectedLocale || defaultLocale, {
       path: "/",
       maxAge: 31536000, // 1 year
     });
-    return response;
+    return localeResponse;
   }
+
+  const response = NextResponse.next({ request: req });
+
+  // Cookies written while refreshing the session. If getUser() refreshes the
+  // tokens and we then redirect, they must be carried over to the redirect
+  // response or the next request would keep using the stale token.
+  let refreshedCookies: {
+    name: string;
+    value: string;
+    options: CookieOptions;
+  }[] = [];
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       getAll: () => req.cookies.getAll(),
       setAll: (cookies) => {
-        for (const { name, value } of cookies) {
+        refreshedCookies = cookies;
+        for (const { name, value, options } of cookies) {
           req.cookies.set(name, value);
+          response.cookies.set(name, value, options);
         }
       },
     },
   });
 
+  // Use getUser() instead of getSession(): it validates the JWT against the
+  // Supabase Auth server, so route protection can't be bypassed with a
+  // tampered or expired session token.
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  const user = session?.user ?? null;
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user && !isAuthPath) {
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = "/auth/login";
-    return NextResponse.redirect(redirectUrl);
+    return redirectWithCookies(
+      NextResponse.redirect(redirectUrl),
+      refreshedCookies,
+    );
   }
 
   if (user && isAuthPath) {
-    return NextResponse.redirect(new URL("/", req.url));
+    return redirectWithCookies(
+      NextResponse.redirect(new URL("/", req.url)),
+      refreshedCookies,
+    );
   }
 
-  return NextResponse.next({ request: req });
+  return response;
+}
+
+function redirectWithCookies(
+  redirectResponse: NextResponse,
+  cookies: { name: string; value: string; options: CookieOptions }[],
+) {
+  for (const { name, value, options } of cookies) {
+    redirectResponse.cookies.set(name, value, options);
+  }
+  return redirectResponse;
 }
 
 export const config = {

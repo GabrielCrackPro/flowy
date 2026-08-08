@@ -1,8 +1,8 @@
 "use client";
 
-import { ErrorBoundary as ErrorBoundaryClass } from "./error-boundary";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { type ReactNode } from "react";
+import { ErrorBoundary as ErrorBoundaryClass } from "./error-boundary";
 
 interface ErrorBoundaryWrapperProps {
   children: ReactNode;

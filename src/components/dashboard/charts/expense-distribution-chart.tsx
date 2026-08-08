@@ -18,10 +18,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import type { DashboardData } from "@/types/Dashboard";
 import { Cell, Pie, PieChart } from "recharts";
 import { ArrowRight, ChartPie } from "@/lib/icons";
 import { formatCurrency } from "@/lib/utils";
+import type { DashboardData } from "@/types/Dashboard";
 import { OTHER_CATEGORY_KEY } from "@/types/Dashboard";
 import { ChartCardSkeleton } from "./chart-card";
 

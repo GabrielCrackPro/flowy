@@ -1,3 +1,4 @@
+import type { Locale } from "date-fns";
 import { motion } from "framer-motion";
 import {
   Select,
@@ -7,9 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { useCategoryApi } from "@/hooks/api";
 import { CalendarIcon, CreditCard, Repeat2, Tag, Wallet } from "@/lib/icons";
-import { cn } from "@/lib/utils";
 import type { Budget } from "@/types/Budget";
 import type { Category } from "@/types/Category";
 import type { PaymentMethod } from "@/types/Transaction";
@@ -32,7 +31,7 @@ interface TransactionSidebarProps {
   budgets: Budget[];
   budgetId: string | null | undefined;
   onBudgetChange: (budgetId: string | undefined) => void;
-  dateLocale?: any;
+  dateLocale?: Locale;
   t: (key: string) => string;
   getPaymentMethodOptions: () => { value: string; label: string }[];
 }

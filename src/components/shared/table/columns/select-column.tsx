@@ -23,10 +23,11 @@ export function SelectColumn<T>({
 }: SelectColumnOptions<T>): Column<T> {
   return {
     header: (
-      <div onClick={(e) => e.stopPropagation()}>
+      <div>
         <Checkbox
           checked={allSelected}
           onCheckedChange={onSelectAll}
+          onClick={(e) => e.stopPropagation()}
           aria-label="Select all"
         />
       </div>
@@ -37,10 +38,11 @@ export function SelectColumn<T>({
       const id = getId(row);
 
       return (
-        <div onClick={(e) => e.stopPropagation()}>
+        <div>
           <Checkbox
             checked={selectedIds.has(id)}
             onCheckedChange={() => onSelect(id)}
+            onClick={(e) => e.stopPropagation()}
             aria-label={getLabel?.(row)}
           />
         </div>

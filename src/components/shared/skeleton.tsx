@@ -1,7 +1,7 @@
 "use client";
 
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
 import { cn } from "@lib/utils";
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 
 export interface SkeletonProps
   extends Omit<ComponentPropsWithoutRef<"phantom-ui">, "loading"> {
@@ -10,7 +10,7 @@ export interface SkeletonProps
   variant?: "default" | "circular" | "rounded";
 }
 
-export const Skeleton = forwardRef<HTMLElement, SkeletonProps>(
+export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(
   (
     {
       children,
@@ -26,7 +26,7 @@ export const Skeleton = forwardRef<HTMLElement, SkeletonProps>(
   ) => {
     return (
       <div
-        ref={ref as any}
+        ref={ref}
         className={cn(
           "block",
           variant === "circular" && "rounded-full",

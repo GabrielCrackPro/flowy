@@ -79,6 +79,45 @@ select {
   font: inherit;
 }
 
+/* Remove double-tap zoom delay on interactive elements (mobile UX) */
+button,
+a,
+[role="button"],
+[type="button"],
+[type="submit"],
+[type="reset"] {
+  touch-action: manipulation;
+}
+
+/* Contain overscroll within nested scroll areas (sheets, dialogs, tables) */
+.overflow-y-auto,
+.overflow-auto,
+.overflow-y-scroll,
+.overflow-scroll {
+  overscroll-behavior: contain;
+}
+
+/* Keep anchored targets visible below the sticky header */
+:where([id]) {
+  scroll-margin-top: 4.5rem;
+}
+
+/* Honor prefers-reduced-motion (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: required to override inline animation/transition styles */
+    animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: required to override inline animation/transition styles */
+    animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: required to override inline animation/transition styles */
+    transition-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: required to override inline animation/transition styles */
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Consistent thin scrollbars across the app */
 * {
   scrollbar-width: thin;
@@ -215,8 +254,11 @@ phantom-ui {
   }
 
   [data-sonner-toaster][data-y-position="bottom"] [data-sonner-toast] {
+    /* biome-ignore lint/complexity/noImportantStyles: required to override sonner's inline styles */
     width: calc(100vw - 2.5rem) !important;
+    /* biome-ignore lint/complexity/noImportantStyles: required to override sonner's inline styles */
     max-width: 22rem !important;
+    /* biome-ignore lint/complexity/noImportantStyles: required to override sonner's inline styles */
     margin-inline: auto !important;
   }
 }

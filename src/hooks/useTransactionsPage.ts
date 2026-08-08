@@ -8,7 +8,8 @@ import {
   getOptions,
   PAYMENT_METHOD_KEY,
 } from "@utils/constants";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { bulkDeleteTransactions } from "@/lib/api/transaction";
 import { parseDateOnly } from "@/lib/date-only";
@@ -24,6 +25,8 @@ export function useTransactionsPage() {
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
   const { categories } = useCategoryApi();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const {
     filters,
@@ -39,6 +42,58 @@ export function useTransactionsPage() {
     initialPage: 1,
     initialLimit: 50,
   });
+
+  // Seed filters and page from the URL once, after mount, so the initial
+  // render matches the server HTML (no hydration mismatch on deep links).
+  const seededFromUrl = useRef(false);
+  useEffect(() => {
+    if (seededFromUrl.current) return;
+    seededFromUrl.current = true;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const urlFilters: Record<string, string | undefined> = {
+      search: params.get("search") ?? undefined,
+      dateFrom: params.get("dateFrom") ?? undefined,
+      dateTo: params.get("dateTo") ?? undefined,
+      type: params.get("type") ?? undefined,
+      categoryId: params.get("categoryId") ?? undefined,
+      paymentMethod: params.get("paymentMethod") ?? undefined,
+    };
+    for (const [key, value] of Object.entries(urlFilters)) {
+      if (value !== undefined) handleFilterChange(key, value);
+    }
+    const urlPage = Math.max(
+      1,
+      Number.parseInt(params.get("page") ?? "1", 10) || 1,
+    );
+    if (urlPage > 1) setPage(urlPage);
+  }, [handleFilterChange, setPage]);
+
+  // Keep the URL in sync with the (debounced) filters and current page so
+  // the list view is deep-linkable and survives refreshes.
+  const urlSyncInitialized = useRef(false);
+  useEffect(() => {
+    if (!urlSyncInitialized.current) {
+      urlSyncInitialized.current = true;
+      return;
+    }
+    const params = new URLSearchParams();
+    const filterKeys = [
+      "search",
+      "dateFrom",
+      "dateTo",
+      "type",
+      "categoryId",
+      "paymentMethod",
+    ] as const;
+    for (const key of filterKeys) {
+      const value = debouncedFilters[key];
+      if (value !== undefined && value !== "") params.set(key, value);
+    }
+    if (pagination.page > 1) params.set("page", String(pagination.page));
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [debouncedFilters, pagination.page, pathname, router]);
 
   const {
     selectedIds,

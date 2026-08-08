@@ -1,8 +1,8 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { motion } from "framer-motion";
 import type * as React from "react";
+import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared/icon";
 import { XIcon } from "@/lib/icons";
 
@@ -41,6 +41,8 @@ function DialogContent({
   children,
   ...props
 }: DialogPrimitive.Popup.Props) {
+  const { t } = useTranslation();
+
   return (
     <DialogPortal>
       <DialogBackdrop />
@@ -53,9 +55,9 @@ function DialogContent({
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg opacity-70 ring-offset-background transition-all hover:opacity-100 hover:bg-muted/30 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:ring-offset-2 disabled:pointer-events-none">
-          <Icon icon={XIcon} className="h-4 w-4" />
-          <span className="sr-only">Close</span>
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg opacity-70 ring-offset-background transition hover:opacity-100 hover:bg-muted/30 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:ring-offset-2 disabled:pointer-events-none">
+          <Icon icon={XIcon} className="size-4" />
+          <span className="sr-only">{t("common.close")}</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Popup>
     </DialogPortal>

@@ -1,6 +1,11 @@
 "use client";
 
-import { motion, type HTMLMotionProps, type Transition } from "framer-motion";
+import {
+  type HTMLMotionProps,
+  motion,
+  type TargetAndTransition,
+  type Transition,
+} from "framer-motion";
 import type { ReactNode } from "react";
 
 interface AnimatedComponentProps
@@ -15,9 +20,9 @@ interface AnimatedComponentProps
 const presetTransitions: Record<
   Exclude<AnimatedComponentProps["preset"], undefined>,
   {
-    initial: any;
-    animate: any;
-    exit?: any;
+    initial: TargetAndTransition;
+    animate: TargetAndTransition;
+    exit?: TargetAndTransition;
     transition: Transition;
   }
 > = {
@@ -64,7 +69,7 @@ export function AnimatedComponent({
 }: AnimatedComponentProps) {
   if (disabled) {
     // Filter out motion-specific props when rendering as regular div
-    const { style, className, ...restProps } = props;
+    const { style, className } = props;
     return (
       <div className={className} style={style as React.CSSProperties}>
         {children}

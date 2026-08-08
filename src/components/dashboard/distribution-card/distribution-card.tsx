@@ -33,7 +33,7 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
   const income = stats?.incomeThisMonth ?? 0;
   const expenses = stats?.expensesThisMonth ?? 0;
   const savings = income - expenses;
-  const total = income || 1;
+  const _total = income || 1;
   const savingsRate = income > 0 ? (savings / income) * 100 : null;
   const expensesPct = income > 0 ? (expenses / income) * 100 : 0;
   const savingsPct = income > 0 ? (savings / income) * 100 : 0;
@@ -59,9 +59,10 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
       iconBg:
         "from-rose-500/20 to-rose-500/10 text-rose-600 ring-rose-500/15 dark:from-rose-500/30 dark:to-rose-500/20 dark:text-rose-400 dark:ring-rose-500/25",
       pct: expensesPct,
-      subtitle: income > 0
-        ? `${formatPercentage(expensesPct, locale, 1)} ${t("distribution.ofIncome")}`
-        : null,
+      subtitle:
+        income > 0
+          ? `${formatPercentage(expensesPct, locale, 1)} ${t("distribution.ofIncome")}`
+          : null,
     },
   ];
 
@@ -237,7 +238,8 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
                           {item.label}
                         </span>
                         <span className="text-[11px] tabular-nums text-muted-foreground/60">
-                          {item.subtitle ?? formatPercentage(item.pct, locale, 1)}
+                          {item.subtitle ??
+                            formatPercentage(item.pct, locale, 1)}
                         </span>
                       </div>
                     </div>

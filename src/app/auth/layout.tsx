@@ -31,12 +31,12 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
             <div className="mb-16 flex items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <div className="flex size-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-                  <Icon icon={Droplet} className="h-6 w-6" />
+                  <Icon icon={Droplet} className="size-6" />
                 </div>
                 <span className="text-2xl font-bold tracking-tight">Flowy</span>
               </div>
               <div className="flex items-center gap-1 text-white/60">
-                <Icon icon={Sparkles} className="h-4 w-4" />
+                <Icon icon={Sparkles} className="size-4" />
                 <span className="text-sm font-medium">Finance Simplified</span>
               </div>
             </div>
@@ -54,7 +54,7 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
               <div className="space-y-4">
                 <div className="flex items-start gap-4 rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/20">
-                    <Icon icon={BarChart3} className="h-5 w-5" />
+                    <Icon icon={BarChart3} className="size-5" />
                   </div>
                   <div>
                     <p className="font-semibold">
@@ -68,7 +68,7 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
 
                 <div className="flex items-start gap-4 rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/20">
-                    <Icon icon={Wallet} className="h-5 w-5" />
+                    <Icon icon={Wallet} className="size-5" />
                   </div>
                   <div>
                     <p className="font-semibold">
@@ -82,7 +82,7 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
 
                 <div className="flex items-start gap-4 rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/20">
-                    <Icon icon={Shield} className="h-5 w-5" />
+                    <Icon icon={Shield} className="size-5" />
                   </div>
                   <div>
                     <p className="font-semibold">
@@ -98,11 +98,14 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        <main className="flex items-center justify-center bg-white/50 px-6 py-12 transition-colors dark:bg-slate-900/50 sm:px-10 lg:px-20 relative">
+        <main
+          id="main"
+          className="flex items-center justify-center bg-white/50 px-6 py-12 transition-colors dark:bg-slate-900/50 sm:px-10 lg:px-20 relative"
+        >
           <div className="w-full max-w-md text-slate-900 dark:text-slate-100">
             <div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
               <div className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-blue-600 text-white shadow-lg shadow-primary/25">
-                <Icon icon={Droplet} className="h-6 w-6" />
+                <Icon icon={Droplet} className="size-6" />
               </div>
               <span className="text-2xl font-bold tracking-tight text-foreground">
                 Flowy
@@ -112,7 +115,7 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
             {children}
 
             <p className="mt-8 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground/80">
-              <Icon icon={Shield} className="h-3.5 w-3.5" />
+              <Icon icon={Shield} className="size-3.5" />
               {t("layout.securityNote")}
             </p>
           </div>

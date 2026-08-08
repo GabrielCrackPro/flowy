@@ -1,10 +1,10 @@
 "use client";
 
 import { Button } from "@components/ui";
-import { Icon } from "./icon";
 import { motion } from "framer-motion";
 import { Plus } from "@/lib/icons";
 import { cn } from "@/lib/utils";
+import { Icon } from "./icon";
 
 interface GradientButtonProps {
   onClick?: () => void;
@@ -37,7 +37,7 @@ export function GradientButton({
     <Button
       onClick={onClick}
       className={cn(
-        "gap-2 transition-all duration-300",
+        "gap-2 transition duration-300",
         sizeStyle,
         fullWidth && "w-full",
         "bg-gradient-to-r from-primary to-primary/90",
@@ -52,7 +52,7 @@ export function GradientButton({
           whileTap={{ scale: 0.9 }}
           transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
           className={cn(
-            "flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-foreground/20 to-primary-foreground/10 transition-all duration-300 shadow-sm",
+            "flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-foreground/20 to-primary-foreground/10 transition duration-300 shadow-sm",
             isSmall ? "size-5" : "size-6",
           )}
         >

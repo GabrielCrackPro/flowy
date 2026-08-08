@@ -1,21 +1,22 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+import { Icon } from "@/components/shared";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Icon } from "@/components/shared";
 import {
-  Check,
-  Sparkles,
-  Zap,
-  Settings,
-  TrendingUp,
-  Wallet,
   Calendar,
+  Check,
+  Settings,
+  Sparkles,
+  TrendingUp,
   User,
+  Wallet,
+  Zap,
 } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,8 @@ interface ThemePreviewProps {
 }
 
 export function ThemePreview({ className, colors }: ThemePreviewProps) {
+  const { t } = useTranslation("app");
+
   const hexToHsl = (hex: string | null): string => {
     if (!hex) return "";
 
@@ -73,12 +76,14 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
   return (
     <div className={cn("space-y-6", className)} style={previewStyle}>
       <div className="flex items-center gap-2">
-        <h3 className="text-lg font-semibold">Theme Preview</h3>
+        <h3 className="text-lg font-semibold">
+          {t("settings.theme.livePreview")}
+        </h3>
       </div>
 
       {/* Buttons Section */}
       <div className="space-y-3">
-        <FormLabel>Buttons</FormLabel>
+        <FormLabel>{t("settings.theme.preview.sectionButtons")}</FormLabel>
         <div className="flex flex-wrap gap-3">
           <Button
             style={{
@@ -86,7 +91,7 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
               color: "hsl(var(--preview-primary-foreground))",
             }}
           >
-            Primary Button
+            {t("settings.theme.primary")}
           </Button>
           <Button
             variant="secondary"
@@ -95,22 +100,26 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
               color: "hsl(var(--preview-secondary-foreground))",
             }}
           >
-            Secondary
+            {t("settings.theme.secondary")}
           </Button>
-          <Button variant="outline">Outline</Button>
-          <Button variant="ghost">Ghost</Button>
+          <Button variant="outline">
+            {t("settings.theme.preview.buttonOutline")}
+          </Button>
+          <Button variant="ghost">
+            {t("settings.theme.preview.buttonGhost")}
+          </Button>
           <Button
             variant="link"
             style={{ color: "hsl(var(--preview-primary))" }}
           >
-            Link
+            {t("settings.theme.preview.buttonLink")}
           </Button>
         </div>
       </div>
 
       {/* Cards Section */}
       <div className="space-y-3">
-        <FormLabel>Cards & Containers</FormLabel>
+        <FormLabel>{t("settings.theme.preview.sectionCards")}</FormLabel>
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="p-4 space-y-3">
             <div className="flex items-center gap-2">
@@ -124,7 +133,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
                 <Icon icon={Wallet} className="size-4" />
               </div>
               <div>
-                <p className="font-semibold">Total Balance</p>
+                <p className="font-semibold">
+                  {t("settings.theme.preview.totalBalance")}
+                </p>
                 <p className="text-sm text-muted-foreground">$12,450.00</p>
               </div>
             </div>
@@ -140,7 +151,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
               >
                 +12.5%
               </span>
-              <span className="text-muted-foreground">from last month</span>
+              <span className="text-muted-foreground">
+                {t("settings.theme.preview.fromLastMonth")}
+              </span>
             </div>
           </Card>
 
@@ -156,9 +169,11 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
                 <Icon icon={Sparkles} className="size-4" />
               </div>
               <div>
-                <p className="font-semibold">Goals Progress</p>
+                <p className="font-semibold">
+                  {t("settings.theme.preview.goalsProgress")}
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  3 of 5 completed
+                  {t("settings.theme.preview.completed")}
                 </p>
               </div>
             </div>
@@ -186,17 +201,17 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
 
       {/* Form Elements */}
       <div className="space-y-3">
-        <FormLabel>Form Elements</FormLabel>
+        <FormLabel>{t("settings.theme.preview.sectionFormElements")}</FormLabel>
         <div className="space-y-3">
-          <Input placeholder="Email address" />
+          <Input placeholder={t("settings.theme.preview.emailPlaceholder")} />
           <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/20 p-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <Icon icon={Settings} className="size-4" />
-                <span>Setting option</span>
+                <span>{t("settings.theme.preview.settingOption")}</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                This is how toggle switches look
+                {t("settings.theme.preview.toggleDescription")}
               </p>
             </div>
             <Switch checked={false} />
@@ -206,21 +221,21 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
 
       {/* Badges & Tags */}
       <div className="space-y-3">
-        <FormLabel>Badges & Tags</FormLabel>
+        <FormLabel>{t("settings.theme.preview.sectionBadges")}</FormLabel>
         <div className="flex flex-wrap gap-2">
-          <Badge>Default</Badge>
+          <Badge>{t("settings.theme.preview.badgeDefault")}</Badge>
           <Badge variant="secondary">Secondary</Badge>
           <Badge variant="outline">Outline</Badge>
           <Badge className="bg-primary text-primary-foreground">Primary</Badge>
           <Badge className="bg-secondary text-secondary-foreground">
-            Custom
+            {t("settings.theme.preview.badgeCustom")}
           </Badge>
         </div>
       </div>
 
       {/* Interactive Elements */}
       <div className="space-y-3">
-        <FormLabel>Interactive Elements</FormLabel>
+        <FormLabel>{t("settings.theme.preview.sectionInteractive")}</FormLabel>
         <div className="flex flex-wrap gap-3">
           <Button size="icon" variant="outline">
             <Icon icon={Sparkles} className="size-4" />
@@ -239,7 +254,7 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
 
       {/* Navigation Preview */}
       <div className="space-y-3">
-        <FormLabel>Navigation</FormLabel>
+        <FormLabel>{t("settings.theme.preview.sectionNavigation")}</FormLabel>
         <Card className="p-3">
           <div
             className="flex items-center gap-2 rounded-lg p-2 text-primary-foreground"
@@ -249,18 +264,22 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
             }}
           >
             <Icon icon={User} className="size-4" />
-            <span className="text-sm font-medium">Active Navigation Item</span>
+            <span className="text-sm font-medium">
+              {t("settings.theme.preview.activeNavItem")}
+            </span>
           </div>
           <div className="mt-2 flex items-center gap-2 rounded-lg p-2 text-muted-foreground hover:bg-muted/40">
             <Icon icon={Settings} className="size-4" />
-            <span className="text-sm">Inactive Item</span>
+            <span className="text-sm">
+              {t("settings.theme.preview.inactiveNavItem")}
+            </span>
           </div>
         </Card>
       </div>
 
       {/* Color Palette Display */}
       <div className="space-y-3">
-        <FormLabel>Current Color Palette</FormLabel>
+        <FormLabel>{t("settings.theme.preview.sectionPalette")}</FormLabel>
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-2">
             <div
@@ -269,7 +288,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
                 background: `linear-gradient(to bottom right, hsl(var(--preview-primary)), hsl(var(--preview-primary) / 0.8))`,
               }}
             />
-            <p className="text-xs text-center font-medium">Primary</p>
+            <p className="text-xs text-center font-medium">
+              {t("settings.theme.primary")}
+            </p>
           </div>
           <div className="space-y-2">
             <div
@@ -278,7 +299,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
                 background: `linear-gradient(to bottom right, hsl(var(--preview-secondary)), hsl(var(--preview-secondary) / 0.8))`,
               }}
             />
-            <p className="text-xs text-center font-medium">Secondary</p>
+            <p className="text-xs text-center font-medium">
+              {t("settings.theme.secondary")}
+            </p>
           </div>
           <div className="space-y-2">
             <div
@@ -287,7 +310,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
                 background: `linear-gradient(to bottom right, hsl(var(--preview-accent)), hsl(var(--preview-accent) / 0.8))`,
               }}
             />
-            <p className="text-xs text-center font-medium">Accent</p>
+            <p className="text-xs text-center font-medium">
+              {t("settings.theme.accent")}
+            </p>
           </div>
         </div>
       </div>

@@ -1,11 +1,10 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getActivities } from "@/lib/api/activity";
-import { clearActivities } from "@/lib/api/activity";
-import type { Activity, ActivityFilters } from "@/types/Activity";
 import { toast } from "@/components/shared/toast";
 import { useProfile } from "@/hooks/useProfile";
+import { clearActivities, getActivities } from "@/lib/api/activity";
+import type { Activity, ActivityFilters } from "@/types/Activity";
 
 export function useActivityApi(filters?: ActivityFilters) {
   const queryClient = useQueryClient();

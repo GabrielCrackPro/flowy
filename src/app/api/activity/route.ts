@@ -1,3 +1,4 @@
+import { type NextRequest, NextResponse } from "next/server";
 import {
   applyRateLimitHeaders,
   handleApiError,
@@ -6,7 +7,6 @@ import {
   withRateLimit,
 } from "@/lib/api/route-utils";
 import { ActivityService } from "@/lib/services/activities";
-import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const auth = await requireAuth();

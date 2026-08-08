@@ -40,7 +40,7 @@ export function SingleSelectFilter({
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
         <SelectTrigger
           className={cn(
-            "h-9 min-w-40 gap-2 rounded-xl border px-3.5 text-xs font-medium transition-all duration-200 [&>svg]:size-4 shadow-sm",
+            "h-9 min-w-40 gap-2 rounded-xl border px-3.5 text-xs font-medium transition duration-200 [&>svg]:size-4 shadow-sm",
             active
               ? "border-primary/40 bg-gradient-to-r from-primary/12 to-primary/6 text-foreground hover:from-primary/16 hover:to-primary/8 shadow-md"
               : "border-border/30 bg-card text-muted-foreground hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:text-foreground",
@@ -57,7 +57,9 @@ export function SingleSelectFilter({
       </motion.div>
 
       <SelectContent className="border-border/30 shadow-xl rounded-xl">
-        <SelectItem value="">{field.placeholder ?? t("filters.all")}</SelectItem>
+        <SelectItem value="">
+          {field.placeholder ?? t("filters.all")}
+        </SelectItem>
 
         {field.options?.map((opt) => (
           <SelectItem key={opt.value} value={opt.value}>

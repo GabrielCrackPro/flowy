@@ -1,11 +1,10 @@
 "use client";
 
-import * as React from "react";
-import * as RechartsPrimitive from "recharts";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
 import type { ChartConfig } from "@components/ui";
 import { ChartContainer } from "@components/ui";
+import { AnimatePresence, motion } from "framer-motion";
+import type * as React from "react";
+import { cn } from "@/lib/utils";
 import type { ChartLayer } from "./chart-layer-system";
 import { ChartLayerSystem } from "./chart-layer-system";
 

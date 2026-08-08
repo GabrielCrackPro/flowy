@@ -45,8 +45,8 @@ function TableSkeleton() {
         {/* Table header row */}
         <div className="border-b border-border/30 bg-gradient-to-r from-muted/10 to-muted/5 px-6 py-3">
           <div className="flex items-center gap-4">
-            <Skeleton className="h-3 w-3" />
-            <Skeleton className="h-3 w-3" />
+            <Skeleton className="size-3" />
+            <Skeleton className="size-3" />
             <Skeleton className="h-3 w-32" />
             <Skeleton className="h-3 w-10" />
             <Skeleton className="hidden h-3 w-20 sm:block" />

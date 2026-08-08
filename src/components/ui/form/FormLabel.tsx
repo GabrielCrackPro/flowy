@@ -6,6 +6,7 @@ const FormLabel = React.forwardRef<
   React.LabelHTMLAttributes<HTMLLabelElement> & { required?: boolean }
 >(({ className, required, children, ...props }, ref) => {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: consumers associate the label via the htmlFor prop, or use it as a standalone section heading
     <label
       ref={ref}
       className={cn(

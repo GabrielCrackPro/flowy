@@ -2,10 +2,8 @@
 
 import { Button } from "@components/ui";
 import { motion } from "framer-motion";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  type AppError,
   classifyError,
   ErrorCategory,
   ErrorTranslationKeys,
@@ -29,7 +27,6 @@ interface ErrorDisplayProps {
   error: Error | unknown;
   onRetry?: () => void;
   onDismiss?: () => void;
-  showDetails?: boolean;
   className?: string;
   compact?: boolean;
 }
@@ -38,12 +35,10 @@ export function ErrorDisplay({
   error,
   onRetry,
   onDismiss,
-  showDetails = false,
   className = "",
   compact = false,
 }: ErrorDisplayProps) {
   const { t } = useTranslation();
-  const [showTechnicalDetails, setShowTechnicalDetails] = useState(showDetails);
   const classifiedError = classifyError(error);
   const userMessage = t(getUserFriendlyMessage(classifiedError));
   const recoveryHint = t(getRecoveryHintKey(classifiedError));
@@ -158,24 +153,19 @@ export function ErrorDisplay({
           {/* Technical details (expandable) */}
           {process.env.NODE_ENV === "development" && (
             <details className="mb-3">
-              <summary
-                className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
-                onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
-              >
+              <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
                 <Icon icon={AlertCircle} className="size-3" />
                 Technical details
               </summary>
-              {showTechnicalDetails && (
-                <pre className="mt-2 max-h-32 overflow-auto rounded-lg border border-border/30 bg-muted/30 p-3 text-xs text-muted-foreground">
-                  {error instanceof Error ? error.message : String(error)}
-                  {error instanceof Error && error.stack && (
-                    <>
-                      {"\n\n"}
-                      <span className="opacity-70">{error.stack}</span>
-                    </>
-                  )}
-                </pre>
-              )}
+              <pre className="mt-2 max-h-32 overflow-auto rounded-lg border border-border/30 bg-muted/30 p-3 text-xs text-muted-foreground">
+                {error instanceof Error ? error.message : String(error)}
+                {error instanceof Error && error.stack && (
+                  <>
+                    {"\n\n"}
+                    <span className="opacity-70">{error.stack}</span>
+                  </>
+                )}
+              </pre>
             </details>
           )}
 
@@ -197,9 +187,9 @@ export function ErrorDisplay({
                 </Button>
               ))}
 
-            {classifiedError.recoveryActions?.map((action, index) => (
+            {classifiedError.recoveryActions?.map((action) => (
               <Button
-                key={index}
+                key={action.label}
                 onClick={() => {
                   try {
                     action.action();
@@ -224,7 +214,9 @@ export function ErrorDisplay({
             </Button>
 
             <Button
-              onClick={() => (window.location.href = "/dashboard")}
+              onClick={() => {
+                window.location.href = "/dashboard";
+              }}
               size="sm"
               variant="outline"
             >
@@ -283,6 +275,7 @@ export function InlineError({
           />
         ) : (
           <button
+            type="button"
             onClick={onRetry}
             className="text-xs font-medium hover:underline flex-shrink-0"
           >

@@ -2,15 +2,14 @@
  * React hook for error handling with retry and graceful degradation
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useState } from "react";
 import {
+  type AppError,
+  classifyError,
+  type DegradationStrategy,
+  type RetryOptions,
   retryWithBackoff,
   withGracefulDegradation,
-  type RetryOptions,
-  type DegradationStrategy,
-  type DegradationResult,
-  classifyError,
-  type AppError,
 } from "@/lib/errors";
 
 export interface UseErrorHandlingOptions {

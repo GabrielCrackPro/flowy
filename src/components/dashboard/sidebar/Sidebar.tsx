@@ -162,21 +162,21 @@ export function SidebarContent({
         >
           <motion.div
             className={cn(
-              "flex shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300",
-              collapsed && variant === "desktop" ? "h-11 w-11" : "h-10 w-10",
+              "flex shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20 transition duration-300",
+              collapsed && variant === "desktop" ? "size-11" : "size-10",
             )}
             whileHover={{ scale: 1.05, rotate: 5 }}
             whileTap={{ scale: 0.95 }}
           >
             <Icon
               icon={Droplet}
-              className="h-5 w-5 transition-transform duration-300 group-hover/logo:rotate-[8deg]"
+              className="size-5 transition-transform duration-300 group-hover/logo:rotate-[8deg]"
             />
           </motion.div>
 
           <motion.div
             className={cn(
-              "min-w-0 transition-all duration-200",
+              "min-w-0 transition duration-200",
               collapsed && variant === "desktop"
                 ? "opacity-0 invisible w-0 overflow-hidden"
                 : "opacity-100 visible",
@@ -205,7 +205,7 @@ export function SidebarContent({
             onClick={state.toggleCollapsed}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.88 }}
-            className="absolute -right-3 top-1/2 z-10 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-border/50 bg-card text-foreground/60 shadow-[0_2px_8px_rgba(0,0,0,0.08)] outline-none transition-all duration-200 hover:border-primary/60 hover:bg-primary/10 hover:text-primary hover:shadow-[0_2px_12px_rgba(0,0,0,0.12)] hover:shadow-primary/10 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:border-primary/50"
+            className="absolute -right-3 top-1/2 z-10 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-border/50 bg-card text-foreground/60 shadow-[0_2px_8px_rgba(0,0,0,0.08)] outline-none transition duration-200 hover:border-primary/60 hover:bg-primary/10 hover:text-primary hover:shadow-[0_2px_12px_rgba(0,0,0,0.12)] hover:shadow-primary/10 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:border-primary/50"
           >
             <motion.div
               animate={{ rotate: collapsed ? 180 : 0 }}
@@ -216,7 +216,7 @@ export function SidebarContent({
                 mass: 0.9,
               }}
             >
-              <Icon icon={ChevronLeft} className="h-3.5 w-3.5" />
+              <Icon icon={ChevronLeft} className="size-3.5" />
             </motion.div>
           </motion.button>
         ) : (
@@ -226,9 +226,9 @@ export function SidebarContent({
             whileTap={{ scale: 0.9 }}
             aria-label={t("nav.closeMenu")}
             onClick={onNavigate}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-colors"
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-colors"
           >
-            <Icon icon={X} className="h-4 w-4" />
+            <Icon icon={X} className="size-4" />
           </motion.button>
         )}
       </div>
@@ -256,7 +256,7 @@ export function SidebarContent({
           >
             <div
               className={cn(
-                "px-3 transition-all duration-200 overflow-hidden",
+                "px-3 transition duration-200 overflow-hidden",
                 collapsed && variant === "desktop"
                   ? "max-h-0 opacity-0"
                   : cn(
@@ -314,7 +314,7 @@ export function SidebarContent({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.3 }}
-            className="p-3 pb-0 pt-3 transition-all duration-200"
+            className="p-3 pb-0 pt-3 transition duration-200"
           >
             <NewTransaction />
           </motion.div>
@@ -323,12 +323,12 @@ export function SidebarContent({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.3 }}
-            className="p-3 pb-0 pt-3 transition-all duration-200"
+            className="p-3 pb-0 pt-3 transition duration-200"
           >
             <Button
               asChild
               size="icon"
-              className="mx-auto w-11 h-11 rounded-xl shadow-md flex bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 hover:ring-4 hover:ring-primary/20 transition-all duration-300"
+              className="mx-auto size-11 rounded-xl shadow-md flex bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 hover:ring-4 hover:ring-primary/20 transition duration-300"
             >
               <Link
                 href="/dashboard/new"
@@ -340,7 +340,7 @@ export function SidebarContent({
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Icon icon={Plus} className="h-5 w-5" />
+                  <Icon icon={Plus} className="size-5" />
                 </motion.div>
               </Link>
             </Button>

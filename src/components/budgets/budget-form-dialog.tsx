@@ -265,7 +265,7 @@ export function BudgetFormSheet({
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={cn(
-                          "flex flex-col items-center gap-2 rounded-xl border p-3 text-sm transition-all",
+                          "flex flex-col items-center gap-2 rounded-xl border p-3 text-sm transition",
                           isSelected
                             ? "border-border/60 bg-card shadow-sm"
                             : "border-border/40 bg-card text-muted-foreground hover:border-border/80 hover:bg-card/80",
@@ -335,7 +335,7 @@ export function BudgetFormSheet({
                     whileTap={{ scale: 0.97 }}
                     onClick={preset.apply}
                     className={cn(
-                      "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
+                      "rounded-full border px-3 py-1.5 text-xs font-medium transition",
                       preset.active
                         ? "border-primary/40 bg-primary/10 text-primary"
                         : "border-border/40 text-muted-foreground hover:border-border/70 hover:text-foreground",

@@ -74,6 +74,7 @@ export function RateLimitStatus({
         )}
         {onRetry && canRetry && (
           <button
+            type="button"
             onClick={onRetry}
             className="text-xs font-medium hover:underline"
           >
@@ -119,6 +120,7 @@ export function RateLimitStatus({
         </div>
         {onRetry && canRetry && (
           <button
+            type="button"
             onClick={onRetry}
             className="flex-shrink-0 text-xs font-medium text-warning hover:text-warning/80 transition-colors"
           >

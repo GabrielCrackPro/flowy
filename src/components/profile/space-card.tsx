@@ -1,9 +1,11 @@
 "use client";
 
-import { Icon } from "@/components/shared";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import { Icon } from "@/components/shared";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import type { SpaceSummary } from "@/lib/api/space";
 import {
   CheckCircle2,
   Copy,
@@ -15,8 +17,6 @@ import {
   UserMinus,
   Users,
 } from "@/lib/icons";
-import { useTranslation } from "react-i18next";
-import type { SpaceSummary } from "@/lib/api/space";
 import { cn } from "@/lib/utils";
 
 function SpaceGlyph({
@@ -131,7 +131,7 @@ export function SpaceCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border transition-all duration-300",
+        "group relative overflow-hidden rounded-2xl border transition duration-300",
         isActive
           ? "border-primary/40 bg-gradient-to-br from-primary/8 via-primary/[0.03] to-transparent shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
           : "border-border/30 bg-gradient-to-br from-card to-card/50 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)]",

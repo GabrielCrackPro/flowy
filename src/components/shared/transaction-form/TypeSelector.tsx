@@ -1,8 +1,8 @@
-import { IncomeIcon, ExpenseIcon, Icon } from "../icon";
 import { motion } from "framer-motion";
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 import type { TransactionType } from "@/types/Transaction";
+import { ExpenseIcon, Icon, IncomeIcon } from "../icon";
 
 interface TypeSelectorProps {
   value: TransactionType;
@@ -17,9 +17,8 @@ export function TypeSelector({
   onChange,
   expenseLabel,
   incomeLabel,
-  embedded = false,
 }: TypeSelectorProps) {
-  const isExpense = value === "EXPENSE";
+  const _isExpense = value === "EXPENSE";
   const layoutKey = useId();
 
   return (

@@ -1,10 +1,10 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { motion } from "framer-motion";
-import { Camera, Loader2, Trash2 } from "@/lib/icons";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Icon } from "@/components/shared";
+import { Camera, Loader2, Trash2 } from "@/lib/icons";
 import { cn, getUserInitials } from "@/lib/utils";
 import type { Profile } from "@/types/Profile";
 

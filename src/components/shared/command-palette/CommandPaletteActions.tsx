@@ -49,7 +49,7 @@ export function CommandPaletteActions({
           animate={{ rotate: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <Icon icon={Home} className="h-3 w-3" />
+          <Icon icon={Home} className="size-3" />
         </motion.div>
         <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
           {t("search.navigation")}
@@ -85,7 +85,7 @@ export function CommandPaletteActions({
           animate={{ rotate: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
         >
-          <Icon icon={SearchIcon} className="h-3 w-3" />
+          <Icon icon={SearchIcon} className="size-3" />
         </motion.div>
         <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
           {t("search.actions")}

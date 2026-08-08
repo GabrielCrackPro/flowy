@@ -149,6 +149,7 @@ model Transaction {
   @@index([spaceId])
   @@index([type])
   @@index([date])
+  @@index([spaceId, date])
   @@index([updatedBy])
   @@index([budgetId])
   @@map("transactions")
@@ -188,6 +189,7 @@ model Budget {
   @@index([userId])
   @@index([spaceId])
   @@index([categoryId])
+  @@index([spaceId, month, year])
   @@index([updatedBy])
   @@map("budgets")
 }
@@ -276,6 +278,7 @@ model Activity {
 
   @@index([userId, createdAt])
   @@index([spaceId])
+  @@index([entityType, entityId])
   @@map("activities")
 }
 

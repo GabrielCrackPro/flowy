@@ -258,7 +258,7 @@ export function CategoryFormSheet({
                         )
                       }
                       className={cn(
-                        "flex h-12 w-12 items-center justify-center rounded-2xl border-2 transition-all relative overflow-hidden",
+                        "flex size-12 items-center justify-center rounded-2xl border-2 transition relative overflow-hidden",
                         selected
                           ? "border-primary bg-gradient-to-br from-primary/20 to-primary/10 text-primary shadow-lg shadow-primary/25 ring-2 ring-primary/10"
                           : "border-border/60 bg-gradient-to-br from-muted/50 to-muted/30 text-muted-foreground hover:border-primary/40 hover:bg-gradient-to-br hover:from-primary/10 hover:to-primary/5 hover:text-foreground hover:shadow-md",
@@ -297,7 +297,7 @@ export function CategoryFormSheet({
                         )
                       }
                       className={cn(
-                        "flex size-11 items-center justify-center rounded-full border-2 transition-all relative overflow-hidden",
+                        "flex size-11 items-center justify-center rounded-full border-2 transition relative overflow-hidden",
                         selected
                           ? "scale-110 border-foreground shadow-xl ring-2 ring-background"
                           : "border-transparent hover:scale-110 hover:shadow-lg",

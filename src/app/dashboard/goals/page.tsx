@@ -105,7 +105,7 @@ export default function GoalsPage() {
   const completedGoals = goals.filter(
     (goal) => goal.savedAmount >= goal.targetAmount,
   ).length;
-  const overallProgress =
+  const _overallProgress =
     totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
 
   return (
@@ -216,7 +216,7 @@ export default function GoalsPage() {
                   : 0;
               const isCompleted = pct >= 100;
               const isNearCompletion = pct >= 80 && !isCompleted;
-              const remaining = Math.max(
+              const _remaining = Math.max(
                 0,
                 goal.targetAmount - goal.savedAmount,
               );
@@ -231,7 +231,7 @@ export default function GoalsPage() {
                 >
                   <div
                     className={cn(
-                      "relative rounded-2xl border bg-gradient-to-br p-5 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5",
+                      "relative rounded-2xl border bg-gradient-to-br p-5 shadow-sm transition hover:shadow-lg hover:-translate-y-0.5",
                       isCompleted
                         ? "border-emerald-500/30 from-emerald-500/5 to-emerald-500/0"
                         : isNearCompletion

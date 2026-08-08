@@ -1,28 +1,28 @@
 "use client";
 
-import { Icon, GradientButton } from "@/components/shared";
-import {
-  AlertTriangle,
-  RefreshCw,
-  Droplet,
-  Home,
-  ArrowLeft,
-  Wifi,
-  Shield,
-} from "@/lib/icons";
-import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { GradientButton, Icon } from "@/components/shared";
+import { RateLimitStatus } from "@/components/shared/rate-limit-status";
 import {
   classifyError,
-  getUserFriendlyMessage,
-  getRecoveryHintKey,
   ErrorCategory,
   ErrorTranslationKeys,
+  getRecoveryHintKey,
+  getUserFriendlyMessage,
   RateLimitError,
 } from "@/lib/errors/error-types";
-import { RateLimitStatus } from "@/components/shared/rate-limit-status";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Droplet,
+  Home,
+  RefreshCw,
+  Shield,
+  Wifi,
+} from "@/lib/icons";
 
 export default function DashboardError({
   error,
@@ -116,12 +116,12 @@ export default function DashboardError({
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             className="absolute inset-0 rounded-full bg-destructive/20 blur-xl"
           />
-          <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-destructive/30 bg-gradient-to-br from-destructive/10 to-destructive/5 text-destructive shadow-lg shadow-destructive/20">
+          <div className="relative flex size-20 items-center justify-center rounded-2xl border border-destructive/30 bg-gradient-to-br from-destructive/10 to-destructive/5 text-destructive shadow-lg shadow-destructive/20">
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             >
-              <Icon icon={ErrorIcon} className="h-10 w-10" />
+              <Icon icon={ErrorIcon} className="size-10" />
             </motion.div>
           </div>
         </motion.div>
@@ -138,7 +138,7 @@ export default function DashboardError({
             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
             className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-destructive to-destructive/80 text-destructive-foreground shadow-md"
           >
-            <Icon icon={Droplet} className="h-3.5 w-3.5" />
+            <Icon icon={Droplet} className="size-3.5" />
           </motion.div>
           Flowy
           <span className="text-muted-foreground/30">·</span>
@@ -191,7 +191,7 @@ export default function DashboardError({
               className="mt-6 text-left"
             >
               <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
-                <Icon icon={AlertTriangle} className="h-4 w-4" />
+                <Icon icon={AlertTriangle} className="size-4" />
                 Detalles técnicos
               </summary>
               <pre className="mt-3 max-h-48 overflow-auto rounded-lg border border-border/30 bg-gradient-to-br from-muted/50 to-muted/30 p-4 text-xs text-muted-foreground shadow-sm">
@@ -264,7 +264,7 @@ export default function DashboardError({
                 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`inline-flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-gradient-to-r from-muted/50 to-muted/30 px-5 py-2.5 text-sm font-medium text-foreground shadow-md transition-all hover:from-muted/60 hover:to-muted/40 hover:shadow-lg h-12 w-full sm:w-auto ${action.primary ? "border-primary/50 bg-primary/10" : ""}`}
+                className={`inline-flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-gradient-to-r from-muted/50 to-muted/30 px-5 py-2.5 text-sm font-medium text-foreground shadow-md transition hover:from-muted/60 hover:to-muted/40 hover:shadow-lg h-12 w-full sm:w-auto ${action.primary ? "border-primary/50 bg-primary/10" : ""}`}
               >
                 {t(action.label)}
               </motion.button>
@@ -278,7 +278,7 @@ export default function DashboardError({
                 onClick={() => router.back()}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-gradient-to-r from-muted/50 to-muted/30 px-5 py-2.5 text-sm font-medium text-foreground shadow-md transition-all hover:from-muted/60 hover:to-muted/40 hover:shadow-lg h-12 w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-gradient-to-r from-muted/50 to-muted/30 px-5 py-2.5 text-sm font-medium text-foreground shadow-md transition hover:from-muted/60 hover:to-muted/40 hover:shadow-lg h-12 w-full sm:w-auto"
               >
                 <Icon icon={ArrowLeft} className="size-4" />
                 {t(ErrorTranslationKeys.GO_BACK) || "Volver"}
@@ -287,7 +287,7 @@ export default function DashboardError({
                 onClick={() => router.push("/dashboard")}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-gradient-to-r from-muted/50 to-muted/30 px-5 py-2.5 text-sm font-medium text-foreground shadow-md transition-all hover:from-muted/60 hover:to-muted/40 hover:shadow-lg h-12 w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-gradient-to-r from-muted/50 to-muted/30 px-5 py-2.5 text-sm font-medium text-foreground shadow-md transition hover:from-muted/60 hover:to-muted/40 hover:shadow-lg h-12 w-full sm:w-auto"
               >
                 <Icon icon={Home} className="size-4" />
                 {t(ErrorTranslationKeys.GO_HOME) || "Ir al inicio"}

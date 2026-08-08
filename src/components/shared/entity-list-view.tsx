@@ -152,7 +152,7 @@ export function EntityListView<T>({
             value={searchQuery}
             onChange={(event) => onSearchQueryChange(event.target.value)}
             placeholder={searchPlaceholder}
-            className="h-10 rounded-xl border-border/30 bg-muted/20 pl-9 pr-9 text-sm placeholder:text-muted-foreground/40 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 transition-all shadow-sm"
+            className="h-10 rounded-xl border-border/30 bg-muted/20 pl-9 pr-9 text-sm placeholder:text-muted-foreground/40 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 transition shadow-sm"
           />
           {searchQuery && (
             <Button

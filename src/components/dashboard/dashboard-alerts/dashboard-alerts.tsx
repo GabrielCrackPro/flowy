@@ -271,7 +271,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
     <section aria-label={t("alerts.barTitle")} className="space-y-0">
       <div
         className={cn(
-          "overflow-hidden rounded-2xl border shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300",
+          "overflow-hidden rounded-2xl border shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition duration-300",
           bar.border,
           isExpanded && "border-border/25 shadow-[0_6px_20px_rgba(0,0,0,0.08)]",
         )}
@@ -288,7 +288,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
             hasAlerts ? (open ? t("alerts.hide") : t("alerts.show")) : undefined
           }
           className={cn(
-            "group relative flex h-auto w-full items-center gap-3.5 border-0 px-4 py-3.5 text-left transition-all duration-300",
+            "group relative flex h-auto w-full items-center gap-3.5 border-0 px-4 py-3.5 text-left transition duration-300",
             bar.bar,
             hasAlerts && bar.interactive,
             isExpanded
@@ -429,7 +429,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                         aria-label={t("alerts.dismissAll")}
                         onClick={handleDismissAll}
                         disabled={dismissingIds.size > 0}
-                        className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground/60 transition-all duration-200 hover:bg-none hover:bg-muted/60 hover:text-foreground active:scale-95 disabled:opacity-50"
+                        className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground/60 transition duration-200 hover:bg-none hover:bg-muted/60 hover:text-foreground active:scale-95 disabled:opacity-50"
                       >
                         {dismissingIds.size > 0 ? (
                           <Sparkles className="size-3.5 animate-spin" />
@@ -468,11 +468,11 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                             transition: { duration: 0.18, ease: "easeIn" },
                           }}
                         >
-                          <div className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/30 bg-gradient-to-br from-card to-card/50 px-3.5 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.03)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_6px_18px_rgba(0,0,0,0.08)]">
+                          <div className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/30 bg-gradient-to-br from-card to-card/50 px-3.5 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.03)] transition duration-200 hover:-translate-y-px hover:shadow-[0_6px_18px_rgba(0,0,0,0.08)]">
                             {/* Severity rail */}
                             <div
                               className={cn(
-                                "absolute inset-y-2 left-0 w-1 rounded-full transition-all duration-300 group-hover:inset-y-1",
+                                "absolute inset-y-2 left-0 w-1 rounded-full transition duration-300 group-hover:inset-y-1",
                                 style.rail,
                               )}
                             />
@@ -508,7 +508,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                                 onClick={handleAction}
                                 disabled={isDismissing}
                                 className={cn(
-                                  "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-200 ring-1 ring-inset sm:px-3",
+                                  "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition duration-200 ring-1 ring-inset sm:px-3",
                                   "bg-none hover:bg-none",
                                   style.button,
                                   "active:scale-95",
@@ -527,7 +527,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                               aria-label={t("alerts.dismiss")}
                               onClick={() => handleDismiss(alert.id)}
                               disabled={isDismissing}
-                              className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground/60 transition-all duration-200 hover:bg-none hover:bg-muted/60 hover:text-foreground active:scale-95 disabled:opacity-50"
+                              className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground/60 transition duration-200 hover:bg-none hover:bg-muted/60 hover:text-foreground active:scale-95 disabled:opacity-50"
                             >
                               {isDismissing ? (
                                 <Sparkles className="size-3.5 animate-spin" />

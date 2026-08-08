@@ -1,5 +1,5 @@
-import supabase from "@/lib/supabase/client";
 import { RateLimitError as AppRateLimitError } from "@/lib/errors/error-types";
+import supabase from "@/lib/supabase/client";
 
 export async function getAccessToken(): Promise<string | null> {
   try {

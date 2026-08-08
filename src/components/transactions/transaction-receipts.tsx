@@ -69,7 +69,7 @@ export function TransactionReceipts({
                 rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group flex overflow-hidden rounded-xl border border-border/30 bg-linear-to-br from-muted/20 to-muted/10 shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
+                className="group flex overflow-hidden rounded-xl border border-border/30 bg-linear-to-br from-muted/20 to-muted/10 shadow-sm transition hover:border-primary/30 hover:shadow-md"
               >
                 <div className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden bg-muted/40">
                   {isImage ? (

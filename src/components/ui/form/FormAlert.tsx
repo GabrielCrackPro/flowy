@@ -19,21 +19,21 @@ const variants: Record<
 > = {
   error: {
     container: "border-destructive/20 bg-destructive/10 text-destructive",
-    icon: <Icon icon={AlertCircle} className="h-4 w-4 shrink-0" />,
+    icon: <Icon icon={AlertCircle} className="size-4 shrink-0" />,
   },
   success: {
     container:
       "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-    icon: <Icon icon={CheckCircle2} className="h-4 w-4 shrink-0" />,
+    icon: <Icon icon={CheckCircle2} className="size-4 shrink-0" />,
   },
   warning: {
     container:
       "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    icon: <Icon icon={TriangleAlert} className="h-4 w-4 shrink-0" />,
+    icon: <Icon icon={TriangleAlert} className="size-4 shrink-0" />,
   },
   info: {
     container: "border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400",
-    icon: <Icon icon={Info} className="h-4 w-4 shrink-0" />,
+    icon: <Icon icon={Info} className="size-4 shrink-0" />,
   },
 };
 

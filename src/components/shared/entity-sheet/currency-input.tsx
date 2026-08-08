@@ -215,7 +215,7 @@ export function CurrencyInput({
           }}
           placeholder={placeholder}
           className={cn(
-            "h-11 transition-all",
+            "h-11 transition",
             "pl-4 pr-4",
             showIncrementButtons && "pl-12 pr-12",
             symbolPosition === "before" && "pl-8",
@@ -251,7 +251,7 @@ export function CurrencyInput({
               type="button"
               onClick={() => handleQuickAmount(amount)}
               className={cn(
-                "rounded-full px-3 py-1 text-xs font-medium tabular-nums transition-all",
+                "rounded-full px-3 py-1 text-xs font-medium tabular-nums transition",
                 value === amount
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground",

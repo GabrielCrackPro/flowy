@@ -1,11 +1,11 @@
+import { SubscriptionService } from "@lib/services/subscriptions";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   handleApiError,
   isAuthResponse,
   noContent,
   requireAuth,
 } from "@/lib/api/route-utils";
-import { SubscriptionService } from "@lib/services/subscriptions";
-import { type NextRequest, NextResponse } from "next/server";
 import { updateSubscriptionSchema } from "@/lib/schemas";
 import { AlertsService } from "@/lib/services/alerts";
 

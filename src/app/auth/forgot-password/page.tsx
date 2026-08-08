@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
             href="/auth/login"
             className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
           >
-            <Icon icon={ArrowLeft} className="h-4 w-4" />
+            <Icon icon={ArrowLeft} className="size-4" />
             {t("forgotPassword.backToLogin")}
           </Link>
         </motion.div>
@@ -92,7 +92,8 @@ export default function ForgotPasswordPage() {
             <FormField label={t("forgotPassword.emailLabel")} required>
               <Input
                 type="email"
-                startIcon={<Icon icon={Mail} className="h-4 w-4" />}
+                autoComplete="email"
+                startIcon={<Icon icon={Mail} className="size-4" />}
                 placeholder={t("forgotPassword.emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

@@ -49,7 +49,7 @@ export default function TransactionsLoading() {
               <div className="h-3 w-24">
                 <Skeleton />
               </div>
-              <div className="h-8 w-8">
+              <div className="size-8">
                 <Skeleton variant="rounded" />
               </div>
             </div>

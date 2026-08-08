@@ -108,10 +108,10 @@ export function SpaceSwitcher({
           }}
           onBlur={() => setTooltipOpen(false)}
           className={cn(
-            "relative flex w-full items-center gap-2.5 rounded-xl border border-border/40 bg-muted/30 text-left outline-none transition-all",
+            "relative flex w-full items-center gap-2.5 rounded-xl border border-border/40 bg-muted/30 text-left outline-none transition",
             "hover:border-primary/40 hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50",
             "data-open:border-primary/40 data-open:bg-muted/50",
-            collapsed ? "mx-auto h-11 w-11 justify-center px-0" : "h-12 px-3",
+            collapsed ? "mx-auto size-11 justify-center px-0" : "h-12 px-3",
           )}
         >
           <SpaceGlyph

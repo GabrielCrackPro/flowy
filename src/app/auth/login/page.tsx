@@ -113,7 +113,8 @@ export default function LoginPage() {
                   <FormControl>
                     <Input
                       type="email"
-                      startIcon={<Icon icon={Mail} className="h-4 w-4" />}
+                      autoComplete="email"
+                      startIcon={<Icon icon={Mail} className="size-4" />}
                       placeholder={t("common.emailPlaceholder")}
                       className="h-11"
                       {...field}
@@ -138,17 +139,24 @@ export default function LoginPage() {
                   <FormControl>
                     <Input
                       type={showPassword ? "text" : "password"}
-                      startIcon={<Icon icon={Lock} className="h-4 w-4" />}
+                      autoComplete={showPassword ? "off" : "current-password"}
+                      startIcon={<Icon icon={Lock} className="size-4" />}
                       endIcon={
                         <button
                           type="button"
+                          aria-label={
+                            showPassword
+                              ? t("common.hidePassword")
+                              : t("common.showPassword")
+                          }
+                          aria-pressed={showPassword}
                           onClick={() => setShowPassword((v) => !v)}
                           className="flex items-center text-muted-foreground transition-colors hover:text-foreground"
                         >
                           {showPassword ? (
-                            <Icon icon={EyeOff} className="h-4 w-4" />
+                            <Icon icon={EyeOff} className="size-4" />
                           ) : (
-                            <Icon icon={Eye} className="h-4 w-4" />
+                            <Icon icon={Eye} className="size-4" />
                           )}
                         </button>
                       }
@@ -177,7 +185,7 @@ export default function LoginPage() {
                     type="checkbox"
                     checked={field.value}
                     onChange={field.onChange}
-                    className="h-4 w-4 rounded border-border"
+                    className="size-4 rounded border-border"
                   />
                   {t("common.rememberMe")}
                 </label>
@@ -204,13 +212,13 @@ export default function LoginPage() {
             >
               {busy ? (
                 <>
-                  <Icon icon={Loader2} className="mr-2 h-4 w-4 animate-spin" />
+                  <Icon icon={Loader2} className="mr-2 size-4 animate-spin" />
                   {t("common.submitting")}
                 </>
               ) : (
                 <>
                   {t("common.submitLogin")}
-                  <Icon icon={ArrowRight} className="ml-2 h-4 w-4" />
+                  <Icon icon={ArrowRight} className="ml-2 size-4" />
                 </>
               )}
             </Button>

@@ -48,7 +48,7 @@ export function CategorySelector({
   return (
     <div className="flex min-w-0 flex-1 flex-col items-end gap-1.5">
       <Popover>
-        <PopoverTrigger className="rounded-lg border border-border/30 px-2.5 py-1 text-sm font-medium text-foreground outline-none transition-all hover:border-primary/50 hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-primary/30">
+        <PopoverTrigger className="rounded-lg border border-border/30 px-2.5 py-1 text-sm font-medium text-foreground outline-none transition hover:border-primary/50 hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-primary/30">
           {selectedTags.length > 0
             ? `${selectedTags.length} ${selectedTags.length !== 1 ? selectedTextPlural : selectedText}`
             : loading
@@ -88,7 +88,7 @@ export function CategorySelector({
                     type="button"
                     onClick={() => onSelect(category.id)}
                     className={cn(
-                      "flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-xs transition-all",
+                      "flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-xs transition",
                       isSelected
                         ? "bg-linear-to-r from-primary/10 to-primary/5 text-primary"
                         : "text-muted-foreground hover:bg-linear-to-r hover:from-muted/50 hover:to-muted/30 hover:text-foreground",
@@ -96,7 +96,7 @@ export function CategorySelector({
                   >
                     <span
                       className={cn(
-                        "flex size-4 shrink-0 items-center justify-center rounded-lg border transition-all",
+                        "flex size-4 shrink-0 items-center justify-center rounded-lg border transition",
                         isSelected
                           ? "border-primary bg-linear-to-br from-primary to-primary/90 text-primary-foreground"
                           : "border-border/30 bg-card",

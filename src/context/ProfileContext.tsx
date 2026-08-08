@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
   type ReactNode,
@@ -8,7 +9,6 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useAuth } from "@/hooks/useAuth";
 import { ensureProfile, getProfile, updateProfile } from "@/lib/api/profile";
@@ -34,14 +34,19 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   const query = useQuery({
     queryKey: ["profile", user?.id],
-    queryFn: () => getProfile(user?.id!),
+    queryFn: () => {
+      if (!user?.id) throw new Error("No hay un usuario autenticado.");
+      return getProfile(user.id);
+    },
     enabled: !!user?.id,
     retry: false,
   });
 
   const updateMutation = useMutation({
-    mutationFn: (values: Partial<Omit<Profile, "id" | "createdAt">>) =>
-      updateProfile(user?.id!, values as any),
+    mutationFn: (values: Partial<Omit<Profile, "id" | "createdAt">>) => {
+      if (!user?.id) throw new Error("No hay un usuario autenticado.");
+      return updateProfile(user.id, values);
+    },
     onSuccess: (profile) => {
       queryClient.setQueryData(["profile", user?.id], profile);
     },
@@ -58,7 +63,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     } catch {
       // Error handled by query
     }
-  }, [user?.id, query]);
+  }, [user?.id, query, queryClient]);
 
   const update = useCallback(
     async (values: Partial<Omit<Profile, "id" | "createdAt">>) => {

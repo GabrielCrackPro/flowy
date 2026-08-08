@@ -262,7 +262,7 @@ export function DashboardCustomize({
                       <div
                         key={id}
                         className={cn(
-                          "flex items-center gap-3 rounded-xl border border-border/40 bg-card/50 p-2.5 pl-3 transition-all duration-200",
+                          "flex items-center gap-3 rounded-xl border border-border/40 bg-card/50 p-2.5 pl-3 transition duration-200",
                           "hover:border-border/70 hover:bg-card hover:shadow-sm",
                           !checked && "opacity-70",
                         )}

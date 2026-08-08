@@ -326,7 +326,7 @@ export default function TransactionDetailPage() {
                         whileTap={{ scale: 0.98 }}
                         onClick={handleToggleType}
                         className={cn(
-                          "relative flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-semibold transition-all",
+                          "relative flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-semibold transition",
                           active
                             ? isExpenseType
                               ? "text-rose-600 dark:text-rose-400"
@@ -840,7 +840,7 @@ function CommentsSection({ transactionId }: { transactionId: string }) {
   );
 
   const commentAvatar = profile ? (
-    <UserAvatar profile={profile} size="sm" className="h-8 w-8 text-[10px]" />
+    <UserAvatar profile={profile} size="sm" className="size-8 text-[10px]" />
   ) : (
     <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted" />
   );
@@ -929,7 +929,7 @@ function CommentsSection({ transactionId }: { transactionId: string }) {
           className="mt-5 flex items-start gap-3"
         >
           {commentAvatar}
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border/60 bg-muted/20 py-1.5 pl-3.5 pr-1.5 transition-all focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border/60 bg-muted/20 py-1.5 pl-3.5 pr-1.5 transition focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10">
             <input
               type="text"
               value={commentText}
@@ -940,7 +940,7 @@ function CommentsSection({ transactionId }: { transactionId: string }) {
             <button
               type="submit"
               disabled={!commentText.trim() || commentsBusy}
-              className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-20"
+              className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-20"
             >
               {commentsBusy ? (
                 <span className="size-3 animate-spin rounded-full border-[1.5px] border-current border-t-transparent" />
@@ -1027,7 +1027,7 @@ function CommentRow({
       size="sm"
       className={cn(
         "shrink-0",
-        compact ? "h-6 w-6 text-[9px]" : "h-8 w-8 text-[10px]",
+        compact ? "size-6 text-[9px]" : "size-8 text-[10px]",
       )}
     />
   ) : (
@@ -1171,7 +1171,7 @@ function CommentRow({
           }}
           className="mt-2 ml-11 flex items-center gap-2"
         >
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border/60 bg-muted/20 py-1.5 pl-3.5 pr-1.5 transition-all focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border/60 bg-muted/20 py-1.5 pl-3.5 pr-1.5 transition focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10">
             <input
               type="text"
               value={replyText}
@@ -1182,7 +1182,7 @@ function CommentRow({
             <button
               type="submit"
               disabled={!replyText.trim() || commentsBusy}
-              className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-20"
+              className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-20"
             >
               {commentsBusy ? (
                 <span className="size-3 animate-spin rounded-full border-[1.5px] border-current border-t-transparent" />

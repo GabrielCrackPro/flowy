@@ -49,7 +49,7 @@ export function SidebarTooltip({ target, open, label }: SidebarTooltipProps) {
     >
       <span
         aria-hidden
-        className="absolute -left-0.5 top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 rounded-[1px] border-l border-t border-border/60 bg-popover"
+        className="absolute -left-0.5 top-1/2 size-2 -translate-y-1/2 rotate-45 rounded-[1px] border-l border-t border-border/60 bg-popover"
       />
       {label}
     </motion.div>,

@@ -51,8 +51,8 @@ export function CommandPaletteResults({
               <div className="mx-4 my-1.5 border-t border-border/30" />
             )}
             <div className="flex items-center gap-2 px-3 pb-1 pt-0.5">
-              <div className="flex h-4 w-4 items-center justify-center">
-                <Icon icon={IconComponent} className="h-3 w-3" />
+              <div className="flex size-4 items-center justify-center">
+                <Icon icon={IconComponent} className="size-3" />
               </div>
               <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
                 {t(sectionLabels[type])}

@@ -20,12 +20,7 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  useAmountInput,
-  useCurrencyFormatting,
-  useDateLocale,
-  useThrottle,
-} from "@/hooks";
+import { useAmountInput, useDateLocale, useThrottle } from "@/hooks";
 import { Camera, Command, Loader2, Pencil, Plus } from "@/lib/icons";
 import { BackHeader } from "../dashboard/header/BackHeader";
 import { AnimatedGradient } from "./animated-gradient";
@@ -85,11 +80,6 @@ export function TransactionForm({
 
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [touched, setTouched] = useState<Set<string>>(new Set());
-
-  const { currencySymbol, formatCompactAmount } = useCurrencyFormatting({
-    locale,
-    currency,
-  });
 
   // Get currency symbol position
   const { currencySymbol: detectedSymbol, symbolPosition } = useMemo(() => {
@@ -162,7 +152,7 @@ export function TransactionForm({
 
   const isExpense = values.type === "EXPENSE";
 
-  const selectedTags = useMemo(
+  const _selectedTags = useMemo(
     () =>
       categories.filter((category) =>
         (values.categoryIds ?? []).includes(category.id),
@@ -192,7 +182,7 @@ export function TransactionForm({
     return errors.description;
   }, [touched, values.description, errors.description, t]);
 
-  const formLayoutId = useId();
+  const _formLayoutId = useId();
 
   const isFormValid =
     (values.description ?? "").trim().length > 0 &&
@@ -344,7 +334,7 @@ export function TransactionForm({
                         whileTap={{ scale: 0.95 }}
                         onClick={() => amountInput.setAmount(amount)}
                         className={cn(
-                          "rounded-full px-3 py-1 text-xs font-medium tabular-nums transition-all",
+                          "rounded-full px-3 py-1 text-xs font-medium tabular-nums transition",
                           parseFloat(amountInput.rawAmount) === amount
                             ? isExpense
                               ? "bg-linear-to-r from-rose-500 to-rose-600 text-white shadow-md"

@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+set -e
+
+# Commit-msg hook: enforce conventional commit messages
+# (e.g. `feat:`, `fix:`, `chore:`, `refactor:`). A non-conforming
+# message aborts the commit.
+pnpm exec commitlint --edit "$1"

@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+set -e
+
+# Pre-commit hook:
+# 1. lint-staged applies `biome check --write` (formatting, import
+#    organization, and safe lint fixes) to staged files and re-stages them.
+#    Any non-fixable lint error aborts the commit.
+# 2. A full project typecheck catches type errors before they land.
+pnpm exec lint-staged
+pnpm typecheck

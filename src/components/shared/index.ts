@@ -1,5 +1,6 @@
 export * from "./alert";
 export * from "./animated-component";
+export * from "./animated-gradient";
 export * from "./animated-number";
 export * from "./card-skeleton";
 export * from "./command-palette/index";
@@ -15,7 +16,6 @@ export * from "./error-display";
 export * from "./favicon";
 export * from "./file-upload";
 export * from "./filter";
-export * from "./animated-gradient";
 export * from "./gradient-button";
 export * from "./icon";
 export * from "./page-transition";

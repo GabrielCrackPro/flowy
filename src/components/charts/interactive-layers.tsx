@@ -1,8 +1,7 @@
 "use client";
 
-import * as React from "react";
-import * as RechartsPrimitive from "recharts";
 import { motion } from "framer-motion";
+import type * as React from "react";
 import type { ChartLayer } from "./chart-layer-system";
 
 export interface InteractiveLayerProps {

@@ -1,10 +1,10 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { ChevronDown, ChevronUp, Eye, EyeOff, GripVertical } from "@/lib/icons";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronUp, GripVertical, Eye, EyeOff } from "@/lib/icons";
 
 export interface ChartLayer {
   id: string;
@@ -119,7 +119,7 @@ export function ChartLayerSystem({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
                 className={cn(
-                  "group flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm transition-all",
+                  "group flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm transition",
                   layer.disabled
                     ? "opacity-50 cursor-not-allowed"
                     : "cursor-grab active:cursor-grabbing hover:bg-muted/50",

@@ -2,7 +2,6 @@
 
 import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react/alert-dialog";
 import type * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -138,7 +137,7 @@ function AlertDialogAction({
     <AlertDialogPrimitive.Close
       data-slot="alert-dialog-action"
       className={cn(
-        "inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-destructive to-destructive/90 px-4 py-2 text-sm font-medium text-destructive-foreground shadow-md shadow-destructive/20 transition-all hover:from-destructive/90 hover:to-destructive/80 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-destructive to-destructive/90 px-4 py-2 text-sm font-medium text-destructive-foreground shadow-md shadow-destructive/20 transition hover:from-destructive/90 hover:to-destructive/80 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
         className,
       )}
       {...props}
@@ -154,7 +153,7 @@ function AlertDialogCancel({
     <AlertDialogPrimitive.Close
       data-slot="alert-dialog-cancel"
       className={cn(
-        "inline-flex items-center justify-center rounded-lg border border-border/30 bg-background px-4 py-2 text-sm font-medium transition-all hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex items-center justify-center rounded-lg border border-border/30 bg-background px-4 py-2 text-sm font-medium transition hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
         className,
       )}
       {...props}

@@ -41,7 +41,7 @@ export function CommandPaletteFilters({
         whileTap={{ scale: 0.95 }}
         onClick={() => onFilterChange("all")}
         data-active={activeFilter === "all"}
-        className="rounded-lg px-2.5 py-1 text-xs font-medium transition-all data-[active=true]:bg-gradient-to-r from-primary to-primary/90 text-white data-[active=true]:shadow-md data-[active=false]:text-muted-foreground/70 data-[active=false]:hover:text-foreground"
+        className="rounded-lg px-2.5 py-1 text-xs font-medium transition data-[active=true]:bg-gradient-to-r from-primary to-primary/90 text-white data-[active=true]:shadow-md data-[active=false]:text-muted-foreground/70 data-[active=false]:hover:text-foreground"
       >
         {t("filters.all")}
       </motion.button>
@@ -56,9 +56,9 @@ export function CommandPaletteFilters({
             whileTap={{ scale: 0.95 }}
             onClick={() => onFilterChange(type)}
             data-active={activeFilter === type}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all data-[active=true]:bg-gradient-to-r from-primary to-primary/90 text-white data-[active=true]:shadow-md data-[active=false]:text-muted-foreground/70 data-[active=false]:hover:text-foreground"
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition data-[active=true]:bg-gradient-to-r from-primary to-primary/90 text-white data-[active=true]:shadow-md data-[active=false]:text-muted-foreground/70 data-[active=false]:hover:text-foreground"
           >
-            <Icon icon={FIcon} className="h-3 w-3" />
+            <Icon icon={FIcon} className="size-3" />
             {t(sectionLabels[type])}
           </motion.button>
         );

@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@lib/utils";
-import { type Variants, motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import type { ReactNode } from "react";
 
 interface EmptyStateProps {

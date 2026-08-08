@@ -5,9 +5,9 @@ import {
   ProfileForm,
   SpaceManager,
 } from "@components/profile";
-import { ThemeCustomizationSheet } from "@/components/profile/theme-customization-modal";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ThemeCustomizationSheet } from "@/components/profile/theme-customization-modal";
 import { Animated, Icon, Skeleton, UserAvatar } from "@/components/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -86,7 +86,7 @@ export default function SettingsPage() {
           <CardContent>
             {loading ? (
               <div className="flex items-center gap-4">
-                <div className="h-16 w-16">
+                <div className="size-16">
                   <Skeleton variant="circular" />
                 </div>
                 <div className="space-y-2">

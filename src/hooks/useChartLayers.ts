@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
 import type { ChartLayer } from "@components/charts/chart-layer-system";
+import { useCallback, useState } from "react";
 
 export function useChartLayers(initialLayers: ChartLayer[]) {
   const [layers, setLayers] = useState<ChartLayer[]>(initialLayers);

@@ -1,6 +1,6 @@
-export { TransactionDetailsRow } from "./TransactionDetailsRow";
+export { AdditionalOptions } from "./AdditionalOptions";
 export { CategorySelector } from "./CategorySelector";
 export { DateSelector } from "./DateSelector";
-export { TypeSelector } from "./TypeSelector";
+export { TransactionDetailsRow } from "./TransactionDetailsRow";
 export { TransactionSidebar } from "./TransactionSidebar";
-export { AdditionalOptions } from "./AdditionalOptions";
+export { TypeSelector } from "./TypeSelector";

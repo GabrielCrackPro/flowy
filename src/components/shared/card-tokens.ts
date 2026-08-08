@@ -1,5 +1,5 @@
 export const CARD_SHELL =
-  "relative overflow-hidden rounded-2xl border border-border/30 bg-card shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]";
+  "relative overflow-hidden rounded-2xl border border-border/30 bg-card shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]";
 
 export const CARD_TOP_ACCENT =
   "pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r";

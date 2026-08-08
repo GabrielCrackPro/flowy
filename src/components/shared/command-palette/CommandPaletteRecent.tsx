@@ -29,7 +29,7 @@ export function CommandPaletteRecent({
           animate={{ rotate: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Icon icon={Clock} className="h-3 w-3" />
+          <Icon icon={Clock} className="size-3" />
         </motion.div>
         <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
           {t("search.recent")}
@@ -64,7 +64,7 @@ export function CommandPaletteRecent({
             onClick={onClearRecent}
             className="flex items-center gap-1 text-[11px] text-muted-foreground/40 transition-colors hover:text-muted-foreground/70"
           >
-            <Icon icon={X} className="h-3 w-3" />
+            <Icon icon={X} className="size-3" />
             {t("search.clearRecent")}
           </motion.button>
         </div>

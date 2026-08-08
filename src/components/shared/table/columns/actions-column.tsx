@@ -57,12 +57,13 @@ export function ActionsColumn<T>({
           />
 
           <DropdownMenuContent align="end" sideOffset={4} className="min-w-36">
-            {items.map((item, index) =>
-              item.separator ? (
-                <DropdownMenuSeparator key={index} />
-              ) : (
+            {items.map((item) => {
+              if (item.separator) {
+                return <DropdownMenuSeparator key="separator" />;
+              }
+              return (
                 <DropdownMenuItem
-                  key={index}
+                  key={typeof item.label === "string" ? item.label : "action"}
                   variant={item.variant}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -72,8 +73,8 @@ export function ActionsColumn<T>({
                   {item.icon}
                   {item.label}
                 </DropdownMenuItem>
-              ),
-            )}
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
       );
