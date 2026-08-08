@@ -26,7 +26,7 @@ export function useBudgetApi(filters?: BudgetFilters) {
     createApi: createBudget,
     updateApi: updateBudget,
     deleteApi: deleteBudget,
-    entityName: "Presupuesto",
+    entityName: "common.budget",
     filters,
   });
 

@@ -1,7 +1,10 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-const FormLabel = React.forwardRef<
+// Standalone section-heading label used OUTSIDE react-hook-form context
+// (e.g. theme preview, color picker). Form inputs inside RHF forms use the
+// FormLabel exported by ReactForm.tsx, which wires htmlFor via useFormField.
+const FormSectionLabel = React.forwardRef<
   HTMLLabelElement,
   React.LabelHTMLAttributes<HTMLLabelElement> & { required?: boolean }
 >(({ className, required, children, ...props }, ref) => {
@@ -20,6 +23,6 @@ const FormLabel = React.forwardRef<
     </label>
   );
 });
-FormLabel.displayName = "FormLabel";
+FormSectionLabel.displayName = "FormSectionLabel";
 
-export { FormLabel };
+export { FormSectionLabel };

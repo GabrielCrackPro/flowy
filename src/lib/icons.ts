@@ -94,6 +94,8 @@ export {
   MoreHorizontal,
   Music,
   Palette,
+  PanelLeftClose,
+  PanelLeftOpen,
   Pencil,
   PiggyBank,
   Pill,

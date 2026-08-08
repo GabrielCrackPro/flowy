@@ -2,6 +2,7 @@
 
 import { Button } from "@components/ui";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared/icon";
 import { ArrowLeft } from "@/lib/icons";
 
@@ -15,6 +16,7 @@ interface BackHeaderProps {
 
 export function BackHeader({ title, href, actions }: BackHeaderProps) {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <div className="flex items-center justify-between gap-3">
@@ -22,7 +24,7 @@ export function BackHeader({ title, href, actions }: BackHeaderProps) {
         <Button
           variant="ghost"
           size="icon-lg"
-          aria-label="Volver"
+          aria-label={t("common.back")}
           className="shrink-0 rounded-full text-muted-foreground/60 transition-colors hover:text-foreground"
           onClick={() => (href ? router.push(href) : router.back())}
         >

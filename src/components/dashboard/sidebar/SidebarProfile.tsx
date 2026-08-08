@@ -9,19 +9,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
+import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon, Skeleton, UserAvatar } from "@/components/shared";
 import { useProfile } from "@/hooks/useProfile";
 import { useSignOut } from "@/hooks/useSignOut";
-import {
-  ChevronRight,
-  ChevronUp,
-  LogOut,
-  Settings2,
-  User as UserIcon,
-} from "@/lib/icons";
+import { ChevronUp, LogOut, Settings2, User as UserIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { SidebarTooltip } from "./SidebarTooltip";
 
@@ -41,10 +37,45 @@ export function SidebarProfile({
   const { profile } = useProfile();
   const { t } = useTranslation();
   const handleSignOut = useSignOut();
+  const router = useRouter();
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [target, setTarget] = useState<HTMLElement | null>(null);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  // Menu-item shortcuts (P → profile, , → preferences), active only while the
+  // menu is open on desktop. Capture phase + stopImmediatePropagation so Radix
+  // typeahead doesn't also react to the key.
+  useEffect(() => {
+    if (!open || variant !== "desktop") return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.isComposing) return;
+      if (
+        (e.target as HTMLElement | null)?.closest(
+          "input, textarea, [contenteditable]",
+        )
+      ) {
+        return;
+      }
+
+      if (e.key === "p" || e.key === "P") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        setOpen(false);
+        router.push("/dashboard/profile");
+      } else if (e.key === ",") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        setOpen(false);
+        router.push("/dashboard/profile#preferences");
+      }
+    };
+
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [open, router, variant]);
 
   useEffect(() => {
     setTarget(triggerRef.current);
@@ -86,7 +117,7 @@ export function SidebarProfile({
 
   return (
     <div className={cn("border-t border-border", className)}>
-      <DropdownMenu>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger
           ref={triggerRef}
           onMouseEnter={() => {
@@ -112,24 +143,39 @@ export function SidebarProfile({
             className="transition-transform duration-200 hover:scale-[1.03]"
           />
 
-          {!collapsed ? (
-            <>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-foreground leading-tight">
-                  {fullName}
-                </p>
+          <motion.div
+            initial={false}
+            animate={{
+              opacity: collapsed ? 0 : 1,
+              x: collapsed ? -6 : 0,
+              width: collapsed ? 0 : "auto",
+            }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="min-w-0 overflow-hidden"
+          >
+            <p className="truncate text-sm font-semibold text-foreground leading-tight">
+              {fullName}
+            </p>
 
-                <p className="truncate text-xs text-muted-foreground mt-0.5">
-                  {email}
-                </p>
-              </div>
+            <p className="truncate text-xs text-muted-foreground mt-0.5">
+              {email}
+            </p>
+          </motion.div>
 
-              <Icon
-                icon={ChevronUp}
-                className="ml-auto size-4 shrink-0 text-muted-foreground transition duration-200 group-hover:-translate-y-0.5 group-hover:text-foreground"
-              />
-            </>
-          ) : null}
+          <motion.span
+            initial={false}
+            animate={{
+              opacity: collapsed ? 0 : 1,
+              width: collapsed ? 0 : "auto",
+            }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className={cn("shrink-0 overflow-hidden", !collapsed && "ml-auto")}
+          >
+            <Icon
+              icon={ChevronUp}
+              className="size-4 text-muted-foreground transition duration-200 group-hover:-translate-y-0.5 group-hover:text-foreground"
+            />
+          </motion.span>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
@@ -170,6 +216,11 @@ export function SidebarProfile({
               >
                 <Icon icon={UserIcon} className="size-4" />
                 {t("profile.myProfile")}
+                {!mobile ? (
+                  <kbd className="ml-auto inline-flex items-center rounded border border-border/40 bg-background px-1.5 py-px text-[0.62rem] font-medium tabular-nums text-muted-foreground/80">
+                    P
+                  </kbd>
+                ) : null}
               </Link>
             </DropdownMenuItem>
 
@@ -186,6 +237,11 @@ export function SidebarProfile({
               >
                 <Icon icon={Settings2} className="size-4" />
                 {t("profile.preferences")}
+                {!mobile ? (
+                  <kbd className="ml-auto inline-flex items-center rounded border border-border/40 bg-background px-1.5 py-px text-[0.62rem] font-medium tabular-nums text-muted-foreground/80">
+                    ,
+                  </kbd>
+                ) : null}
               </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -205,10 +261,6 @@ export function SidebarProfile({
           >
             <Icon icon={LogOut} className="size-4" />
             {t("profile.signOut")}
-            <span className="ml-auto text-[0.68rem] text-muted-foreground/70 font-normal flex items-center gap-0.5">
-              {t("profile.esc")}
-              <Icon icon={ChevronRight} className="size-3" />
-            </span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -216,7 +268,14 @@ export function SidebarProfile({
       <SidebarTooltip
         target={collapsed ? target : null}
         open={tooltipOpen}
-        label={<span>{fullName}</span>}
+        label={
+          <span className="flex flex-col gap-0.5">
+            <span>{fullName}</span>
+            <span className="max-w-56 truncate text-[0.68rem] font-normal text-muted-foreground">
+              {email}
+            </span>
+          </span>
+        }
       />
     </div>
   );

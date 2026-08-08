@@ -8,9 +8,16 @@ interface SidebarTooltipProps {
   target: HTMLElement | null;
   open: boolean;
   label: ReactNode;
+  /** Optional id so the trigger can reference the tooltip via aria-describedby. */
+  id?: string;
 }
 
-export function SidebarTooltip({ target, open, label }: SidebarTooltipProps) {
+export function SidebarTooltip({
+  target,
+  open,
+  label,
+  id,
+}: SidebarTooltipProps) {
   const [mounted, setMounted] = useState(false);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
 
@@ -40,6 +47,7 @@ export function SidebarTooltip({ target, open, label }: SidebarTooltipProps) {
 
   return createPortal(
     <motion.div
+      id={id}
       role="tooltip"
       initial={{ opacity: 0, x: -6, y: "-50%", scale: 0.96 }}
       animate={{ opacity: 1, x: 0, y: "-50%", scale: 1 }}

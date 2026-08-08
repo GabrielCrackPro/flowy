@@ -4,6 +4,7 @@ import { Button } from "@components/ui";
 import { useTheme } from "@hooks/useTheme";
 import { cn } from "@lib/utils";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Moon, Sun } from "@/lib/icons";
 import { Icon } from "./icon";
 
@@ -13,6 +14,7 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
   const { isDark, toggleTheme } = useTheme();
+  const { t } = useTranslation();
 
   const [mounted, setMounted] = useState(false);
 
@@ -25,7 +27,11 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
       size="icon"
       variant="ghost"
       aria-label={
-        mounted ? (isDark ? "Modo claro" : "Modo oscuro") : "Cambiar tema"
+        mounted
+          ? isDark
+            ? t("common.lightMode")
+            : t("common.darkMode")
+          : t("common.toggleTheme")
       }
       className={cn(
         className,

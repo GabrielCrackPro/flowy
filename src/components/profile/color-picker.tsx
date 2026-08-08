@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { FormLabel } from "@/components/ui/form";
+import { FormSectionLabel } from "@/components/ui/form";
 import {
   Popover,
   PopoverContent,
@@ -48,7 +48,7 @@ export function ColorPicker({
 
   return (
     <div className={cn("space-y-2", className)}>
-      <FormLabel>{label}</FormLabel>
+      <FormSectionLabel>{label}</FormSectionLabel>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger>
           <Button
@@ -68,9 +68,9 @@ export function ColorPicker({
         <PopoverContent className="w-72 p-4" align="start">
           <div className="space-y-4">
             <div>
-              <FormLabel className="text-xs mb-3 block text-muted-foreground">
+              <FormSectionLabel className="text-xs mb-3 block text-muted-foreground">
                 Preset Colors
-              </FormLabel>
+              </FormSectionLabel>
               <div className="grid grid-cols-4 gap-2">
                 {PRESET_COLORS.map(({ color, name }) => (
                   <button
@@ -88,9 +88,9 @@ export function ColorPicker({
               </div>
             </div>
             <div>
-              <FormLabel className="text-xs mb-2 block text-muted-foreground">
+              <FormSectionLabel className="text-xs mb-2 block text-muted-foreground">
                 Custom Color
-              </FormLabel>
+              </FormSectionLabel>
               <div className="flex gap-2">
                 <div className="relative">
                   <input

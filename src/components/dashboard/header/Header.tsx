@@ -145,7 +145,7 @@ export function Header() {
             </motion.div>
 
             <nav
-              aria-label="Breadcrumb"
+              aria-label={t("header.breadcrumb")}
               className="flex min-w-0 items-center gap-1 text-sm"
             >
               {crumbs.map((crumb, i) => {

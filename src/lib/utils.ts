@@ -7,6 +7,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** True on macOS / iOS devices (used to pick ⌘ vs Ctrl in shortcut hints). */
+export function isMacPlatform(): boolean {
+  return (
+    typeof navigator !== "undefined" &&
+    /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent)
+  );
+}
+
 export function getUserInitials(
   profile: Profile | ProfileIdentity | null,
 ): string {

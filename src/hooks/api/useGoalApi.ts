@@ -21,7 +21,7 @@ export function useGoalApi(filters?: GoalFilters) {
     createApi: createGoal,
     updateApi: updateGoal,
     deleteApi: deleteGoal,
-    entityName: "Meta",
+    entityName: "common.goal",
     filters,
   });
 

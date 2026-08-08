@@ -10,6 +10,7 @@ import {
   type UseFormReturn,
   useForm as useReactHookForm,
 } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import type { z } from "zod";
 
 export type ReactFormErrors<T extends Record<string, unknown>> = Partial<
@@ -53,6 +54,7 @@ export function useReactForm<T extends Record<string, unknown>>({
   schema,
   onSubmit,
 }: UseReactFormOptions<T>): UseReactFormResult<T> {
+  const { t } = useTranslation();
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -134,13 +136,13 @@ export function useReactForm<T extends Record<string, unknown>>({
         const message =
           caughtError instanceof Error
             ? caughtError.message
-            : "Ocurrió un error inesperado";
+            : t("common.unexpectedError");
         setError(message);
       } finally {
         setBusy(false);
       }
     },
-    [form, onSubmit],
+    [form, onSubmit, t],
   );
 
   const reset = useCallback(() => {

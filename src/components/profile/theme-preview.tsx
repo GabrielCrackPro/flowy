@@ -5,7 +5,7 @@ import { Icon } from "@/components/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FormLabel } from "@/components/ui/form";
+import { FormSectionLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -83,7 +83,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
 
       {/* Buttons Section */}
       <div className="space-y-3">
-        <FormLabel>{t("settings.theme.preview.sectionButtons")}</FormLabel>
+        <FormSectionLabel>
+          {t("settings.theme.preview.sectionButtons")}
+        </FormSectionLabel>
         <div className="flex flex-wrap gap-3">
           <Button
             style={{
@@ -119,7 +121,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
 
       {/* Cards Section */}
       <div className="space-y-3">
-        <FormLabel>{t("settings.theme.preview.sectionCards")}</FormLabel>
+        <FormSectionLabel>
+          {t("settings.theme.preview.sectionCards")}
+        </FormSectionLabel>
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="p-4 space-y-3">
             <div className="flex items-center gap-2">
@@ -201,7 +205,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
 
       {/* Form Elements */}
       <div className="space-y-3">
-        <FormLabel>{t("settings.theme.preview.sectionFormElements")}</FormLabel>
+        <FormSectionLabel>
+          {t("settings.theme.preview.sectionFormElements")}
+        </FormSectionLabel>
         <div className="space-y-3">
           <Input placeholder={t("settings.theme.preview.emailPlaceholder")} />
           <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/20 p-4">
@@ -221,7 +227,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
 
       {/* Badges & Tags */}
       <div className="space-y-3">
-        <FormLabel>{t("settings.theme.preview.sectionBadges")}</FormLabel>
+        <FormSectionLabel>
+          {t("settings.theme.preview.sectionBadges")}
+        </FormSectionLabel>
         <div className="flex flex-wrap gap-2">
           <Badge>{t("settings.theme.preview.badgeDefault")}</Badge>
           <Badge variant="secondary">Secondary</Badge>
@@ -235,7 +243,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
 
       {/* Interactive Elements */}
       <div className="space-y-3">
-        <FormLabel>{t("settings.theme.preview.sectionInteractive")}</FormLabel>
+        <FormSectionLabel>
+          {t("settings.theme.preview.sectionInteractive")}
+        </FormSectionLabel>
         <div className="flex flex-wrap gap-3">
           <Button size="icon" variant="outline">
             <Icon icon={Sparkles} className="size-4" />
@@ -254,7 +264,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
 
       {/* Navigation Preview */}
       <div className="space-y-3">
-        <FormLabel>{t("settings.theme.preview.sectionNavigation")}</FormLabel>
+        <FormSectionLabel>
+          {t("settings.theme.preview.sectionNavigation")}
+        </FormSectionLabel>
         <Card className="p-3">
           <div
             className="flex items-center gap-2 rounded-lg p-2 text-primary-foreground"
@@ -279,7 +291,9 @@ export function ThemePreview({ className, colors }: ThemePreviewProps) {
 
       {/* Color Palette Display */}
       <div className="space-y-3">
-        <FormLabel>{t("settings.theme.preview.sectionPalette")}</FormLabel>
+        <FormSectionLabel>
+          {t("settings.theme.preview.sectionPalette")}
+        </FormSectionLabel>
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-2">
             <div

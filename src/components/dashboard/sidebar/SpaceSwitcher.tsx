@@ -111,15 +111,37 @@ export function SpaceSwitcher({
             "relative flex w-full items-center gap-2.5 rounded-xl border border-border/40 bg-muted/30 text-left outline-none transition",
             "hover:border-primary/40 hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50",
             "data-open:border-primary/40 data-open:bg-muted/50",
-            collapsed ? "mx-auto size-11 justify-center px-0" : "h-12 px-3",
+            collapsed
+              ? "mx-auto size-11 justify-center px-0"
+              : "h-12 justify-between px-3",
           )}
         >
-          <SpaceGlyph
-            name={activeSpace?.name ?? ""}
-            active={!!activeSpace}
-            shared={activeSpace ? !activeSpace.isPersonal : false}
-            className={collapsed ? "size-9" : "size-8"}
-          />
+          <span className="flex min-w-0 items-center gap-2.5">
+            <SpaceGlyph
+              name={activeSpace?.name ?? ""}
+              active={!!activeSpace}
+              shared={activeSpace ? !activeSpace.isPersonal : false}
+              className={collapsed ? "size-9" : "size-8"}
+            />
+
+            <motion.span
+              initial={false}
+              animate={{
+                opacity: collapsed ? 0 : 1,
+                x: collapsed ? -6 : 0,
+                width: collapsed ? 0 : "auto",
+              }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="min-w-0 overflow-hidden"
+            >
+              <span className="block truncate text-sm font-semibold text-foreground">
+                {displayName}
+              </span>
+              <span className="block truncate text-[0.65rem] text-muted-foreground uppercase tracking-wide">
+                {subtitle}
+              </span>
+            </motion.span>
+          </span>
 
           {collapsed && isPending ? (
             <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md ring-2 ring-background">
@@ -136,34 +158,31 @@ export function SpaceSwitcher({
             </span>
           ) : null}
 
-          {!collapsed ? (
-            <>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold text-foreground">
-                  {displayName}
-                </span>
-                <span className="block truncate text-[0.65rem] text-muted-foreground uppercase tracking-wide">
-                  {subtitle}
-                </span>
-              </span>
-
-              {isPending ? (
-                <motion.span
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 0.8,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                  className="shrink-0 text-muted-foreground/60"
-                >
-                  <Icon icon={Loader2} className="size-4" />
-                </motion.span>
-              ) : (
-                <Icon icon={ChevronsUpDown} className="size-3.5 shrink-0" />
-              )}
-            </>
-          ) : null}
+          <motion.span
+            initial={false}
+            animate={{
+              opacity: collapsed ? 0 : 1,
+              width: collapsed ? 0 : "auto",
+            }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="shrink-0 overflow-hidden"
+          >
+            {isPending ? (
+              <motion.span
+                animate={{ rotate: 360 }}
+                transition={{
+                  duration: 0.8,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="text-muted-foreground/60"
+              >
+                <Icon icon={Loader2} className="size-4" />
+              </motion.span>
+            ) : (
+              <Icon icon={ChevronsUpDown} className="size-3.5 shrink-0" />
+            )}
+          </motion.span>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent

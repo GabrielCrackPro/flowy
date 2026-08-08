@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared";
 import { Command, SearchIcon } from "@/lib/icons";
+import { isMacPlatform } from "@/lib/utils";
 
 interface SearchProps {
   onOpenDialog?: () => void;
@@ -12,6 +13,7 @@ interface SearchProps {
 
 export function Search({ onOpenDialog }: SearchProps) {
   const { t } = useTranslation();
+  const isMac = isMacPlatform();
 
   return (
     <motion.div
@@ -30,10 +32,19 @@ export function Search({ onOpenDialog }: SearchProps) {
         readOnly
       />
       <motion.kbd
+        suppressHydrationWarning
         className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 flex h-6 items-center gap-1 rounded-lg border border-border/30 bg-gradient-to-br from-background to-background/50 px-2 text-xs text-muted-foreground/70 shadow-sm"
         whileHover={{ scale: 1.05 }}
       >
-        <Icon icon={Command} className="size-3" />K
+        {isMac ? (
+          <>
+            <Icon icon={Command} className="size-3" />K
+          </>
+        ) : (
+          <span className="text-[0.7rem] font-semibold tracking-wide">
+            Ctrl K
+          </span>
+        )}
       </motion.kbd>
     </motion.div>
   );

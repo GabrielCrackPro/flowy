@@ -25,7 +25,7 @@ export function useCategoryApi() {
     createApi: createCategory,
     updateApi: updateCategory,
     deleteApi: deleteCategory,
-    entityName: "Categoría",
+    entityName: "common.category",
   });
 
   // Handle both array and paginated response formats

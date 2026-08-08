@@ -27,7 +27,7 @@ export function useTransactionApi(filters?: TransactionFilters) {
     createApi: createTransaction,
     updateApi: updateTransaction,
     deleteApi: deleteTransaction,
-    entityName: "Transacción",
+    entityName: "common.transaction",
     filters,
   });
 

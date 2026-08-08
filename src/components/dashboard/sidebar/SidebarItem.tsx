@@ -15,6 +15,10 @@ interface SidebarItemProps {
   collapsed?: boolean;
   onClick?: () => void;
   badge?: string | number;
+  /** Shared-layout id for the sliding active pill; must be unique per mounted tree. */
+  pillLayoutId?: string;
+  /** Stagger delay (ms) for the label fade when the sidebar expands. */
+  expandDelay?: number;
 }
 
 export function SidebarItem({
@@ -25,6 +29,8 @@ export function SidebarItem({
   collapsed = false,
   onClick,
   badge,
+  pillLayoutId = "sidebar-active-pill",
+  expandDelay = 0,
 }: SidebarItemProps) {
   const linkRef = useRef<HTMLAnchorElement>(null);
   const [target, setTarget] = useState<HTMLElement | null>(null);
@@ -64,47 +70,68 @@ export function SidebarItem({
             : "active:scale-[0.98]",
           active
             ? collapsed
-              ? "bg-linear-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30 ring-2 ring-primary/25"
-              : "bg-linear-to-r from-primary to-primary/90 text-primary-foreground shadow-md shadow-primary/20"
-            : "text-muted-foreground hover:bg-linear-to-r hover:from-muted/50 hover:to-muted/30 hover:text-foreground",
+              ? "bg-primary/10 text-primary ring-1 ring-inset ring-primary/15"
+              : "text-foreground"
+            : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
         )}
       >
+        {/* Sliding active pill (expanded) — glides between items on navigation */}
+        {active && !collapsed ? (
+          <motion.span
+            layoutId={pillLayoutId}
+            className="absolute inset-0 rounded-xl bg-primary/10 ring-1 ring-inset ring-primary/15"
+            transition={{ type: "spring", stiffness: 380, damping: 32 }}
+          />
+        ) : null}
+
+        {/* Left accent indicator */}
         <motion.span
           className={cn(
-            "absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full transition duration-200",
-            active ? "bg-white/80 opacity-100" : "opacity-0",
+            "absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary transition duration-200",
             collapsed ? "hidden" : "",
           )}
-          animate={{ opacity: active ? 1 : 0 }}
+          initial={false}
+          animate={{ opacity: active ? 1 : 0, scale: active ? 1 : 0.5 }}
         />
 
         <motion.div
-          whileHover={{ scale: collapsed ? 1.15 : 1.1, rotate: active ? 0 : 5 }}
+          whileHover={{ scale: collapsed ? 1.15 : 1.08 }}
           transition={{ duration: 0.2 }}
-          className={cn(
-            "flex shrink-0 items-center justify-center transition duration-200",
-            collapsed ? "size-8 rounded-lg" : "",
-            collapsed && active ? "bg-white/10" : "",
-          )}
+          className="flex shrink-0 items-center justify-center rounded-lg transition duration-200"
         >
           <Icon
             icon={IconComponent}
             className={cn(
-              "size-5 shrink-0 transition duration-200",
-              !active && "text-muted-foreground group-hover:text-foreground",
+              "size-5 shrink-0 transition duration-200 group-hover:scale-105",
+              active
+                ? "text-primary"
+                : "text-muted-foreground group-hover:text-foreground",
             )}
           />
         </motion.div>
 
         <motion.div
-          className={cn(
-            "flex flex-1 items-center gap-2 overflow-hidden transition duration-200",
-            collapsed ? "hidden" : "w-auto opacity-100 visible",
-          )}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: collapsed ? 0 : 1 }}
+          className="flex min-w-0 items-center gap-2 overflow-hidden"
+          initial={false}
+          animate={{
+            opacity: collapsed ? 0 : 1,
+            x: collapsed ? -8 : 0,
+            width: collapsed ? 0 : "auto",
+          }}
+          transition={{
+            duration: 0.25,
+            ease: [0.16, 1, 0.3, 1],
+            delay: collapsed ? 0 : expandDelay / 1000,
+          }}
         >
-          <span className="truncate font-medium">{label}</span>
+          <span
+            className={cn(
+              "truncate font-medium transition-transform duration-200 group-hover:translate-x-0.5",
+              active && "font-semibold",
+            )}
+          >
+            {label}
+          </span>
           {hasBadge ? (
             <motion.span
               initial={{ scale: 0.8 }}
@@ -112,8 +139,8 @@ export function SidebarItem({
               className={cn(
                 "inline-flex min-w-[1.25rem] h-5 items-center justify-center rounded-md px-1.5 text-[0.7rem] font-semibold tabular-nums shrink-0",
                 active
-                  ? "bg-white/20 text-white"
-                  : "bg-gradient-to-r from-primary/20 to-primary/10 text-primary",
+                  ? "bg-primary/15 text-primary"
+                  : "bg-muted/60 text-muted-foreground",
               )}
             >
               {badge}

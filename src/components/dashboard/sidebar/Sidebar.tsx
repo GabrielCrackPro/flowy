@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -16,7 +16,6 @@ import { Icon, type IconProps } from "@/components/shared";
 import { Button } from "@/components/ui";
 import {
   ArrowUpDown,
-  ChevronLeft,
   Droplet,
   Home,
   Plus,
@@ -28,6 +27,7 @@ import {
 } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { NewTransaction } from "../new-transaction";
+import { SidebarCollapseButton } from "./SidebarCollapseButton";
 import { SidebarItem } from "./SidebarItem";
 import { SidebarProfile } from "./SidebarProfile";
 import { SpaceSwitcher } from "./SpaceSwitcher";
@@ -146,8 +146,10 @@ export function SidebarContent({
     >
       <div
         className={cn(
-          "relative flex shrink-0 items-center justify-between border-b border-border/30",
-          collapsed && variant === "desktop" ? "px-2 py-5" : "px-5 py-5",
+          "flex shrink-0 items-center border-b border-border/30 transition-[padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          collapsed && variant === "desktop"
+            ? "flex-col gap-1.5 px-2 py-1.5"
+            : "justify-between px-5 py-5",
         )}
       >
         <Link
@@ -163,7 +165,7 @@ export function SidebarContent({
           <motion.div
             className={cn(
               "flex shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20 transition duration-300",
-              collapsed && variant === "desktop" ? "size-11" : "size-10",
+              collapsed && variant === "desktop" ? "size-9" : "size-10",
             )}
             whileHover={{ scale: 1.05, rotate: 5 }}
             whileTap={{ scale: 0.95 }}
@@ -175,14 +177,14 @@ export function SidebarContent({
           </motion.div>
 
           <motion.div
-            className={cn(
-              "min-w-0 transition duration-200",
-              collapsed && variant === "desktop"
-                ? "opacity-0 invisible w-0 overflow-hidden"
-                : "opacity-100 visible",
-            )}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: collapsed ? 0 : 1 }}
+            className="min-w-0 overflow-hidden"
+            initial={{ opacity: 0, x: -12 }}
+            animate={{
+              opacity: collapsed ? 0 : 1,
+              x: collapsed ? -12 : 0,
+              width: collapsed ? 0 : "auto",
+            }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
             <h1 className="text-lg font-bold tracking-tight leading-none bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Flowy
@@ -197,28 +199,10 @@ export function SidebarContent({
         </Link>
 
         {variant === "desktop" ? (
-          <motion.button
-            type="button"
-            aria-label={
-              collapsed ? t("nav.expandSidebar") : t("nav.collapseSidebar")
-            }
-            onClick={state.toggleCollapsed}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.88 }}
-            className="absolute -right-3 top-1/2 z-10 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-border/50 bg-card text-foreground/60 shadow-[0_2px_8px_rgba(0,0,0,0.08)] outline-none transition duration-200 hover:border-primary/60 hover:bg-primary/10 hover:text-primary hover:shadow-[0_2px_12px_rgba(0,0,0,0.12)] hover:shadow-primary/10 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:border-primary/50"
-          >
-            <motion.div
-              animate={{ rotate: collapsed ? 180 : 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 320,
-                damping: 22,
-                mass: 0.9,
-              }}
-            >
-              <Icon icon={ChevronLeft} className="size-3.5" />
-            </motion.div>
-          </motion.button>
+          <SidebarCollapseButton
+            collapsed={collapsed}
+            onToggle={state.toggleCollapsed}
+          />
         ) : (
           <motion.button
             type="button"
@@ -240,7 +224,7 @@ export function SidebarContent({
 
       <nav
         className={cn(
-          "flex-1 min-h-0 w-full scroll-smooth overflow-y-auto",
+          "sidebar-scrollbar flex-1 min-h-0 w-full scroll-smooth overflow-y-auto transition-[padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
           collapsed && variant === "desktop"
             ? "px-0 py-3 space-y-1"
             : "px-3 py-3 space-y-5",
@@ -252,11 +236,11 @@ export function SidebarContent({
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: sectionIndex * 0.05 }}
-            className="space-y-1"
+            className="space-y-1 transition-[margin-top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
           >
             <div
               className={cn(
-                "px-3 transition duration-200 overflow-hidden",
+                "px-3 transition duration-300 overflow-hidden",
                 collapsed && variant === "desktop"
                   ? "max-h-0 opacity-0"
                   : cn(
@@ -299,6 +283,12 @@ export function SidebarContent({
                       collapsed={collapsed && variant === "desktop"}
                       onClick={onNavigate}
                       badge={item.badge}
+                      expandDelay={itemIndex * 25}
+                      pillLayoutId={
+                        variant === "desktop"
+                          ? "sidebar-active-pill"
+                          : "sidebar-active-pill-mobile"
+                      }
                     />
                   </motion.div>
                 );
@@ -309,43 +299,49 @@ export function SidebarContent({
       </nav>
 
       <div className="shrink-0 border-t border-border/30">
-        {!(collapsed && variant === "desktop") ? (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-            className="p-3 pb-0 pt-3 transition duration-200"
-          >
-            <NewTransaction />
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-            className="p-3 pb-0 pt-3 transition duration-200"
-          >
-            <Button
-              asChild
-              size="icon"
-              className="mx-auto size-11 rounded-xl shadow-md flex bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 hover:ring-4 hover:ring-primary/20 transition duration-300"
+        <AnimatePresence initial={false} mode="popLayout">
+          {!(collapsed && variant === "desktop") ? (
+            <motion.div
+              key="cta-expanded"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="p-3 pb-0 pt-3"
             >
-              <Link
-                href="/dashboard/new"
-                onClick={onNavigate}
-                aria-label={t("nav.newTransaction")}
-                className="group"
+              <NewTransaction />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="cta-collapsed"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.85 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="p-3 pb-0 pt-3"
+            >
+              <Button
+                asChild
+                size="icon"
+                className="mx-auto flex size-11 rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-md transition duration-300 hover:from-primary/90 hover:to-primary/70 hover:ring-4 hover:ring-primary/20"
               >
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.3 }}
+                <Link
+                  href="/dashboard/transactions/add"
+                  onClick={onNavigate}
+                  aria-label={t("nav.newTransaction")}
+                  className="group"
                 >
-                  <Icon icon={Plus} className="size-5" />
-                </motion.div>
-              </Link>
-            </Button>
-          </motion.div>
-        )}
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Icon icon={Plus} className="size-5" />
+                  </motion.div>
+                </Link>
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div
           className={cn(
@@ -366,6 +362,7 @@ export function SidebarContent({
 }
 
 export function Sidebar() {
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const toggleCollapsed = useCallback(() => {
     setCollapsed((c) => {
@@ -389,16 +386,35 @@ export function Sidebar() {
     }
   }, []);
 
+  // Cmd/Ctrl + B toggles the sidebar (standard dashboard shortcut)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Let text editing keep its shortcuts (e.g. future rich-text bold)
+      if (
+        (e.target as HTMLElement)?.closest("input, textarea, [contenteditable]")
+      ) {
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
+        e.preventDefault();
+        toggleCollapsed();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [toggleCollapsed]);
+
   return (
     <SidebarStateContext.Provider
       value={{ collapsed, setCollapsed, toggleCollapsed }}
     >
       <aside
+        id="sidebar"
         style={{ width: collapsed ? "4.5rem" : "18rem" }}
         className={cn(
-          "hidden md:flex h-screen shrink-0 transition-[width] duration-300 ease-out border-r border-border/30 bg-transparent",
+          "hidden md:flex h-screen shrink-0 transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] border-r border-border/30 bg-transparent",
         )}
-        aria-label="Barra de navegación principal"
+        aria-label={t("nav.mainAriaLabel")}
       >
         <SidebarContent />
       </aside>

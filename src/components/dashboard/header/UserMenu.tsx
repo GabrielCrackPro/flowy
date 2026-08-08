@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { Icon, UserAvatar } from "@/components/shared";
 import { useProfile } from "@/hooks/useProfile";
 import { useSignOut } from "@/hooks/useSignOut";
-import { ChevronRight, LogOut, Settings2, User as UserIcon } from "@/lib/icons";
+import { LogOut, Settings2, User as UserIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export function UserMenu() {
@@ -88,10 +88,6 @@ export function UserMenu() {
         >
           <Icon icon={LogOut} className="size-4" />
           {t("profile.signOut")}
-          <span className="ml-auto text-[0.68rem] text-muted-foreground/70 font-normal flex items-center gap-0.5">
-            {t("profile.esc")}
-            <Icon icon={ChevronRight} className="size-3" />
-          </span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

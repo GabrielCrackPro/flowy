@@ -171,23 +171,6 @@ export function AccountSecurityActions() {
         }
       >
         <div className="space-y-6">
-          <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-background to-background p-5 shadow-sm">
-            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-            <div className="flex items-start gap-3">
-              <div className="flex size-10 items-center justify-center rounded-2xl bg-background/80 text-primary shadow-sm">
-                <Lock className="size-4" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-foreground">
-                  {t("settings.security.changePassword")}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {t("settings.security.changePasswordHint")}
-                </p>
-              </div>
-            </div>
-          </div>
-
           <form onSubmit={(e) => form.handleSubmit(e)} className="space-y-4">
             <div className="space-y-4 rounded-2xl border border-border/60 bg-gradient-to-br from-background to-muted/20 p-4 shadow-sm">
               <div className="space-y-2">

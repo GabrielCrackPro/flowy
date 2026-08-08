@@ -1,12 +1,9 @@
 "use client";
 
-import type { ChartLayer } from "@components/charts";
-import { ChartToggle } from "@components/charts";
 import {
   AnimatedNumber,
   EmptyState,
   Icon,
-  type IconProps,
   SectionCard,
 } from "@components/shared";
 import type { ChartConfig } from "@components/ui";
@@ -20,127 +17,37 @@ import { useGoalApi } from "@hooks/api/useGoalApi";
 import { useChartLayers } from "@hooks/useChartLayers";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
-import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Area,
-  Bar,
   CartesianGrid,
   ComposedChart,
   Legend,
-  Line,
   ReferenceLine,
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  Calendar,
-  ChartArea,
-  ChartColumn,
-  ChartLine,
-  ChevronRight,
-  Clock,
-  Layers,
-  TrendingUp,
-} from "@/lib/icons";
+import { ChartArea, ChevronRight, TrendingUp } from "@/lib/icons";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { DashboardData } from "@/types/Dashboard";
+import {
+  BALANCE_COLOR,
+  buildInitialLayers,
+  type ChartType,
+  EXPENSE_COLOR,
+  INCOME_COLOR,
+  NET_COLOR,
+  type TimePeriod,
+} from "./cash-flow-constants";
+import { CashFlowLegend } from "./cash-flow-legend";
+import { renderSeries } from "./cash-flow-series";
+import { CashFlowToolbar } from "./cash-flow-toolbar";
 import { ChartCardSkeleton } from "./chart-card";
-
-type ChartType = "area" | "bar" | "line";
-type TimePeriod = "week" | "month";
-
-const INCOME_COLOR = "#22c55e";
-const EXPENSE_COLOR = "#ef4444";
-const BALANCE_COLOR = "#3b82f6";
-const NET_COLOR = "#8b5cf6";
 
 interface CashFlowChartProps {
   month: number;
   year: number;
-}
-
-function buildInitialLayers(t: (key: string) => string): ChartLayer[] {
-  return [
-    {
-      id: "income",
-      name: t("charts.income"),
-      type: "area",
-      visible: true,
-      color: INCOME_COLOR,
-      dataKey: "income",
-    },
-    {
-      id: "expenses",
-      name: t("charts.expenses"),
-      type: "area",
-      visible: true,
-      color: EXPENSE_COLOR,
-      dataKey: "expenses",
-    },
-    {
-      id: "balance",
-      name: t("charts.balance"),
-      type: "line",
-      visible: false,
-      color: BALANCE_COLOR,
-      dataKey: "balance",
-    },
-    {
-      id: "net",
-      name: t("charts.net"),
-      type: "line",
-      visible: false,
-      color: NET_COLOR,
-      dataKey: "net",
-    },
-  ];
-}
-
-function renderSeries(layer: ChartLayer, chartType: ChartType) {
-  const { dataKey, color } = layer;
-  if (!dataKey) return null;
-
-  const fillOpacity = chartType === "area" ? 0.2 : undefined;
-
-  if (chartType === "area") {
-    return (
-      <Area
-        key={layer.id}
-        dataKey={dataKey}
-        type="monotone"
-        fill={color}
-        fillOpacity={fillOpacity}
-        stroke={color}
-        strokeWidth={2}
-      />
-    );
-  }
-
-  if (chartType === "bar") {
-    return (
-      <Bar
-        key={layer.id}
-        dataKey={dataKey}
-        fill={color}
-        radius={[4, 4, 0, 0]}
-      />
-    );
-  }
-
-  return (
-    <Line
-      key={layer.id}
-      dataKey={dataKey}
-      type="monotone"
-      stroke={color}
-      strokeWidth={2}
-      dot={false}
-      activeDot={{ r: 4 }}
-    />
-  );
 }
 
 export function CashFlowChart({ month, year }: CashFlowChartProps) {
@@ -272,27 +179,6 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
     [locale],
   );
 
-  const chartTypeTabs: {
-    value: ChartType;
-    label: string;
-    icon: IconProps["icon"];
-  }[] = [
-    { value: "area", label: t("charts.area"), icon: ChartArea },
-    { value: "bar", label: t("charts.bar"), icon: ChartColumn },
-    { value: "line", label: t("charts.line"), icon: ChartLine },
-  ];
-
-  const timePeriodTabs: {
-    value: TimePeriod;
-    label: string;
-    icon: IconProps["icon"];
-  }[] = [
-    { value: "week", label: t("charts.week"), icon: Clock },
-    { value: "month", label: t("charts.month"), icon: Calendar },
-  ];
-
-  const layersCollapsed = collapsedGroups.has("layers");
-
   const tooltipFormatter = (value: unknown, name: unknown) => {
     const key = String(name);
     const color =
@@ -338,134 +224,24 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
       title={getTitle()}
       description={getDescription()}
       action={
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <ChartToggle<TimePeriod>
-            value={timePeriod}
-            onChange={(period) => {
-              setTimePeriod(period);
-              localStorage.setItem("flowy-time-period", period);
-            }}
-            options={timePeriodTabs}
-            groupIcon={Clock}
-            collapsible
-            collapsed={collapsedGroups.has("timePeriod")}
-            onCollapseToggle={() => toggleGroup("timePeriod")}
-            labelHiddenUntil="md"
-          />
-          <ChartToggle<ChartType>
-            value={chartType}
-            onChange={(type) => {
-              setChartType(type);
-              localStorage.setItem("flowy-chart-type", type);
-            }}
-            options={chartTypeTabs}
-            groupIcon={ChartArea}
-            collapsible
-            collapsed={collapsedGroups.has("chartType")}
-            onCollapseToggle={() => toggleGroup("chartType")}
-          />
-
-          {/* Inline layers multi-toggle — matches ChartToggle style */}
-          <div className="inline-flex items-center gap-1 rounded-xl border border-border/30 bg-card p-1 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-            <motion.button
-              type="button"
-              onClick={() => toggleGroup("layers")}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              aria-expanded={!layersCollapsed}
-              className="flex items-center gap-1.5 rounded-lg py-1.5 pr-1.5 pl-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
-            >
-              <Icon icon={Layers} className="size-3.5" />
-              <motion.span
-                animate={{ rotate: layersCollapsed ? 0 : 90 }}
-                transition={{ duration: 0.2 }}
-                className="flex"
-              >
-                <Icon icon={ChevronRight} className="size-3" />
-              </motion.span>
-            </motion.button>
-
-            <AnimatePresence initial={false}>
-              {!layersCollapsed && (
-                <motion.div
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex items-center gap-0.5 overflow-hidden"
-                >
-                  {layers.map((layer) => {
-                    const active = layer.visible;
-                    return (
-                      <button
-                        key={layer.id}
-                        type="button"
-                        onClick={() =>
-                          handleLayerVisibilityChange(layer.id, !layer.visible)
-                        }
-                        aria-pressed={active}
-                        title={layer.name}
-                        className={cn(
-                          "relative flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium outline-none transition-colors duration-200 focus-visible:ring-3 focus-visible:ring-ring/40 hover:bg-muted/60",
-                          active
-                            ? "text-foreground"
-                            : "text-muted-foreground/60",
-                        )}
-                      >
-                        {active && (
-                          <motion.span
-                            layoutId="layer-active-pill"
-                            transition={{
-                              type: "spring",
-                              stiffness: 420,
-                              damping: 32,
-                            }}
-                            className="absolute inset-0 rounded-lg bg-primary/10 ring-1 ring-inset ring-primary/20"
-                          />
-                        )}
-                        <span
-                          className="relative z-10 size-2 shrink-0 rounded-full"
-                          style={{ backgroundColor: layer.color }}
-                        />
-                        <span className="relative z-10 hidden sm:inline">
-                          {layer.name}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          <motion.button
-            type="button"
-            onClick={() => setShowOverlays(!showOverlays)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            aria-pressed={showOverlays}
-            className={cn(
-              "flex h-8 items-center gap-1.5 rounded-xl border px-3 text-xs font-medium transition-colors duration-200",
-              showOverlays
-                ? "border-primary/40 bg-primary/10 text-primary"
-                : "border-border/30 bg-card text-muted-foreground shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-primary/30 hover:text-foreground",
-            )}
-          >
-            <AnimatePresence>
-              {showOverlays ? (
-                <motion.span
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  className="size-1.5 rounded-full bg-primary"
-                />
-              ) : null}
-            </AnimatePresence>
-            <Icon icon={TrendingUp} className="size-3.5" />
-            <span className="hidden sm:inline">{t("charts.overlays")}</span>
-          </motion.button>
-        </div>
+        <CashFlowToolbar
+          chartType={chartType}
+          onChartTypeChange={(type) => {
+            setChartType(type);
+            localStorage.setItem("flowy-chart-type", type);
+          }}
+          timePeriod={timePeriod}
+          onTimePeriodChange={(period) => {
+            setTimePeriod(period);
+            localStorage.setItem("flowy-time-period", period);
+          }}
+          layers={layers}
+          onLayerVisibilityChange={handleLayerVisibilityChange}
+          collapsedGroups={collapsedGroups}
+          onToggleGroup={toggleGroup}
+          showOverlays={showOverlays}
+          onToggleOverlays={() => setShowOverlays((prev) => !prev)}
+        />
       }
     >
       {hasData && hasAnyLayerVisible ? (
@@ -500,39 +276,12 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
               <Legend
                 verticalAlign="top"
                 height={36}
-                content={({ payload }) => {
-                  if (!payload || payload.length === 0) return null;
-                  return (
-                    <div className="flex items-center gap-4">
-                      {payload.map(
-                        (entry: {
-                          value?: string | number;
-                          color?: string;
-                        }) => {
-                          const key = String(
-                            entry.value,
-                          ) as keyof typeof chartConfig;
-                          const label =
-                            chartConfig[key]?.label ?? String(entry.value);
-                          return (
-                            <div
-                              key={`${entry.value}-${entry.color}`}
-                              className="flex items-center gap-1.5"
-                            >
-                              <div
-                                className="size-3 rounded-sm"
-                                style={{ backgroundColor: entry.color }}
-                              />
-                              <span className="text-xs text-muted-foreground">
-                                {label}
-                              </span>
-                            </div>
-                          );
-                        },
-                      )}
-                    </div>
-                  );
-                }}
+                content={(props) => (
+                  <CashFlowLegend
+                    payload={props.payload}
+                    chartConfig={chartConfig}
+                  />
+                )}
               />
               {showOverlays &&
                 budgetLines.map((budget) => (

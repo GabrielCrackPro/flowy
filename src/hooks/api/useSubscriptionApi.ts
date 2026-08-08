@@ -26,7 +26,7 @@ export function useSubscriptionApi(filters?: SubscriptionFilters) {
     createApi: createSubscription,
     updateApi: updateSubscription,
     deleteApi: deleteSubscription,
-    entityName: "Suscripción",
+    entityName: "common.subscription",
     filters,
   });
 

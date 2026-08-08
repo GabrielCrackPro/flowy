@@ -7,28 +7,21 @@ import { useProfile } from "@hooks/useProfile";
 import { useReactForm } from "@hooks/useReactForm";
 import type { CreateTransactionSchema } from "@lib/schemas";
 import { createTransactionSchema } from "@lib/schemas";
-import { cn, formatCurrency } from "@lib/utils";
+import { cn } from "@lib/utils";
 import { getOptions, PAYMENT_METHOD_KEY } from "@utils/constants";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAmountInput, useDateLocale, useThrottle } from "@/hooks";
-import { Camera, Command, Loader2, Pencil, Plus } from "@/lib/icons";
+import { Camera, Pencil } from "@/lib/icons";
 import { BackHeader } from "../dashboard/header/BackHeader";
-import { AnimatedGradient } from "./animated-gradient";
 import { FileUpload } from "./file-upload";
 import { Icon } from "./icon";
 import { AdditionalOptions } from "./transaction-form/AdditionalOptions";
+import { AmountSection } from "./transaction-form/AmountSection";
+import { FormActions } from "./transaction-form/FormActions";
 import { TransactionSidebar } from "./transaction-form/TransactionSidebar";
-import { TypeSelector } from "./transaction-form/TypeSelector";
 
 interface TransactionFormProps {
   mode: "create" | "edit";
@@ -82,7 +75,10 @@ export function TransactionForm({
   const [touched, setTouched] = useState<Set<string>>(new Set());
 
   // Get currency symbol position
-  const { currencySymbol: detectedSymbol, symbolPosition } = useMemo(() => {
+  const { currencySymbol: detectedSymbol, symbolPosition } = useMemo<{
+    currencySymbol: string;
+    symbolPosition: "before" | "after";
+  }>(() => {
     try {
       const parts = new Intl.NumberFormat(locale, {
         style: "currency",
@@ -152,14 +148,6 @@ export function TransactionForm({
 
   const isExpense = values.type === "EXPENSE";
 
-  const _selectedTags = useMemo(
-    () =>
-      categories.filter((category) =>
-        (values.categoryIds ?? []).includes(category.id),
-      ),
-    [categories, values.categoryIds],
-  );
-
   const toggleCategory = useCallback(
     (id: string) => {
       const current = values.categoryIds ?? [];
@@ -181,8 +169,6 @@ export function TransactionForm({
     if (!desc) return t("transaction.validation.descriptionRequired");
     return errors.description;
   }, [touched, values.description, errors.description, t]);
-
-  const _formLayoutId = useId();
 
   const isFormValid =
     (values.description ?? "").trim().length > 0 &&
@@ -238,152 +224,22 @@ export function TransactionForm({
           )}
         >
           <div className="space-y-6">
-            <motion.section
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
-              className="relative overflow-hidden rounded-2xl border border-border/30 bg-card shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-            >
-              <AnimatedGradient
-                active={isExpense}
-                className="absolute inset-0"
-                classNameA="bg-linear-to-br from-rose-500/15 via-rose-500/5 to-transparent"
-                classNameB="bg-linear-to-br from-emerald-500/15 via-emerald-500/5 to-transparent"
-              />
-
-              <AnimatedGradient
-                active={isExpense}
-                className="absolute inset-x-0 top-0 h-px"
-                classNameA="bg-linear-to-r from-rose-500 via-rose-400 to-rose-500"
-                classNameB="bg-linear-to-r from-emerald-500 via-emerald-400 to-emerald-500"
-              />
-
-              <div
-                className={cn("relative p-5", embedded ? "sm:p-5" : "sm:p-6")}
-              >
-                <TypeSelector
-                  value={values.type}
-                  onChange={handleTypeChange}
-                  expenseLabel={t("transaction.expense")}
-                  incomeLabel={t("transaction.income")}
-                  embedded={embedded}
-                />
-
-                <div className="mt-5 flex items-baseline gap-2">
-                  {symbolPosition === "before" && (
-                    <motion.span
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 0.3, delay: 0.2 }}
-                      className={cn(
-                        "text-3xl font-semibold tabular-nums",
-                        isExpense ? "text-rose-600/70" : "text-emerald-600/70",
-                      )}
-                    >
-                      {detectedSymbol}
-                    </motion.span>
-                  )}
-                  <input
-                    ref={amountRef}
-                    value={amountInput.rawAmount}
-                    onChange={amountInput.handleAmountChange}
-                    onFocus={amountInput.handleAmountFocus}
-                    onBlur={amountInput.handleAmountBlur}
-                    placeholder="0.00"
-                    autoComplete="off"
-                    inputMode="decimal"
-                    className={cn(
-                      "w-full min-w-0 bg-transparent font-bold tabular-nums tracking-tight outline-none placeholder:text-muted-foreground/30",
-                      embedded ? "text-4xl" : "text-4xl sm:text-5xl",
-                      isExpense ? "text-rose-600" : "text-emerald-600",
-                    )}
-                  />
-                  {symbolPosition === "after" && (
-                    <motion.span
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 0.3, delay: 0.2 }}
-                      className={cn(
-                        "text-3xl font-semibold tabular-nums",
-                        isExpense ? "text-rose-600/70" : "text-emerald-600/70",
-                      )}
-                    >
-                      {detectedSymbol}
-                    </motion.span>
-                  )}
-                </div>
-
-                <div className="mt-4 flex flex-wrap items-center gap-1.5">
-                  {[10, 20, 50, 100, 200, 500].map((amount, index) => {
-                    const formatQuickAmount = (amt: number): string => {
-                      if (symbolPosition === "before") {
-                        return `${detectedSymbol}${amt.toLocaleString(locale)}`;
-                      }
-                      return `${amt.toLocaleString(locale)}${detectedSymbol}`;
-                    };
-
-                    return (
-                      <motion.button
-                        key={amount}
-                        type="button"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{
-                          duration: 0.2,
-                          delay: 0.3 + index * 0.05,
-                        }}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => amountInput.setAmount(amount)}
-                        className={cn(
-                          "rounded-full px-3 py-1 text-xs font-medium tabular-nums transition",
-                          parseFloat(amountInput.rawAmount) === amount
-                            ? isExpense
-                              ? "bg-linear-to-r from-rose-500 to-rose-600 text-white shadow-md"
-                              : "bg-linear-to-r from-emerald-500 to-emerald-600 text-white shadow-md"
-                            : "bg-background/80 text-muted-foreground/80 ring-1 ring-border/30 hover:text-foreground hover:ring-border/50",
-                        )}
-                      >
-                        {formatQuickAmount(amount)}
-                      </motion.button>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-4 flex items-center justify-between gap-3 border-t border-border/30 pt-3">
-                  <span className="truncate text-xs text-muted-foreground/50">
-                    {values.description?.trim() ||
-                      (isExpense
-                        ? t("transaction.expense")
-                        : t("transaction.income"))}
-                  </span>
-                  <motion.span
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 0.3, delay: 0.4 }}
-                    className={cn(
-                      "shrink-0 text-sm font-semibold tabular-nums",
-                      isExpense ? "text-rose-600" : "text-emerald-600",
-                    )}
-                  >
-                    {values.amount > 0
-                      ? `${isExpense ? "−" : "+"}${formatCurrency(
-                          values.amount,
-                          locale,
-                          currency,
-                        )}`
-                      : formatCurrency(0, locale, currency)}
-                  </motion.span>
-                </div>
-
-                {touched.has("amount") && errors.amount ? (
-                  <motion.p
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-2 text-xs text-rose-600 dark:text-rose-400"
-                  >
-                    {errors.amount}
-                  </motion.p>
-                ) : null}
-              </div>
-            </motion.section>
+            <AmountSection
+              embedded={embedded}
+              isExpense={isExpense}
+              type={values.type}
+              onTypeChange={handleTypeChange}
+              amountRef={amountRef}
+              amountInput={amountInput}
+              detectedSymbol={detectedSymbol}
+              symbolPosition={symbolPosition}
+              locale={locale}
+              currency={currency}
+              description={values.description}
+              amount={values.amount}
+              amountError={errors.amount}
+              amountTouched={touched.has("amount")}
+            />
 
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -526,56 +382,15 @@ export function TransactionForm({
             </div>
           ) : null}
 
-          {/* Submit / cancel buttons: rendered in-flow under the sidebar column normally,
-              or as the final block in the single-column embedded layout */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-            className={cn(
-              "flex flex-col gap-2",
-              embedded ? "" : "lg:col-start-2",
-            )}
-          >
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button
-                onClick={throttledSubmit}
-                disabled={!isFormValid || busy}
-                size="lg"
-                className={cn(
-                  "w-full text-primary-foreground shadow-lg",
-                  isExpense
-                    ? "bg-linear-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700"
-                    : "bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700",
-                )}
-              >
-                {busy ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Icon icon={Loader2} className="size-4 animate-spin" />
-                    {t("transaction.saving")}
-                  </span>
-                ) : (
-                  <>
-                    <Icon icon={Plus} className="size-4" />
-                    {mode === "edit"
-                      ? t("transaction.saveChanges")
-                      : t("transaction.save")}
-                  </>
-                )}
-                <kbd className="ml-2 flex items-center gap-0.5 rounded-md border border-white/30 bg-white/10 px-1.5 py-0.5 text-[10px] text-primary-foreground">
-                  <Icon icon={Command} className="size-2.5" />
-                  <span>↵</span>
-                </kbd>
-              </Button>
-            </motion.div>
-            <Button
-              variant="ghost"
-              onClick={goBack}
-              className="w-full text-muted-foreground/70 hover:text-foreground hover:bg-muted/30"
-            >
-              {t("transaction.cancel")}
-            </Button>
-          </motion.div>
+          <FormActions
+            embedded={embedded}
+            isExpense={isExpense}
+            busy={busy}
+            disabled={!isFormValid}
+            mode={mode}
+            onSave={throttledSubmit}
+            onCancel={goBack}
+          />
         </div>
 
         {error ? (

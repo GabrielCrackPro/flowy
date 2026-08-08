@@ -94,6 +94,7 @@ export type AppTranslationMessages = {
     collapseSidebar: string;
     openMenu: string;
     closeMenu: string;
+    mainAriaLabel: string;
   };
   profile: {
     user: string;
@@ -102,7 +103,6 @@ export type AppTranslationMessages = {
     myProfile: string;
     preferences: string;
     signOut: string;
-    esc: string;
     noMerchant: string;
     active: string;
     inactive: string;
@@ -260,6 +260,7 @@ export type AppTranslationMessages = {
     subscriptions: string;
     newTransaction: string;
     overview: string;
+    breadcrumb: string;
   };
   dashboard: {
     financialSummary: string;
@@ -778,6 +779,24 @@ export type AppTranslationMessages = {
     viewGrid: string;
     viewTable: string;
     close: string;
+    yes: string;
+    no: string;
+    element: string;
+    transaction: string;
+    budget: string;
+    category: string;
+    goal: string;
+    subscription: string;
+    entityCreated: string;
+    entityUpdated: string;
+    entityDeleted: string;
+    errorCreating: string;
+    errorDeleting: string;
+    unexpectedError: string;
+    back: string;
+    lightMode: string;
+    darkMode: string;
+    toggleTheme: string;
   };
 };
 

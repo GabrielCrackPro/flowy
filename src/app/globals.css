@@ -148,6 +148,33 @@ a,
   background: transparent;
 }
 
+/* Sidebar nav: extra-thin scrollbar, only visible while hovering/scrolling */
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.sidebar-scrollbar:hover,
+.sidebar-scrollbar:focus-within {
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: transparent;
+  border: none;
+}
+
+.sidebar-scrollbar:hover::-webkit-scrollbar-thumb,
+.sidebar-scrollbar:focus-within::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+}
+
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));

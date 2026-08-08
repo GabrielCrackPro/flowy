@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "@/components/shared/toast";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -11,6 +12,7 @@ interface EntityApiConfig<T, F, C, U> {
   createApi: (data: C) => Promise<T>;
   updateApi: (id: string, data: U) => Promise<T>;
   deleteApi: (id: string) => Promise<void>;
+  /** i18n key for the entity label used in success/error toasts (e.g. "common.transaction"). */
   entityName?: string;
   filters?: F;
   invalidateDependentQueries?: boolean;
@@ -52,8 +54,11 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
   invalidateDependentQueries = true,
 }: EntityApiConfig<T, F, C, U>) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const activeSpaceId = profile?.activeSpaceId ?? null;
+
+  const entityLabel = t(entityName ?? "common.element");
 
   // Refetch every query for this entity (any space, filter or view) plus the
   // queries that aggregate it, so no page keeps stale data after a mutation.
@@ -102,13 +107,15 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
           };
         },
       );
-      toast.success(`${entityName ?? "Elemento"} creado correctamente`);
+      toast.success(t("common.entityCreated", { entity: entityLabel }));
 
       // Refresh every view of this entity
       invalidateEntityQueries(queryClient);
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Error al crear");
+      toast.error(
+        error instanceof Error ? error.message : t("common.errorCreating"),
+      );
     },
   });
 
@@ -177,7 +184,7 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
       // Refresh every view of this entity
       invalidateEntityQueries(queryClient);
 
-      toast.success(`${entityName ?? "Elemento"} actualizado correctamente`);
+      toast.success(t("common.entityUpdated", { entity: entityLabel }));
     },
   });
 
@@ -214,13 +221,15 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
       return { previous };
     },
     onSuccess: () => {
-      toast.success(`${entityName ?? "Elemento"} eliminado correctamente`);
+      toast.success(t("common.entityDeleted", { entity: entityLabel }));
 
       // Refresh every view of this entity
       invalidateEntityQueries(queryClient);
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Error al eliminar");
+      toast.error(
+        error instanceof Error ? error.message : t("common.errorDeleting"),
+      );
     },
   });
 
