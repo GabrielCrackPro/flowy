@@ -1,4 +1,5 @@
 import { Header, Sidebar } from "@components/dashboard";
+import { OfflineBanner } from "@components/shared/offline-banner";
 import { PageTransition } from "@components/shared/page-transition";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -18,6 +19,9 @@ export default function DashboardLayout({
         <Sidebar />
       </Suspense>
       <div className="flex min-w-0 flex-1 flex-col">
+        <Suspense fallback={null}>
+          <OfflineBanner />
+        </Suspense>
         <Suspense fallback={null}>
           <Header />
         </Suspense>

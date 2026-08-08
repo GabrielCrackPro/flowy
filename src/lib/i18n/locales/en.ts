@@ -825,6 +825,27 @@ export const app: AppTranslationMessages = {
     updateHint: "Restart to apply the latest changes.",
     updateAction: "Update",
   },
+  offline: {
+    label: "Offline",
+    online: "Online",
+    offlineBanner: "You're offline \u2014 showing data saved on this device.",
+    pendingBanner: "{{count}} changes waiting to sync",
+    pendingChanges: "{{count}} changes pending",
+    pendingLabel: "Pending sync",
+    pendingTitle: "Pending changes",
+    popoverOffline:
+      "You're offline. Changes are saved on this device and will sync when you reconnect.",
+    popoverPending:
+      "Changes will sync automatically as soon as you're back online.",
+    legendLabel: "Status",
+    lastSync: "Last synced",
+    savedLocally:
+      "Saved on this device \u2014 it will sync when you're back online.",
+    queueFailed: "Couldn't save the change. Please try again.",
+    synced: "{{count}} changes synced",
+    syncFailed: "Some changes couldn't sync yet.",
+    retry: "Retry",
+  },
   common: {
     skipToContent: "Skip to content",
     cancel: "Cancel",

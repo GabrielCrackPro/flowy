@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { classifyError, RateLimitError } from "@/lib/errors/error-types";
 import {
-  CalendarDays,
+  Calendar,
   Moon,
   RefreshCcw,
   RotateCcw,
@@ -135,7 +135,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
               )}
             >
               <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Icon icon={CalendarDays} className="size-3.5" />
+                <Icon icon={Calendar} className="size-3.5" />
               </span>
               {isFetching ? (
                 <span

@@ -7,9 +7,11 @@ import {
   CustomColumn,
   Icon,
   NumberColumn,
+  PendingSyncBadge,
   TextColumn,
 } from "@/components/shared";
 import { Pencil, Trash2 } from "@/lib/icons";
+import { isPendingSync } from "@/lib/offline";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { Budget } from "@/types/Budget";
 
@@ -47,6 +49,11 @@ export function buildBudgetColumns({
           </div>
         );
       },
+    }),
+
+    CustomColumn({
+      header: null,
+      cell: (budget) => (isPendingSync(budget) ? <PendingSyncBadge /> : null),
     }),
 
     TextColumn({

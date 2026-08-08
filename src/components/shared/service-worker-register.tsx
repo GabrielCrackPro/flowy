@@ -17,10 +17,20 @@ export function ServiceWorkerRegister() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (
-      process.env.NODE_ENV !== "production" ||
-      !("serviceWorker" in navigator)
-    ) {
+    if (!("serviceWorker" in navigator)) {
+      return;
+    }
+
+    // In development, a service worker left over from a previous production
+    // session on the same origin can keep serving stale cached chunks and
+    // break dev (e.g. "module factory is not available"). Unregister it so
+    // dev always runs with fresh modules.
+    if (process.env.NODE_ENV !== "production") {
+      void navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          void registration.unregister();
+        }
+      });
       return;
     }
 

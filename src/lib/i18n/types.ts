@@ -783,6 +783,24 @@ export type AppTranslationMessages = {
     updateHint: string;
     updateAction: string;
   };
+  offline: {
+    label: string;
+    online: string;
+    offlineBanner: string;
+    pendingBanner: string;
+    pendingChanges: string;
+    pendingLabel: string;
+    pendingTitle: string;
+    popoverOffline: string;
+    popoverPending: string;
+    legendLabel: string;
+    lastSync: string;
+    savedLocally: string;
+    queueFailed: string;
+    synced: string;
+    syncFailed: string;
+    retry: string;
+  };
   common: {
     skipToContent: string;
     cancel: string;

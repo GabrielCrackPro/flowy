@@ -3,9 +3,10 @@
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { resolveCategoryIcon } from "@/components/categories/category-icons";
-import { Icon } from "@/components/shared";
+import { Icon, PendingSyncBadge } from "@/components/shared";
 import { Button } from "@/components/ui";
 import { Pencil, Trash2 } from "@/lib/icons";
+import { isPendingSync } from "@/lib/offline";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { Budget } from "@/types/Budget";
 
@@ -83,6 +84,9 @@ export function BudgetCard({
                     ? `${budget.month}/${budget.year}`
                     : t("budgets.recurring")}
                 </p>
+                {isPendingSync(budget) && (
+                  <PendingSyncBadge className="mt-1.5" />
+                )}
               </div>
             </div>
           </div>
