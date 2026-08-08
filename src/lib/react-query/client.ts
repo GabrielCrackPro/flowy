@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
-import { isRateLimitError } from "@/lib/api/client";
 import { toast } from "@/components/shared/toast";
+import { isRateLimitError } from "@/lib/api/client";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,7 +14,7 @@ export const queryClient = new QueryClient({
         // Retry up to 1 time for other errors
         return failureCount < 1;
       },
-      refetchOnWindowFocus: false, // Don't refetch on window focus to avoid unnecessary reloads
+      refetchOnWindowFocus: true, // Refetch on focus, but only when data is stale
       refetchOnReconnect: false, // Don't refetch on reconnect unless needed
       refetchOnMount: true, // Refetch on mount only when the cached data is stale
     },

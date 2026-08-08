@@ -1,5 +1,6 @@
 import { cn } from "@lib/utils";
 import type { ReactNode } from "react";
+import { Skeleton } from "@/components/shared";
 import type { Column } from "../data-table";
 
 interface NumberColumnOptions<T> {
@@ -43,6 +44,19 @@ export function NumberColumn<T>({
       ? (row) => sortValue?.(row) ?? value(row) ?? 0
       : undefined,
 
+    skeleton: (
+      <div
+        className={cn(
+          "flex flex-col gap-1",
+          align === "left" && "items-start",
+          align === "center" && "items-center",
+          align === "right" && "items-end",
+        )}
+      >
+        <Skeleton className="h-4 w-16" />
+        {secondary && <Skeleton className="h-3 w-10" />}
+      </div>
+    ),
     cell: (row) => {
       const number = value(row);
 

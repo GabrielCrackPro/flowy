@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { TagBadge } from "@/components/shared/tag-badge";
+import { Skeleton, TagBadge } from "@/components/shared";
 import type { Category } from "@/types/Category";
 import type { Column } from "../data-table";
 
@@ -33,6 +33,12 @@ export function TagsColumn<T>({
               .join(", ") ?? ""
         : undefined),
 
+    skeleton: (
+      <div className="flex items-center gap-1">
+        <Skeleton variant="rounded" className="h-5 w-14" />
+        <Skeleton variant="rounded" className="h-5 w-10" />
+      </div>
+    ),
     cell: (row) => {
       const tags = getTags(row);
 

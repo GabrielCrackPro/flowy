@@ -1,5 +1,6 @@
 import { IncomeIcon, ExpenseIcon, Icon } from "../icon";
 import { motion } from "framer-motion";
+import { useId } from "react";
 import { cn } from "@/lib/utils";
 import type { TransactionType } from "@/types/Transaction";
 
@@ -19,6 +20,7 @@ export function TypeSelector({
   embedded = false,
 }: TypeSelectorProps) {
   const isExpense = value === "EXPENSE";
+  const layoutKey = useId();
 
   return (
     <div className="grid grid-cols-2 gap-1 rounded-2xl bg-background/80 p-1 shadow-inner">
@@ -44,9 +46,7 @@ export function TypeSelector({
           >
             {active ? (
               <motion.span
-                layoutId={
-                  embedded ? "amount-type-bg-embedded" : "amount-type-bg"
-                }
+                layoutId={`amount-type-bg-${layoutKey}`}
                 className="absolute inset-0 rounded-xl bg-card shadow-sm ring-1 ring-border/20"
                 transition={{
                   type: "spring",

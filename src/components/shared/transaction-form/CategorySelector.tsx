@@ -1,5 +1,5 @@
 import { Icon } from "@/components/shared";
-import { Check } from "@/lib/icons";
+import { Check, Search } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/popover";
 import { TagBadge } from "@/components/shared/tag-badge";
 import type { Category } from "@/types/Category";
+import { useMemo, useState } from "react";
 
 interface CategorySelectorProps {
   categories: Category[];
@@ -36,6 +37,16 @@ export function CategorySelector({
     selectedIds.includes(category.id),
   );
 
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q) return categories;
+    return categories.filter((cat) =>
+      cat.name.toLowerCase().includes(q),
+    );
+  }, [categories, search]);
+
   return (
     <div className="flex min-w-0 flex-1 flex-col items-end gap-1.5">
       <Popover>
@@ -50,13 +61,24 @@ export function CategorySelector({
           align="end"
           className="w-56 p-1.5 border-border/30 shadow-lg"
         >
-          <div className="flex max-h-64 flex-col gap-0.5 overflow-y-auto">
-            {categories.length === 0 ? (
+          <div className="mb-1 flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2 py-1.5">
+            <Icon icon={Search} className="size-3 shrink-0 text-muted-foreground" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={placeholder}
+              className="w-full bg-transparent text-xs outline-none placeholder:text-muted-foreground/50"
+              autoComplete="off"
+            />
+          </div>
+          <div className="flex max-h-52 flex-col gap-0.5 overflow-y-auto">
+            {filtered.length === 0 ? (
               <p className="px-2 py-3 text-center text-xs text-muted-foreground">
                 {emptyText}
               </p>
             ) : (
-              categories.map((category) => {
+              filtered.map((category) => {
                 const isSelected = selectedIds.includes(category.id);
 
                 return (

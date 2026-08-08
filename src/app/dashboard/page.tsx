@@ -12,9 +12,8 @@ import {
   SubscriptionCardList,
 } from "@components/dashboard";
 import { ChartCardSkeleton } from "@components/dashboard/charts/chart-card";
-import { Skeleton, StatsCardGroup } from "@components/shared";
+import { StatsCardGroup } from "@components/shared";
 import { ErrorBoundary } from "@components/shared/error-boundary";
-import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import {
   type ReactNode,
@@ -82,292 +81,6 @@ function SectionHeading({
   );
 }
 
-// Skeleton components for dashboard cards
-function DistributionCardSkeleton() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-3 rounded-2xl border border-border/30 bg-card p-6"
-    >
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10">
-          <Skeleton variant="rounded" />
-        </div>
-        <div className="space-y-2 flex-1">
-          <div className="h-5 w-32">
-            <Skeleton />
-          </div>
-          <div className="h-4 w-48">
-            <Skeleton />
-          </div>
-        </div>
-      </div>
-      <div className="space-y-4 pt-4">
-        <div className="h-3 w-full">
-          <Skeleton />
-        </div>
-        <div className="space-y-3">
-          {[1, 2].map((i) => (
-            <div key={i} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="h-6 w-6">
-                    <Skeleton variant="rounded" />
-                  </div>
-                  <div className="h-4 w-20">
-                    <Skeleton />
-                  </div>
-                </div>
-                <div className="h-4 w-16">
-                  <Skeleton />
-                </div>
-              </div>
-              <div className="h-2 w-full">
-                <Skeleton />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function RecentTransactionsCardSkeleton() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-3 rounded-2xl border border-border/30 bg-card p-6"
-    >
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10">
-          <Skeleton variant="rounded" />
-        </div>
-        <div className="space-y-2 flex-1">
-          <div className="h-5 w-32">
-            <Skeleton />
-          </div>
-          <div className="h-4 w-48">
-            <Skeleton />
-          </div>
-        </div>
-      </div>
-      <div className="space-y-3 pt-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="flex items-center gap-4 border-t border-border/30 py-3"
-          >
-            <div className="h-8 w-8">
-              <Skeleton variant="rounded" />
-            </div>
-            <div className="flex-1 space-y-2">
-              <div className="h-4 w-32">
-                <Skeleton />
-              </div>
-              <div className="h-3 w-20">
-                <Skeleton />
-              </div>
-            </div>
-            <div className="h-4 w-16">
-              <Skeleton />
-            </div>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-function BudgetProgressCardSkeleton() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-3 rounded-2xl border border-border/30 bg-card p-6"
-    >
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10">
-          <Skeleton variant="rounded" />
-        </div>
-        <div className="space-y-2 flex-1">
-          <div className="h-5 w-32">
-            <Skeleton />
-          </div>
-          <div className="h-4 w-48">
-            <Skeleton />
-          </div>
-        </div>
-      </div>
-      <div className="space-y-3 pt-4">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="space-y-2 rounded-xl border border-border/20 bg-muted/20 p-4"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-6">
-                  <Skeleton variant="rounded" />
-                </div>
-                <div className="h-4 w-20">
-                  <Skeleton />
-                </div>
-              </div>
-              <div className="h-5 w-8">
-                <Skeleton variant="rounded" />
-              </div>
-            </div>
-            <div className="h-2 w-full">
-              <Skeleton />
-            </div>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-function GoalProgressCardSkeleton() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-3 rounded-2xl border border-border/30 bg-card p-6"
-    >
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10">
-          <Skeleton variant="rounded" />
-        </div>
-        <div className="space-y-2 flex-1">
-          <div className="h-5 w-32">
-            <Skeleton />
-          </div>
-          <div className="h-4 w-48">
-            <Skeleton />
-          </div>
-        </div>
-      </div>
-      <div className="space-y-3 pt-4">
-        {[1, 2].map((i) => (
-          <div
-            key={i}
-            className="space-y-2 rounded-xl border border-border/20 bg-muted/20 p-4"
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-4 w-24">
-                <Skeleton />
-              </div>
-              <div className="h-4 w-16">
-                <Skeleton />
-              </div>
-            </div>
-            <div className="h-2 w-full">
-              <Skeleton />
-            </div>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-function SubscriptionCardListSkeleton() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-3 rounded-2xl border border-border/30 bg-card p-6"
-    >
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10">
-          <Skeleton variant="rounded" />
-        </div>
-        <div className="space-y-2 flex-1">
-          <div className="h-5 w-32">
-            <Skeleton />
-          </div>
-          <div className="h-4 w-48">
-            <Skeleton />
-          </div>
-        </div>
-      </div>
-      <div className="space-y-3 pt-4">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="flex items-center gap-3 rounded-xl border border-border/20 bg-muted/20 p-3"
-          >
-            <div className="h-8 w-8">
-              <Skeleton variant="rounded" />
-            </div>
-            <div className="flex-1 space-y-1">
-              <div className="h-4 w-24">
-                <Skeleton />
-              </div>
-              <div className="h-3 w-16">
-                <Skeleton />
-              </div>
-            </div>
-            <div className="h-4 w-12">
-              <Skeleton />
-            </div>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-function ActivityFeedCardSkeleton() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-3 rounded-2xl border border-border/30 bg-card p-6"
-    >
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10">
-          <Skeleton variant="rounded" />
-        </div>
-        <div className="space-y-2 flex-1">
-          <div className="h-5 w-32">
-            <Skeleton />
-          </div>
-          <div className="h-4 w-48">
-            <Skeleton />
-          </div>
-        </div>
-      </div>
-      <div className="space-y-3 pt-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex gap-3">
-            <div className="h-2 w-2 shrink-0">
-              <Skeleton variant="circular" />
-            </div>
-            <div className="flex-1 space-y-2">
-              <div className="h-4 w-full">
-                <Skeleton />
-              </div>
-              <div className="h-3 w-3/4">
-                <Skeleton />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
 export default function DashboardPage() {
   const { t } = useTranslation();
   const { isCardEnabled } = useDashboardCards();
@@ -427,47 +140,8 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 lg:space-y-8">
-      <Suspense
-        fallback={
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="space-y-4"
-          >
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12">
-                <Skeleton variant="rounded" />
-              </div>
-              <div className="space-y-2">
-                <div className="h-7 w-48">
-                  <Skeleton />
-                </div>
-                <div className="h-5 w-32">
-                  <Skeleton />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        }
-      >
-        <DashboardHeader month={month} year={year} />
-      </Suspense>
-
-      <Suspense
-        fallback={
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="h-16 rounded-2xl border border-border/30 bg-card"
-          >
-            <Skeleton className="h-full w-full" />
-          </motion.div>
-        }
-      >
-        <DashboardAlerts month={month} year={year} />
-      </Suspense>
+      <DashboardHeader month={month} year={year} />
+      <DashboardAlerts month={month} year={year} />
 
       <section className="space-y-5">
         <SectionHeading
@@ -536,16 +210,12 @@ export default function DashboardPage() {
                 >
                   {showDistribution && (
                     <ErrorBoundary>
-                      <Suspense fallback={<DistributionCardSkeleton />}>
-                        <DistributionCard month={month} year={year} />
-                      </Suspense>
+                      <DistributionCard month={month} year={year} />
                     </ErrorBoundary>
                   )}
                   {showRecentTransactions && (
                     <ErrorBoundary>
-                      <Suspense fallback={<RecentTransactionsCardSkeleton />}>
-                        <RecentTransactionsCard month={month} year={year} />
-                      </Suspense>
+                      <RecentTransactionsCard month={month} year={year} />
                     </ErrorBoundary>
                   )}
                   {(showBudgetProgress || showGoalProgress) && (
@@ -559,16 +229,12 @@ export default function DashboardPage() {
                     >
                       {showBudgetProgress && (
                         <ErrorBoundary>
-                          <Suspense fallback={<BudgetProgressCardSkeleton />}>
-                            <BudgetProgressCard month={month} year={year} />
-                          </Suspense>
+                          <BudgetProgressCard month={month} year={year} />
                         </ErrorBoundary>
                       )}
                       {showGoalProgress && (
                         <ErrorBoundary>
-                          <Suspense fallback={<GoalProgressCardSkeleton />}>
-                            <GoalProgressCard month={month} year={year} />
-                          </Suspense>
+                          <GoalProgressCard month={month} year={year} />
                         </ErrorBoundary>
                       )}
                     </div>
@@ -584,16 +250,12 @@ export default function DashboardPage() {
                 >
                   {showSubscriptions && (
                     <ErrorBoundary>
-                      <Suspense fallback={<SubscriptionCardListSkeleton />}>
-                        <SubscriptionCardList />
-                      </Suspense>
+                      <SubscriptionCardList />
                     </ErrorBoundary>
                   )}
                   {showActivity && (
                     <ErrorBoundary>
-                      <Suspense fallback={<ActivityFeedCardSkeleton />}>
-                        <ActivityFeedCard month={month} year={year} />
-                      </Suspense>
+                      <ActivityFeedCard month={month} year={year} />
                     </ErrorBoundary>
                   )}
                 </aside>

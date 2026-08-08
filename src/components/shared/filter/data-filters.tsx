@@ -32,12 +32,15 @@ export function DataFilters({
   onClear,
   className,
   title,
-  filterLabel = "Filtros",
-  clearLabel = "Limpiar filtros",
+  filterLabel,
+  clearLabel,
   open,
   onOpenChange,
 }: DataFiltersProps) {
   const { t } = useTranslation();
+
+  const resolvedFilterLabel = filterLabel ?? t("filters.title");
+  const resolvedClearLabel = clearLabel ?? t("filters.clearFilters");
 
   const {
     filtersOpen,
@@ -68,7 +71,7 @@ export function DataFilters({
               </h3>
 
               <p className="mt-0.5 text-xs leading-none text-muted-foreground/50">
-                Filtra y busca transacciones
+                {t("filters.filterAndSearch")}
               </p>
             </div>
           )}
@@ -77,7 +80,7 @@ export function DataFilters({
             open={filtersOpen}
             hasActiveFilters={hasActiveFilters}
             activeFiltersCount={activeFiltersCount}
-            label={filterLabel}
+            label={resolvedFilterLabel}
             onClick={() => setFiltersOpen(!filtersOpen)}
           />
         </div>
@@ -125,7 +128,7 @@ export function DataFilters({
             >
               <Icon icon={X} className="size-3" />
 
-              <span>{clearLabel}</span>
+              <span>{resolvedClearLabel}</span>
             </motion.button>
           )}
         </div>

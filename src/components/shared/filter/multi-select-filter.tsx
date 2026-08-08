@@ -1,11 +1,13 @@
 "use client";
 
-import { Icon } from "@/components/shared";
-import { Popover, PopoverContent, PopoverTrigger } from "@components/ui";
+import { Icon } from "@components/shared";
+import { Input, Popover, PopoverContent, PopoverTrigger } from "@components/ui";
 import { useMultiSelectFilter } from "@hooks/filter";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
-import { Check, ChevronDown } from "@/lib/icons";
+import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { Check, ChevronDown, Search, X } from "@/lib/icons";
 import type { FilterField, FilterValues } from "@/types/ui";
 import { FilterButton } from "./filter-button";
 import { FilterOptionIcon } from "./filter-option-icon";
@@ -21,18 +23,34 @@ export function MultiSelectFilter({
   values,
   onChange,
 }: MultiSelectFilterProps) {
+  const { t } = useTranslation();
   const { open, setOpen, selected, isActive, toggle } = useMultiSelectFilter({
     fieldKey: field.key,
     values,
     onChange,
   });
+  const [searchDraft, setSearchDraft] = useState("");
+
+  const filteredOptions = useMemo(() => {
+    if (!searchDraft.trim()) return field.options ?? [];
+    const query = searchDraft.toLowerCase();
+    return (field.options ?? []).filter((opt) =>
+      opt.label.toLowerCase().includes(query),
+    );
+  }, [field.options, searchDraft]);
 
   const selectedOptions = field.options?.filter((option) =>
     selected.includes(option.value),
   );
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) setSearchDraft("");
+      }}
+    >
       <PopoverTrigger
         render={
           <FilterButton active={isActive}>
@@ -53,9 +71,7 @@ export function MultiSelectFilter({
                   )}
                 </span>
                 <span className="max-w-24 truncate">
-                  {`${selected.length} seleccionado${
-                    selected.length !== 1 ? "s" : ""
-                  }`}
+                  {t("filters.selected", { count: selected.length })}
                 </span>
               </>
             ) : (
@@ -79,13 +95,42 @@ export function MultiSelectFilter({
         className="w-60 p-2 border-border/30 shadow-xl rounded-xl"
         sideOffset={8}
       >
-        <div className="flex flex-col gap-1">
+        {/* Search input inside dropdown */}
+        {field.options && field.options.length > 6 && (
+          <div className="relative mb-2">
+            <Icon
+              icon={Search}
+              className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground/50"
+            />
+            <Input
+              value={searchDraft}
+              onChange={(e) => setSearchDraft(e.target.value)}
+              placeholder={t("filters.searchOptions")}
+              className="h-8 rounded-lg border-border/30 bg-muted/20 pl-8 pr-8 text-xs placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:border-primary/40"
+            />
+            {searchDraft && (
+              <button
+                type="button"
+                onClick={() => setSearchDraft("")}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-0.5 text-muted-foreground/40 hover:text-foreground"
+              >
+                <Icon icon={X} className="size-3" />
+              </button>
+            )}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-1 max-h-64 overflow-y-auto">
           {!field.options?.length ? (
             <p className="px-3 py-4 text-center text-xs text-muted-foreground">
-              No hay opciones
+              {t("filters.noOptions")}
+            </p>
+          ) : filteredOptions.length === 0 ? (
+            <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+              {t("filters.noOptions")}
             </p>
           ) : (
-            field.options.map((option, index) => {
+            filteredOptions.map((option, index) => {
               const isSelected = selected.includes(option.value);
 
               return (

@@ -9,6 +9,7 @@ import {
 } from "@components/ui";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import type { FilterField } from "@/types/ui";
 import { FilterOptionIcon } from "./filter-option-icon";
 
@@ -23,6 +24,7 @@ export function SingleSelectFilter({
   value,
   onChange,
 }: SingleSelectFilterProps) {
+  const { t } = useTranslation();
   const active = !!value;
   const selectedOption = field.options?.find(
     (option) => option.value === value,
@@ -48,14 +50,14 @@ export function SingleSelectFilter({
             <FilterOptionIcon option={selectedOption} size="xs" />
           )}
           <SelectValue
-            placeholder={field.placeholder ?? "Todos"}
+            placeholder={field.placeholder ?? t("filters.all")}
             options={field.options}
           />
         </SelectTrigger>
       </motion.div>
 
       <SelectContent className="border-border/30 shadow-xl rounded-xl">
-        <SelectItem value="">{field.placeholder ?? "Todos"}</SelectItem>
+        <SelectItem value="">{field.placeholder ?? t("filters.all")}</SelectItem>
 
         {field.options?.map((opt) => (
           <SelectItem key={opt.value} value={opt.value}>

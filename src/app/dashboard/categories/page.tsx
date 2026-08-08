@@ -24,9 +24,13 @@ import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CategoryCard, CategoryFormSheet } from "@/components";
+import {
+  CategoryCard,
+  CategoryCardSkeleton,
+  CategoryFormSheet,
+} from "@/components";
 import { useEntityFormModal } from "@/hooks";
-import { Pencil, Plus, Tags, Trash2, X } from "@/lib/icons";
+import { Pencil, Tags, Trash2, X } from "@/lib/icons";
 import type {
   Category,
   CreateCategoryInput,
@@ -290,6 +294,9 @@ export default function CategoriesPage() {
                   transactionCount={categoryTransactionCounts[category.id] || 0}
                 />
               </motion.div>
+            )}
+            renderSkeletonCard={(index) => (
+              <CategoryCardSkeleton index={index} />
             )}
           />
 

@@ -2,17 +2,46 @@
 
 import {
   Alert,
-  CardSkeleton,
   EmptyState,
   Icon,
   SectionCard,
+  Skeleton,
 } from "@components/shared";
 import { useSubscriptionApi } from "@hooks/api/useSubscriptionApi";
+import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { SubscriptionCard } from "@/components/subscriptions/subscription-card";
 import { ArrowRight, Repeat2 } from "@/lib/icons";
+
+export function SubscriptionCardListSkeleton() {
+  return (
+    <div className="pb-2">
+      {[1, 2, 3, 4].map((row, index) => (
+        <motion.div
+          key={row}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: index * 0.05 }}
+        >
+          <div className="flex items-center justify-between gap-3 border-t border-border/30 px-5 py-3.5 sm:px-6">
+            <div className="flex min-w-0 items-center gap-3">
+              <Skeleton variant="circular" className="size-9 shrink-0" />
+              <div className="min-w-0 space-y-1.5">
+                <Skeleton
+                  className={cn("h-3.5", index % 2 === 0 ? "w-28" : "w-24")}
+                />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            </div>
+            <Skeleton variant="rounded" className="h-5 w-14 shrink-0" />
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
 
 export function SubscriptionCardList() {
   const { subscriptions, loading, error } = useSubscriptionApi();
@@ -20,6 +49,7 @@ export function SubscriptionCardList() {
 
   return (
     <SectionCard
+      icon={<Icon icon={Repeat2} className="size-5" />}
       title={t("nav.subscriptions")}
       action={
         <Link
@@ -41,12 +71,22 @@ export function SubscriptionCardList() {
           />
         </div>
       ) : loading ? (
-        <CardSkeleton variant="row" count={4} />
+        <SubscriptionCardListSkeleton />
       ) : subscriptions.length === 0 ? (
         <EmptyState
-          icon={<Icon icon={Repeat2} className="size-5" />}
+          icon={<Icon icon={Repeat2} size="lg" />}
           title={t("subscriptions.emptyTitle")}
           description={t("subscriptions.emptyDescription")}
+          iconClassName="from-sky-500/20 to-sky-500/10 text-sky-600 ring-sky-500/10 dark:from-sky-500/30 dark:to-sky-500/20 dark:text-sky-400"
+          action={
+            <Link
+              href="/dashboard/subscriptions"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              {t("subscriptions.emptyAction")}
+              <Icon icon={ArrowRight} className="size-3.5" />
+            </Link>
+          }
         />
       ) : (
         <div className="pb-2">

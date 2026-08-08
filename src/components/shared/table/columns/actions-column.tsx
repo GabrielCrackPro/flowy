@@ -1,4 +1,3 @@
-import { Icon } from "@/components/shared";
 import {
   Button,
   DropdownMenu,
@@ -7,8 +6,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@components/ui";
-import { MoreHorizontal } from "@/lib/icons";
 import type { ReactNode } from "react";
+import { Icon, Skeleton } from "@/components/shared";
+import { MoreHorizontal } from "@/lib/icons";
 import type { Column } from "../data-table";
 
 interface ActionItem {
@@ -32,6 +32,11 @@ export function ActionsColumn<T>({
     header: null,
     className,
 
+    skeleton: (
+      <div className="flex justify-end">
+        <Skeleton variant="rounded" className="size-7" />
+      </div>
+    ),
     cell: (row) => {
       const items = actions(row);
 

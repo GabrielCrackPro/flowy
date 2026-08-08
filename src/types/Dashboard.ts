@@ -27,6 +27,12 @@ export interface DashboardStats {
 
   savingsRate: number;
 
+  prevIncome: number;
+
+  prevExpenses: number;
+
+  prevSavingsRate: number;
+
   activeSubscriptions: number;
 
   activeBudgets: number;

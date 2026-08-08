@@ -2,12 +2,12 @@
 
 import {
   AnimatedNumber,
-  CardSkeleton,
   EmptyState,
   ExpenseIcon,
   Icon,
   IncomeIcon,
   SectionCard,
+  Skeleton,
 } from "@components/shared";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
@@ -22,6 +22,31 @@ import type { DashboardData } from "@/types/Dashboard";
 interface RecentTransactionsCardProps {
   month: number;
   year: number;
+}
+
+export function RecentTransactionsCardSkeleton() {
+  return (
+    <div>
+      {[1, 2, 3, 4, 5].map((row, index) => (
+        <motion.div
+          key={row}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3, delay: index * 0.05 }}
+          className="flex items-center gap-4 border-t border-border/30 px-5 py-3.5 sm:px-6"
+        >
+          <Skeleton variant="circular" className="h-10 w-10 shrink-0" />
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <Skeleton
+              className={cn("h-3.5", index % 2 === 0 ? "w-1/2" : "w-2/5")}
+            />
+            <Skeleton className="h-3 w-1/3" />
+          </div>
+          <Skeleton className="h-4 w-16" />
+        </motion.div>
+      ))}
+    </div>
+  );
 }
 
 export function RecentTransactionsCard({
@@ -45,6 +70,7 @@ export function RecentTransactionsCard({
 
   return (
     <SectionCard
+      icon={<Icon icon={Receipt} className="size-5" />}
       title={t("dashboard.recentTransactions")}
       description={t("dashboard.recentTransactionsDesc")}
       action={
@@ -58,13 +84,22 @@ export function RecentTransactionsCard({
       }
     >
       {isLoading && recent.length === 0 ? (
-        <div>
-          <CardSkeleton variant="row" count={5} />
-        </div>
+        <RecentTransactionsCardSkeleton />
       ) : recent.length === 0 ? (
         <EmptyState
-          icon={<Icon icon={Receipt} className="size-5" />}
+          icon={<Icon icon={Receipt} size="lg" />}
           title={t("dashboard.noTransactions")}
+          description={t("dashboard.noTransactionsDesc")}
+          iconClassName="from-rose-500/20 to-rose-500/10 text-rose-600 ring-rose-500/10 dark:from-rose-500/30 dark:to-rose-500/20 dark:text-rose-400"
+          action={
+            <Link
+              href="/dashboard/transactions/add"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              {t("nav.newTransaction")}
+              <Icon icon={ArrowRight} className="size-3.5" />
+            </Link>
+          }
         />
       ) : (
         <div>

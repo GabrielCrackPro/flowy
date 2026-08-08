@@ -31,6 +31,12 @@ export function useSpaces() {
     queryKey: ["spaces", userId],
     queryFn: getSpaces,
     enabled: !!userId,
+    // The spaces table is not on the realtime publication (no filterable
+    // column), so poll as a fallback like the other entities to keep renames
+    // and membership changes in shared spaces fresh.
+    staleTime: 30000,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
   });
 
   const invalidateSpaces = async () => {

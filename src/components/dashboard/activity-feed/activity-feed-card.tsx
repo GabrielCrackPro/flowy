@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@components/ui";
 import {
-  CardSkeleton,
   ConfirmDialog,
   EmptyState,
   Icon,
   RelativeTime,
   SectionCard,
+  Skeleton,
 } from "@components/shared";
+import { Button } from "@components/ui";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -22,12 +22,12 @@ import {
   ArrowUpCircle,
   CornerDownRight,
   MessageSquare,
+  Repeat2,
   Tag,
   Target,
   Trash2,
   Users,
   Wallet,
-  Repeat2,
 } from "@/lib/icons";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { Activity } from "@/types/Activity";
@@ -159,6 +159,41 @@ function getActivityAppearance(activity: Activity) {
   };
 }
 
+export function ActivityFeedCardSkeleton() {
+  return (
+    <div className="relative px-5 pb-5 pt-2 sm:px-6">
+      {[1, 2, 3, 4, 5].map((row, index) => (
+        <motion.div
+          key={row}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: index * 0.05 }}
+          className="relative flex gap-3.5 pb-5 last:pb-1"
+        >
+          {index < 4 && (
+            <span
+              aria-hidden
+              className="absolute left-4 top-9 h-[calc(100%-0.75rem)] w-px bg-gradient-to-b from-border/80 via-border/40 to-transparent"
+            />
+          )}
+
+          <div className="relative mt-0.5 flex shrink-0">
+            <Skeleton
+              variant="circular"
+              className="size-8 ring-4 ring-background"
+            />
+          </div>
+
+          <div className="min-w-0 flex-1 pt-1">
+            <Skeleton className="h-3.5 w-full" />
+            <Skeleton className="mt-1.5 h-3 w-1/4" />
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
 export function ActivityFeedCard({
   month,
   year,
@@ -209,6 +244,7 @@ export function ActivityFeedCard({
       />
 
       <SectionCard
+        icon={<Icon icon={MessageSquare} className="size-5" />}
         title={t("activity.title")}
         description={t("activity.desc")}
         action={
@@ -233,13 +269,13 @@ export function ActivityFeedCard({
         }
       >
         {loading && activities.length === 0 ? (
-          <div>
-            <CardSkeleton variant="row" count={5} />
-          </div>
+          <ActivityFeedCardSkeleton />
         ) : isEmpty ? (
           <EmptyState
-            icon={<Icon icon={MessageSquare} className="size-5" />}
+            icon={<Icon icon={MessageSquare} size="lg" />}
             title={t("activity.empty")}
+            description={t("activity.emptyDesc")}
+            iconClassName="from-violet-500/20 to-violet-500/10 text-violet-600 ring-violet-500/10 dark:from-violet-500/30 dark:to-violet-500/20 dark:text-violet-400"
           />
         ) : (
           <div className="relative px-5 pb-5 pt-2 sm:px-6">

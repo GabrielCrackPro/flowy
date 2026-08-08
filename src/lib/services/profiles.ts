@@ -22,9 +22,11 @@ function profileNameFromUser(user: User) {
   return null;
 }
 
-async function deleteOwnedSpaces(userId: string) {
-  const ownedSpaces = await prisma.space.findMany({
-    where: { ownerId: userId },
+async function cleanupSpacesForAccountDeletion(userId: string) {
+  const spaces = await prisma.space.findMany({
+    where: {
+      OR: [{ ownerId: userId }, { members: { some: { userId } } }],
+    },
     include: {
       members: {
         orderBy: { joinedAt: "asc" },
@@ -33,16 +35,23 @@ async function deleteOwnedSpaces(userId: string) {
     },
   });
 
-  for (const space of ownedSpaces) {
+  for (const space of spaces) {
+    const isOwner = space.ownerId === userId;
     const otherMembers = space.members.filter((m) => m.userId !== userId);
 
-    if (space.isPersonal || otherMembers.length === 0) {
+    if (isOwner) {
+      if (space.isPersonal || otherMembers.length === 0) {
+        await prisma.space.delete({ where: { id: space.id } });
+      } else {
+        await prisma.space.update({
+          where: { id: space.id },
+          data: { ownerId: otherMembers[0].userId },
+        });
+      }
+    } else if (otherMembers.length === 0) {
+      // Shared space whose only member is the deleted account: remove it so
+      // it doesn't linger without members.
       await prisma.space.delete({ where: { id: space.id } });
-    } else {
-      await prisma.space.update({
-        where: { id: space.id },
-        data: { ownerId: otherMembers[0].userId },
-      });
     }
   }
 }
@@ -146,7 +155,7 @@ export const ProfileService = {
       throw new Error("Profile not found");
     }
 
-    await deleteOwnedSpaces(userId);
+    await cleanupSpacesForAccountDeletion(userId);
 
     await prisma.profile.delete({
       where: { id },
@@ -162,7 +171,7 @@ export const ProfileService = {
       return;
     }
 
-    await deleteOwnedSpaces(userId);
+    await cleanupSpacesForAccountDeletion(userId);
 
     const receipts = await prisma.transaction.findMany({
       where: { userId },

@@ -5,10 +5,11 @@ import { ProfileProvider } from "@context/ProfileContext";
 import { ThemeProvider } from "@context/ThemeContext";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ThemeProvider as NextThemeProvider } from "next-themes";
 import { queryClient } from "@/lib/react-query";
 import { LocaleProvider } from "./LocaleContext";
 import { PhantomProvider } from "./PhantomProvider";
-import { ThemeProvider as NextThemeProvider } from "next-themes";
+import { RealtimeSyncProvider } from "./RealtimeSyncProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -18,7 +19,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <ThemeProvider>
             <LocaleProvider>
               <PhantomProvider>
-                <NotificationProvider>{children}</NotificationProvider>
+                <NotificationProvider>
+                  <RealtimeSyncProvider>{children}</RealtimeSyncProvider>
+                </NotificationProvider>
               </PhantomProvider>
             </LocaleProvider>
           </ThemeProvider>

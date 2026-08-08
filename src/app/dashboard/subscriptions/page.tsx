@@ -17,14 +17,17 @@ import {
   TextColumn,
   type ViewMode,
 } from "@components/shared";
-import { Badge, Button } from "@components/ui";
+import { Badge } from "@components/ui";
 import { useSubscriptionApi } from "@hooks/api/useSubscriptionApi";
 import { useProfile } from "@hooks/useProfile";
 import { cn, formatCurrency } from "@lib/utils";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { SubscriptionCard } from "@/components/subscriptions/subscription-card";
+import {
+  SubscriptionCard,
+  SubscriptionCardSkeleton,
+} from "@/components/subscriptions/subscription-card";
 import { SubscriptionFormSheet } from "@/components/subscriptions/subscription-form-dialog";
 import { useEntityFormModal } from "@/hooks";
 import { parseDateOnly } from "@/lib/date-only";
@@ -32,7 +35,6 @@ import {
   Calendar,
   CreditCard,
   Pencil,
-  Plus,
   Repeat2,
   Trash2,
   Wallet,
@@ -366,7 +368,7 @@ export default function SubscriptionsPage() {
                 }
               />
             }
-            renderCard={(subscription, index) => (
+            renderCard={(subscription, _index) => (
               <SubscriptionCard
                 key={subscription.id}
                 subscription={subscription}
@@ -374,6 +376,9 @@ export default function SubscriptionsPage() {
                 onDelete={() => setDeleting(subscription)}
                 onQuickPayment={() => setQuickAddSubscription(subscription)}
               />
+            )}
+            renderSkeletonCard={(index) => (
+              <SubscriptionCardSkeleton index={index} />
             )}
           />
         </div>

@@ -3,22 +3,67 @@
 import { resolveCategoryIcon } from "@components/categories/category-icons";
 import {
   AnimatedNumber,
-  CardSkeleton,
   EmptyState,
   Icon,
   SectionCard,
+  Skeleton,
 } from "@components/shared";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
 import { cn, formatCurrency } from "@lib/utils";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, ArrowDownCircle, Wallet, Tag } from "@/lib/icons";
+import {
+  AlertTriangle,
+  ArrowDownCircle,
+  ArrowRight,
+  Wallet,
+} from "@/lib/icons";
 import type { DashboardData } from "@/types/Dashboard";
 
 interface BudgetProgressCardProps {
   month: number;
   year: number;
+}
+
+export function BudgetProgressCardSkeleton() {
+  return (
+    <div className="space-y-3 px-5 pb-6 sm:px-6">
+      {[1, 2, 3].map((item, index) => (
+        <motion.div
+          key={item}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: index * 0.05 }}
+          className="rounded-xl border border-border/40 bg-gradient-to-br from-card to-card/50 p-4 shadow-sm"
+        >
+          <div className="mb-3 flex items-center gap-2">
+            <Skeleton variant="rounded" className="size-8" />
+            <div className="min-w-0 flex-1">
+              <Skeleton className="h-3.5 w-2/5" />
+            </div>
+            <Skeleton variant="rounded" className="h-5 w-9 rounded-full" />
+          </div>
+
+          <div className="mb-3 h-2 overflow-hidden rounded-full bg-muted/50">
+            <Skeleton className="h-full w-3/4 rounded-full" />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-3.5 w-16" />
+            </div>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-3.5 w-14" />
+            </div>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
 }
 
 export function BudgetProgressCard({ month, year }: BudgetProgressCardProps) {
@@ -32,16 +77,27 @@ export function BudgetProgressCard({ month, year }: BudgetProgressCardProps) {
 
   return (
     <SectionCard
+      icon={<Icon icon={Wallet} className="size-5" />}
       title={t("dashboard.budgetProgress")}
       description={t("dashboard.budgetProgressDesc")}
     >
       {isLoading && budgets.length === 0 ? (
-        <CardSkeleton variant="bar" />
+        <BudgetProgressCardSkeleton />
       ) : budgets.length === 0 ? (
         <EmptyState
           icon={<Icon icon={Wallet} size="lg" />}
           title={t("dashboard.noBudgets")}
-          iconClassName="from-indigo-500/20 to-indigo-500/10 text-indigo-600 dark:from-indigo-500/30 dark:to-indigo-500/20 dark:text-indigo-400"
+          description={t("dashboard.noBudgetsDesc")}
+          iconClassName="from-blue-500/20 to-blue-500/10 text-blue-600 ring-blue-500/10 dark:from-blue-500/30 dark:to-blue-500/20 dark:text-blue-400"
+          action={
+            <Link
+              href="/dashboard/budgets"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              {t("budgets.emptyAction")}
+              <Icon icon={ArrowRight} className="size-3.5" />
+            </Link>
+          }
         />
       ) : (
         <div className="space-y-3 px-5 pb-6 sm:px-6">

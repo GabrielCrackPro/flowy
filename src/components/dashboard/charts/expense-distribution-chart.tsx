@@ -1,11 +1,9 @@
 "use client";
 
-import { ChartToggle } from "@components/charts";
 import {
   AnimatedNumber,
   EmptyState,
   Icon,
-  type IconProps,
   SectionCard,
 } from "@components/shared";
 import type { ChartConfig } from "@components/ui";
@@ -16,16 +14,13 @@ import {
 } from "@components/ui";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { DashboardData } from "@/types/Dashboard";
 import { Cell, Pie, PieChart } from "recharts";
-import {
-  ArrowDownCircle,
-  ArrowUpCircle,
-  ChartPie,
-  TrendingUp,
-} from "@/lib/icons";
+import { ArrowRight, ChartPie } from "@/lib/icons";
 import { formatCurrency } from "@/lib/utils";
 import { OTHER_CATEGORY_KEY } from "@/types/Dashboard";
 import { ChartCardSkeleton } from "./chart-card";
@@ -38,8 +33,6 @@ const PALETTE = [
   "#ef4444",
   "#64748b",
 ];
-
-type DistributionView = "expenses" | "income" | "net";
 
 interface ExpenseDistributionChartProps {
   month: number;
@@ -54,78 +47,28 @@ export function ExpenseDistributionChart({
   const stats = (dashboard as DashboardData)?.stats;
   const { profile } = useProfile();
   const { t } = useTranslation();
-  const [view, setView] = useState<DistributionView>(
-    (localStorage.getItem("flowy-distribution-view") as DistributionView) ??
-      "expenses",
-  );
+  const router = useRouter();
 
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
 
   const data = useMemo(() => {
     const baseData = stats?.expensesByCategory ?? [];
+    return baseData.map((item, index) => ({
+      name: item.name === OTHER_CATEGORY_KEY ? t("charts.other") : item.name,
+      value: item.amount,
+      fill: PALETTE[index % PALETTE.length],
+    }));
+  }, [stats, t]);
 
-    if (view === "expenses") {
-      return baseData.map((item, index) => ({
-        name: item.name === OTHER_CATEGORY_KEY ? t("charts.other") : item.name,
-        value: item.amount,
-        fill: PALETTE[index % PALETTE.length],
-      }));
-    }
-
-    if (view === "income") {
-      const incomeData = baseData.map((item, index) => ({
-        name: item.name === OTHER_CATEGORY_KEY ? t("charts.other") : item.name,
-        value: item.amount * 0.8,
-        fill: PALETTE[index % PALETTE.length],
-      }));
-      return incomeData;
-    }
-
-    if (view === "net") {
-      return baseData.map((item, index) => ({
-        name: item.name === OTHER_CATEGORY_KEY ? t("charts.other") : item.name,
-        value: item.amount * 0.2,
-        fill: PALETTE[index % PALETTE.length],
-      }));
-    }
-
-    return [];
-  }, [stats, t, view]);
-
-  const hasData = useMemo(() => {
-    if (view === "expenses") {
-      return data.some((item) => item.value > 0);
-    }
-    if (view === "income") {
-      return data.some((item) => item.value > 0);
-    }
-    if (view === "net") {
-      return data.some((item) => item.value !== 0);
-    }
-    return data.length > 0;
-  }, [data, view]);
+  const hasData = data.some((item) => item.value > 0);
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
-  const getEmptyMessage = () => {
-    switch (view) {
-      case "income":
-        return {
-          title: t("charts.noIncomeData"),
-          description: t("charts.noIncomeDataDesc"),
-        };
-      case "net":
-        return {
-          title: t("charts.noNetData"),
-          description: t("charts.noNetDataDesc"),
-        };
-      default:
-        return {
-          title: t("charts.emptyTitle"),
-          description: t("charts.emptyDescription"),
-        };
-    }
+  const handleSliceClick = (categoryName: string) => {
+    if (categoryName === t("charts.other")) return;
+    const params = new URLSearchParams({ category: categoryName });
+    router.push(`/dashboard/transactions?${params.toString()}`);
   };
 
   const chartConfig = useMemo(
@@ -155,55 +98,6 @@ export function ExpenseDistributionChart({
     </div>
   );
 
-  const viewTabs: {
-    value: DistributionView;
-    label: string;
-    icon: IconProps["icon"];
-  }[] = [
-    { value: "expenses", label: t("charts.expenses"), icon: ArrowDownCircle },
-    { value: "income", label: t("charts.income"), icon: ArrowUpCircle },
-    { value: "net", label: t("charts.net"), icon: TrendingUp },
-  ];
-
-  const getCenterLabel = () => {
-    switch (view) {
-      case "expenses":
-        return t("charts.expenses");
-      case "income":
-        return t("charts.income");
-      case "net":
-        return t("charts.net");
-      default:
-        return t("charts.expenses");
-    }
-  };
-
-  const getTitle = () => {
-    switch (view) {
-      case "expenses":
-        return t("charts.expensesByCategory");
-      case "income":
-        return t("charts.incomeByCategory");
-      case "net":
-        return t("charts.netByCategory");
-      default:
-        return t("charts.expensesByCategory");
-    }
-  };
-
-  const getDescription = () => {
-    switch (view) {
-      case "expenses":
-        return t("charts.expensesByCategoryDesc");
-      case "income":
-        return t("charts.incomeByCategoryDesc");
-      case "net":
-        return t("charts.netByCategoryDesc");
-      default:
-        return t("charts.expensesByCategoryDesc");
-    }
-  };
-
   if (isLoading) {
     return <ChartCardSkeleton />;
   }
@@ -211,18 +105,8 @@ export function ExpenseDistributionChart({
   return (
     <SectionCard
       icon={<Icon icon={ChartPie} className="size-5" />}
-      title={getTitle()}
-      description={getDescription()}
-      action={
-        <ChartToggle<DistributionView>
-          value={view}
-          onChange={(nextView) => {
-            setView(nextView);
-            localStorage.setItem("flowy-distribution-view", nextView);
-          }}
-          options={viewTabs}
-        />
-      }
+      title={t("charts.expensesByCategory")}
+      description={t("charts.expensesByCategoryDesc")}
     >
       {hasData ? (
         <div className="px-5 pb-6 sm:px-6">
@@ -243,16 +127,22 @@ export function ExpenseDistributionChart({
                   outerRadius={88}
                   paddingAngle={2}
                   cornerRadius={4}
+                  onClick={(entry) => handleSliceClick(entry.name)}
+                  className="cursor-pointer"
                 >
                   {data.map((entry) => (
-                    <Cell key={entry.name} fill={entry.fill} />
+                    <Cell
+                      key={entry.name}
+                      fill={entry.fill}
+                      className="transition-opacity duration-200 hover:opacity-80 focus:opacity-80"
+                    />
                   ))}
                 </Pie>
               </PieChart>
             </ChartContainer>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-xs text-muted-foreground">
-                {getCenterLabel()}
+                {t("charts.expenses")}
               </span>
               <span className="mt-0.5 text-lg font-semibold tabular-nums">
                 <AnimatedNumber
@@ -297,9 +187,19 @@ export function ExpenseDistributionChart({
         </div>
       ) : (
         <EmptyState
-          icon={<Icon icon={ChartPie} className="size-5" />}
-          title={getEmptyMessage().title}
-          description={getEmptyMessage().description}
+          icon={<Icon icon={ChartPie} size="lg" />}
+          title={t("charts.emptyTitle")}
+          description={t("charts.emptyDescription")}
+          iconClassName="from-violet-500/20 to-violet-500/10 text-violet-600 ring-violet-500/10 dark:from-violet-500/30 dark:to-violet-500/20 dark:text-violet-400"
+          action={
+            <Link
+              href="/dashboard/transactions/add"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              {t("nav.newTransaction")}
+              <Icon icon={ArrowRight} className="size-3.5" />
+            </Link>
+          }
         />
       )}
     </SectionCard>

@@ -123,9 +123,10 @@ export function TransactionReceipts({
         </div>
       ) : (
         <EmptyState
-          icon={<Icon icon={Receipt} className="size-5" />}
+          icon={<Icon icon={Receipt} size="lg" />}
           title={t("transactions.receiptsTitle")}
           description={t("transactions.receiptsEmpty")}
+          iconClassName="from-rose-500/20 to-rose-500/10 text-rose-600 ring-rose-500/10 dark:from-rose-500/30 dark:to-rose-500/20 dark:text-rose-400"
         />
       )}
     </SectionCard>

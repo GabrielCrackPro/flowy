@@ -2,12 +2,6 @@ export type Locale = "es" | "en";
 
 export type AuthTranslationMessages = {
   layout: {
-    headerTitle: string;
-    signIn: string;
-    signUp: string;
-    languageLabel: string;
-    english: string;
-    spanish: string;
     title: string;
     description: string;
     smartAnalyticsTitle: string;
@@ -36,12 +30,6 @@ export type AuthTranslationMessages = {
     rememberMe: string;
     forgotPassword: string;
     acceptTerms: string;
-    googleButton: string;
-    appleButton: string;
-    orContinue: string;
-    manageAccount: string;
-    createAccount: string;
-    signInPrompt: string;
     cancel: string;
     save: string;
     edit: string;
@@ -49,26 +37,12 @@ export type AuthTranslationMessages = {
     saving: string;
   };
   login: {
-    badge: string;
-    title: string;
-    description: string;
-    helpHeading1: string;
-    helpText1: string;
-    helpHeading2: string;
-    helpText2: string;
     formTitle: string;
     formDescription: string;
     statusEmailSent: string;
     createAccountLink: string;
   };
   register: {
-    badge: string;
-    title: string;
-    description: string;
-    helpHeading1: string;
-    helpText1: string;
-    helpHeading2: string;
-    helpText2: string;
     formTitle: string;
     formDescription: string;
     statusCreated: string;
@@ -105,7 +79,6 @@ export type AppTranslationMessages = {
   nav: {
     main: string;
     finances: string;
-    account: string;
     overview: string;
     transactions: string;
     categories: string;
@@ -162,7 +135,6 @@ export type AppTranslationMessages = {
       leave: string;
       manageMembers: string;
       members: string;
-      membersCount: string;
       noMembers: string;
       noMembersHint: string;
       removeMember: string;
@@ -188,11 +160,9 @@ export type AppTranslationMessages = {
   };
   settings: {
     description: string;
-    comingSoon: string;
     profile: {
       title: string;
       description: string;
-      edit: string;
       memberSince: string;
       nameLabel: string;
       nameHint: string;
@@ -203,24 +173,13 @@ export type AppTranslationMessages = {
       localeLabel: string;
       avatarLabel: string;
       avatarHint: string;
-      avatarChange: string;
       avatarRemove: string;
-      avatarUploading: string;
       avatarError: string;
       showLanguageSelectorLabel: string;
       showLanguageSelectorHint: string;
       save: string;
       saving: string;
       updateSuccess: string;
-    };
-    preferences: {
-      title: string;
-      description: string;
-    };
-    notifications: {
-      title: string;
-      description: string;
-      inAppEnabled: string;
     };
     security: {
       title: string;
@@ -238,15 +197,12 @@ export type AppTranslationMessages = {
       deleteAccountHint: string;
       deleteAccountConfirmTitle: string;
       deleteAccountConfirmDescription: string;
-      deleteAccountSuccess: string;
       deleteAccountError: string;
-      saving: string;
     };
     theme: {
       title: string;
       description: string;
       customize: string;
-      customizeHint: string;
       colorSettings: string;
       primaryDescription: string;
       secondaryDescription: string;
@@ -285,13 +241,18 @@ export type AppTranslationMessages = {
     financialSummaryDesc: string;
     analysis: string;
     analysisDesc: string;
-    resume: string;
-    activityResume: string;
     statsNotLoaded: string;
     retry: string;
     updated: string;
     updating: string;
     refresh: string;
+    syncing: string;
+    synced: string;
+    syncInfo: {
+      title: string;
+      body: string;
+      upToDate: string;
+    };
     prevMonth: string;
     nextMonth: string;
     prevYear: string;
@@ -327,22 +288,19 @@ export type AppTranslationMessages = {
         subscriptions: string;
       };
     };
-    monthSummary: string;
-    monthSummaryDesc: string;
     recentTransactions: string;
     recentTransactionsDesc: string;
     budgetProgress: string;
     budgetProgressDesc: string;
     goalProgress: string;
     goalProgressDesc: string;
-    upcomingPayments: string;
-    upcomingPaymentsDesc: string;
     noTransactions: string;
+    noTransactionsDesc: string;
     noGoals: string;
+    noGoalsDesc: string;
     noBudgets: string;
-    noUpcomingPayments: string;
+    noBudgetsDesc: string;
     viewAll: string;
-    pctUsed: string;
     exceededBy: string;
     remaining: string;
   };
@@ -356,7 +314,6 @@ export type AppTranslationMessages = {
     hide: string;
     actionsLabel: string;
     actions: {
-      viewDashboard: string;
       reviewBudgets: string;
       viewSubscriptions: string;
       viewGoals: string;
@@ -383,7 +340,6 @@ export type AppTranslationMessages = {
     create: string;
     edit: string;
     update: string;
-    delete: string;
     deleteConfirmTitle: string;
     deleteConfirmDescription: string;
     description: string;
@@ -395,7 +351,6 @@ export type AppTranslationMessages = {
     savedAmountPlaceholder: string;
     deadline: string;
     noDeadline: string;
-    progress: string;
     totalTarget: string;
     totalSaved: string;
     completed: string;
@@ -405,18 +360,13 @@ export type AppTranslationMessages = {
     searchPlaceholder: string;
     quickAdd: string;
     quickAddTitle: string;
-    quickAddPlaceholder: string;
     addMore: string;
-  };
-  quickAction: {
-    add: string;
-    subtract: string;
-    set: string;
   };
   activity: {
     title: string;
     desc: string;
     empty: string;
+    emptyDesc: string;
     clear: string;
     clearConfirmTitle: string;
     clearConfirmDescription: string;
@@ -450,6 +400,7 @@ export type AppTranslationMessages = {
     incomeMonth: string;
     expensesMonth: string;
     savingsRate: string;
+    vsPrevMonth: string;
     savingsExcellent: string;
     savingsTry: string;
     activeSubscriptions: string;
@@ -463,6 +414,8 @@ export type AppTranslationMessages = {
     income: string;
     expenses: string;
     savings: string;
+    savingsRate: string;
+    ofIncome: string;
     emptyTitle: string;
     emptyDescription: string;
   };
@@ -501,6 +454,8 @@ export type AppTranslationMessages = {
     noBalanceDataDesc: string;
     noNetData: string;
     noNetDataDesc: string;
+    allSeriesHidden: string;
+    allSeriesHiddenDesc: string;
   };
   subscriptions: {
     errorTitle: string;
@@ -511,9 +466,7 @@ export type AppTranslationMessages = {
     edit: string;
     searchPlaceholder: string;
     emptyAction: string;
-    activeCount: string;
     totalMonthly: string;
-    totalYearly: string;
     nextPayment: string;
     cycles: {
       DAILY: string;
@@ -534,10 +487,7 @@ export type AppTranslationMessages = {
     activeHint: string;
     monthlyEquivalent: string;
     noNextPayment: string;
-    deleteConfirmTitle: string;
-    deleteConfirmDesc: string;
     quickPayment: string;
-    quickPaymentTitle: string;
   };
   transaction: {
     pageTitle: string;
@@ -565,7 +515,6 @@ export type AppTranslationMessages = {
     assignToBudgetHint: string;
     selectBudget: string;
     receipt: string;
-    receiptUrl: string;
     notes: string;
     notesPlaceholder: string;
     comments: string;
@@ -579,14 +528,7 @@ export type AppTranslationMessages = {
     saving: string;
     save: string;
     saveChanges: string;
-    status: string;
-    completed: string;
-    createdAt: string;
-    transactionId: string;
     shareDetail: string;
-    noReceipt: string;
-    viewReceipt: string;
-    attachments: string;
     editTransaction: string;
     deletePermanently: string;
     dateTime: string;
@@ -601,6 +543,10 @@ export type AppTranslationMessages = {
     uploadError: string;
     retry: string;
     notFound: string;
+    validation: {
+      descriptionRequired: string;
+      amountMustBePositive: string;
+    };
   };
   transactions: {
     title: string;
@@ -620,8 +566,6 @@ export type AppTranslationMessages = {
     allCategories: string;
     allMethods: string;
     dateRange: string;
-    dateFrom: string;
-    dateTo: string;
     count: string;
     filterBtn: string;
     clearFilters: string;
@@ -664,7 +608,6 @@ export type AppTranslationMessages = {
     typeLabel: string;
     iconLabel: string;
     colorLabel: string;
-    save: string;
     emptyTitle: string;
     emptyDesc: string;
     emptyAction: string;
@@ -673,13 +616,10 @@ export type AppTranslationMessages = {
     searchPlaceholder: string;
   };
   budgets: {
-    title: string;
     description: string;
     new: string;
     edit: string;
     delete: string;
-    deleteConfirmTitle: string;
-    deleteConfirmDesc: string;
     categoryLabel: string;
     noCategorySelected: string;
     noExpenseCategories: string;
@@ -699,45 +639,19 @@ export type AppTranslationMessages = {
     income: string;
     expenses: string;
     remaining: string;
-    totalBudgets: string;
     totalExpenses: string;
     totalIncome: string;
     spent: string;
     deleteTitle: string;
     deleteDescription: string;
   };
-  relativeTime: {
-    now: string;
-    lessThanMin: string;
-    min: string;
-    mins: string;
-    hour: string;
-    hours: string;
-    day: string;
-    days: string;
-  };
   entityAudit: {
     createdBy: string;
     updatedBy: string;
   };
-  greeting: {
-    morning: string;
-    afternoon: string;
-    evening: string;
-  };
-  auth: {
-    headerTitle: string;
-    title: string;
-    description: string;
-  };
   errors: {
     title: string;
-    description: string;
     retry: string;
-    goHome: string;
-    help: string;
-    goBack: string;
-    contactSupport: string;
     somethingWentWrong: string;
     failedToLoad: string;
     network: {
@@ -758,15 +672,12 @@ export type AppTranslationMessages = {
     };
     notFound: {
       message: string;
-      hint: string;
     };
     server: {
       message: string;
-      hint: string;
     };
     database: {
       message: string;
-      hint: string;
     };
     rateLimit: {
       message: string;
@@ -783,7 +694,6 @@ export type AppTranslationMessages = {
     };
     unknown: {
       message: string;
-      hint: string;
     };
     default: {
       hint: string;
@@ -801,13 +711,34 @@ export type AppTranslationMessages = {
     placeholder: string;
     typeHint: string;
     noResults: string;
+    noResultsDesc: string;
+    searching: string;
+    filterEmpty: string;
     recent: string;
     clearRecent: string;
+    clearSearch: string;
     actions: string;
     navigation: string;
     navigate: string;
     open: string;
     close: string;
+    themeLight: string;
+    themeDark: string;
+    signOut: string;
+  };
+  filters: {
+    title: string;
+    filterAndSearch: string;
+    clearAll: string;
+    clearFilters: string;
+    noOptions: string;
+    selected_one: string;
+    selected_other: string;
+    all: string;
+    searchOptions: string;
+  };
+  pagination: {
+    of: string;
   };
   common: {
     cancel: string;
@@ -820,10 +751,6 @@ export type AppTranslationMessages = {
     viewGrid: string;
     viewTable: string;
     close: string;
-  };
-  locale: {
-    en: string;
-    es: string;
   };
 };
 

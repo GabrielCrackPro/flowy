@@ -1,6 +1,6 @@
 "use client";
 
-import { EntityAudit, Icon } from "@components/shared";
+import { EntityAudit, Icon, Skeleton } from "@components/shared";
 import { Badge, Button, Card } from "@components/ui";
 import { useDateLocale } from "@hooks/useDateLocale";
 import { cn, formatCurrency } from "@lib/utils";
@@ -38,6 +38,53 @@ const NEXT_PAYMENT_TONE_CLASSES = {
   warning: "text-warning",
   danger: "text-destructive",
 } as const;
+
+export function SubscriptionCardSkeleton({ index = 0 }: { index?: number }) {
+  return (
+    <Card
+      className={cn(
+        CARD_SHELL,
+        // Keep the shell's look but stay inert on hover
+        "hover:-translate-y-0 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]",
+      )}
+    >
+      <div className="p-5">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Skeleton variant="rounded" className="size-10 rounded-xl" />
+            <div className="min-w-0 space-y-1.5">
+              <Skeleton
+                className={cn("h-3.5", index % 2 === 0 ? "w-28" : "w-24")}
+              />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          </div>
+          <Skeleton variant="rounded" className="h-5 w-14 shrink-0" />
+        </div>
+
+        <div className="flex items-end justify-between gap-4">
+          <div className="min-w-0 space-y-1.5">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-5 w-24" />
+          </div>
+          <div className="shrink-0 space-y-1.5">
+            <Skeleton className="ml-auto h-3 w-16" />
+            <Skeleton className="ml-auto h-3.5 w-24" />
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-2 border-t border-border/30 pt-3">
+          <Skeleton className="h-3 w-1/3" />
+          <div className="flex items-center gap-1.5">
+            <Skeleton variant="rounded" className="size-7" />
+            <Skeleton variant="rounded" className="size-7" />
+            <Skeleton variant="rounded" className="size-7" />
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
 
 export function SubscriptionCard({
   subscription,

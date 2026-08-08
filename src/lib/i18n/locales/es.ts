@@ -2,12 +2,6 @@ import type { AppTranslationMessages, AuthTranslationMessages } from "../types";
 
 export const auth: AuthTranslationMessages = {
   layout: {
-    headerTitle: "Tus finanzas sin complicaciones.",
-    signIn: "Iniciar sesión",
-    signUp: "Crear cuenta",
-    languageLabel: "Idioma",
-    english: "English",
-    spanish: "Español",
     title: "Encuentra tu serenidad financiera.",
     description:
       "Gestiona tus activos con la claridad y calma que te mereces. Una experiencia diseñada para tu tranquilidad.",
@@ -41,12 +35,6 @@ export const auth: AuthTranslationMessages = {
     forgotPassword: "¿Olvidaste tu contraseña?",
     acceptTerms:
       "Acepto los Términos y Condiciones y la Política de Privacidad de Flowy.",
-    googleButton: "Continuar con Google",
-    appleButton: "Continuar con Apple",
-    orContinue: "o con tu correo",
-    manageAccount: "Completa los campos para crear tu cuenta.",
-    createAccount: "Crea tu cuenta en Flowy",
-    signInPrompt: "Introduce tus credenciales para continuar.",
     cancel: "Cancelar",
     save: "Guardar",
     edit: "Editar",
@@ -54,15 +42,6 @@ export const auth: AuthTranslationMessages = {
     saving: "Guardando…",
   },
   login: {
-    badge: "Flujo completo de auth",
-    title: "Encuentra tu serenidad financiera.",
-    description:
-      "Gestiona tus activos con la claridad y calma que te mereces. Una experiencia diseñada para tu tranquilidad.",
-    helpHeading1: "¿Qué necesitas?",
-    helpText1: "Correo y contraseña registrados en tu cuenta.",
-    helpHeading2: "Seguridad",
-    helpText2:
-      "El envío de credenciales es seguro y la sesión se gestiona con Supabase Auth.",
     formTitle: "Bienvenido de nuevo",
     formDescription: "Ingresa tus credenciales para acceder.",
     statusEmailSent:
@@ -70,14 +49,6 @@ export const auth: AuthTranslationMessages = {
     createAccountLink: "Crea una cuenta",
   },
   register: {
-    badge: "Crea tu cuenta",
-    title: "Comienza tu viaje hacia la serenidad.",
-    description:
-      "Únete a miles de personas que ya gestionan sus finanzas con total claridad y control sin esfuerzo.",
-    helpHeading1: "Seguridad total",
-    helpText1: "Tus datos y tu autenticación están protegidos.",
-    helpHeading2: "Análisis IA",
-    helpText2: "Recibe ideas inteligentes para manejar mejor tu dinero.",
     formTitle: "Crea tu cuenta",
     formDescription: "Empieza hoy mismo, es gratis por 30 días.",
     statusCreated:
@@ -116,7 +87,6 @@ export const app: AppTranslationMessages = {
   nav: {
     main: "Principal",
     finances: "Finanzas",
-    account: "Cuenta",
     overview: "Resumen",
     transactions: "Transacciones",
     categories: "Categorías",
@@ -174,7 +144,6 @@ export const app: AppTranslationMessages = {
       leave: "Salir",
       manageMembers: "Gestionar miembros",
       members: "Miembros",
-      membersCount: "miembros",
       noMembers: "No hay otros miembros",
       noMembersHint: "Comparte el código de invitación para añadir miembros",
       removeMember: "Eliminar miembro",
@@ -204,11 +173,9 @@ export const app: AppTranslationMessages = {
   },
   settings: {
     description: "Gestiona tu perfil y preferencias de la aplicación",
-    comingSoon: "Próximamente",
     profile: {
       title: "Perfil",
       description: "Actualiza tu información personal",
-      edit: "Editar perfil",
       memberSince: "Miembro desde",
       nameLabel: "Nombre",
       nameHint: "Este es tu nombre público",
@@ -219,9 +186,7 @@ export const app: AppTranslationMessages = {
       localeLabel: "Idioma",
       avatarLabel: "Foto de perfil",
       avatarHint: "PNG, JPG o WebP • Máx 5 MB",
-      avatarChange: "Cambiar foto",
       avatarRemove: "Eliminar foto",
-      avatarUploading: "Subiendo foto...",
       avatarError: "Error al subir la foto",
       showLanguageSelectorLabel: "Mostrar selector de idioma",
       showLanguageSelectorHint:
@@ -229,17 +194,6 @@ export const app: AppTranslationMessages = {
       save: "Guardar cambios",
       saving: "Guardando...",
       updateSuccess: "Perfil actualizado correctamente",
-    },
-    preferences: {
-      title: "Preferencias",
-      description: "Configura tu experiencia en la aplicación",
-    },
-    notifications: {
-      title: "Notificaciones",
-      description:
-        "Recibe avisos dentro de la app sobre presupuestos, objetivos y pagos próximos",
-      inAppEnabled:
-        "Las notificaciones se muestran como avisos dentro de la app.",
     },
     security: {
       title: "Seguridad de la cuenta",
@@ -259,15 +213,12 @@ export const app: AppTranslationMessages = {
       deleteAccountConfirmTitle: "¿Eliminar tu cuenta?",
       deleteAccountConfirmDescription:
         "Esta acción no se puede deshacer. Se borrará tu perfil y tu sesión se cerrará.",
-      deleteAccountSuccess: "Cuenta eliminada correctamente",
       deleteAccountError: "No se pudo eliminar la cuenta",
-      saving: "Guardando...",
     },
     theme: {
       title: "Personalización del tema",
       description: "Personaliza los colores de tu app y ve las vistas previas",
       customize: "Personalizar tema",
-      customizeHint: "Elige tus colores preferidos y mira cómo se ven",
       colorSettings: "Configuración de colores",
       primaryDescription: "Color principal para acciones principales",
       secondaryDescription: "Secundario para tarjetas",
@@ -309,13 +260,18 @@ export const app: AppTranslationMessages = {
     analysis: "Análisis",
     analysisDesc:
       "Comprende cómo se distribuyen tus ingresos y recibe recomendaciones basadas en tu actividad.",
-    resume: "Resumen de tu actividad financiera",
-    activityResume: "Resumen",
     statsNotLoaded: "No se pudieron cargar las estadísticas",
     retry: "Reintentar",
     updated: "Actualizado",
     updating: "Actualizando…",
     refresh: "Actualizar",
+    syncing: "Sincronizando…",
+    synced: "Sincronizado",
+    syncInfo: {
+      title: "Sincronización en vivo",
+      body: "Tus datos se actualizan automáticamente en tiempo real. Los cambios que hagas tú u otros miembros se reflejan al instante en todos tus dispositivos.",
+      upToDate: "Al día",
+    },
     prevMonth: "Mes anterior",
     nextMonth: "Mes siguiente",
     prevYear: "Año anterior",
@@ -353,22 +309,22 @@ export const app: AppTranslationMessages = {
         subscriptions: "Suscripciones",
       },
     },
-    monthSummary: "Resumen mensual",
-    monthSummaryDesc: "Añade transacciones para ver el resumen mensual",
     recentTransactions: "Transacciones recientes",
     recentTransactionsDesc: "Últimos movimientos registrados",
     budgetProgress: "Presupuestos del mes",
     budgetProgressDesc: "Estado de tus presupuestos activos",
     goalProgress: "Metas de ahorro",
     goalProgressDesc: "Progreso hacia tus objetivos",
-    upcomingPayments: "Próximos pagos",
-    upcomingPaymentsDesc: "Pagos programados próximamente",
     noTransactions: "Aún no hay transacciones",
+    noTransactionsDesc:
+      "Registra tu primera transacción para empezar a seguir ingresos y gastos.",
     noGoals: "Aún no tienes metas configuradas",
+    noGoalsDesc:
+      "Define metas de ahorro para seguir el progreso hacia tus objetivos financieros.",
     noBudgets: "Aún no tienes presupuestos",
-    noUpcomingPayments: "No hay pagos próximos",
+    noBudgetsDesc:
+      "Crea presupuestos para controlar tus gastos y no pasarte de tus límites.",
     viewAll: "Ver todo",
-    pctUsed: "% usado",
     exceededBy: "excedido",
     remaining: "restantes",
   },
@@ -382,7 +338,6 @@ export const app: AppTranslationMessages = {
     hide: "Ocultar avisos",
     actionsLabel: "Acciones",
     actions: {
-      viewDashboard: "Abrir panel",
       reviewBudgets: "Revisar presupuestos",
       viewSubscriptions: "Ver suscripciones",
       viewGoals: "Ver metas",
@@ -417,7 +372,6 @@ export const app: AppTranslationMessages = {
     create: "Crear meta",
     edit: "Editar meta",
     update: "Actualizar meta",
-    delete: "Eliminar meta",
     deleteConfirmTitle: "¿Eliminar meta?",
     deleteConfirmDescription:
       'Esto eliminará permanentemente "{{title}}". Esta acción no se puede deshacer.',
@@ -431,7 +385,6 @@ export const app: AppTranslationMessages = {
     savedAmountPlaceholder: "0,00",
     deadline: "Fecha límite",
     noDeadline: "Sin fecha límite",
-    progress: "Progreso",
     totalTarget: "Total objetivo",
     totalSaved: "Total ahorrado",
     completed: "Completadas",
@@ -443,17 +396,13 @@ export const app: AppTranslationMessages = {
     quickAdd: "Añadir ahorro",
     quickAddTitle: "Añadir a la meta",
     addMore: "Añadir más ahorro",
-    quickAddPlaceholder: "Cantidad a añadir",
-  },
-  quickAction: {
-    add: "Añadir",
-    subtract: "Restar",
-    set: "Establecer",
   },
   activity: {
     title: "Actividad",
     desc: "Últimas acciones realizadas",
     empty: "Aún no hay actividad",
+    emptyDesc:
+      "Tus acciones recientes aparecerán aquí a medida que uses la app.",
     clear: "Borrar feed",
     clearConfirmTitle: "Eliminar registros de actividad",
     clearConfirmDescription:
@@ -489,6 +438,7 @@ export const app: AppTranslationMessages = {
     incomeMonth: "Ingresos del mes",
     expensesMonth: "Gastos del mes",
     savingsRate: "Tasa de ahorro",
+    vsPrevMonth: "vs. mes anterior",
     savingsExcellent: "¡Excelente! Estás ahorrando bien",
     savingsTry: "Intenta ahorrar al menos un 20%",
     activeSubscriptions: "Suscripciones activas",
@@ -502,6 +452,8 @@ export const app: AppTranslationMessages = {
     income: "Ingresos",
     expenses: "Gastos",
     savings: "Ahorro",
+    savingsRate: "Tasa de ahorro",
+    ofIncome: "del ingreso",
     emptyTitle: "Resumen mensual",
     emptyDescription: "Añade transacciones para ver el resumen mensual",
   },
@@ -542,6 +494,9 @@ export const app: AppTranslationMessages = {
       "No hay información de saldo disponible para este periodo",
     noNetData: "Sin datos netos",
     noNetDataDesc: "No hay datos de ingreso neto disponibles para este periodo",
+    allSeriesHidden: "Todas las series ocultas",
+    allSeriesHiddenDesc:
+      "Activa al menos una serie de datos en el panel de Capas debajo del gráfico.",
   },
   subscriptions: {
     errorTitle: "Error al cargar suscripciones",
@@ -553,9 +508,7 @@ export const app: AppTranslationMessages = {
     edit: "Editar suscripción",
     searchPlaceholder: "Buscar por nombre...",
     emptyAction: "Crear tu primera suscripción",
-    activeCount: "Suscripciones activas",
     totalMonthly: "Gasto mensual",
-    totalYearly: "Gasto anual",
     nextPayment: "Próximo cobro",
     cycles: {
       DAILY: "Diario",
@@ -577,11 +530,7 @@ export const app: AppTranslationMessages = {
       "Las suscripciones activas cuentan para tu gasto mensual calculado.",
     monthlyEquivalent: "Gasto mensual estimado",
     noNextPayment: "Sin fecha",
-    deleteConfirmTitle: "¿Eliminar suscripción?",
-    deleteConfirmDesc:
-      "Esta acción eliminará la suscripción de forma permanente y no se podrá deshacer.",
     quickPayment: "Registrar pago",
-    quickPaymentTitle: "Registrar pago",
   },
   transaction: {
     pageTitle: "Nueva transacción",
@@ -609,7 +558,6 @@ export const app: AppTranslationMessages = {
     assignToBudgetHint: "Solo para ingresos",
     selectBudget: "Seleccionar presupuesto",
     receipt: "Comprobante",
-    receiptUrl: "URL del comprobante",
     notes: "Notas",
     notesPlaceholder: "Notas adicionales (opcional)",
     comments: "Comentarios",
@@ -623,14 +571,7 @@ export const app: AppTranslationMessages = {
     saving: "Guardando...",
     save: "Guardar transacción",
     saveChanges: "Guardar cambios",
-    status: "Estado",
-    completed: "Completado",
-    createdAt: "Creado el",
-    transactionId: "ID Transacción",
     shareDetail: "Compartir detalle",
-    noReceipt: "Sin comprobante adjunto",
-    viewReceipt: "Ver comprobante original",
-    attachments: "Archivos adjuntos",
     editTransaction: "Editar transacción",
     deletePermanently: "Eliminar definitivamente",
     dateTime: "Fecha y hora",
@@ -643,6 +584,10 @@ export const app: AppTranslationMessages = {
     uploadError: "Error al subir el archivo",
     retry: "Reintentar",
     notFound: "Transacción no encontrada",
+    validation: {
+      descriptionRequired: "La descripción es obligatoria",
+      amountMustBePositive: "El importe debe ser mayor que cero",
+    },
     createdBy: "Creado por",
     updatedBy: "Actualizado por",
   },
@@ -672,8 +617,6 @@ export const app: AppTranslationMessages = {
     allCategories: "Todas las categorías",
     allMethods: "Todos los métodos",
     dateRange: "Rango de fechas",
-    dateFrom: "Desde",
-    dateTo: "Hasta",
     count: "{{count}} transacciones",
     filterBtn: "Filtros",
     clearFilters: "Limpiar filtros",
@@ -710,7 +653,6 @@ export const app: AppTranslationMessages = {
     typeLabel: "Tipo",
     iconLabel: "Icono",
     colorLabel: "Color",
-    save: "Guardar",
     emptyTitle: "No hay categorías",
     emptyDesc:
       "Crea tu primera categoría para organizar tus transacciones y entender mejor a dónde va tu dinero.",
@@ -720,14 +662,10 @@ export const app: AppTranslationMessages = {
     searchPlaceholder: "Buscar categorías...",
   },
   budgets: {
-    title: "Presupuestos",
     description: "Establece límites de gasto para controlar tus finanzas",
     new: "Nuevo presupuesto",
     edit: "Editar presupuesto",
     delete: "Eliminar",
-    deleteConfirmTitle: "¿Eliminar este presupuesto?",
-    deleteConfirmDesc:
-      "Esta acción no se puede deshacer. El presupuesto se eliminará permanentemente.",
     categoryLabel: "Categoría",
     noCategorySelected: "Sin categoría seleccionada",
     noExpenseCategories: "No hay categorías de gasto disponibles",
@@ -748,7 +686,6 @@ export const app: AppTranslationMessages = {
     income: "Ingresos",
     expenses: "Gastos",
     remaining: "Restante",
-    totalBudgets: "Total de presupuestos",
     totalExpenses: "Gastos totales",
     totalIncome: "Ingresos totales",
     spent: "Gastado",
@@ -756,38 +693,13 @@ export const app: AppTranslationMessages = {
     deleteDescription:
       "Esto eliminará permanentemente este presupuesto. Esta acción no se puede deshacer.",
   },
-  relativeTime: {
-    now: "ahora mismo",
-    lessThanMin: "hace menos de 1 min",
-    min: "min",
-    mins: "mins",
-    hour: "hora",
-    hours: "horas",
-    day: "día",
-    days: "días",
-  },
   entityAudit: {
     createdBy: "Creado por",
     updatedBy: "Modificado por",
   },
-  greeting: {
-    morning: "Buenos días",
-    afternoon: "Buenas tardes",
-    evening: "Buenas noches",
-  },
-  auth: {
-    headerTitle: "Flowy | Autenticación",
-    title: "Encuentra tu serenidad financiera.",
-    description: "Gestiona tus activos con la claridad y calma que te mereces.",
-  },
   errors: {
     title: "Algo salió mal",
-    description: "Ocurrió un error inesperado. Intenta de nuevo.",
     retry: "Reintentar",
-    goHome: "Ir al inicio",
-    help: "Si el problema persiste, contacta al soporte.",
-    goBack: "Volver",
-    contactSupport: "Contacta al soporte si el problema persiste",
     somethingWentWrong: "Algo salió mal",
     failedToLoad: "Error al cargar",
     network: {
@@ -809,16 +721,13 @@ export const app: AppTranslationMessages = {
     },
     notFound: {
       message: "El recurso solicitado no fue encontrado.",
-      hint: "Intenta actualizar la página o volver al panel",
     },
     server: {
       message:
         "Algo salió mal en nuestro servidor. Intenta de nuevo más tarde.",
-      hint: "Intenta actualizar la página o volver al panel",
     },
     database: {
       message: "No se pudieron guardar tus cambios. Intenta de nuevo.",
-      hint: "Intenta actualizar la página o volver al panel",
     },
     rateLimit: {
       message:
@@ -838,7 +747,6 @@ export const app: AppTranslationMessages = {
     },
     unknown: {
       message: "Ocurrió un error inesperado. Intenta de nuevo.",
-      hint: "Intenta actualizar la página o volver al panel",
     },
     default: {
       hint: "Intenta actualizar la página o volver al panel",
@@ -856,13 +764,34 @@ export const app: AppTranslationMessages = {
     placeholder: "Buscar en Flowy…",
     typeHint: "Escribe al menos 2 caracteres para buscar",
     noResults: "No se encontraron resultados",
+    noResultsDesc: "Prueba con otros términos",
+    searching: "Buscando…",
+    filterEmpty: "No hay resultados en este filtro",
     recent: "Búsquedas recientes",
     clearRecent: "Limpiar",
+    clearSearch: "Limpiar búsqueda",
     actions: "Acciones rápidas",
     navigation: "Navegación",
     navigate: "Navegar",
     open: "Abrir",
     close: "Cerrar",
+    themeLight: "Modo claro",
+    themeDark: "Modo oscuro",
+    signOut: "Cerrar sesión",
+  },
+  filters: {
+    title: "Filtros",
+    filterAndSearch: "Filtra y busca transacciones",
+    clearAll: "Limpiar todo",
+    clearFilters: "Limpiar filtros",
+    noOptions: "Sin opciones",
+    selected_one: "{{count}} seleccionado",
+    selected_other: "{{count}} seleccionados",
+    all: "Todos",
+    searchOptions: "Buscar opciones...",
+  },
+  pagination: {
+    of: "de",
   },
   common: {
     cancel: "Cancelar",
@@ -875,10 +804,6 @@ export const app: AppTranslationMessages = {
     viewGrid: "Vista de cuadrícula",
     viewTable: "Vista de tabla",
     close: "Cerrar",
-  },
-  locale: {
-    es: "Español",
-    en: "Inglés",
   },
 };
 

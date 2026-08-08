@@ -29,44 +29,62 @@ export const StatsService = {
     const targetYear = year ?? now.getFullYear();
     const startOfMonth = new Date(targetYear, targetMonth - 1, 1);
     const startOfNextMonth = new Date(targetYear, targetMonth, 1);
+    const startOfPrevMonth = new Date(targetYear, targetMonth - 2, 1);
 
-    const [monthTransactions, activeSubscriptions, activeBudgets] =
-      await Promise.all([
-        prisma.transaction.findMany({
-          where: {
-            spaceId: activeSpace?.id ?? null,
-            date: {
-              gte: startOfMonth,
-              lt: startOfNextMonth,
-            },
+    const [
+      monthTransactions,
+      activeSubscriptions,
+      activeBudgets,
+      prevMonthTransactions,
+    ] = await Promise.all([
+      prisma.transaction.findMany({
+        where: {
+          spaceId: activeSpace?.id ?? null,
+          date: {
+            gte: startOfMonth,
+            lt: startOfNextMonth,
           },
-          select: {
-            type: true,
-            amount: true,
-            date: true,
-            tags: {
-              select: {
-                category: {
-                  select: { id: true, name: true },
-                },
+        },
+        select: {
+          type: true,
+          amount: true,
+          date: true,
+          tags: {
+            select: {
+              category: {
+                select: { id: true, name: true },
               },
             },
           },
-        }),
-        prisma.subscription.count({
-          where: {
-            spaceId: activeSpace?.id ?? null,
-            active: true,
+        },
+      }),
+      prisma.subscription.count({
+        where: {
+          spaceId: activeSpace?.id ?? null,
+          active: true,
+        },
+      }),
+      prisma.budget.count({
+        where: {
+          spaceId: activeSpace?.id ?? null,
+          month: targetMonth,
+          year: targetYear,
+        },
+      }),
+      prisma.transaction.findMany({
+        where: {
+          spaceId: activeSpace?.id ?? null,
+          date: {
+            gte: startOfPrevMonth,
+            lt: startOfMonth,
           },
-        }),
-        prisma.budget.count({
-          where: {
-            spaceId: activeSpace?.id ?? null,
-            month: targetMonth,
-            year: targetYear,
-          },
-        }),
-      ]);
+        },
+        select: {
+          type: true,
+          amount: true,
+        },
+      }),
+    ]);
 
     const incomeThisMonth = sumAmounts(
       monthTransactions.filter((item) => item.type === "INCOME"),
@@ -80,6 +98,19 @@ export const StatsService = {
       incomeThisMonth > 0
         ? ((incomeThisMonth - expensesThisMonth) / incomeThisMonth) * 100
         : expensesThisMonth > 0
+          ? -100
+          : 0;
+
+    const prevIncome = sumAmounts(
+      prevMonthTransactions.filter((item) => item.type === "INCOME"),
+    );
+    const prevExpenses = sumAmounts(
+      prevMonthTransactions.filter((item) => item.type === "EXPENSE"),
+    );
+    const prevSavingsRate =
+      prevIncome > 0
+        ? ((prevIncome - prevExpenses) / prevIncome) * 100
+        : prevExpenses > 0
           ? -100
           : 0;
 
@@ -116,6 +147,9 @@ export const StatsService = {
       incomeThisMonth,
       expensesThisMonth,
       savingsRate,
+      prevIncome,
+      prevExpenses,
+      prevSavingsRate,
       activeSubscriptions,
       activeBudgets,
       dailySeries,

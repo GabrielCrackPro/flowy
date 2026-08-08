@@ -66,17 +66,17 @@ export function AlertBanner({ alert, onDismiss }: AlertBannerProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const style = variants[alert.severity];
-  const action = getAlertAction(alert.type, alert.data?.url);
+  const action = getAlertAction(alert.type);
 
   function handleOpen() {
     toast.dismiss(alert.id);
-    router.push(action.url);
+    if (action) router.push(action.url);
   }
 
   function handleAction() {
     toast.dismiss(alert.id);
     void notificationsApi.markRead({ ids: [alert.id] }).catch(() => {});
-    router.push(action.url);
+    if (action) router.push(action.url);
   }
 
   return (
@@ -122,18 +122,20 @@ export function AlertBanner({ alert, onDismiss }: AlertBannerProps) {
         </span>
       </Button>
 
-      <Button
-        size="sm"
-        onClick={handleAction}
-        className={cn(
-          "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ring-1 ring-inset",
-          "bg-none hover:bg-none",
-          style.button,
-        )}
-      >
-        {t(action.labelKey)}
-        <ArrowRight className="size-3.5" />
-      </Button>
+      {action && (
+        <Button
+          size="sm"
+          onClick={handleAction}
+          className={cn(
+            "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ring-1 ring-inset",
+            "bg-none hover:bg-none",
+            style.button,
+          )}
+        >
+          {t(action.labelKey)}
+          <ArrowRight className="size-3.5" />
+        </Button>
+      )}
 
       <Button
         variant="ghost"

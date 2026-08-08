@@ -6,7 +6,6 @@ import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { Favicon } from "@/components/shared/favicon";
 import { Providers } from "@/context";
-import { Toaster } from "sonner";
 import { cn } from "@/lib/utils";
 
 // Optimize font loading with display swap for better LCP
@@ -52,7 +51,6 @@ export default function RootLayout({
           <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.16),transparent_42%)]">
             {children}
           </div>
-          <Toaster />
         </Providers>
       </body>
     </html>

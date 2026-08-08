@@ -1,4 +1,5 @@
 import { Checkbox } from "@components/ui";
+import { Skeleton } from "@/components/shared";
 import type { Column } from "../data-table";
 
 interface SelectColumnOptions<T> {
@@ -31,6 +32,7 @@ export function SelectColumn<T>({
       </div>
     ),
     className,
+    skeleton: <Skeleton className="size-4 rounded-[4px]" />,
     cell: (row) => {
       const id = getId(row);
 

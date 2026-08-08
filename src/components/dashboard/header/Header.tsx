@@ -5,13 +5,14 @@ import {
   CommandPalette,
   Icon,
   type IconProps,
+  SyncingIndicator,
   ThemeToggle,
 } from "@components/shared";
 import { Button, Sheet, SheetContent } from "@components/ui";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useSpaces } from "@/hooks/useSpaces";
@@ -90,6 +91,36 @@ export function Header() {
   const crumbs = useMemo(() => buildCrumbs(pathname, t), [pathname, t]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // Global ⌘K / Ctrl+K toggle + "/" to open (matches the hint in Search.tsx)
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // Ignore keystrokes during IME composition (e.g. CJK input methods)
+      if (e.isComposing) return;
+
+      const mod = e.metaKey || e.ctrlKey;
+
+      if (mod && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((open) => !open);
+        return;
+      }
+
+      // "/" opens search unless the user is typing in a field
+      const target = e.target as HTMLElement | null;
+      const isTyping =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
+      if (!mod && e.key === "/" && !isTyping) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
@@ -205,6 +236,8 @@ export function Header() {
                 <Icon icon={SearchIcon} className="h-4 w-4" />
               </Button>
             </motion.div>
+
+            <SyncingIndicator />
 
             <div className="flex items-center gap-0.5 rounded-xl border border-border/30 bg-card/50 p-0.5 shadow-sm">
               <LanguageSwitcher />

@@ -4,6 +4,7 @@ import { Icon } from "@/components/shared";
 import { colorWithAlpha } from "@components/categories/category-colors";
 import { cn } from "@lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { X } from "@/lib/icons";
 import type { ReactNode } from "react";
 import type { FilterField } from "@/types/ui";
@@ -26,6 +27,7 @@ export function ActiveFilterChips({
   onClearAll,
   className,
 }: ActiveFilterChipsProps) {
+  const { t } = useTranslation();
   const chips: { key: string; label: string; value: ReactNode }[] = [];
 
   for (const [key, value] of Object.entries(filters)) {
@@ -98,7 +100,7 @@ export function ActiveFilterChips({
   return (
     <div className={cn("flex flex-wrap items-center gap-2.5", className)}>
       <AnimatePresence mode="popLayout">
-        {chips.map((chip, index) => (
+        {chips.map((chip) => (
           <motion.span
             key={chip.key}
             layout
@@ -108,7 +110,6 @@ export function ActiveFilterChips({
             transition={{
               duration: 0.2,
               ease: "easeOut",
-              delay: index * 0.04,
             }}
             className="group inline-flex items-center gap-2 rounded-xl border border-border/30 bg-gradient-to-r from-primary/8 via-primary/5 to-primary/[0.02] px-3 py-1.5 text-[11px] font-medium text-foreground/90 shadow-sm hover:shadow-md hover:border-primary/30 transition-all"
           >
@@ -130,14 +131,14 @@ export function ActiveFilterChips({
         type="button"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: chips.length * 0.04 + 0.15 }}
+        transition={{ delay: 0.15 }}
         onClick={onClearAll}
         className="inline-flex items-center gap-1.5 rounded-xl border border-border/30 px-3 py-1.5 text-[11px] font-medium text-muted-foreground/50 transition-all hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/40 hover:to-muted/20 hover:text-foreground shadow-sm hover:shadow-md"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
         <Icon icon={X} className="size-3.5" />
-        Limpiar todo
+        {t("filters.clearAll")}
       </motion.button>
     </div>
   );

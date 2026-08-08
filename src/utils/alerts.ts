@@ -3,15 +3,11 @@ export interface AlertAction {
   url: string;
 }
 
-const ALERT_ACTIONS: Record<string, AlertAction> = {
-  overspending: {
-    labelKey: "alerts.actions.viewDashboard",
-    url: "/dashboard",
-  },
-  "low-savings": {
-    labelKey: "alerts.actions.viewDashboard",
-    url: "/dashboard",
-  },
+// Alerts that would only navigate to the dashboard ("Abrir panel") get no
+// dedicated action button; the banner itself already directs users there.
+const ALERT_ACTIONS: Record<string, AlertAction | null> = {
+  overspending: null,
+  "low-savings": null,
   "budget-exceeded": {
     labelKey: "alerts.actions.reviewBudgets",
     url: "/dashboard/budgets",
@@ -38,19 +34,6 @@ const ALERT_ACTIONS: Record<string, AlertAction> = {
   },
 };
 
-const DEFAULT_ACTION: AlertAction = {
-  labelKey: "alerts.actions.viewDashboard",
-  url: "/dashboard",
-};
-
-export function getAlertAction(
-  type: string,
-  dataUrl?: string | null,
-): AlertAction {
-  const known = ALERT_ACTIONS[type];
-  if (known) return known;
-  return {
-    labelKey: DEFAULT_ACTION.labelKey,
-    url: dataUrl ?? DEFAULT_ACTION.url,
-  };
+export function getAlertAction(type: string): AlertAction | null {
+  return ALERT_ACTIONS[type] ?? null;
 }

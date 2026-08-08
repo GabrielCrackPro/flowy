@@ -1,15 +1,18 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Input } from "@components/ui";
-import { Command, SearchIcon } from "@/lib/icons";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import { Icon } from "@/components/shared";
+import { Command, SearchIcon } from "@/lib/icons";
 
 interface SearchProps {
   onOpenDialog?: () => void;
 }
 
 export function Search({ onOpenDialog }: SearchProps) {
+  const { t } = useTranslation();
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -18,8 +21,10 @@ export function Search({ onOpenDialog }: SearchProps) {
     >
       <Input
         type="search"
-        placeholder="Buscar en Flowy…"
-        className="h-11 rounded-xl border-border/30 bg-gradient-to-r from-muted/40 to-muted/30 pl-10 pr-14 w-64 lg:w-80 focus-visible:w-80 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-md"
+        placeholder={t("search.placeholder")}
+        aria-label={t("search.placeholder")}
+        title={t("search.open")}
+        className="h-11 w-64 rounded-xl border-border/30 bg-gradient-to-r from-muted/40 to-muted/30 pl-10 pr-14 shadow-sm transition-all duration-300 hover:shadow-md focus-visible:w-80 focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/20 lg:w-80"
         startIcon={<Icon icon={SearchIcon} className="h-4 w-4" />}
         onClick={onOpenDialog}
         readOnly

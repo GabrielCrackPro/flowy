@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@components/ui";
 import { exportCSV, exportPDF } from "@lib/export-transactions";
-import { Download, RefreshCw } from "@/lib/icons";
+import { Download, FileText, RefreshCw } from "@/lib/icons";
 import type { Transaction } from "@/types/Transaction";
 
 interface TransactionTableHeaderProps {
@@ -32,13 +32,17 @@ export function TransactionTableHeader({
   onRefresh,
 }: TransactionTableHeaderProps) {
   return (
-    <div className="flex items-center justify-between border-b border-border/50 px-6 py-2">
-      <p className="text-xs font-medium text-muted-foreground/60">
-        {loading
-          ? "—"
-          : t("transactions.count", { count: transactions.length })}
-      </p>
-      <div className="flex items-center gap-1">
+    <div className="flex items-center justify-between gap-4 border-b border-border/30 px-6 py-2.5">
+      {/* Left: count with stat pill */}
+      <div className="flex items-center gap-3">
+        <span className="inline-flex items-center gap-2 rounded-lg bg-muted/40 px-2.5 py-1">
+          <span className="text-xs font-medium text-foreground/80">
+            {loading
+              ? "—"
+              : t("transactions.count", { count: transactions.length })}
+          </span>
+        </span>
+
         {lastRefreshedAt && (
           <RelativeTime
             date={lastRefreshedAt}
@@ -47,6 +51,10 @@ export function TransactionTableHeader({
             className="text-[11px] text-muted-foreground/40"
           />
         )}
+      </div>
+
+      {/* Right: actions */}
+      <div className="flex items-center gap-1">
         {transactions.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -54,40 +62,43 @@ export function TransactionTableHeader({
                 <Button
                   variant="ghost"
                   size="icon-xs"
-                  className="size-6 text-muted-foreground/40 hover:bg-muted/60 hover:text-foreground"
+                  className="size-7 rounded-lg text-muted-foreground/40 hover:bg-muted/60 hover:text-foreground"
                 >
-                  <Icon icon={Download} className="size-3" />
+                  <Icon icon={Download} className="size-3.5" />
                 </Button>
               }
             />
             <DropdownMenuContent
               align="end"
               sideOffset={4}
-              className="min-w-36"
+              className="min-w-40"
             >
               <DropdownMenuItem
                 onClick={() => exportCSV(transactions, t, locale, currency)}
               >
+                <Icon icon={Download} className="size-3.5" />
                 {t("transactions.exportCSV")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => exportPDF(transactions, t, locale, currency)}
               >
+                <Icon icon={FileText} className="size-3.5" />
                 {t("transactions.exportPDF")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+
         <Button
           variant="ghost"
           size="icon-xs"
           onClick={onRefresh}
           disabled={loading}
-          className="size-6 text-muted-foreground/40 hover:bg-muted/60 hover:text-foreground"
+          className="size-7 rounded-lg text-muted-foreground/40 hover:bg-muted/60 hover:text-foreground"
         >
           <Icon
             icon={RefreshCw}
-            className={`size-3 ${loading ? "animate-spin" : ""}`}
+            className={`size-3.5 ${loading ? "animate-spin" : ""}`}
           />
         </Button>
       </div>

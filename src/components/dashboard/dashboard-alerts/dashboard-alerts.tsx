@@ -450,11 +450,11 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                   <AnimatePresence mode="popLayout" initial={false}>
                     {alerts.map((alert) => {
                       const style = severityStyles[alert.variant];
-                      const action = getAlertAction(alert.type, alert.dataUrl);
+                      const action = getAlertAction(alert.type);
                       const isDismissing = dismissingIds.has(alert.id);
 
                       function handleAction() {
-                        router.push(action.url);
+                        if (action) router.push(action.url);
                       }
 
                       return (
@@ -502,22 +502,24 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                               />
                             </div>
 
-                            <Button
-                              size="sm"
-                              onClick={handleAction}
-                              disabled={isDismissing}
-                              className={cn(
-                                "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-200 ring-1 ring-inset sm:px-3",
-                                "bg-none hover:bg-none",
-                                style.button,
-                                "active:scale-95",
-                              )}
-                            >
-                              <span className="hidden sm:inline">
-                                {t(action.labelKey)}
-                              </span>
-                              <ArrowRight className="size-3.5" />
-                            </Button>
+                            {action && (
+                              <Button
+                                size="sm"
+                                onClick={handleAction}
+                                disabled={isDismissing}
+                                className={cn(
+                                  "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-200 ring-1 ring-inset sm:px-3",
+                                  "bg-none hover:bg-none",
+                                  style.button,
+                                  "active:scale-95",
+                                )}
+                              >
+                                <span className="hidden sm:inline">
+                                  {t(action.labelKey)}
+                                </span>
+                                <ArrowRight className="size-3.5" />
+                              </Button>
+                            )}
 
                             <Button
                               variant="ghost"

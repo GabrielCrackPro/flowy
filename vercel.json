@@ -4,5 +4,11 @@
   "devCommand": "pnpm dev",
   "installCommand": "pnpm install",
   "framework": "nextjs",
-  "regions": ["iad1"]
+  "regions": ["iad1"],
+  "crons": [
+    {
+      "path": "/api/cron/alerts",
+      "schedule": "0 */15 * * *"
+    }
+  ]
 }

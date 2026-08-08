@@ -16,8 +16,10 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "@/lib/icons";
 
 export interface Column<T> {
@@ -26,6 +28,13 @@ export interface Column<T> {
   className?: string;
   sortable?: boolean;
   sortValue?: (item: T) => string | number;
+  /** Placeholder rendered for this column while the table is loading. Falls back to a generic text bar. */
+  skeleton?: ReactNode;
+}
+
+interface ColumnMeta<T> {
+  key: string;
+  column: Column<T>;
 }
 
 interface DataTableProps<T> {
@@ -38,9 +47,11 @@ interface DataTableProps<T> {
   pageSizes?: number[];
   onRowClick?: (item: T) => void;
   stickyHeader?: boolean;
+  /** Removes outer border/shadow wrapper — use when DataTable is inside a Card */
+  bare?: boolean;
 }
 
-function createColumnKeys<T>(columns: Column<T>[]) {
+function createColumnKeys<T>(columns: Column<T>[]): ColumnMeta<T>[] {
   const counts = new Map<string, number>();
 
   return columns.map((column) => {
@@ -59,19 +70,25 @@ function createColumnKeys<T>(columns: Column<T>[]) {
   });
 }
 
-function RowSkeleton({ columns }: { columns: number }) {
-  const cells = Array.from({ length: columns }, (_, value) => value + 1);
-
+function RowSkeleton<T>({
+  columns,
+  index,
+}: {
+  columns: ColumnMeta<T>[];
+  index: number;
+}) {
   return (
-    <TableRow>
-      {cells.map((cell) => (
-        <TableCell key={cell}>
-          <div className={cn(cell === 1 ? "w-3/5" : "w-4/5")}>
-            <Skeleton className="h-4" />
-          </div>
+    <>
+      {columns.map(({ key, column: col }) => (
+        <TableCell key={key} className={cn(col.className, "px-4 py-4")}>
+          {col.skeleton ?? (
+            <Skeleton
+              className={cn("h-4", index % 2 === 0 ? "w-4/5" : "w-3/5")}
+            />
+          )}
         </TableCell>
       ))}
-    </TableRow>
+    </>
   );
 }
 
@@ -85,16 +102,22 @@ export function DataTable<T>({
   pageSizes = [10, 20, 50],
   onRowClick,
   stickyHeader = true,
+  bare = false,
 }: DataTableProps<T>) {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
   const [pageSizeOpen, setPageSizeOpen] = useState(false);
   const [sortColumn, setSortColumn] = useState<number | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  // Only treat loading as a "refresh" once the table has rendered data, so a
+  // table that mounts mid-fetch (e.g. transactions page) doesn't flash dimmed.
+  const hasLoadedOnce = useRef(false);
   const columnMeta = useMemo(() => createColumnKeys(columns), [columns]);
   const skeletonRows = useMemo(
-    () => Array.from({ length: 8 }, (_, value) => value + 1),
-    [],
+    () =>
+      Array.from({ length: Math.min(pageSize, 10) }, (_, value) => value + 1),
+    [pageSize],
   );
 
   const handleSort = useCallback(
@@ -139,6 +162,12 @@ export function DataTable<T>({
   useEffect(() => {
     setPage(1);
   }, []);
+
+  useEffect(() => {
+    if (!loading && data.length > 0) {
+      hasLoadedOnce.current = true;
+    }
+  }, [loading, data]);
 
   const renderHeader = (className?: string) => (
     <TableHeader
@@ -213,71 +242,136 @@ export function DataTable<T>({
 
   if (loading && data.length === 0) {
     return (
-      <div className="overflow-hidden rounded-xl border border-border/30 shadow-sm">
+      <div
+        className={cn(
+          "overflow-hidden",
+          bare ? "" : "rounded-xl border border-border/30 shadow-sm",
+        )}
+      >
         <Table>
-          {renderHeader()}
+          {renderHeader(bare ? "border-t-0" : undefined)}
           <TableBody>
-            {skeletonRows.map((row) => (
-              <RowSkeleton key={row} columns={columns.length} />
+            {skeletonRows.map((row, index) => (
+              <motion.tr
+                key={row}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{
+                  duration: 0.25,
+                  delay: index * 0.04,
+                  ease: "easeOut",
+                }}
+                className="border-b border-border/20 last:border-b-0"
+              >
+                <RowSkeleton columns={columnMeta} index={index} />
+              </motion.tr>
             ))}
           </TableBody>
         </Table>
+
+        {/* Pagination footer skeleton — keeps layout stable when the table loads */}
+        <div className="flex items-center justify-between border-t border-border/30 bg-gradient-to-r from-muted/10 to-muted/5 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton variant="rounded" className="h-8 w-14" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Skeleton variant="rounded" className="size-8" />
+            <Skeleton className="h-3 w-6" />
+            <Skeleton variant="rounded" className="size-8" />
+          </div>
+        </div>
       </div>
     );
   }
 
+  const isRefreshing = loading && data.length > 0 && hasLoadedOnce.current;
+
   return (
-    <div className="space-y-4">
-      <div className="overflow-hidden rounded-xl border border-border/30 shadow-sm bg-gradient-to-br from-card to-card/50">
-        <Table>
-          {renderHeader()}
-          <TableBody>
-            {data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="p-0">
-                  {emptyState}
-                </TableCell>
-              </TableRow>
-            ) : (
-              <AnimatePresence mode="popLayout">
-                {paginatedData.map((item, index) => (
-                  <motion.tr
-                    key={keyExtractor(item)}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2, delay: index * 0.02 }}
-                    className={cn(
-                      "group transition-all duration-200 border-b border-border/20 last:border-b-0",
-                      onRowClick && "cursor-pointer hover:bg-primary/5",
-                    )}
-                    onClick={onRowClick ? () => onRowClick(item) : undefined}
-                  >
-                    {columnMeta.map(({ key, column: col }) => (
-                      <TableCell
-                        key={key}
-                        className={cn(
-                          col.className,
-                          "px-4 py-4 group-hover:bg-primary/[0.02] transition-colors",
-                        )}
-                      >
-                        {col.cell(item)}
-                      </TableCell>
-                    ))}
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
+    <div className={cn(!bare && "space-y-4")}>
+      <div
+        className={cn(
+          "overflow-hidden bg-gradient-to-br from-card to-card/50",
+          bare ? "" : "rounded-xl border border-border/30 shadow-sm",
+        )}
+      >
+        <div className="relative" aria-busy={isRefreshing || undefined}>
+          <Table
+            className={cn(
+              "transition-opacity duration-300",
+              isRefreshing && "opacity-60",
             )}
-          </TableBody>
-        </Table>
+          >
+            {renderHeader(bare ? "border-t-0" : undefined)}
+            <TableBody>
+              {data.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="p-0">
+                    {emptyState}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                <AnimatePresence mode="popLayout">
+                  {paginatedData.map((item, index) => (
+                    <motion.tr
+                      key={keyExtractor(item)}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2, delay: index * 0.02 }}
+                      className={cn(
+                        "group transition-all duration-200 border-b border-border/20 last:border-b-0",
+                        onRowClick && "cursor-pointer hover:bg-primary/5",
+                      )}
+                      onClick={onRowClick ? () => onRowClick(item) : undefined}
+                    >
+                      {columnMeta.map(({ key, column: col }) => (
+                        <TableCell
+                          key={key}
+                          className={cn(
+                            col.className,
+                            "px-4 py-4 group-hover:bg-primary/[0.02] transition-colors",
+                          )}
+                        >
+                          {col.cell(item)}
+                        </TableCell>
+                      ))}
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+              )}
+            </TableBody>
+          </Table>
+
+          {/* Refresh shimmer — subtle feedback while existing data is refetching */}
+          {isRefreshing && (
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-0.5 overflow-hidden bg-border/40">
+              <motion.div
+                className="h-full w-1/3 rounded-full bg-gradient-to-r from-transparent via-primary/60 to-transparent"
+                animate={{ x: ["-100%", "400%"] }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 1.2,
+                  ease: "easeInOut",
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {data.length > 0 && (
-        <div className="flex items-center justify-between border-t border-border/30 bg-gradient-to-r from-muted/10 to-muted/5 px-4 py-3 rounded-b-xl">
+        <div
+          className={cn(
+            "flex items-center justify-between border-t border-border/30 bg-gradient-to-r from-muted/10 to-muted/5 px-4 py-3",
+            bare ? "" : "rounded-b-xl",
+          )}
+        >
           <div className="flex items-center gap-3">
             <p className="text-xs text-muted-foreground/70">
               {(page - 1) * pageSize + 1}–
-              {Math.min(page * pageSize, sorted.length)} de {sorted.length}
+              {Math.min(page * pageSize, sorted.length)} {t("pagination.of")}{" "}
+              {sorted.length}
             </p>
             <div className="relative">
               <motion.button

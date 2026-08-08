@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Skeleton } from "@/components/shared";
 import type { Column } from "../data-table";
 
 interface DateColumnOptions<T> {
@@ -40,6 +41,8 @@ export function DateColumn<T>({
           return date ? new Date(date).getTime() : 0;
         }
       : undefined,
+
+    skeleton: <Skeleton className="h-3.5 w-20" />,
 
     cell: (row) => {
       const date = value(row);

@@ -33,19 +33,28 @@ export interface StatsCardProps {
   trend?: {
     value: number;
     label?: string;
+    invert?: boolean;
   };
 }
 
 const toneAccentClasses: Record<StatsCardTone, string> = {
   default:
-    "bg-gradient-to-br from-primary/20 to-primary/10 text-primary dark:from-primary/30 dark:to-primary/20 shadow-md shadow-primary/20",
+    "bg-primary/10 text-primary ring-1 ring-inset ring-primary/10 dark:bg-primary/15 dark:text-primary",
   positive:
-    "bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 text-emerald-600 dark:from-emerald-500/30 dark:to-emerald-500/20 dark:text-emerald-400 shadow-md shadow-emerald-500/20",
+    "bg-emerald-500/10 text-emerald-600 ring-1 ring-inset ring-emerald-500/10 dark:bg-emerald-500/15 dark:text-emerald-400",
   negative:
-    "bg-gradient-to-br from-rose-500/20 to-rose-500/10 text-rose-600 dark:from-rose-500/30 dark:to-rose-500/20 dark:text-rose-400 shadow-md shadow-rose-500/20",
-  info: "bg-gradient-to-br from-blue-500/20 to-blue-500/10 text-blue-600 dark:from-blue-500/30 dark:to-blue-500/20 dark:text-blue-400 shadow-md shadow-blue-500/20",
+    "bg-rose-500/10 text-rose-600 ring-1 ring-inset ring-rose-500/10 dark:bg-rose-500/15 dark:text-rose-400",
+  info: "bg-blue-500/10 text-blue-600 ring-1 ring-inset ring-blue-500/10 dark:bg-blue-500/15 dark:text-blue-400",
   warning:
-    "bg-gradient-to-br from-amber-500/20 to-amber-500/10 text-amber-600 dark:from-amber-500/30 dark:to-amber-500/20 dark:text-amber-400 shadow-md shadow-amber-500/20",
+    "bg-amber-500/10 text-amber-600 ring-1 ring-inset ring-amber-500/10 dark:bg-amber-500/15 dark:text-amber-400",
+};
+
+const toneGlowClasses: Record<StatsCardTone, string> = {
+  default: "bg-primary/15 dark:bg-primary/20",
+  positive: "bg-emerald-500/15 dark:bg-emerald-500/20",
+  negative: "bg-rose-500/15 dark:bg-rose-500/20",
+  info: "bg-blue-500/15 dark:bg-blue-500/20",
+  warning: "bg-amber-500/15 dark:bg-amber-500/20",
 };
 
 const toneBorderClasses: Record<StatsCardTone, string> = {
@@ -98,12 +107,21 @@ function getFormatter(
     case "percentage":
       return (v: number) => {
         // If value is between 0-1, treat as decimal and convert to percentage
-        const percentageValue = v <= 1 ? v * 100 : v;
-        return formatPercentage(percentageValue, locale);
+        const percentageValue = v > 0 && v <= 1 ? v * 100 : v;
+        return formatPercentage(percentageValue, locale, 2);
       };
     default:
       return (v: number) => formatCount(v, locale);
   }
+}
+
+function getValueSizeClass(formatted: string): string {
+  const length = formatted.length;
+
+  if (length < 10) return "text-3xl sm:text-4xl";
+  if (length < 13) return "text-2xl sm:text-3xl";
+  if (length < 16) return "text-xl sm:text-2xl";
+  return "text-lg sm:text-xl";
 }
 
 export function StatsCard({
@@ -124,46 +142,65 @@ export function StatsCard({
 
   const tone = resolveTone(explicitTone, variant, numericValue);
 
-  // Convert to percentage if value is between 0-1 (decimal) instead of 0-100
-  const percentageValue = numericValue <= 1 ? numericValue * 100 : numericValue;
+  const formatter = getFormatter(variant, locale, currency);
+  const valueSizeClass = getValueSizeClass(formatter(numericValue));
 
+  const trendGood = trend
+    ? trend.invert
+      ? trend.value <= 0
+      : trend.value >= 0
+    : true;
   const TrendIcon = trend && trend.value >= 0 ? ArrowUpRight : ArrowDownRight;
 
   return (
     <Animated.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="group"
+      className="group relative h-full"
     >
       <Card
         className={cn(
           CARD_SHELL,
-          "relative h-full gap-0 overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/5",
+          "relative h-full gap-0 overflow-hidden py-0",
+          "hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_rgba(2,6,23,0.3)] dark:hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.7)]",
         )}
       >
         {/* Background gradient */}
         <div className={cn(CARD_BG_GRADIENT, toneBgClasses[tone])} />
 
-        {/* Top gradient border */}
+        {/* Radial tone glow, revealed on hover */}
+        <div
+          className={cn(
+            "pointer-events-none absolute -right-12 -top-16 size-44 rounded-full opacity-0 blur-3xl transition-opacity duration-700 group-hover:opacity-100",
+            toneGlowClasses[tone],
+          )}
+        />
+
+        {/* Top accent */}
         <div className={cn(CARD_TOP_ACCENT, toneBorderClasses[tone])} />
 
         <CardHeader className="relative flex flex-row items-center justify-between px-5 pb-3 pt-5">
-          <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+          <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
             {title}
           </CardTitle>
 
           {IconComponent && (
             <Animated.div
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.2, type: "spring", stiffness: 200 }}
+              whileHover={{ scale: 1.08, rotate: -4 }}
+              whileTap={{ scale: 0.94 }}
+              transition={{
+                duration: 0.25,
+                type: "spring",
+                stiffness: 260,
+                damping: 18,
+              }}
               className={cn(
-                "flex size-10 shrink-0 items-center justify-center rounded-xl transition-transform",
+                "flex size-9 shrink-0 items-center justify-center rounded-xl shadow-sm transition-shadow duration-300 group-hover:shadow-md",
                 toneAccentClasses[tone],
               )}
             >
-              <Icon icon={IconComponent} className="size-5" />
+              <Icon icon={IconComponent} className="size-[18px]" />
             </Animated.div>
           )}
         </CardHeader>
@@ -171,18 +208,16 @@ export function StatsCard({
         <CardContent className="relative flex flex-1 flex-col px-5 pb-5 pt-2">
           {/* Main Value */}
           <Animated.p
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
+            initial={{ scale: 0.96, opacity: 0, y: 4 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.08, ease: "easeOut" }}
             className={cn(
-              "text-3xl font-bold leading-none tracking-tight sm:text-4xl",
+              "font-bold leading-none tracking-tight tabular-nums",
+              valueSizeClass,
               toneValueClasses[tone],
             )}
           >
-            <AnimatedNumber
-              value={numericValue}
-              formatter={getFormatter(variant, locale, currency)}
-            />
+            <AnimatedNumber value={numericValue} formatter={formatter} />
           </Animated.p>
 
           {/* Description/Label */}
@@ -190,8 +225,8 @@ export function StatsCard({
             <Animated.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.15 }}
-              className="mt-2 text-sm leading-snug text-muted-foreground/70"
+              transition={{ duration: 0.35, delay: 0.16 }}
+              className="mt-2 text-[13px] leading-snug text-muted-foreground/60"
             >
               {description}
             </Animated.p>
@@ -199,102 +234,77 @@ export function StatsCard({
 
           {/* Footer Section */}
           <div className="mt-auto pt-4">
-            <div className="mb-3 border-t border-border/30" />
+            <div className="mb-3 border-t border-border/40" />
             <div className="flex items-center justify-between">
               {/* Trend Indicator */}
               {trend ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <Animated.div
-                    whileHover={{
-                      scale: 1.1,
-                      rotate: trend.value >= 0 ? 10 : -10,
-                    }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{
-                      duration: 0.2,
-                      type: "spring",
-                      stiffness: 200,
-                    }}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.15 }}
+                    whileHover={{ y: -1 }}
                     className={cn(
-                      "flex size-6 items-center justify-center rounded-lg transition-transform",
-                      trend.value >= 0
-                        ? "bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 text-emerald-600 dark:from-emerald-500/30 dark:to-emerald-500/20 dark:text-emerald-400 shadow-sm shadow-emerald-500/20"
-                        : "bg-gradient-to-br from-rose-500/20 to-rose-500/10 text-rose-600 dark:from-rose-500/30 dark:to-rose-500/20 dark:text-rose-400 shadow-sm shadow-rose-500/20",
+                      "inline-flex items-center gap-1.5 rounded-full py-1 pl-1.5 pr-2.5 ring-1 ring-inset transition-all duration-300 hover:ring-2",
+                      trendGood
+                        ? "bg-emerald-500/10 text-emerald-700 ring-emerald-500/15 hover:bg-emerald-500/15 dark:bg-emerald-500/15 dark:text-emerald-400 dark:ring-emerald-500/25"
+                        : "bg-rose-500/10 text-rose-700 ring-rose-500/15 hover:bg-rose-500/15 dark:bg-rose-500/15 dark:text-rose-400 dark:ring-rose-500/25",
                     )}
                   >
-                    <Icon icon={TrendIcon} className="size-3.5" />
-                  </Animated.div>
-
-                  <div className="flex flex-col">
-                    <Animated.span
-                      initial={{ opacity: 0, x: -5 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: 0.15 }}
+                    <Animated.div
+                      whileHover={{
+                        scale: 1.15,
+                        rotate: trend.value >= 0 ? 10 : -10,
+                      }}
+                      whileTap={{ scale: 0.9 }}
+                      transition={{
+                        duration: 0.2,
+                        type: "spring",
+                        stiffness: 240,
+                        damping: 14,
+                      }}
                       className={cn(
-                        "text-sm font-semibold leading-none",
-                        trend.value >= 0
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-rose-600 dark:text-rose-400",
+                        "flex size-5 items-center justify-center rounded-full",
+                        trendGood
+                          ? "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/25 dark:text-emerald-400"
+                          : "bg-rose-500/15 text-rose-700 dark:bg-rose-500/25 dark:text-rose-400",
                       )}
                     >
+                      <Icon icon={TrendIcon} className="size-3" />
+                    </Animated.div>
+                    <span className="text-xs font-semibold tabular-nums leading-none">
                       {formatPercentage(Math.abs(trend.value), locale, 1)}
+                    </span>
+                  </Animated.div>
+                  {trend.label && (
+                    <Animated.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3, delay: 0.2 }}
+                      className="text-[11px] leading-none text-muted-foreground/60"
+                    >
+                      {trend.label}
                     </Animated.span>
-                    {trend.label && (
-                      <Animated.span
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3, delay: 0.2 }}
-                        className="text-xs text-muted-foreground/60"
-                      >
-                        {trend.label}
-                      </Animated.span>
-                    )}
-                  </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   {IconComponent && (
                     <div
                       className={cn(
-                        "flex size-6 items-center justify-center rounded-lg",
+                        "flex size-6 items-center justify-center rounded-md",
                         toneAccentClasses[tone],
                       )}
                     >
                       <Icon icon={IconComponent} className="size-3.5" />
                     </div>
                   )}
-                  <span className="text-xs text-muted-foreground/60">
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
                     {variant === "currency"
                       ? currency
                       : variant === "percentage"
                         ? "%"
                         : "items"}
-                  </span>
-                </div>
-              )}
-
-              {/* Progress indicator for percentage cards */}
-              {variant === "percentage" && (
-                <div className="flex items-center gap-2">
-                  <div className="relative h-2 w-16 overflow-hidden rounded-full bg-muted/50 shadow-inner">
-                    <Animated.div
-                      initial={{ width: 0 }}
-                      animate={{
-                        width: `${Math.min(100, Math.max(0, percentageValue))}%`,
-                      }}
-                      transition={{
-                        duration: 0.8,
-                        delay: 0.2,
-                        ease: "easeOut",
-                      }}
-                      className={cn(
-                        "h-full rounded-full shadow-sm",
-                        toneBorderClasses[tone],
-                      )}
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-muted-foreground/70">
-                    {Math.round(Math.min(100, Math.max(0, percentageValue)))}%
                   </span>
                 </div>
               )}

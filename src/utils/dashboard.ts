@@ -32,6 +32,19 @@ interface DashboardStats {
   savingsRate: number;
   activeSubscriptions: number;
   activeBudgets: number;
+  prevIncome: number;
+  prevExpenses: number;
+  prevSavingsRate: number;
+}
+
+function roundTo1(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+function pctChange(current: number, previous: number): number | null {
+  if (previous === 0) return null;
+  const rounded = roundTo1(((current - previous) / Math.abs(previous)) * 100);
+  return rounded === 0 ? null : rounded;
 }
 
 export function buildDashboardCards(
@@ -42,6 +55,13 @@ export function buildDashboardCards(
   t: (key: string) => string,
 ): StatsCardProps[] {
   if (!data) return [];
+
+  const incomeTrend = pctChange(data.incomeThisMonth, data.prevIncome);
+  const expenseTrend = pctChange(data.expensesThisMonth, data.prevExpenses);
+  const prevHadActivity = data.prevIncome > 0 || data.prevExpenses > 0;
+  const savingsTrend = prevHadActivity
+    ? roundTo1(data.savingsRate - data.prevSavingsRate)
+    : null;
 
   return [
     {
@@ -61,6 +81,10 @@ export function buildDashboardCards(
       icon: TrendingUp,
       tone: "positive",
       description: getMonthName(month, year, locale),
+      trend:
+        incomeTrend === null
+          ? undefined
+          : { value: incomeTrend, label: t("stats.vsPrevMonth") },
     },
     {
       title: t("stats.expensesMonth"),
@@ -69,6 +93,14 @@ export function buildDashboardCards(
       icon: TrendingDown,
       tone: "negative",
       description: getMonthName(month, year, locale),
+      trend:
+        expenseTrend === null
+          ? undefined
+          : {
+              value: expenseTrend,
+              invert: true,
+              label: t("stats.vsPrevMonth"),
+            },
     },
     {
       title: t("stats.savingsRate"),
@@ -85,6 +117,10 @@ export function buildDashboardCards(
         data.savingsRate >= 20
           ? t("stats.savingsExcellent")
           : t("stats.savingsTry"),
+      trend:
+        savingsTrend === null || savingsTrend === 0
+          ? undefined
+          : { value: savingsTrend, label: t("stats.vsPrevMonth") },
     },
     {
       title: t("stats.activeSubscriptions"),

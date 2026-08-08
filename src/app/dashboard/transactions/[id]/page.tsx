@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AnimatedGradient,
   ConfirmDialog,
   EmptyState,
   FileUpload,
@@ -18,7 +19,7 @@ import { getTransaction } from "@lib/api/transaction";
 import { cn, formatCurrency } from "@lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { PAYMENT_METHOD_KEY } from "@utils/constants";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import {
   type FormEvent,
@@ -250,21 +251,20 @@ export default function TransactionDetailPage() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
-              className={cn(
-                "relative overflow-hidden rounded-2xl p-6 sm:p-7 shadow-lg",
-                isIncome
-                  ? "bg-linear-to-br from-emerald-500/15 via-emerald-500/8 to-emerald-500/5 dark:from-emerald-500/20 dark:via-emerald-500/10 dark:to-emerald-500/5"
-                  : "bg-linear-to-br from-rose-500/15 via-rose-500/8 to-rose-500/5 dark:from-rose-500/20 dark:via-rose-500/10 dark:to-rose-500/5",
-              )}
+              className="relative overflow-hidden rounded-2xl p-6 sm:p-7 shadow-lg"
             >
-              {/* Top gradient border */}
-              <div
-                className={cn(
-                  "absolute inset-x-0 top-0 h-px bg-linear-to-r",
-                  isIncome
-                    ? "from-emerald-500 via-emerald-400 to-emerald-500"
-                    : "from-rose-500 via-rose-400 to-rose-500",
-                )}
+              <AnimatedGradient
+                active={isIncome}
+                className="absolute inset-0"
+                classNameA="bg-linear-to-br from-emerald-500/15 via-emerald-500/8 to-emerald-500/5 dark:from-emerald-500/20 dark:via-emerald-500/10 dark:to-emerald-500/5"
+                classNameB="bg-linear-to-br from-rose-500/15 via-rose-500/8 to-rose-500/5 dark:from-rose-500/20 dark:via-rose-500/10 dark:to-rose-500/5"
+              />
+
+              <AnimatedGradient
+                active={isIncome}
+                className="absolute inset-x-0 top-0 h-px"
+                classNameA="bg-linear-to-r from-emerald-500 via-emerald-400 to-emerald-500"
+                classNameB="bg-linear-to-r from-rose-500 via-rose-400 to-rose-500"
               />
 
               <div className="relative flex items-start justify-between gap-4">
@@ -559,145 +559,137 @@ export default function TransactionDetailPage() {
   );
 }
 
+const detailSkeletonContainer: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+
+const detailSkeletonVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: "easeOut" },
+  },
+};
+
 function TransactionDetailSkeleton() {
   return (
-    <div className="mx-auto max-w-4xl px-4 sm:px-6 pt-6">
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <div className="h-6 w-44">
-          <Skeleton />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="size-9">
-            <Skeleton variant="rounded" />
-          </div>
-          <div className="size-9">
-            <Skeleton variant="rounded" />
-          </div>
-          <div className="size-9">
-            <Skeleton variant="rounded" />
-          </div>
-        </div>
-      </div>
-
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={detailSkeletonContainer}
+      className="mx-auto max-w-4xl px-4 sm:px-6 pt-6"
+    >
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 p-6 sm:p-7">
-            <div className="mb-2 h-3 w-24">
-              <Skeleton />
-            </div>
-            <div className="h-11 w-64 sm:w-72">
-              <Skeleton />
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-1 rounded-xl bg-muted/30 p-1">
-              <div className="h-8 rounded-lg">
-                <Skeleton />
+        <motion.div variants={detailSkeletonVariants} className="space-y-6">
+          {/* Amount card skeleton */}
+          <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 p-6 sm:p-7 shadow-lg">
+            <Skeleton className="mb-2 h-3 w-24" />
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <Skeleton className="h-11 w-64 sm:w-72" />
+                <Skeleton className="mt-3 h-4 w-40" />
               </div>
-              <div className="h-8 rounded-lg">
-                <Skeleton />
-              </div>
+              <Skeleton variant="rounded" className="size-12 rounded-2xl" />
+            </div>
+            <div className="mt-6 grid grid-cols-2 gap-1 rounded-xl bg-background/60 p-1 shadow-inner">
+              <Skeleton className="h-8 rounded-lg" />
+              <Skeleton className="h-8 rounded-lg" />
             </div>
           </div>
 
-          <div className="divide-y divide-border/30 rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50">
-            {[1, 2, 3, 4].map((row) => (
+          {/* Detail rows skeleton */}
+          <div className="divide-y divide-border/30 rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 shadow-md">
+            {[1, 2, 3, 4].map((row, index) => (
+              <div
+                key={row}
+                className="flex items-center justify-between gap-4 px-6 py-4"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <Skeleton variant="rounded" className="size-8" />
+                  <Skeleton
+                    className={cn("h-3.5", index % 2 === 0 ? "w-24" : "w-20")}
+                  />
+                </div>
+                <Skeleton className="h-3.5 w-32" />
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div variants={detailSkeletonVariants} className="space-y-6">
+          {/* Receipt card skeleton */}
+          <div className="rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 p-6 shadow-md">
+            <div className="mb-4 flex items-center gap-2">
+              <Skeleton variant="rounded" className="size-8" />
+              <Skeleton className="h-3.5 w-24" />
+            </div>
+            <div className="flex h-28 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border/40 bg-muted/10">
+              <Skeleton variant="rounded" className="size-8" />
+              <Skeleton className="h-3 w-32" />
+            </div>
+          </div>
+
+          {/* Notes card skeleton */}
+          <div className="rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 p-6 shadow-md">
+            <Skeleton className="mb-3 h-3.5 w-16" />
+            <Skeleton className="h-3.5 w-3/4" />
+            <Skeleton className="mt-2 h-3.5 w-1/2" />
+          </div>
+
+          {/* Created/updated rows skeleton */}
+          <div className="divide-y divide-border/30 rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 shadow-md">
+            {[1, 2].map((row, index) => (
               <div
                 key={row}
                 className="flex items-center justify-between gap-4 px-6 py-4"
               >
                 <div className="flex items-center gap-3">
-                  <div className="size-8">
-                    <Skeleton variant="rounded" />
-                  </div>
-                  <div className="h-3.5 w-24">
-                    <Skeleton />
-                  </div>
+                  <Skeleton variant="rounded" className="size-8" />
+                  <Skeleton
+                    className={cn("h-3.5", index % 2 === 0 ? "w-24" : "w-20")}
+                  />
                 </div>
-                <div className="h-3.5 w-32">
-                  <Skeleton />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="space-y-4 rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 p-6">
-            <div className="flex items-center gap-2">
-              <div className="size-8">
-                <Skeleton variant="rounded" />
-              </div>
-              <div className="h-3.5 w-24">
-                <Skeleton />
-              </div>
-            </div>
-            <div className="h-28 w-full">
-              <Skeleton className="h-full w-full rounded-lg" />
-            </div>
-          </div>
-
-          <div className="space-y-3 rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 p-6">
-            <div className="h-3.5 w-16">
-              <Skeleton />
-            </div>
-            <div className="h-4 w-3/4">
-              <Skeleton />
-            </div>
-          </div>
-
-          <div className="divide-y divide-border/30 rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50">
-            {[1, 2].map((row) => (
-              <div
-                key={row}
-                className="flex items-center justify-between gap-4 px-6 py-4"
-              >
-                <div className="h-3.5 w-20">
-                  <Skeleton />
-                </div>
-                <div className="h-3.5 w-24">
-                  <Skeleton />
+                <div className="flex items-center gap-2">
+                  <Skeleton variant="circular" className="size-5" />
+                  <Skeleton className="h-3 w-24" />
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="mt-8 rounded-2xl bg-card p-6 shadow-sm ring-1 ring-foreground/5">
+      {/* Comments skeleton */}
+      <motion.div
+        variants={detailSkeletonVariants}
+        className="mt-8 rounded-2xl bg-card p-6 shadow-sm ring-1 ring-foreground/5"
+      >
         <div className="mb-5 flex items-center gap-2.5">
-          <div className="size-8">
-            <Skeleton variant="rounded" />
-          </div>
-          <div className="h-3.5 w-28">
-            <Skeleton />
-          </div>
+          <Skeleton variant="rounded" className="size-8" />
+          <Skeleton className="h-3.5 w-28" />
+          <Skeleton className="h-4 w-5 rounded-full" />
         </div>
         <div className="space-y-4">
-          {[1, 2].map((row) => (
+          {[1, 2].map((row, index) => (
             <div key={row} className="flex items-start gap-3">
-              <div className="size-8 shrink-0">
-                <Skeleton variant="circular" />
-              </div>
+              <Skeleton variant="circular" className="size-8 shrink-0" />
               <div className="min-w-0 flex-1 space-y-2">
-                <div className="h-3.5 w-40">
-                  <Skeleton />
-                </div>
-                <div className="h-3 w-3/4">
-                  <Skeleton />
-                </div>
+                <Skeleton
+                  className={cn("h-3.5", index % 2 === 0 ? "w-40" : "w-32")}
+                />
+                <Skeleton className="h-3 w-3/4" />
               </div>
             </div>
           ))}
         </div>
         <div className="mt-5 flex items-start gap-3">
-          <div className="size-8 shrink-0">
-            <Skeleton variant="circular" />
-          </div>
-          <div className="h-11 flex-1">
-            <Skeleton variant="rounded" />
-          </div>
+          <Skeleton variant="circular" className="size-8 shrink-0" />
+          <Skeleton variant="rounded" className="h-11 flex-1" />
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

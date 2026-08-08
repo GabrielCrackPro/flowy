@@ -37,7 +37,9 @@ export function CommandPaletteEmpty({ type, t }: CommandPaletteEmptyProps) {
         className="flex flex-col items-center gap-3 py-14 text-center"
       >
         <Icon icon={Loader2} className="h-5 w-5 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground/60">Buscando…</p>
+        <p className="text-sm text-muted-foreground/60">
+          {t("search.searching")}
+        </p>
       </motion.div>
     );
   }
@@ -57,7 +59,7 @@ export function CommandPaletteEmpty({ type, t }: CommandPaletteEmptyProps) {
             {t("search.noResults")}
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground/40">
-            Prueba con otros términos
+            {t("search.noResultsDesc")}
           </p>
         </div>
       </motion.div>
@@ -76,7 +78,7 @@ export function CommandPaletteEmpty({ type, t }: CommandPaletteEmptyProps) {
         </div>
         <div>
           <p className="text-sm font-medium text-muted-foreground/70">
-            No hay resultados en este filtro
+            {t("search.filterEmpty")}
           </p>
         </div>
       </motion.div>

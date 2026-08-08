@@ -1,5 +1,6 @@
 import { cn } from "@lib/utils";
 import type { ReactNode } from "react";
+import { Skeleton } from "@/components/shared";
 import type { Column } from "../data-table";
 
 interface TextColumnOptions<T> {
@@ -42,6 +43,15 @@ export function TextColumn<T>({
           }
         : undefined),
 
+    skeleton: (
+      <div className="flex min-w-0 items-center gap-2">
+        {icon && <Skeleton className="size-4 shrink-0" />}
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <Skeleton className="h-3.5 w-3/5" />
+          {secondaryText && <Skeleton className="h-3 w-2/5" />}
+        </div>
+      </div>
+    ),
     cell: (row) => {
       const primary = value(row);
       const secondary = secondaryText?.(row);

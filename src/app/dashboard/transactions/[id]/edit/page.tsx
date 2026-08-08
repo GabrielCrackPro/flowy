@@ -2,6 +2,7 @@
 
 import { EmptyState, Skeleton, TransactionForm } from "@components/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { motion, type Variants } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,6 +13,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { getTransaction } from "@/lib/api/transaction";
 import { parseDateOnly } from "@/lib/date-only";
 import type { CreateTransactionSchema } from "@/lib/schemas";
+import { cn } from "@/lib/utils";
 
 export default function EditTransactionPage() {
   const { id } = useParams<{ id: string }>();
@@ -109,99 +111,99 @@ export default function EditTransactionPage() {
   );
 }
 
+const editSkeletonContainer: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+
+const editSkeletonVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: "easeOut" },
+  },
+};
+
 function EditTransactionSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 pt-4">
-      <div className="h-10 w-40">
-        <Skeleton />
-      </div>
-
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={editSkeletonContainer}
+      className="mx-auto w-full max-w-5xl px-4 sm:px-6 pt-4"
+    >
       <div className="grid grid-cols-1 gap-6 pt-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-        <div className="space-y-6">
+        <motion.div variants={editSkeletonVariants} className="space-y-6">
+          {/* Amount card skeleton */}
           <div className="relative overflow-hidden rounded-2xl shadow-sm ring-1 ring-border/30 bg-gradient-to-br from-muted/20 to-muted/5 p-5 sm:p-6">
-            <div className="grid grid-cols-2 gap-1 rounded-xl bg-background/60 p-1">
-              <div className="h-8 rounded-lg">
-                <Skeleton />
-              </div>
-              <div className="h-8 rounded-lg">
-                <Skeleton />
-              </div>
+            <div className="grid grid-cols-2 gap-1 rounded-2xl bg-background/80 p-1 shadow-inner">
+              <Skeleton className="h-8 rounded-xl" />
+              <Skeleton className="h-8 rounded-xl" />
             </div>
             <div className="mt-5 flex items-baseline gap-2">
-              <div className="h-12 w-48 sm:w-64">
-                <Skeleton />
-              </div>
+              <Skeleton className="h-8 w-10" />
+              <Skeleton className="h-12 w-48 sm:w-64" />
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-1.5">
               {[1, 2, 3, 4, 5, 6].map((chip) => (
-                <div key={chip} className="h-7 w-14">
-                  <Skeleton variant="rounded" />
-                </div>
+                <Skeleton
+                  key={chip}
+                  variant="rounded"
+                  className="h-7 w-14 rounded-full"
+                />
               ))}
             </div>
             <div className="mt-4 flex items-center justify-between gap-3 border-t border-border/30 pt-3">
-              <div className="h-3.5 w-32">
-                <Skeleton />
-              </div>
-              <div className="h-4 w-24">
-                <Skeleton />
-              </div>
+              <Skeleton className="h-3.5 w-32" />
+              <Skeleton className="h-4 w-24" />
             </div>
           </div>
 
+          {/* Description input skeleton */}
           <div className="rounded-2xl border border-border/30 bg-card p-5 sm:p-6">
-            <div className="mb-2 h-3.5 w-24">
-              <Skeleton />
-            </div>
-            <div className="h-12 w-full">
-              <Skeleton variant="rounded" />
-            </div>
+            <Skeleton className="mb-2 h-3.5 w-24" />
+            <Skeleton variant="rounded" className="h-12 w-full" />
           </div>
 
+          {/* Notes textarea skeleton */}
           <div className="rounded-2xl border border-border/30 bg-card p-5 sm:p-6">
-            <div className="mb-2 h-3.5 w-16">
-              <Skeleton />
-            </div>
-            <div className="h-24 w-full">
-              <Skeleton className="h-full w-full rounded-lg" />
-            </div>
+            <Skeleton className="mb-2 h-3.5 w-16" />
+            <Skeleton className="h-24 w-full rounded-lg" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="space-y-6 lg:sticky lg:top-4">
-          <div className="space-y-4 rounded-2xl border border-border/30 bg-card p-5 sm:p-6">
-            <div className="h-3.5 w-24">
-              <Skeleton />
-            </div>
-            <div className="h-10 w-full">
-              <Skeleton variant="rounded" />
-            </div>
-            <div className="h-3.5 w-32">
-              <Skeleton />
-            </div>
-            <div className="space-y-2">
-              {[1, 2, 3].map((item) => (
-                <div key={item} className="flex items-center gap-3">
-                  <div className="size-8">
-                    <Skeleton variant="rounded" />
-                  </div>
-                  <div className="h-3.5 w-32">
-                    <Skeleton />
-                  </div>
+        <motion.div
+          variants={editSkeletonVariants}
+          className="space-y-6 lg:sticky lg:top-4"
+        >
+          {/* Sidebar rows skeleton */}
+          <div className="divide-y divide-border/30 rounded-2xl border border-border/30 bg-card py-1 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+            {[1, 2, 3, 4, 5].map((row, index) => (
+              <div
+                key={row}
+                className="flex items-center justify-between gap-4 px-5 py-3.5"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <Skeleton variant="rounded" className="size-8" />
+                  <Skeleton
+                    className={cn("h-3.5", index % 2 === 0 ? "w-24" : "w-20")}
+                  />
                 </div>
-              ))}
-            </div>
+                <Skeleton
+                  className={cn("h-3.5", index === 3 ? "w-8" : "w-16")}
+                />
+              </div>
+            ))}
           </div>
+
+          {/* Action buttons skeleton */}
           <div className="flex flex-col gap-2">
-            <div className="h-12 w-full">
-              <Skeleton variant="rounded" />
-            </div>
-            <div className="h-10 w-full">
-              <Skeleton variant="rounded" />
-            </div>
+            <Skeleton variant="rounded" className="h-12 w-full" />
+            <Skeleton variant="rounded" className="h-10 w-full" />
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

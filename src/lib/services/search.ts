@@ -20,6 +20,16 @@ export const SearchService = {
             OR: [
               { description: { contains: query, mode: "insensitive" } },
               { notes: { contains: query, mode: "insensitive" } },
+              { paymentMethod: { contains: query, mode: "insensitive" } },
+              {
+                tags: {
+                  some: {
+                    category: {
+                      name: { contains: query, mode: "insensitive" },
+                    },
+                  },
+                },
+              },
             ],
           },
           include: {
@@ -63,7 +73,10 @@ export const SearchService = {
         prisma.subscription.findMany({
           where: {
             spaceId: activeSpace?.id ?? null,
-            merchant: { contains: query, mode: "insensitive" },
+            OR: [
+              { merchant: { contains: query, mode: "insensitive" } },
+              { billingCycle: { contains: query, mode: "insensitive" } },
+            ],
           },
           take: 5,
           orderBy: { nextPayment: "asc" },

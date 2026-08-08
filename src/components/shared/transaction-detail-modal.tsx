@@ -27,6 +27,7 @@ import { parseDateOnly } from "@/lib/date-only";
 import type { Category } from "@/types/Category";
 import type { Transaction, TransactionType } from "@/types/Transaction";
 import { PAYMENT_METHOD_KEY } from "@/utils/constants";
+import { AnimatedGradient } from "./animated-gradient";
 import { EntityAudit } from "./entity-audit";
 import { TagBadge } from "./tag-badge";
 import { CategoryIcon, Icon } from "./icon";
@@ -198,21 +199,20 @@ export function TransactionDetailModal({
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
-            className={cn(
-              "relative overflow-hidden rounded-2xl p-5 sm:p-6 shadow-lg",
-              isIncome
-                ? "bg-gradient-to-br from-emerald-500/15 via-emerald-500/8 to-emerald-500/5 dark:from-emerald-500/20 dark:via-emerald-500/10 dark:to-emerald-500/5"
-                : "bg-gradient-to-br from-rose-500/15 via-rose-500/8 to-rose-500/5 dark:from-rose-500/20 dark:via-rose-500/10 dark:to-rose-500/5",
-            )}
+            className="relative overflow-hidden rounded-2xl p-5 sm:p-6 shadow-lg"
           >
-            {/* Top gradient border */}
-            <div
-              className={cn(
-                "absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r",
-                isIncome
-                  ? "from-emerald-500 via-emerald-400 to-emerald-500"
-                  : "from-rose-500 via-rose-400 to-rose-500",
-              )}
+            <AnimatedGradient
+              active={isIncome}
+              className="absolute inset-0"
+              classNameA="bg-gradient-to-br from-emerald-500/15 via-emerald-500/8 to-emerald-500/5 dark:from-emerald-500/20 dark:via-emerald-500/10 dark:to-emerald-500/5"
+              classNameB="bg-gradient-to-br from-rose-500/15 via-rose-500/8 to-rose-500/5 dark:from-rose-500/20 dark:via-rose-500/10 dark:to-rose-500/5"
+            />
+
+            <AnimatedGradient
+              active={isIncome}
+              className="absolute inset-x-0 top-0 h-[1px]"
+              classNameA="bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500"
+              classNameB="bg-gradient-to-r from-rose-500 via-rose-400 to-rose-500"
             />
 
             <div className="relative flex items-start justify-between gap-4">

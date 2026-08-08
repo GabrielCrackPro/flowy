@@ -3,8 +3,8 @@
 import { Animated, Icon, type IconProps } from "@components/shared";
 import { cn } from "@lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { type ExternalToast, toast as sonnerToast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { type ExternalToast, toast as sonnerToast } from "sonner";
 import { ErrorTranslationKeys } from "@/lib/errors/error-types";
 import {
   CheckCircle2,
@@ -296,7 +296,7 @@ export function AppToast({
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-          className="text-sm font-semibold leading-tight text-foreground"
+          className="break-words text-sm font-semibold leading-tight text-foreground"
         >
           {displayTitle}
         </Animated.p>
@@ -309,7 +309,7 @@ export function AppToast({
               delay: 0.25,
               ease: [0.25, 0.1, 0.25, 1],
             }}
-            className="text-[13px] leading-relaxed text-muted-foreground/70"
+            className="break-words text-[13px] leading-relaxed text-muted-foreground/70"
           >
             {t(ErrorTranslationKeys.RATE_LIMIT_RETRYING_IN)}: {countdown}s
           </Animated.p>
@@ -322,7 +322,7 @@ export function AppToast({
               delay: 0.25,
               ease: [0.25, 0.1, 0.25, 1],
             }}
-            className="text-[13px] leading-relaxed text-muted-foreground/70"
+            className="break-words text-[13px] leading-relaxed text-muted-foreground/70"
           >
             {description}
           </Animated.p>
@@ -438,7 +438,7 @@ export const toast = {
     options?: ToastOptions,
   ) => show("loading", title, description, options),
   rateLimit: (
-    title: React.ReactNode,
+    _title: React.ReactNode,
     retryAfter?: number,
     options?: ToastOptions,
   ) => show("rate_limit", "", retryAfter, options),

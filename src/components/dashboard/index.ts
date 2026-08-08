@@ -12,4 +12,3 @@ export * from "./new-transaction";
 export * from "./recent-transactions";
 export * from "./sidebar";
 export * from "./subscription-card-list";
-export * from "./upcoming-payments";

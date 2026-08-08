@@ -1,6 +1,7 @@
 "use client";
 
 import { ChartToggle } from "@components/charts";
+import type { ChartLayer } from "@components/charts";
 import {
   AnimatedNumber,
   EmptyState,
@@ -17,9 +18,11 @@ import {
 import { useBudgetApi } from "@hooks/api/useBudgetApi";
 import { useGoalApi } from "@hooks/api/useGoalApi";
 import { useDashboardData } from "@hooks/useDashboardData";
+import { useChartLayers } from "@hooks/useChartLayers";
 import { useProfile } from "@hooks/useProfile";
 import type { DashboardData } from "@/types/Dashboard";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -34,27 +37,110 @@ import {
   YAxis,
 } from "recharts";
 import {
-  ArrowDownCircle,
-  ArrowUpCircle,
-  ArrowUpDown,
   Calendar,
   ChartArea,
   ChartColumn,
   ChartLine,
+  ChevronRight,
   Clock,
+  Layers,
   TrendingUp,
-  Wallet,
 } from "@/lib/icons";
 import { cn, formatCurrency } from "@/lib/utils";
 import { ChartCardSkeleton } from "./chart-card";
 
 type ChartType = "area" | "bar" | "line";
-type DataView = "both" | "income" | "expenses" | "balance" | "net";
 type TimePeriod = "week" | "month";
+
+const INCOME_COLOR = "#22c55e";
+const EXPENSE_COLOR = "#ef4444";
+const BALANCE_COLOR = "#3b82f6";
+const NET_COLOR = "#8b5cf6";
 
 interface CashFlowChartProps {
   month: number;
   year: number;
+}
+
+function buildInitialLayers(t: (key: string) => string): ChartLayer[] {
+  return [
+    {
+      id: "income",
+      name: t("charts.income"),
+      type: "area",
+      visible: true,
+      color: INCOME_COLOR,
+      dataKey: "income",
+    },
+    {
+      id: "expenses",
+      name: t("charts.expenses"),
+      type: "area",
+      visible: true,
+      color: EXPENSE_COLOR,
+      dataKey: "expenses",
+    },
+    {
+      id: "balance",
+      name: t("charts.balance"),
+      type: "line",
+      visible: false,
+      color: BALANCE_COLOR,
+      dataKey: "balance",
+    },
+    {
+      id: "net",
+      name: t("charts.net"),
+      type: "line",
+      visible: false,
+      color: NET_COLOR,
+      dataKey: "net",
+    },
+  ];
+}
+
+function renderSeries(layer: ChartLayer, chartType: ChartType) {
+  const { dataKey, color } = layer;
+  if (!dataKey) return null;
+
+  const fillOpacity = chartType === "area" ? 0.2 : undefined;
+
+  if (chartType === "area") {
+    return (
+      <Area
+        key={layer.id}
+        dataKey={dataKey}
+        type="monotone"
+        fill={color}
+        fillOpacity={fillOpacity}
+        stroke={color}
+        strokeWidth={2}
+      />
+    );
+  }
+
+  if (chartType === "bar") {
+    return (
+      <Bar
+        key={layer.id}
+        dataKey={dataKey}
+        fill={color}
+        radius={[4, 4, 0, 0]}
+      />
+    );
+  }
+
+  return (
+    <Line
+      key={layer.id}
+      dataKey={dataKey}
+      type="monotone"
+      stroke={color}
+      strokeWidth={2}
+      dot={false}
+      activeDot={{ r: 4 }}
+    />
+  );
 }
 
 export function CashFlowChart({ month, year }: CashFlowChartProps) {
@@ -64,11 +150,9 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
   const { goals } = useGoalApi();
   const { profile } = useProfile();
   const { t } = useTranslation();
+
   const [chartType, setChartType] = useState<ChartType>(
     (localStorage.getItem("flowy-chart-type") as ChartType) ?? "area",
-  );
-  const [dataView, setDataView] = useState<DataView>(
-    (localStorage.getItem("flowy-data-view") as DataView) ?? "both",
   );
   const [timePeriod, setTimePeriod] = useState<TimePeriod>(() => {
     const saved = localStorage.getItem("flowy-time-period");
@@ -81,8 +165,12 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
     const saved = localStorage.getItem("flowy-collapsed-groups");
     return saved
       ? new Set(JSON.parse(saved))
-      : new Set(["chartType", "dataView"]);
+      : new Set(["chartType"]);
   });
+
+  const { layers, handleLayerVisibilityChange } = useChartLayers(
+    buildInitialLayers(t),
+  );
 
   const toggleGroup = (group: string) => {
     const newCollapsed = new Set(collapsedGroups);
@@ -101,10 +189,8 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
 
-  const INCOME_COLOR = "#22c55e";
-  const EXPENSE_COLOR = "#ef4444";
-  const BALANCE_COLOR = "#3b82f6";
-  const NET_COLOR = "#8b5cf6";
+  const visibleLayers = layers.filter((l) => l.visible);
+  const hasAnyLayerVisible = visibleLayers.length > 0;
 
   const budgetLines = useMemo(() => {
     if (!showOverlays || !budgets || budgets.length === 0) return [];
@@ -149,14 +235,6 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
       }));
     }
 
-    if (timePeriod === "month") {
-      return dailyData.map((point) => ({
-        ...point,
-        label: String(point.day),
-        net: point.income - point.expenses,
-      }));
-    }
-
     return dailyData.map((point) => ({
       ...point,
       label: String(point.day),
@@ -164,54 +242,14 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
     }));
   }, [stats, timePeriod]);
 
-  const hasData = useMemo(() => {
-    if (data.length === 0) return false;
-
-    switch (dataView) {
-      case "both":
-        return data.some((point) => point.income || point.expenses);
-      case "income":
-        return data.some((point) => point.income > 0);
-      case "expenses":
-        return data.some((point) => point.expenses > 0);
-      case "balance":
-        return data.some((point) => point.balance !== 0);
-      case "net":
-        return data.some((point) => point.net !== 0);
-      default:
-        return data.some((point) => point.income || point.expenses);
-    }
-  }, [data, dataView]);
-
-  const getEmptyMessage = () => {
-    switch (dataView) {
-      case "income":
-        return {
-          title: t("charts.noIncomeData"),
-          description: t("charts.noIncomeDataDesc"),
-        };
-      case "expenses":
-        return {
-          title: t("charts.noExpenseData"),
-          description: t("charts.noExpenseDataDesc"),
-        };
-      case "balance":
-        return {
-          title: t("charts.noBalanceData"),
-          description: t("charts.noBalanceDataDesc"),
-        };
-      case "net":
-        return {
-          title: t("charts.noNetData"),
-          description: t("charts.noNetDataDesc"),
-        };
-      default:
-        return {
-          title: t("charts.emptyTitle"),
-          description: t("charts.emptyDescription"),
-        };
-    }
-  };
+  const hasData =
+    data.length > 0 &&
+    data.some((point) =>
+      visibleLayers.some((layer) => {
+        const val = point[layer.dataKey as keyof typeof point];
+        return typeof val === "number" && val !== 0;
+      }),
+    );
 
   const getTitle = () => {
     const period = t(`charts.${timePeriod}`);
@@ -222,8 +260,6 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
     switch (timePeriod) {
       case "week":
         return t("charts.cashFlowWeekDesc");
-      case "month":
-        return t("charts.cashFlowDesc");
       default:
         return t("charts.cashFlowDesc");
     }
@@ -248,18 +284,6 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
     { value: "line", label: t("charts.line"), icon: ChartLine },
   ];
 
-  const dataViewTabs: {
-    value: DataView;
-    label: string;
-    icon: IconProps["icon"];
-  }[] = [
-    { value: "both", label: t("charts.both"), icon: ArrowUpDown },
-    { value: "income", label: t("charts.income"), icon: ArrowUpCircle },
-    { value: "expenses", label: t("charts.expenses"), icon: ArrowDownCircle },
-    { value: "balance", label: t("charts.balance"), icon: Wallet },
-    { value: "net", label: t("charts.net"), icon: TrendingUp },
-  ];
-
   const timePeriodTabs: {
     value: TimePeriod;
     label: string;
@@ -268,6 +292,8 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
     { value: "week", label: t("charts.week"), icon: Clock },
     { value: "month", label: t("charts.month"), icon: Calendar },
   ];
+
+  const layersCollapsed = collapsedGroups.has("layers");
 
   const tooltipFormatter = (value: unknown, name: unknown) => {
     const key = String(name);
@@ -340,19 +366,80 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
             collapsed={collapsedGroups.has("chartType")}
             onCollapseToggle={() => toggleGroup("chartType")}
           />
-          <ChartToggle<DataView>
-            value={dataView}
-            onChange={(view) => {
-              setDataView(view);
-              localStorage.setItem("flowy-data-view", view);
-            }}
-            options={dataViewTabs}
-            groupIcon={ArrowUpDown}
-            collapsible
-            collapsed={collapsedGroups.has("dataView")}
-            onCollapseToggle={() => toggleGroup("dataView")}
-            labelHiddenUntil="md"
-          />
+
+          {/* Inline layers multi-toggle — matches ChartToggle style */}
+          <div className="inline-flex items-center gap-1 rounded-xl border border-border/30 bg-card p-1 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+            <motion.button
+              type="button"
+              onClick={() => toggleGroup("layers")}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              aria-expanded={!layersCollapsed}
+              className="flex items-center gap-1.5 rounded-lg py-1.5 pr-1.5 pl-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
+            >
+              <Icon icon={Layers} className="size-3.5" />
+              <motion.span
+                animate={{ rotate: layersCollapsed ? 0 : 90 }}
+                transition={{ duration: 0.2 }}
+                className="flex"
+              >
+                <Icon icon={ChevronRight} className="size-3" />
+              </motion.span>
+            </motion.button>
+
+            <AnimatePresence initial={false}>
+              {!layersCollapsed && (
+                <motion.div
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center gap-0.5 overflow-hidden"
+                >
+                  {layers.map((layer) => {
+                    const active = layer.visible;
+                    return (
+                      <button
+                        key={layer.id}
+                        type="button"
+                        onClick={() =>
+                          handleLayerVisibilityChange(layer.id, !layer.visible)
+                        }
+                        aria-pressed={active}
+                        title={layer.name}
+                        className={cn(
+                          "relative flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium outline-none transition-colors duration-200 focus-visible:ring-3 focus-visible:ring-ring/40 hover:bg-muted/60",
+                          active
+                            ? "text-foreground"
+                            : "text-muted-foreground/60",
+                        )}
+                      >
+                        {active && (
+                          <motion.span
+                            layoutId="layer-active-pill"
+                            transition={{
+                              type: "spring",
+                              stiffness: 420,
+                              damping: 32,
+                            }}
+                            className="absolute inset-0 rounded-lg bg-primary/10 ring-1 ring-inset ring-primary/20"
+                          />
+                        )}
+                        <span
+                          className="relative z-10 size-2 shrink-0 rounded-full"
+                          style={{ backgroundColor: layer.color }}
+                        />
+                        <span className="relative z-10 hidden sm:inline">
+                          {layer.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <motion.button
             type="button"
             onClick={() => setShowOverlays(!showOverlays)}
@@ -383,7 +470,7 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
         </div>
       }
     >
-      {hasData ? (
+      {hasData && hasAnyLayerVisible ? (
         <div className="px-5 pb-6 sm:px-6">
           <ChartContainer
             config={chartConfig}
@@ -481,192 +568,33 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
                     }}
                   />
                 ))}
-              {dataView === "both" ? (
-                <>
-                  {chartType === "area" ? (
-                    <>
-                      <Area
-                        dataKey="income"
-                        type="monotone"
-                        fill={INCOME_COLOR}
-                        fillOpacity={0.2}
-                        stroke={INCOME_COLOR}
-                        strokeWidth={2}
-                      />
-                      <Area
-                        dataKey="expenses"
-                        type="monotone"
-                        fill={EXPENSE_COLOR}
-                        fillOpacity={0.2}
-                        stroke={EXPENSE_COLOR}
-                        strokeWidth={2}
-                      />
-                    </>
-                  ) : null}
-                  {chartType === "bar" ? (
-                    <>
-                      <Bar
-                        dataKey="income"
-                        fill={INCOME_COLOR}
-                        radius={[4, 4, 0, 0]}
-                      />
-                      <Bar
-                        dataKey="expenses"
-                        fill={EXPENSE_COLOR}
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </>
-                  ) : null}
-                  {chartType === "line" ? (
-                    <>
-                      <Line
-                        dataKey="income"
-                        type="monotone"
-                        stroke={INCOME_COLOR}
-                        strokeWidth={2}
-                        dot={false}
-                        activeDot={{ r: 4 }}
-                      />
-                      <Line
-                        dataKey="expenses"
-                        type="monotone"
-                        stroke={EXPENSE_COLOR}
-                        strokeWidth={2}
-                        dot={false}
-                        activeDot={{ r: 4 }}
-                      />
-                    </>
-                  ) : null}
-                </>
-              ) : null}
-              {dataView === "income" ? (
-                <>
-                  {chartType === "area" ? (
-                    <Area
-                      dataKey="income"
-                      type="monotone"
-                      fill={INCOME_COLOR}
-                      fillOpacity={0.3}
-                      stroke={INCOME_COLOR}
-                      strokeWidth={2}
-                    />
-                  ) : null}
-                  {chartType === "bar" ? (
-                    <Bar
-                      dataKey="income"
-                      fill={INCOME_COLOR}
-                      radius={[4, 4, 0, 0]}
-                    />
-                  ) : null}
-                  {chartType === "line" ? (
-                    <Line
-                      dataKey="income"
-                      type="monotone"
-                      stroke={INCOME_COLOR}
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 4 }}
-                    />
-                  ) : null}
-                </>
-              ) : null}
-              {dataView === "expenses" ? (
-                <>
-                  {chartType === "area" ? (
-                    <Area
-                      dataKey="expenses"
-                      type="monotone"
-                      fill={EXPENSE_COLOR}
-                      fillOpacity={0.3}
-                      stroke={EXPENSE_COLOR}
-                      strokeWidth={2}
-                    />
-                  ) : null}
-                  {chartType === "bar" ? (
-                    <Bar
-                      dataKey="expenses"
-                      fill={EXPENSE_COLOR}
-                      radius={[4, 4, 0, 0]}
-                    />
-                  ) : null}
-                  {chartType === "line" ? (
-                    <Line
-                      dataKey="expenses"
-                      type="monotone"
-                      stroke={EXPENSE_COLOR}
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 4 }}
-                    />
-                  ) : null}
-                </>
-              ) : null}
-              {dataView === "balance" ? (
-                <>
-                  {chartType === "area" ? (
-                    <Area
-                      dataKey="balance"
-                      type="monotone"
-                      fill={BALANCE_COLOR}
-                      fillOpacity={0.3}
-                      stroke={BALANCE_COLOR}
-                      strokeWidth={2}
-                    />
-                  ) : null}
-                  {chartType === "bar" ? (
-                    <Bar
-                      dataKey="balance"
-                      fill={BALANCE_COLOR}
-                      radius={[4, 4, 0, 0]}
-                    />
-                  ) : null}
-                  {chartType === "line" ? (
-                    <Line
-                      dataKey="balance"
-                      type="monotone"
-                      stroke={BALANCE_COLOR}
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 4 }}
-                    />
-                  ) : null}
-                </>
-              ) : null}
-              {dataView === "net" ? (
-                <>
-                  {chartType === "area" ? (
-                    <Area
-                      dataKey="net"
-                      type="monotone"
-                      fill={NET_COLOR}
-                      fillOpacity={0.3}
-                      stroke={NET_COLOR}
-                      strokeWidth={2}
-                    />
-                  ) : null}
-                  {chartType === "bar" ? (
-                    <Bar dataKey="net" fill={NET_COLOR} radius={[4, 4, 0, 0]} />
-                  ) : null}
-                  {chartType === "line" ? (
-                    <Line
-                      dataKey="net"
-                      type="monotone"
-                      stroke={NET_COLOR}
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 4 }}
-                    />
-                  ) : null}
-                </>
-              ) : null}
+              {visibleLayers.map((layer) => renderSeries(layer, chartType))}
             </ComposedChart>
           </ChartContainer>
         </div>
       ) : (
         <EmptyState
-          icon={<Icon icon={TrendingUp} className="size-5" />}
-          title={getEmptyMessage().title}
-          description={getEmptyMessage().description}
+          icon={<Icon icon={TrendingUp} size="lg" />}
+          title={
+            hasAnyLayerVisible
+              ? t("charts.emptyTitle")
+              : t("charts.allSeriesHidden")
+          }
+          description={
+            hasAnyLayerVisible
+              ? t("charts.emptyDescription")
+              : t("charts.allSeriesHiddenDesc")
+          }
+          iconClassName="from-blue-500/20 to-blue-500/10 text-blue-600 ring-blue-500/10 dark:from-blue-500/30 dark:to-blue-500/20 dark:text-blue-400"
+          action={
+            <Link
+              href="/dashboard/transactions/add"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              {t("nav.newTransaction")}
+              <Icon icon={ChevronRight} className="size-3.5" />
+            </Link>
+          }
         />
       )}
     </SectionCard>

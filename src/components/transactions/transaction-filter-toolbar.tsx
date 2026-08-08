@@ -3,10 +3,19 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Button, Input } from "@components/ui";
 import { NewTransaction } from "@components/dashboard";
-import { ActiveFilterChips, DataFilters, Icon } from "@components/shared";
+import { ActiveFilterChips, DataFilters, Icon, RelativeTime } from "@components/shared";
 import { Filter, FilterX, Search, X } from "@/lib/icons";
 import { cn } from "@lib/utils";
 import type { FilterField } from "@/types/ui";
+import { exportCSV, exportPDF } from "@lib/export-transactions";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@components/ui";
+import type { Transaction } from "@/types/Transaction";
+import { Download, FileText, RefreshCw } from "@/lib/icons";
 
 interface TransactionFilterToolbarProps {
   filters: Record<string, string | undefined>;
@@ -14,9 +23,16 @@ interface TransactionFilterToolbarProps {
   hasFilters: boolean;
   filterFields: FilterField[];
   t: (key: string) => string;
+  transactionCount: number;
+  transactions: Transaction[];
+  loading: boolean;
+  lastRefreshedAt: Date | null;
+  locale: string;
+  currency: string;
   onFilterChange: (key: string, value: string | undefined) => void;
   onClearFilters: () => void;
   onFilterOpenChange: (open: boolean) => void;
+  onRefresh: () => void;
   formatFilterValue: (key: string, value: string) => string | undefined;
   onRemoveChip: (key: string) => void;
 }
@@ -27,9 +43,16 @@ export function TransactionFilterToolbar({
   hasFilters,
   filterFields,
   t,
+  transactionCount,
+  transactions,
+  loading,
+  lastRefreshedAt,
+  locale,
+  currency,
   onFilterChange,
   onClearFilters,
   onFilterOpenChange,
+  onRefresh,
   formatFilterValue,
   onRemoveChip,
 }: TransactionFilterToolbarProps) {
@@ -44,6 +67,8 @@ export function TransactionFilterToolbar({
             {t("transactions.description")}
           </p>
         </div>
+
+        {/* Search */}
         <div className="relative group w-full sm:w-auto sm:flex-1 sm:max-w-64">
           <motion.div
             className="relative"
@@ -84,6 +109,8 @@ export function TransactionFilterToolbar({
             )}
           </AnimatePresence>
         </div>
+
+        {/* Filter toggle */}
         <motion.button
           type="button"
           whileHover={{ scale: 1.02 }}
@@ -171,6 +198,77 @@ export function TransactionFilterToolbar({
             />
           )}
         </motion.button>
+
+        {/* Count pill */}
+        <span className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border/30 bg-card/60 px-2.5 text-xs font-medium tabular-nums text-muted-foreground/70 shadow-sm">
+          {loading
+            ? "—"
+            : new Intl.NumberFormat(locale).format(transactionCount)}
+        </span>
+
+        {/* Export */}
+        {transactionCount > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  className="size-7 rounded-lg text-muted-foreground/40 hover:bg-muted/60 hover:text-foreground"
+                >
+                  <Icon icon={Download} className="size-3.5" />
+                </Button>
+              }
+            />
+            <DropdownMenuContent
+              align="end"
+              sideOffset={4}
+              className="min-w-40"
+            >
+              <DropdownMenuItem
+                onClick={() =>
+                  exportCSV(transactions, t, locale, currency)
+                }
+              >
+                <Icon icon={Download} className="size-3.5" />
+                {t("transactions.exportCSV")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  exportPDF(transactions, t, locale, currency)
+                }
+              >
+                <Icon icon={FileText} className="size-3.5" />
+                {t("transactions.exportPDF")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
+        {/* Refresh */}
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          onClick={onRefresh}
+          disabled={loading}
+          className="size-7 rounded-lg text-muted-foreground/40 hover:bg-muted/60 hover:text-foreground"
+        >
+          <Icon
+            icon={RefreshCw}
+            className={`size-3.5 ${loading ? "animate-spin" : ""}`}
+          />
+        </Button>
+
+        {/* Last refreshed */}
+        {lastRefreshedAt && (
+          <RelativeTime
+            date={lastRefreshedAt}
+            locale={locale}
+            prefix="·"
+            className="text-[11px] text-muted-foreground/40 hidden sm:inline"
+          />
+        )}
+
         <NewTransaction size="sm" openInSheet={true} />
       </div>
       <DataFilters

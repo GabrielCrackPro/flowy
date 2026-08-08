@@ -43,7 +43,7 @@ export function CommandPaletteFilters({
         data-active={activeFilter === "all"}
         className="rounded-lg px-2.5 py-1 text-xs font-medium transition-all data-[active=true]:bg-gradient-to-r from-primary to-primary/90 text-white data-[active=true]:shadow-md data-[active=false]:text-muted-foreground/70 data-[active=false]:hover:text-foreground"
       >
-        {t("nav.overview")}
+        {t("filters.all")}
       </motion.button>
       {availableFilters.map((type) => {
         const meta = sectionMeta[type];

@@ -1,11 +1,11 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Badge, Button, Card } from "@components/ui";
-import { useTranslation } from "react-i18next";
 import { cn } from "@lib/utils";
-import { Pencil, Trash2, Receipt } from "@/lib/icons";
+import { useTranslation } from "react-i18next";
+import { Icon, Skeleton } from "@/components/shared";
 import { EntityAudit } from "@/components/shared/entity-audit";
+import { Pencil, Receipt, Trash2 } from "@/lib/icons";
 import type { Category } from "@/types/Category";
 import { CategoryIconBadge } from "./category-icon";
 
@@ -14,6 +14,35 @@ interface CategoryCardProps {
   onEdit: (category: Category) => void;
   onDelete: (category: Category) => void;
   transactionCount?: number;
+}
+
+export function CategoryCardSkeleton({ index = 0 }: { index?: number }) {
+  return (
+    <Card className="relative overflow-hidden p-4">
+      <div className="flex items-center gap-3">
+        <Skeleton variant="rounded" className="size-10 rounded-xl" />
+
+        <div className="min-w-0 flex-1 space-y-2">
+          <Skeleton
+            className={cn("h-3.5", index % 2 === 0 ? "w-2/3" : "w-1/2")}
+          />
+          <div className="flex items-center gap-2">
+            <Skeleton variant="rounded" className="h-5 w-16" />
+            <Skeleton className="h-3 w-6" />
+          </div>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-0.5">
+          <Skeleton variant="rounded" className="size-7" />
+          <Skeleton variant="rounded" className="size-7" />
+        </div>
+      </div>
+
+      <div className="mt-3 border-t border-border/40 pt-2.5">
+        <Skeleton className="h-3 w-1/2" />
+      </div>
+    </Card>
+  );
 }
 
 export function CategoryCard({

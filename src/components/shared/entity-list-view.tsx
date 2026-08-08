@@ -30,6 +30,8 @@ interface EntityListViewProps<T> {
   gridClassName?: string;
   skeletonVariant?: "card" | "detail";
   skeletonCount?: number;
+  /** Custom grid skeleton card that mirrors this entity's real card shape. */
+  renderSkeletonCard?: (index: number) => ReactNode;
 }
 
 const SKELETON_KEYS = Array.from(
@@ -136,6 +138,7 @@ export function EntityListView<T>({
   gridClassName = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3",
   skeletonVariant = "card",
   skeletonCount = 6,
+  renderSkeletonCard,
 }: EntityListViewProps<T>) {
   return (
     <>
@@ -148,13 +151,13 @@ export function EntityListView<T>({
         <div className="relative min-w-0 flex-1">
           <Icon
             icon={Search}
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60"
           />
           <Input
             value={searchQuery}
             onChange={(event) => onSearchQueryChange(event.target.value)}
             placeholder={searchPlaceholder}
-            className="h-10 pl-9 pr-9 text-sm"
+            className="h-10 rounded-xl border-border/30 bg-muted/20 pl-9 pr-9 text-sm placeholder:text-muted-foreground/40 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 transition-all shadow-sm"
           />
           {searchQuery && (
             <Button
@@ -186,9 +189,11 @@ export function EntityListView<T>({
                 gridClassName,
               )}
             >
-              {SKELETON_KEYS.slice(0, skeletonCount).map((key) => (
+              {SKELETON_KEYS.slice(0, skeletonCount).map((key, index) => (
                 <motion.div key={key} variants={skeletonItemVariants}>
-                  {skeletonVariant === "detail" ? (
+                  {renderSkeletonCard ? (
+                    renderSkeletonCard(index)
+                  ) : skeletonVariant === "detail" ? (
                     <DetailSkeletonCard />
                   ) : (
                     <CardSkeletonCard />

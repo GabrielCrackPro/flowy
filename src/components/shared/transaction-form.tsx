@@ -19,9 +19,10 @@ import { createTransactionSchema } from "@lib/schemas";
 import { cn, formatCurrency } from "@lib/utils";
 import { getOptions, PAYMENT_METHOD_KEY } from "@utils/constants";
 import { motion } from "framer-motion";
-import { Command, Loader2, Plus } from "@/lib/icons";
+import { AnimatedGradient } from "./animated-gradient";
+import { Command, Loader2, Camera, Pencil, Plus } from "@/lib/icons";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { FileUpload } from "./file-upload";
 import { AdditionalOptions } from "./transaction-form/AdditionalOptions";
 import { TransactionSidebar } from "./transaction-form/TransactionSidebar";
@@ -128,7 +129,7 @@ export function TransactionForm({
         return;
       }
       if (values.amount <= 0) {
-        throw new Error("El importe debe ser mayor que cero");
+        throw new Error(t("transaction.validation.amountMustBePositive"));
       }
       await onSubmit({ ...values, description: descriptionValue });
       onSuccess?.();
@@ -180,15 +181,29 @@ export function TransactionForm({
   const descriptionError = useMemo(() => {
     if (!touched.has("description")) return undefined;
     const desc = (values.description ?? "").trim();
-    if (!desc) return "La descripción es obligatoria";
+    if (!desc) return t("transaction.validation.descriptionRequired");
     return errors.description;
-  }, [touched, values.description, errors.description]);
+  }, [touched, values.description, errors.description, t]);
+
+  const formLayoutId = useId();
 
   const isFormValid =
     (values.description ?? "").trim().length > 0 &&
     values.amount > 0 &&
     !errors.description &&
     !errors.amount;
+
+  // Keyboard shortcut: Cmd+Enter / Ctrl+Enter to submit
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (isFormValid && !busy) throttledSubmit();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isFormValid, busy, throttledSubmit]);
 
   const handleTypeChange = useCallback(
     (type: "INCOME" | "EXPENSE") => {
@@ -230,21 +245,20 @@ export function TransactionForm({
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
-              className={cn(
-                "relative overflow-hidden rounded-2xl shadow-sm ring-1 ring-border/30",
-                isExpense
-                  ? "bg-linear-to-br from-rose-500/15 via-rose-500/5 to-transparent"
-                  : "bg-linear-to-br from-emerald-500/15 via-emerald-500/5 to-transparent",
-              )}
+              className="relative overflow-hidden rounded-2xl border border-border/30 bg-card shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
             >
-              {/* Top gradient border */}
-              <div
-                className={cn(
-                  "absolute inset-x-0 top-0 h-px bg-linear-to-r",
-                  isExpense
-                    ? "from-rose-500 via-rose-400 to-rose-500"
-                    : "from-emerald-500 via-emerald-400 to-emerald-500",
-                )}
+              <AnimatedGradient
+                active={isExpense}
+                className="absolute inset-0"
+                classNameA="bg-linear-to-br from-rose-500/15 via-rose-500/5 to-transparent"
+                classNameB="bg-linear-to-br from-emerald-500/15 via-emerald-500/5 to-transparent"
+              />
+
+              <AnimatedGradient
+                active={isExpense}
+                className="absolute inset-x-0 top-0 h-px"
+                classNameA="bg-linear-to-r from-rose-500 via-rose-400 to-rose-500"
+                classNameB="bg-linear-to-r from-emerald-500 via-emerald-400 to-emerald-500"
               />
 
               <div
@@ -378,10 +392,20 @@ export function TransactionForm({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
-              className="rounded-2xl border border-border/30 bg-card shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 sm:p-6"
+              className="relative overflow-hidden rounded-2xl border border-border/30 bg-card bg-linear-to-br from-primary/5 via-primary/[0.02] to-transparent shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 sm:p-6"
             >
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-primary via-primary/50 to-primary" />
+
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary ring-1 ring-inset ring-primary/10">
+                  <Icon icon={Pencil} className="size-4" />
+                </div>
+                <span className="text-sm font-semibold text-foreground/90">
+                  {t("transaction.descriptionField")}
+                </span>
+              </div>
+
               <FormField
-                label={t("transaction.descriptionField")}
                 error={descriptionError}
                 required
               >
@@ -428,9 +452,20 @@ export function TransactionForm({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.15 }}
-              className="rounded-2xl border border-border/30 bg-card shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 sm:p-6"
+              className="relative overflow-hidden rounded-2xl border border-border/30 bg-card bg-linear-to-br from-amber-500/5 via-amber-500/[0.02] to-transparent shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 sm:p-6"
             >
-              <FormField label={t("transaction.receipt")}>
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-amber-500 via-amber-400 to-amber-500" />
+
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-amber-500/20 to-amber-500/10 text-amber-600 ring-1 ring-inset ring-amber-500/10 dark:from-amber-500/30 dark:to-amber-500/20 dark:text-amber-400">
+                  <Icon icon={Camera} className="size-4" />
+                </div>
+                <span className="text-sm font-semibold text-foreground/90">
+                  {t("transaction.receipt")}
+                </span>
+              </div>
+
+              <FormField>
                 <FileUpload
                   value={values.receiptUrl}
                   onChange={(url) =>

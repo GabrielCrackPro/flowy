@@ -24,6 +24,7 @@ import { useTransactionsPage } from "@hooks/useTransactionsPage";
 import { cn, formatCurrency } from "@lib/utils";
 import { PAYMENT_METHOD_KEY } from "@utils/constants";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,12 +33,12 @@ import {
   TransactionFilterToolbar,
   TransactionReceipts,
   TransactionSummaryCards,
-  TransactionTableHeader,
 } from "@/components";
 import { CardSkeleton } from "@/components/shared";
 import { parseDateOnly } from "@/lib/date-only";
 import {
   ArrowDownCircle,
+  ArrowRight,
   ArrowUpCircle,
   ArrowUpDown,
   Calendar,
@@ -273,7 +274,7 @@ export default function TransactionsPage() {
             transition={{ duration: 0.3, delay: 0.15 }}
           >
             {loading && !loadingDone ? (
-              <CardSkeleton variant="table" />
+              <CardSkeleton />
             ) : (
               <Card className="overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.08)] border-border/40 bg-gradient-to-br from-card to-card/50">
                 <div className="border-b border-border/30 bg-gradient-to-r from-muted/20 to-muted/10 px-6 py-4">
@@ -283,23 +284,20 @@ export default function TransactionsPage() {
                     hasFilters={hasFilters}
                     filterFields={filterFields}
                     t={t}
+                    transactionCount={sorted.length}
+                    transactions={sorted}
+                    loading={loading}
+                    lastRefreshedAt={lastRefreshedAt}
+                    locale={locale}
+                    currency={currency}
                     onFilterChange={handleFilterChange}
                     onClearFilters={handleClearFilters}
                     onFilterOpenChange={setFilterOpen}
+                    onRefresh={handleRefresh}
                     formatFilterValue={formatFilterValue}
                     onRemoveChip={handleRemoveChip}
                   />
                 </div>
-
-                <TransactionTableHeader
-                  transactions={sorted}
-                  loading={loading}
-                  lastRefreshedAt={lastRefreshedAt}
-                  locale={locale}
-                  currency={currency}
-                  t={t}
-                  onRefresh={handleRefresh}
-                />
 
                 <TransactionBulkActions
                   selectedCount={selectedIds.size}
@@ -314,10 +312,22 @@ export default function TransactionsPage() {
                   loading={loading}
                   pageSize={20}
                   onRowClick={(tx) => setDetailTx(tx)}
+                  bare
                   emptyState={
                     <EmptyState
-                      icon={<Icon icon={ArrowUpDown} className="size-5" />}
+                      icon={<Icon icon={ArrowUpDown} size="lg" />}
                       title={t("transactions.empty")}
+                      description={t("dashboard.noTransactionsDesc")}
+                      iconClassName="from-blue-500/20 to-blue-500/10 text-blue-600 ring-blue-500/10 dark:from-blue-500/30 dark:to-blue-500/20 dark:text-blue-400"
+                      action={
+                        <Link
+                          href="/dashboard/transactions/add"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                        >
+                          {t("nav.newTransaction")}
+                          <Icon icon={ArrowRight} className="size-3.5" />
+                        </Link>
+                      }
                     />
                   }
                 />

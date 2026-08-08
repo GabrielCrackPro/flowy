@@ -78,8 +78,9 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
     queryKey: [queryKey, activeSpaceId, filters],
     queryFn: () => listApi(filters),
     staleTime: 10000, // Cache data for 10 seconds to avoid unnecessary refetches
-    refetchOnWindowFocus: false, // Don't refetch on window focus
     refetchOnReconnect: false, // Don't refetch on reconnect if data is fresh
+    refetchInterval: 60000, // Poll in the background to catch realtime misses
+    refetchIntervalInBackground: false, // Only while the tab is visible
     gcTime: 10000, // Keep cache for 10 seconds after inactive
     placeholderData: (previousData) => previousData, // Keep previous data while loading new data
   });
@@ -145,7 +146,7 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
 
       return { previous };
     },
-    onError: (error, _variables, context) => {
+    onError: (_error, _variables, context) => {
       queryClient.setQueryData<QueryData<T>>(
         [queryKey, activeSpaceId, filters],
         context?.previous,

@@ -1,9 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getDashboardData } from "@/lib/api/dashboard";
 import { useProfile } from "@/hooks/useProfile";
-import { useTranslation } from "react-i18next";
+import { getDashboardData } from "@/lib/api/dashboard";
 
 export function useDashboardData(month?: number, year?: number) {
   const { profile } = useProfile();
@@ -14,5 +13,7 @@ export function useDashboardData(month?: number, year?: number) {
     queryFn: () => getDashboardData(month, year),
     enabled: month != null && year != null,
     staleTime: 10000,
+    refetchInterval: 60000, // Poll in the background to catch realtime misses
+    refetchIntervalInBackground: false, // Only while the tab is visible
   });
 }

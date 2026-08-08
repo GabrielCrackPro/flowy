@@ -217,7 +217,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       {
         id: "toggle-theme",
         icon: isDark ? Sun : Moon,
-        label: isDark ? "Modo claro" : "Modo oscuro",
+        label: isDark ? t("search.themeLight") : t("search.themeDark"),
         keywords: [
           "tema",
           "theme",
@@ -235,7 +235,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       {
         id: "sign-out",
         icon: LogOut,
-        label: "Cerrar sesión",
+        label: t("search.signOut"),
         keywords: ["cerrar", "sesión", "sesion", "logout", "signout", "salir"],
         action: async () => {
           onOpenChange(false);
@@ -243,7 +243,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         },
       },
     ],
-    [isDark, onOpenChange, handleSignOut],
+    [isDark, onOpenChange, handleSignOut, t],
   );
 
   const refreshRecent = useCallback(() => {
@@ -260,10 +260,16 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     }
   }, [open, refreshRecent]);
 
+  // First Escape clears the query, second closes the palette
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && open) {
-        onOpenChange(false);
+        e.preventDefault();
+        if (query) {
+          setQuery("");
+        } else {
+          onOpenChange(false);
+        }
       }
     };
 
@@ -274,7 +280,17 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [open, onOpenChange]);
+  }, [open, onOpenChange, query]);
+
+  // Lock body scroll while the palette is open
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (query.length < 2) {
@@ -329,23 +345,32 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     return sectionOrder.filter((t) => types.has(t));
   }, [grouped]);
 
+  // Match against the translated label AND the keyword aliases, so typing
+  // the visible label of an action always finds it
+  const matchesQuery = useCallback(
+    (keywords: string[], label: string) => {
+      const q = query.toLowerCase();
+      return [label, ...keywords].some((term) =>
+        term.toLowerCase().includes(q),
+      );
+    },
+    [query],
+  );
+
   const matchingNav = useMemo(() => {
     if (query.length < 2) return navActions;
-    const q = query.toLowerCase();
-    return navActions.filter((a) => a.keywords.some((kw) => kw.includes(q)));
-  }, [query]);
+    return navActions.filter((a) => matchesQuery(a.keywords, t(a.labelKey)));
+  }, [query, t, matchesQuery]);
 
   const matchingActions = useMemo(() => {
     if (query.length < 2) return quickActions;
-    const q = query.toLowerCase();
-    return quickActions.filter((a) => a.keywords.some((kw) => kw.includes(q)));
-  }, [query]);
+    return quickActions.filter((a) => matchesQuery(a.keywords, t(a.labelKey)));
+  }, [query, t, matchesQuery]);
 
   const matchingSystem = useMemo(() => {
     if (query.length < 2) return systemActions;
-    const q = query.toLowerCase();
-    return systemActions.filter((a) => a.keywords.some((kw) => kw.includes(q)));
-  }, [query, systemActions]);
+    return systemActions.filter((a) => matchesQuery(a.keywords, a.label));
+  }, [query, systemActions, matchesQuery]);
 
   const hasMatchingQuick =
     matchingNav.length > 0 ||
