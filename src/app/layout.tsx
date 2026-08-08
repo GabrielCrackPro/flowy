@@ -5,6 +5,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { Favicon } from "@/components/shared/favicon";
+import { ServiceWorkerRegister } from "@/components/shared/service-worker-register";
 import { SkipLink } from "@/components/shared/skip-link";
 import { Providers } from "@/context";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,21 @@ export const metadata: Metadata = {
     template: "%s | Flowy",
   },
   description: "Una app simple para controlar tus finanzas y tus metas.",
+  applicationName: "Flowy",
+  appleWebApp: {
+    capable: true,
+    title: "Flowy",
+    statusBarStyle: "default",
+  },
+  icons: {
+    apple: [
+      {
+        url: "/icons/apple-touch-icon-180.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
@@ -50,6 +66,7 @@ export default function RootLayout({
         <Providers>
           <SkipLink />
           <Favicon />
+          <ServiceWorkerRegister />
           <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.16),transparent_42%)]">
             {children}
           </div>

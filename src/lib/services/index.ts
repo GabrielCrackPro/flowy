@@ -5,6 +5,7 @@ export * from "./categories";
 export * from "./comments";
 export * from "./goals";
 export * from "./profiles";
+export * from "./push";
 export * from "./search";
 export * from "./stats";
 export * from "./subscriptions";

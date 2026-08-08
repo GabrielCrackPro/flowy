@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Flowy — Resumen</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 750px;
+        height: 1334px;
+        overflow: hidden;
+      }
+      body {
+        font-family: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: #fafafb;
+        color: #0f172a;
+        font-variant-numeric: tabular-nums;
+        display: flex;
+        flex-direction: column;
+      }
+      svg {
+        display: block;
+      }
+
+      /* ---- Header ---- */
+      .topbar {
+        height: 88px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 28px;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+        background: rgba(250, 250, 251, 0.85);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .logo-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+      }
+      .brand-name {
+        font-size: 19px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .brand-sub {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 2px;
+      }
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .bell {
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #475569;
+        position: relative;
+      }
+      .bell svg {
+        width: 18px;
+        height: 18px;
+      }
+      .bell .dot {
+        position: absolute;
+        top: 9px;
+        right: 10px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ef4444;
+        border: 2px solid #fff;
+      }
+      .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #818cf8, #6366f1);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* ---- Content ---- */
+      .content {
+        flex: 1;
+        overflow: hidden;
+        padding: 26px 28px 110px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .hero {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        border-radius: 24px;
+        color: #fff;
+        padding: 30px 28px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 18px 40px rgba(59, 130, 246, 0.35);
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: -60px;
+        top: -70px;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+      }
+      .hero .label {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+      }
+      .hero .amount {
+        font-size: 46px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        margin-top: 8px;
+      }
+      .hero .trend {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 14px;
+        background: rgba(255, 255, 255, 0.16);
+        border-radius: 999px;
+        padding: 7px 14px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .hero .trend svg {
+        width: 14px;
+        height: 14px;
+      }
+      .cards-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid rgba(226, 232, 240, 0.7);
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      }
+      .card.big {
+        padding: 24px;
+      }
+      .label {
+        font-size: 12.5px;
+        color: #64748b;
+        font-weight: 500;
+      }
+      .amount {
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-top: 5px;
+      }
+      .mini-trend {
+        font-size: 12px;
+        margin-top: 6px;
+        font-weight: 600;
+      }
+      .mini-trend.up {
+        color: #16a34a;
+      }
+      .card-title {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .card-title .badge {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #2563eb;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 999px;
+        padding: 4px 11px;
+      }
+      .chart-axis {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 11px;
+        color: #94a3b8;
+      }
+      .budget-row {
+        margin-bottom: 16px;
+      }
+      .budget-head {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-bottom: 7px;
+      }
+      .budget-head b {
+        font-weight: 600;
+      }
+      .budget-head span {
+        color: #64748b;
+      }
+      .bar {
+        height: 9px;
+        border-radius: 999px;
+        background: #eef2f7;
+        overflow: hidden;
+      }
+      .bar i {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+      }
+      .tx-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 13px 0;
+      }
+      .tx-row + .tx-row {
+        border-top: 1px solid #f1f5f9;
+      }
+      .tx-ico {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .tx-ico svg {
+        width: 18px;
+        height: 18px;
+      }
+      .tx-main {
+        flex: 1;
+        min-width: 0;
+      }
+      .tx-name {
+        font-size: 14.5px;
+        font-weight: 600;
+      }
+      .tx-cat {
+        font-size: 12px;
+        color: #94a3b8;
+      }
+      .tx-amt {
+        font-size: 14.5px;
+        font-weight: 700;
+      }
+      .tx-amt.in {
+        color: #16a34a;
+      }
+
+      /* ---- Bottom nav ---- */
+      .tabbar {
+        height: 96px;
+        flex-shrink: 0;
+        background: #ffffff;
+        border-top: 1px solid rgba(226, 232, 240, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0 16px;
+      }
+      .tab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        color: #94a3b8;
+        font-size: 10.5px;
+        font-weight: 600;
+      }
+      .tab.active {
+        color: #2563eb;
+      }
+      .tab svg {
+        width: 22px;
+        height: 22px;
+      }
+      .tab.fab {
+        margin-top: -34px;
+      }
+      .fab-inner {
+        width: 56px;
+        height: 56px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(59, 130, 246, 0.45);
+        border: 4px solid #fafafb;
+      }
+      .fab-inner svg {
+        width: 24px;
+        height: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo-mark">
+          <svg viewBox="0 0 32 32" width="22" height="22">
+            <path
+              d="M12 22a7 7 0 1 0 14 0c0-2-1-3.5-3-5.5l-4-4-4 4c-2 2-3 3.5-3 5.5z"
+              fill="#fff"
+              transform="translate(-3,-2) scale(0.9)"
+            />
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">Flowy</div>
+          <div class="brand-sub">Finanzas personales</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="bell">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span class="dot"></span>
+        </div>
+        <div class="avatar">MG</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="hero">
+        <div class="label">Balance del período</div>
+        <div class="amount">$12,450.32</div>
+        <div class="trend">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7 17 10-10"/><path d="M9 7h8v8"/></svg>
+          +12.4% este mes
+        </div>
+      </div>
+
+      <div class="cards-row">
+        <div class="card">
+          <div class="label">Ingresos del mes</div>
+          <div class="amount">$8,940.00</div>
+          <div class="mini-trend up">▲ +4.2% vs. anterior</div>
+        </div>
+        <div class="card">
+          <div class="label">Gastos del mes</div>
+          <div class="amount">$6,120.50</div>
+          <div class="mini-trend up">▼ −2.1% vs. anterior</div>
+        </div>
+      </div>
+
+      <div class="card big">
+        <div class="card-title">
+          Flujo de caja
+          <span class="badge">Este mes</span>
+        </div>
+        <svg viewBox="0 0 694 210" width="100%" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25" />
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <line x1="0" y1="52" x2="694" y2="52" stroke="#eef2f7" stroke-width="1" />
+          <line x1="0" y1="105" x2="694" y2="105" stroke="#eef2f7" stroke-width="1" />
+          <line x1="0" y1="158" x2="694" y2="158" stroke="#eef2f7" stroke-width="1" />
+          <path
+            d="M0 158 C 55 150, 85 162, 130 146 S 205 118, 250 128 S 320 74, 370 90 S 445 108, 490 76 S 575 47, 625 55 S 675 32, 694 25 L 694 210 L 0 210 Z"
+            fill="url(#area)"
+          />
+          <path
+            d="M0 158 C 55 150, 85 162, 130 146 S 205 118, 250 128 S 320 74, 370 90 S 445 108, 490 76 S 575 47, 625 55 S 675 32, 694 25"
+            fill="none"
+            stroke="#3b82f6"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
+          <circle cx="694" cy="25" r="5" fill="#fff" stroke="#3b82f6" stroke-width="3" />
+        </svg>
+        <div class="chart-axis">
+          <span>1 ago</span><span>8 ago</span><span>15 ago</span><span>22 ago</span><span>31 ago</span>
+        </div>
+      </div>
+
+      <div class="card big">
+        <div class="card-title">Presupuestos del mes</div>
+        <div class="budget-row">
+          <div class="budget-head"><b>Alimentación</b><span>$410 de $500</span></div>
+          <div class="bar"><i style="width:82%;background:linear-gradient(90deg,#f59e0b,#f97316);"></i></div>
+        </div>
+        <div class="budget-row">
+          <div class="budget-head"><b>Transporte</b><span>$135 de $300</span></div>
+          <div class="bar"><i style="width:45%;background:linear-gradient(90deg,#60a5fa,#3b82f6);"></i></div>
+        </div>
+        <div class="budget-row" style="margin-bottom:0;">
+          <div class="budget-head"><b>Ocio</b><span>$120 de $200</span></div>
+          <div class="bar"><i style="width:60%;background:linear-gradient(90deg,#34d399,#10b981);"></i></div>
+        </div>
+      </div>
+
+      <div class="card big">
+        <div class="card-title" style="margin-bottom:6px;">Transacciones recientes</div>
+        <div class="tx-row">
+          <div class="tx-ico" style="background:rgba(59,130,246,0.12);color:#2563eb;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="tx-main"><div class="tx-name">Supermercado</div><div class="tx-cat">Alimentación · Tarjeta</div></div>
+          <div class="tx-amt">−$184.20</div>
+        </div>
+        <div class="tx-row">
+          <div class="tx-ico" style="background:rgba(16,185,129,0.12);color:#059669;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 14 4-4 4 4"/></svg>
+          </div>
+          <div class="tx-main"><div class="tx-name">Nómina</div><div class="tx-cat">Ingresos · Transferencia</div></div>
+          <div class="tx-amt" style="color:#16a34a;">+$2,400.00</div>
+        </div>
+        <div class="tx-row">
+          <div class="tx-ico" style="background:rgba(139,92,246,0.12);color:#7c3aed;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+          </div>
+          <div class="tx-main"><div class="tx-name">Netflix</div><div class="tx-cat">Suscripciones</div></div>
+          <div class="tx-amt">−$15.99</div>
+        </div>
+        <div class="tx-row" style="padding-bottom:4px;">
+          <div class="tx-ico" style="background:rgba(245,158,11,0.12);color:#d97706;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+          </div>
+          <div class="tx-main"><div class="tx-name">Gasolina</div><div class="tx-cat">Transporte · Efectivo</div></div>
+          <div class="tx-amt">−$62.30</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabbar">
+      <div class="tab active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Resumen
+      </div>
+      <div class="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4-4 4 4 5-5 5 5"/><path d="m20 16v-5h-5"/></svg>
+        Movimientos
+      </div>
+      <div class="tab fab">
+        <div class="fab-inner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        </div>
+      </div>
+      <div class="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Metas
+      </div>
+      <div class="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Ajustes
+      </div>
+    </div>
+  </body>
+</html>

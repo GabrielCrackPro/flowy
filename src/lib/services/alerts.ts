@@ -18,18 +18,29 @@ const ALERT_URLS: Record<DashboardAlertType, string> = {
   "no-budgets": "/dashboard/budgets",
 };
 
+export interface CreatedAlert {
+  type: string;
+  severity: string;
+  title: string;
+  description: string | null;
+  data: { url: string } | null;
+}
+
 export const AlertsService = {
   /**
    * Evaluates the user's current financial state, persists any new alerts
-   * (deduplicated by fingerprint) and delivers push notifications for them.
+   * (deduplicated by fingerprint) and returns the alerts that were created
+   * so callers can deliver push notifications for them.
    */
-  async evaluateForUser(userId: string): Promise<{ created: number }> {
+  async evaluateForUser(
+    userId: string,
+  ): Promise<{ created: number; alerts: CreatedAlert[] }> {
     const profile = await prisma.profile.findUnique({
       where: { id: userId },
     });
 
     if (!profile) {
-      return { created: 0 };
+      return { created: 0, alerts: [] };
     }
 
     const [data, t, activeSpace] = await Promise.all([
@@ -71,6 +82,7 @@ export const AlertsService = {
 
     const now = new Date();
     let created = 0;
+    const createdAlerts: CreatedAlert[] = [];
 
     for (const candidate of candidates) {
       if (known.has(candidate.id)) {
@@ -93,9 +105,16 @@ export const AlertsService = {
         },
       });
 
+      createdAlerts.push({
+        type: candidate.type,
+        severity: candidate.variant,
+        title: candidate.title,
+        description: candidate.description ?? null,
+        data: { url },
+      });
       created += 1;
     }
 
-    return { created };
+    return { created, alerts: createdAlerts };
   },
 };

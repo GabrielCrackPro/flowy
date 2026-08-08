@@ -4,6 +4,7 @@ import {
   CommandPalette,
   Icon,
   type IconProps,
+  InstallAppButton,
   SyncingIndicator,
   ThemeToggle,
 } from "@components/shared";
@@ -235,6 +236,8 @@ export function Header() {
             </motion.div>
 
             <SyncingIndicator />
+
+            <InstallAppButton />
 
             <div className="flex items-center gap-0.5 rounded-xl border border-border/30 bg-card/50 p-0.5 shadow-sm">
               <LanguageSwitcher />

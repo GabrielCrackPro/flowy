@@ -3,6 +3,7 @@
 import {
   AccountSecurityActions,
   ProfileForm,
+  PushNotificationsCard,
   SpaceManager,
 } from "@components/profile";
 import { useState } from "react";
@@ -209,6 +210,8 @@ export default function SettingsPage() {
             <SpaceManager />
           </CardContent>
         </Card>
+
+        <PushNotificationsCard />
 
         <AccountSecurityActions />
       </div>
