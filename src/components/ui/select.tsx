@@ -1,9 +1,9 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Select as SelectPrimitive } from "@base-ui/react/select";
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "@/lib/icons";
 import type * as React from "react";
+import { Icon } from "@/components/shared/icon";
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 const Select = SelectPrimitive.Root;

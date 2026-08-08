@@ -1,6 +1,5 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,8 +11,9 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@components/ui";
-import { TriangleAlert } from "@/lib/icons";
 import type { ReactNode } from "react";
+import { TriangleAlert } from "@/lib/icons";
+import { Icon } from "./icon";
 
 interface ConfirmDialogProps {
   open: boolean;

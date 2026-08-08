@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared";
 import {
   Popover,
   PopoverContent,
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui";
 import { Info, Loader2 } from "@/lib/icons";
 import { cn } from "@/lib/utils";
+import { Icon } from "./icon";
 
 // Refetches triggered by navigating to a page with cached data should not be
 // labelled as "syncing"; only syncs that happen while settled on a page.

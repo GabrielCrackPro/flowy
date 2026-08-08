@@ -1,19 +1,14 @@
 "use client";
 
-import {
-  type Column,
-  DataTable,
-  Icon,
-  type ViewMode,
-  ViewToggle,
-} from "@components/shared";
 import { Button, Input } from "@components/ui";
 import { cn } from "@lib/utils";
 import { motion, type Variants } from "framer-motion";
 import type { ReactNode } from "react";
 import { Search, X } from "@/lib/icons";
-
+import { Icon } from "./icon";
 import { Skeleton } from "./skeleton";
+import { type Column, DataTable } from "./table/data-table";
+import { type ViewMode, ViewToggle } from "./view-toggle";
 
 interface EntityListViewProps<T> {
   searchQuery: string;

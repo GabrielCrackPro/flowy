@@ -1,13 +1,13 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { colorWithAlpha } from "@components/categories/category-colors";
 import { cn } from "@lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { X } from "@/lib/icons";
-import type { ReactNode } from "react";
 import type { FilterField } from "@/types/ui";
+import { Icon } from "../icon";
 import { FilterOptionIcon } from "./filter-option-icon";
 
 interface ActiveFilterChipsProps {

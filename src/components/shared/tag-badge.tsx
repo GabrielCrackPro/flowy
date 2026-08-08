@@ -1,8 +1,8 @@
 import { colorWithAlpha } from "@components/categories/category-colors";
 import { resolveCategoryIcon } from "@components/categories/category-icons";
-import { Icon } from "@components/shared";
 import { cn } from "@lib/utils";
 import type { Category } from "@/types/Category";
+import { Icon } from "./icon";
 
 interface TagBadgeProps {
   tag: Pick<Category, "id" | "name" | "icon" | "color">;

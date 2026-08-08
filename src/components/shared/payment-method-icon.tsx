@@ -1,5 +1,5 @@
-import { Icon, type IconProps } from "@/components/shared";
 import { PAYMENT_METHOD_ICON } from "@/utils/constants";
+import { Icon, type IconProps } from "./icon";
 
 interface PaymentMethodIconProps {
   method?: string | null;

@@ -1,8 +1,8 @@
 "use client";
 
-import { Icon, type IconProps } from "@components/shared";
 import { cn } from "@lib/utils";
 import type { ReactNode } from "react";
+import { Icon, type IconProps } from "../icon";
 
 interface FormSectionProps {
   label: ReactNode;

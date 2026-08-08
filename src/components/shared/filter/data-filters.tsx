@@ -1,12 +1,12 @@
 "use client";
 
-import { Icon } from "@/components/shared";
-import { useTranslation } from "react-i18next";
 import { cn } from "@lib/utils";
-import { X } from "@/lib/icons";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { useDataFilters } from "@/hooks/filter/useDataFilters";
+import { X } from "@/lib/icons";
 import type { FilterField } from "@/types/ui";
+import { Icon } from "../icon";
 import { FilterRenderer } from "./filter-renderer";
 import { FiltersPanel } from "./filters-panel";
 import { FiltersToggleButton } from "./filters-toggle";

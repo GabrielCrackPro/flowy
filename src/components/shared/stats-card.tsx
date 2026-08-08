@@ -1,18 +1,14 @@
 "use client";
 
-import {
-  Animated,
-  AnimatedNumber,
-  Icon,
-  type IconProps,
-} from "@components/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@components/ui";
 import { useProfile } from "@hooks/useProfile";
 import type { ReactNode } from "react";
 import { ArrowDownRight, ArrowUpRight } from "@/lib/icons";
-
 import { cn, formatCount, formatCurrency, formatPercentage } from "@/lib/utils";
+import { Animated } from "./animated-component";
+import { AnimatedNumber } from "./animated-number";
 import { CARD_BG_GRADIENT, CARD_SHELL, CARD_TOP_ACCENT } from "./card-tokens";
+import { Icon, type IconProps } from "./icon";
 
 export type StatsCardVariant = "currency" | "percentage" | "count";
 

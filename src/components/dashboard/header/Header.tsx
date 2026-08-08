@@ -1,6 +1,5 @@
 "use client";
 
-import { SidebarContent } from "@components/dashboard";
 import {
   CommandPalette,
   Icon,
@@ -29,6 +28,7 @@ import {
   User,
   Wallet,
 } from "@/lib/icons";
+import { SidebarContent } from "../sidebar/Sidebar";
 import { Search } from "./Search";
 import { UserMenu } from "./UserMenu";
 

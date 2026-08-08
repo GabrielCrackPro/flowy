@@ -3,8 +3,8 @@
 import { Command } from "cmdk";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared";
 import { Loader2, SearchIcon, X } from "@/lib/icons";
+import { Icon } from "../icon";
 
 interface CommandPaletteInputProps {
   value: string;

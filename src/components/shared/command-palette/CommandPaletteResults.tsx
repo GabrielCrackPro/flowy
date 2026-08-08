@@ -1,10 +1,10 @@
 "use client";
 
-import { Icon, type IconProps } from "@components/shared";
 import { Command } from "cmdk";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/utils";
 import type { SearchResultItem } from "@/types/SearchResult";
+import { Icon, type IconProps } from "../icon";
 import { CommandPaletteItem } from "./CommandPaletteItem";
 import { Highlight } from "./Highlight";
 

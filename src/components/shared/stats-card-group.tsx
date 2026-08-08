@@ -1,6 +1,5 @@
 "use client";
 
-import { Skeleton } from "@components/shared";
 import { Card, CardContent, CardHeader } from "@components/ui";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
@@ -8,6 +7,7 @@ import { buildDashboardCards } from "@utils/dashboard";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import type { DashboardData } from "@/types/Dashboard";
+import { Skeleton } from "./skeleton";
 import { StatsCard, type StatsCardProps } from "./stats-card";
 
 interface StatsCardGroupProps {

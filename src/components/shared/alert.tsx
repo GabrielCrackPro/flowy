@@ -2,8 +2,8 @@
 
 import { cn } from "@lib/utils";
 import type { ReactNode } from "react";
-import { Icon, type IconProps } from "@/components/shared";
 import { AlertTriangle, CheckCircle2, Info, TriangleAlert } from "@/lib/icons";
+import { Icon, type IconProps } from "./icon";
 
 type AlertVariant = "default" | "info" | "success" | "warning" | "danger";
 

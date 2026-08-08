@@ -1,15 +1,15 @@
 "use client";
 
-import { DashboardCustomize } from "@components/dashboard";
 import { Alert, Icon, RelativeTime, Skeleton, toast } from "@components/shared";
 import { Button } from "@components/ui";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
-import { useMemo, useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocaleContext } from "@/context/LocaleContext";
+import { classifyError, RateLimitError } from "@/lib/errors/error-types";
 import {
   CalendarDays,
   Moon,
@@ -19,7 +19,7 @@ import {
   Sunset,
 } from "@/lib/icons";
 import { getGreetingMessage } from "@/utils/dashboard";
-import { classifyError, RateLimitError } from "@/lib/errors/error-types";
+import { DashboardCustomize } from "../dashboard-customize/dashboard-customize";
 
 interface DashboardHeaderProps {
   month: number;

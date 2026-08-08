@@ -1,7 +1,7 @@
 "use client";
 
 import type * as React from "react";
-import { Icon, type IconProps } from "@/components/shared";
+import { Icon, type IconProps } from "@/components/shared/icon";
 import {
   Sheet,
   SheetContent,

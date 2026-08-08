@@ -1,6 +1,5 @@
 "use client";
 
-import { Animated, Icon, type IconProps } from "@components/shared";
 import { cn } from "@lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,6 +14,8 @@ import {
   X,
   XCircle,
 } from "@/lib/icons";
+import { Animated } from "./animated-component";
+import { Icon, type IconProps } from "./icon";
 
 function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(() =>

@@ -7,8 +7,9 @@ import {
   DropdownMenuTrigger,
 } from "@components/ui";
 import type { ReactNode } from "react";
-import { Icon, Skeleton } from "@/components/shared";
 import { MoreHorizontal } from "@/lib/icons";
+import { Icon } from "../../icon";
+import { Skeleton } from "../../skeleton";
 import type { Column } from "../data-table";
 
 interface ActionItem {

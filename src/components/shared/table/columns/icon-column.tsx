@@ -1,6 +1,6 @@
 import { cn } from "@lib/utils";
 import type { ReactNode } from "react";
-import { Skeleton } from "@/components/shared";
+import { Skeleton } from "../../skeleton";
 import type { Column } from "../data-table";
 
 interface IconColumnOptions<T> {

@@ -1,9 +1,9 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Button } from "@components/ui";
-import { ArrowLeft } from "@/lib/icons";
 import { useRouter } from "next/navigation";
+import { Icon } from "@/components/shared/icon";
+import { ArrowLeft } from "@/lib/icons";
 
 interface BackHeaderProps {
   title: string;

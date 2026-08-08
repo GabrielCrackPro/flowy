@@ -1,9 +1,9 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Button, Input } from "@components/ui";
-import { Search, X } from "@/lib/icons";
 import { useDebounce } from "@/hooks";
+import { Search, X } from "@/lib/icons";
+import { Icon } from "../icon";
 
 interface SearchFilterProps {
   value: string;

@@ -1,9 +1,9 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
-import { CheckIcon, ChevronRightIcon } from "@/lib/icons";
 import type * as React from "react";
+import { Icon } from "@/components/shared/icon";
+import { CheckIcon, ChevronRightIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {

@@ -1,6 +1,5 @@
 "use client";
 
-import type { IconProps } from "@components/shared";
 import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -24,6 +23,7 @@ import {
   Wallet,
 } from "@/lib/icons";
 import type { SearchResultItem } from "@/types/SearchResult";
+import type { IconProps } from "../icon";
 import { CommandPaletteActions } from "./CommandPaletteActions";
 import { CommandPaletteContainer } from "./CommandPaletteContainer";
 import { CommandPaletteEmpty } from "./CommandPaletteEmpty";

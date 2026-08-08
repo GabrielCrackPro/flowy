@@ -2,8 +2,6 @@
 
 import { useCategoryApi, useTransactionApi } from "@hooks/api";
 import { useProfile } from "@hooks/useProfile";
-import { useTranslation } from "react-i18next";
-import { useFilterState, useSelection, usePagination } from "@/hooks";
 import { filtersToQueryParams } from "@lib/filters";
 import {
   EXPENSE_TYPE_KEY,
@@ -11,10 +9,14 @@ import {
   PAYMENT_METHOD_KEY,
 } from "@utils/constants";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { bulkDeleteTransactions } from "@/lib/api/transaction";
 import { parseDateOnly } from "@/lib/date-only";
 import type { TransactionFilters } from "@/types/Transaction";
 import type { FilterField } from "@/types/ui";
+import { useFilterState } from "./useFilterState";
+import { usePagination } from "./usePagination";
+import { useSelection } from "./useSelection";
 
 export function useTransactionsPage() {
   const { t } = useTranslation();

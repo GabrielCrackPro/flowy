@@ -1,11 +1,11 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Button } from "@components/ui";
 import { useTheme } from "@hooks/useTheme";
 import { cn } from "@lib/utils";
-import { Moon, Sun } from "@/lib/icons";
 import { useEffect, useState } from "react";
+import { Moon, Sun } from "@/lib/icons";
+import { Icon } from "./icon";
 
 interface ThemeToggleProps {
   className?: string;

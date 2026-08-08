@@ -1,5 +1,5 @@
 import { Checkbox } from "@components/ui";
-import { Skeleton } from "@/components/shared";
+import { Skeleton } from "../../skeleton";
 import type { Column } from "../data-table";
 
 interface SelectColumnOptions<T> {

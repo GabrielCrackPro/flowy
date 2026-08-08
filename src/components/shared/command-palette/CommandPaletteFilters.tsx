@@ -1,7 +1,7 @@
 "use client";
 
-import { Icon, type IconProps } from "@components/shared";
 import { motion } from "framer-motion";
+import { Icon, type IconProps } from "../icon";
 
 export type FilterType =
   | "all"

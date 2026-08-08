@@ -1,6 +1,5 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import {
   Button,
   Calendar,
@@ -11,11 +10,12 @@ import {
 import { cn } from "@lib/utils";
 import type { DatePreset } from "@utils/date-range";
 import { format } from "date-fns";
-import { CalendarIcon, Check, ChevronLeft, X } from "@/lib/icons";
-import { useDateRangeFilter } from "@/hooks/filter";
-import type { FilterField } from "@/types/ui";
-import { FilterButton } from "./filter-button";
 import { motion } from "framer-motion";
+import { useDateRangeFilter } from "@/hooks/filter";
+import { CalendarIcon, Check, ChevronLeft, X } from "@/lib/icons";
+import type { FilterField } from "@/types/ui";
+import { Icon } from "../icon";
+import { FilterButton } from "./filter-button";
 
 interface DateRangeFilterProps {
   field: FilterField;

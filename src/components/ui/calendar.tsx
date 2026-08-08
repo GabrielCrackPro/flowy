@@ -1,11 +1,6 @@
 "use client";
 
-import { Icon } from "@/components/shared";
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "@/lib/icons";
+import { motion } from "framer-motion";
 import * as React from "react";
 import {
   type DayButton,
@@ -13,9 +8,14 @@ import {
   getDefaultClassNames,
   type Locale,
 } from "react-day-picker";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Icon } from "@/components/shared/icon";
+import { type Button, buttonVariants } from "@/components/ui/button";
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@/lib/icons";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
 function Calendar({
   className,

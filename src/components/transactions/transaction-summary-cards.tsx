@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TransactionCard } from "@/components";
+import { TransactionCard } from "./transaction-card";
 
 interface TransactionSummaryCardsProps {
   expenses: number;

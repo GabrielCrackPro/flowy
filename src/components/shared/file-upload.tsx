@@ -1,6 +1,13 @@
 "use client";
 
-import { Icon } from "@/components/shared";
+import { motion } from "framer-motion";
+import {
+  type ChangeEvent,
+  type DragEvent,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 import {
   AlertCircle,
   Download,
@@ -9,15 +16,8 @@ import {
   Trash2,
   Upload,
 } from "@/lib/icons";
-import {
-  type ChangeEvent,
-  type DragEvent,
-  useCallback,
-  useRef,
-  useState,
-} from "react";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Icon } from "./icon";
 
 interface FileUploadLabels {
   uploadLabel?: string;

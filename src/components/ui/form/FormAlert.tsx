@@ -1,5 +1,5 @@
-import { Icon } from "@/components/shared";
 import { cn } from "@lib/utils";
+import { Icon } from "@/components/shared/icon";
 import { AlertCircle, CheckCircle2, Info, TriangleAlert } from "@/lib/icons";
 
 type FormAlertVariant = "error" | "success" | "info" | "warning";

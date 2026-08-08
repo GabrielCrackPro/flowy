@@ -1,21 +1,34 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { Button, Input } from "@components/ui";
-import { NewTransaction } from "@components/dashboard";
-import { ActiveFilterChips, DataFilters, Icon, RelativeTime } from "@components/shared";
-import { Filter, FilterX, Search, X } from "@/lib/icons";
-import { cn } from "@lib/utils";
-import type { FilterField } from "@/types/ui";
-import { exportCSV, exportPDF } from "@lib/export-transactions";
 import {
+  ActiveFilterChips,
+  DataFilters,
+  Icon,
+  RelativeTime,
+} from "@components/shared";
+import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  Input,
 } from "@components/ui";
+import { exportCSV, exportPDF } from "@lib/export-transactions";
+import { cn } from "@lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Download,
+  FileText,
+  Filter,
+  FilterX,
+  RefreshCw,
+  Search,
+  X,
+} from "@/lib/icons";
 import type { Transaction } from "@/types/Transaction";
-import { Download, FileText, RefreshCw } from "@/lib/icons";
+import type { FilterField } from "@/types/ui";
+import { NewTransaction } from "../dashboard/new-transaction/new-transaction";
 
 interface TransactionFilterToolbarProps {
   filters: Record<string, string | undefined>;
@@ -226,17 +239,13 @@ export function TransactionFilterToolbar({
               className="min-w-40"
             >
               <DropdownMenuItem
-                onClick={() =>
-                  exportCSV(transactions, t, locale, currency)
-                }
+                onClick={() => exportCSV(transactions, t, locale, currency)}
               >
                 <Icon icon={Download} className="size-3.5" />
                 {t("transactions.exportCSV")}
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() =>
-                  exportPDF(transactions, t, locale, currency)
-                }
+                onClick={() => exportPDF(transactions, t, locale, currency)}
               >
                 <Icon icon={FileText} className="size-3.5" />
                 {t("transactions.exportPDF")}

@@ -1,8 +1,8 @@
-import { Icon } from "@/components/shared";
-import { StickyNote, ChevronDown } from "@/lib/icons";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import { Badge, Textarea } from "@/components/ui";
+import { ChevronDown, StickyNote } from "@/lib/icons";
+import { cn } from "@/lib/utils";
+import { Icon } from "../icon";
 
 interface AdditionalOptionsProps {
   isOpen: boolean;

@@ -1,9 +1,9 @@
 "use client";
 
-import { Icon, type IconProps } from "@components/shared";
 import { Command } from "cmdk";
 import { motion } from "framer-motion";
 import { Home, SearchIcon } from "@/lib/icons";
+import { Icon, type IconProps } from "../icon";
 import { CommandPaletteItem } from "./CommandPaletteItem";
 
 interface QuickAction {

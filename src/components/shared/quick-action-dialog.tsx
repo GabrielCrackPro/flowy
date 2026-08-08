@@ -1,6 +1,5 @@
 "use client";
 
-import { Icon } from "@components/shared";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,13 +11,14 @@ import {
   AlertDialogTitle,
 } from "@components/ui";
 import { useProfile } from "@hooks/useProfile";
-import { useAmountInput, useCurrencyFormatting } from "@/hooks";
-import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { useMemo } from "react";
-import { Plus, Minus, UserMinus, Settings } from "@/lib/icons";
-import { cn, formatCurrency } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useAmountInput, useCurrencyFormatting } from "@/hooks";
+import { Minus, Plus, Settings, UserMinus } from "@/lib/icons";
+import { cn, formatCurrency } from "@/lib/utils";
+import { Icon } from "./icon";
 
 export type QuickActionType = "add" | "subtract" | "set";
 

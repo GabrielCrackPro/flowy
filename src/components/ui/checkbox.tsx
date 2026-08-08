@@ -1,7 +1,7 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
+import { Icon } from "@/components/shared/icon";
 import { CheckIcon } from "@/lib/icons";
 
 import { cn } from "@/lib/utils";

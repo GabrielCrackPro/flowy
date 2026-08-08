@@ -1,14 +1,14 @@
-import { Icon } from "@/components/shared";
-import { Check, Search } from "@/lib/icons";
-import { cn } from "@/lib/utils";
+import { useMemo, useState } from "react";
+import { TagBadge } from "@/components/shared/tag-badge";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { TagBadge } from "@/components/shared/tag-badge";
+import { Check, Search } from "@/lib/icons";
+import { cn } from "@/lib/utils";
 import type { Category } from "@/types/Category";
-import { useMemo, useState } from "react";
+import { Icon } from "../icon";
 
 interface CategorySelectorProps {
   categories: Category[];
@@ -42,9 +42,7 @@ export function CategorySelector({
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     if (!q) return categories;
-    return categories.filter((cat) =>
-      cat.name.toLowerCase().includes(q),
-    );
+    return categories.filter((cat) => cat.name.toLowerCase().includes(q));
   }, [categories, search]);
 
   return (
@@ -62,7 +60,10 @@ export function CategorySelector({
           className="w-56 p-1.5 border-border/30 shadow-lg"
         >
           <div className="mb-1 flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2 py-1.5">
-            <Icon icon={Search} className="size-3 shrink-0 text-muted-foreground" />
+            <Icon
+              icon={Search}
+              className="size-3 shrink-0 text-muted-foreground"
+            />
             <input
               type="text"
               value={search}

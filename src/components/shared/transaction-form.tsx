@@ -1,29 +1,36 @@
 "use client";
 
-import { Icon } from "@/components/shared";
+import { Button, FormAlert, FormField, Input } from "@components/ui";
+import { useCategoryApi } from "@hooks/api";
+import { useBudgetApi } from "@hooks/api/useBudgetApi";
+import { useProfile } from "@hooks/useProfile";
+import { useReactForm } from "@hooks/useReactForm";
+import type { CreateTransactionSchema } from "@lib/schemas";
+import { createTransactionSchema } from "@lib/schemas";
+import { cn, formatCurrency } from "@lib/utils";
+import { getOptions, PAYMENT_METHOD_KEY } from "@utils/constants";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useTranslation } from "react-i18next";
 import {
   useAmountInput,
   useCurrencyFormatting,
   useDateLocale,
   useThrottle,
 } from "@/hooks";
-import { BackHeader } from "@components/dashboard";
-import { Button, FormAlert, FormField, Input } from "@components/ui";
-import { useCategoryApi } from "@hooks/api";
-import { useBudgetApi } from "@hooks/api/useBudgetApi";
-import { useProfile } from "@hooks/useProfile";
-import { useReactForm } from "@hooks/useReactForm";
-import { useTranslation } from "react-i18next";
-import type { CreateTransactionSchema } from "@lib/schemas";
-import { createTransactionSchema } from "@lib/schemas";
-import { cn, formatCurrency } from "@lib/utils";
-import { getOptions, PAYMENT_METHOD_KEY } from "@utils/constants";
-import { motion } from "framer-motion";
+import { Camera, Command, Loader2, Pencil, Plus } from "@/lib/icons";
+import { BackHeader } from "../dashboard/header/BackHeader";
 import { AnimatedGradient } from "./animated-gradient";
-import { Command, Loader2, Camera, Pencil, Plus } from "@/lib/icons";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { FileUpload } from "./file-upload";
+import { Icon } from "./icon";
 import { AdditionalOptions } from "./transaction-form/AdditionalOptions";
 import { TransactionSidebar } from "./transaction-form/TransactionSidebar";
 import { TypeSelector } from "./transaction-form/TypeSelector";
@@ -405,10 +412,7 @@ export function TransactionForm({
                 </span>
               </div>
 
-              <FormField
-                error={descriptionError}
-                required
-              >
+              <FormField error={descriptionError} required>
                 <Input
                   value={values.description ?? ""}
                   onChange={handleChange("description")}

@@ -1,6 +1,5 @@
 "use client";
 
-import { Icon, Skeleton } from "@components/shared";
 import {
   Table,
   TableBody,
@@ -21,6 +20,8 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "@/lib/icons";
+import { Icon } from "../icon";
+import { Skeleton } from "../skeleton";
 
 export interface Column<T> {
   header: ReactNode;

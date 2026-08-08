@@ -1,11 +1,11 @@
 "use client";
 
-import { Icon, type IconProps } from "@components/shared";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { LayoutGrid, Table2 } from "@/lib/icons";
+import { Icon, type IconProps } from "./icon";
 
 export type ViewMode = "grid" | "table";
 

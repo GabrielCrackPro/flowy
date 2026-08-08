@@ -1,10 +1,10 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { XIcon } from "@/lib/icons";
-import type * as React from "react";
 import { motion } from "framer-motion";
+import type * as React from "react";
+import { Icon } from "@/components/shared/icon";
+import { XIcon } from "@/lib/icons";
 
 import { cn } from "@/lib/utils";
 

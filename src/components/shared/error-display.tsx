@@ -1,28 +1,28 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Button } from "@components/ui";
-import {
-  AlertCircle,
-  RefreshCw,
-  Home,
-  ArrowLeft,
-  Wifi,
-  Shield,
-  AlertTriangle,
-} from "@/lib/icons";
 import { motion } from "framer-motion";
-import {
-  classifyError,
-  getUserFriendlyMessage,
-  getRecoveryHintKey,
-  ErrorCategory,
-  ErrorTranslationKeys,
-  type AppError,
-  RateLimitError,
-} from "@/lib/errors/error-types";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  type AppError,
+  classifyError,
+  ErrorCategory,
+  ErrorTranslationKeys,
+  getRecoveryHintKey,
+  getUserFriendlyMessage,
+  RateLimitError,
+} from "@/lib/errors/error-types";
+import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft,
+  Home,
+  RefreshCw,
+  Shield,
+  Wifi,
+} from "@/lib/icons";
+import { Icon } from "./icon";
 import { RateLimitStatus } from "./rate-limit-status";
 
 interface ErrorDisplayProps {

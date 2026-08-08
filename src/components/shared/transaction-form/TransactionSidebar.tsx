@@ -1,7 +1,4 @@
-import { Icon } from "@/components/shared";
 import { motion } from "framer-motion";
-import { Wallet, Repeat2, CalendarIcon, Tag, CreditCard } from "@/lib/icons";
-import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -10,13 +7,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { TransactionDetailsRow } from "./TransactionDetailsRow";
-import { DateSelector } from "./DateSelector";
-import { CategorySelector } from "./CategorySelector";
-import type { Category } from "@/types/Category";
-import type { Budget } from "@/types/Budget";
-import type { PaymentMethod } from "@/types/Transaction";
 import { useCategoryApi } from "@/hooks/api";
+import { CalendarIcon, CreditCard, Repeat2, Tag, Wallet } from "@/lib/icons";
+import { cn } from "@/lib/utils";
+import type { Budget } from "@/types/Budget";
+import type { Category } from "@/types/Category";
+import type { PaymentMethod } from "@/types/Transaction";
+import { Icon } from "../icon";
+import { CategorySelector } from "./CategorySelector";
+import { DateSelector } from "./DateSelector";
+import { TransactionDetailsRow } from "./TransactionDetailsRow";
 
 interface TransactionSidebarProps {
   date: Date | undefined;

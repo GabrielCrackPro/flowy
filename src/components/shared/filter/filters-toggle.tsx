@@ -1,10 +1,10 @@
 "use client";
 
-import { Icon } from "@/components/shared";
 import { Button } from "@components/ui";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
 import { Filter } from "@/lib/icons";
+import { Icon } from "../icon";
 
 interface FiltersToggleButtonProps {
   open: boolean;

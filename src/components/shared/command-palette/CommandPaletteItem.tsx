@@ -1,9 +1,9 @@
 "use client";
 
-import { Icon, type IconProps } from "@components/shared";
 import { Command } from "cmdk";
 import type { ReactNode } from "react";
 import { ChevronRight } from "@/lib/icons";
+import { Icon, type IconProps } from "../icon";
 
 interface CommandPaletteItemProps {
   value: string;

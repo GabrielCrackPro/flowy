@@ -1,11 +1,11 @@
 "use client";
 
-import { Icon } from "@components/shared";
 import { Button } from "@components/ui";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { X } from "@/lib/icons";
 import { cn } from "@/lib/utils";
+import { Icon } from "../icon";
 
 interface EntitySheetFooterProps {
   onCancel: () => void;

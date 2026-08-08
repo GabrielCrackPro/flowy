@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Skeleton, TagBadge } from "@/components/shared";
 import type { Category } from "@/types/Category";
+import { Skeleton } from "../../skeleton";
+import { TagBadge } from "../../tag-badge";
 import type { Column } from "../data-table";
 
 interface TagsColumnOptions<T> {

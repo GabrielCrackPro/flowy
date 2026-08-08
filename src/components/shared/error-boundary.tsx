@@ -1,18 +1,18 @@
 "use client";
 
-import { Icon } from "@/components/shared";
-import { Component, ReactNode } from "react";
 import { Button } from "@components/ui";
-import { AlertCircle, RefreshCw, Home, ArrowLeft } from "@/lib/icons";
+import { motion } from "framer-motion";
+import { Component, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  classifyError,
-  getUserFriendlyMessage,
-  ErrorTranslationKeys,
   type AppError,
+  classifyError,
+  ErrorTranslationKeys,
+  getUserFriendlyMessage,
   type RecoveryAction,
 } from "@/lib/errors/error-types";
-import { motion } from "framer-motion";
-import { useTranslation } from "react-i18next";
+import { AlertCircle, ArrowLeft, Home, RefreshCw } from "@/lib/icons";
+import { Icon } from "./icon";
 
 interface Props {
   children: ReactNode;

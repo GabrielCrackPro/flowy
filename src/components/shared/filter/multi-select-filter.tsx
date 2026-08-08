@@ -1,14 +1,14 @@
 "use client";
 
-import { Icon } from "@components/shared";
 import { Input, Popover, PopoverContent, PopoverTrigger } from "@components/ui";
 import { useMultiSelectFilter } from "@hooks/filter";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, ChevronDown, Search, X } from "@/lib/icons";
 import type { FilterField, FilterValues } from "@/types/ui";
+import { Icon } from "../icon";
 import { FilterButton } from "./filter-button";
 import { FilterOptionIcon } from "./filter-option-icon";
 

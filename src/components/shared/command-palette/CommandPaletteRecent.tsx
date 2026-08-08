@@ -2,8 +2,8 @@
 
 import { Command } from "cmdk";
 import { motion } from "framer-motion";
-import { Icon } from "@/components/shared";
 import { Clock, X } from "@/lib/icons";
+import { Icon } from "../icon";
 import { CommandPaletteItem } from "./CommandPaletteItem";
 
 interface CommandPaletteRecentProps {

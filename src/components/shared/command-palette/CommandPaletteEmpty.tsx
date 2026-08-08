@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Icon } from "@/components/shared";
 import { Loader2, SearchIcon } from "@/lib/icons";
+import { Icon } from "../icon";
 
 interface CommandPaletteEmptyProps {
   type: "hint" | "searching" | "noResults" | "filterEmpty";

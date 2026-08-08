@@ -1,11 +1,11 @@
 "use client";
 
-import { Icon } from "@/components/shared";
-import { AlertTriangle, Clock } from "@/lib/icons";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorTranslationKeys } from "@/lib/errors/error-types";
+import { AlertTriangle, Clock } from "@/lib/icons";
+import { Icon } from "./icon";
 
 interface RateLimitStatusProps {
   retryAfter?: number;
