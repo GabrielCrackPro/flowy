@@ -260,6 +260,15 @@ export const app: AppTranslationMessages = {
         sectionPalette: "Current Color Palette",
       },
     },
+    notifications: {
+      title: "Push notifications",
+      description:
+        "Receive financial alerts on this device, even when the app is closed",
+      pushLabel: "Financial alerts",
+      enabled: "Enabled — you'll get alerts here",
+      disabled: "Disabled",
+      denied: "Blocked in your browser settings",
+    },
   },
   header: {
     home: "Home",
@@ -806,6 +815,15 @@ export const app: AppTranslationMessages = {
   pagination: {
     of: "of",
     closePageSizeMenu: "Close page size menu",
+  },
+  pwa: {
+    install: "Install app",
+    installIosTitle: "Install Flowy",
+    installIosHint:
+      "Tap Share, then \u201cAdd to Home Screen\u201d to install Flowy.",
+    updateAvailable: "New version available",
+    updateHint: "Restart to apply the latest changes.",
+    updateAction: "Update",
   },
   common: {
     skipToContent: "Skip to content",

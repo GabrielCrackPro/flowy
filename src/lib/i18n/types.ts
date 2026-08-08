@@ -249,6 +249,14 @@ export type AppTranslationMessages = {
         sectionPalette: string;
       };
     };
+    notifications: {
+      title: string;
+      description: string;
+      pushLabel: string;
+      enabled: string;
+      disabled: string;
+      denied: string;
+    };
   };
   header: {
     home: string;
@@ -766,6 +774,14 @@ export type AppTranslationMessages = {
   pagination: {
     of: string;
     closePageSizeMenu: string;
+  };
+  pwa: {
+    install: string;
+    installIosTitle: string;
+    installIosHint: string;
+    updateAvailable: string;
+    updateHint: string;
+    updateAction: string;
   };
   common: {
     skipToContent: string;
