@@ -1,0 +1,89 @@
+name: Engineering Task
+description: A well-scoped piece of engineering work distilled from a task brief.
+title: "[Task]: "
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the codebase does this affect?
+      options:
+        - BACK
+        - WEB
+        - DevOps
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this work?
+      options:
+        - "Priority: Lowest"
+        - "Priority: Low"
+        - "Priority: Medium"
+        - "Priority: High"
+        - "Priority: Highest"
+      default: 2
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What needs to be done and why. Lead with the user-visible problem or outcome, then the proposed work.
+      placeholder: |
+        What: ...
+        Why: ...
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Concrete, independently verifiable outcomes. One bullet per criterion.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Only for bugs. Steps that lead to the current behavior, plus expected vs. actual.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+
+        Expected: ...
+        Actual: ...
+      render: markdown
+    validations:
+      required: false
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Notes
+      description: Relevant files, services, or areas of the codebase, implementation approach, and any constraints or open questions.
+      render: markdown
+    validations:
+      required: false
+  - type: checkboxes
+    id: definition-of-done
+    attributes:
+      label: Definition of Done
+      description: Everything that must be true before this issue is closed.
+      options:
+        - label: Acceptance criteria met
+          required: true
+        - label: Code reviewed and approved
+          required: true
+        - label: "`pnpm typecheck` passes"
+          required: true
+        - label: "`pnpm lint` passes"
+          required: true
+        - label: "`pnpm build` succeeds"
+          required: false

@@ -1,0 +1,9 @@
+# Configures the "New issue" flow. With blank issues disabled, every new
+# issue goes through the template chooser, so the Engineering Task form is
+# always used.
+blank_issues_enabled: false
+
+contact_links:
+  - name: Project docs
+    url: https://github.com/GabrielCrackPro/flowy/blob/main/README.md
+    about: Read the README for setup, environment variables, scripts, and FAQ before opening an issue.

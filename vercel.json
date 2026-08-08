@@ -5,6 +5,7 @@
   "installCommand": "pnpm install",
   "framework": "nextjs",
   "regions": ["iad1"],
+  "ignoreCommand": "git log -1 --pretty=%B | grep -qiE '\\[skip deploy\\]' && exit 0 || exit 1",
   "crons": [
     {
       "path": "/api/cron/alerts",

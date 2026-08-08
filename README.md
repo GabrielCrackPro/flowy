@@ -106,11 +106,11 @@ The repo ships hooks under `.githooks/`, activated via `git config core.hooksPat
 - **pre-commit**: runs Biome `check --write` on staged files through lint-staged, then `pnpm typecheck`; a failure aborts the commit
 - **commit-msg**: validates conventional commit messages with commitlint, for example `feat: add budget export` or `fix(auth): refresh session on redirect`
 
-Keep commit messages in the conventional format so the hook does not block you.
+Keep commit messages in the conventional format so the hook does not block you. To skip the pre-commit checks for a single commit (for example a docs-only change), use `git commit --no-verify` — git runs the pre-commit hook before the commit message exists, so it cannot skip itself based on message content.
 
 ## Deployment
 
-The project deploys on Vercel. `vercel.json` pins the build command, the region, and a daily cron that runs `/api/cron/alerts`.
+The project deploys on Vercel. `vercel.json` pins the build command, the region, and a daily cron that runs `/api/cron/alerts`. Commits whose message contains `[skip deploy]` cancel the deployment via Vercel's ignored build step, configured entirely in `vercel.json` (no dashboard setup needed): the `ignoreCommand` checks the latest commit message with `git log` and exits `0` to cancel the build.
 
 1. Push the repo to GitHub and import it in Vercel
 2. Add every variable from the [Environment variables](#environment-variables) table under Project Settings
