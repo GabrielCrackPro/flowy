@@ -15,8 +15,9 @@ export const queryClient = new QueryClient({
         return failureCount < 1;
       },
       refetchOnWindowFocus: true, // Refetch on focus, but only when data is stale
-      refetchOnReconnect: false, // Don't refetch on reconnect unless needed
+      refetchOnReconnect: true, // Refresh data when the connection comes back
       refetchOnMount: true, // Refetch on mount only when the cached data is stale
+      networkMode: "offlineFirst", // Serve cached data instantly when offline
     },
     mutations: {
       retry: (failureCount, error) => {
@@ -27,6 +28,7 @@ export const queryClient = new QueryClient({
         // Retry up to 1 time for other errors
         return failureCount < 1;
       },
+      networkMode: "offlineFirst", // Let offline mutations queue locally instead of pausing
       onError: (error) => {
         // Show rate limit toast for 429 errors
         if (isRateLimitError(error)) {

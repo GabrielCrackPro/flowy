@@ -1,6 +1,7 @@
 "use client";
 
 import { NotificationProvider } from "@context/NotificationProvider";
+import { OfflineProvider } from "@context/OfflineProvider";
 import { ProfileProvider } from "@context/ProfileContext";
 import { ThemeProvider } from "@context/ThemeContext";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -20,11 +21,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <ProfileProvider>
             <ThemeProvider>
               <LocaleProvider>
-                <PhantomProvider>
-                  <NotificationProvider>
-                    <RealtimeSyncProvider>{children}</RealtimeSyncProvider>
-                  </NotificationProvider>
-                </PhantomProvider>
+                <OfflineProvider>
+                  <PhantomProvider>
+                    <NotificationProvider>
+                      <RealtimeSyncProvider>{children}</RealtimeSyncProvider>
+                    </NotificationProvider>
+                  </PhantomProvider>
+                </OfflineProvider>
               </LocaleProvider>
             </ThemeProvider>
           </ProfileProvider>

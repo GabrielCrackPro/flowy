@@ -14,6 +14,7 @@ import {
   NumberColumn,
   PageTransition,
   PaymentMethodIcon,
+  PendingSyncBadge,
   SelectColumn,
   TagsColumn,
   TextColumn,
@@ -47,6 +48,7 @@ import {
   Repeat2,
   Trash2,
 } from "@/lib/icons";
+import { isPendingSync } from "@/lib/offline";
 
 export default function TransactionsPage() {
   const { t } = useTranslation();
@@ -129,6 +131,11 @@ export default function TransactionsPage() {
               }).format(parseDateOnly(tx.date) ?? new Date(tx.date))
             : "",
         secondaryClassName: "md:hidden",
+      }),
+
+      CustomColumn({
+        header: null,
+        cell: (tx) => (isPendingSync(tx) ? <PendingSyncBadge /> : null),
       }),
 
       CustomColumn({

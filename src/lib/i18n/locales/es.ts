@@ -838,6 +838,28 @@ export const app: AppTranslationMessages = {
     updateHint: "Reinicia para aplicar los últimos cambios.",
     updateAction: "Actualizar",
   },
+  offline: {
+    label: "Sin conexión",
+    online: "En línea",
+    offlineBanner:
+      "Estás sin conexión \u2014 mostrando datos guardados en este dispositivo.",
+    pendingBanner: "{{count}} cambios esperando sincronizarse",
+    pendingChanges: "{{count}} cambios pendientes",
+    pendingLabel: "Pendiente de sincronizar",
+    pendingTitle: "Cambios pendientes",
+    popoverOffline:
+      "Estás sin conexión. Los cambios se guardan en este dispositivo y se sincronizarán al reconectar.",
+    popoverPending:
+      "Los cambios se sincronizarán automáticamente en cuanto vuelvas a estar en línea.",
+    legendLabel: "Estado",
+    lastSync: "Última sincronización",
+    savedLocally:
+      "Guardado en este dispositivo \u2014 se sincronizará cuando vuelvas a estar en línea.",
+    queueFailed: "No se pudo guardar el cambio. Inténtalo de nuevo.",
+    synced: "{{count}} cambios sincronizados",
+    syncFailed: "Algunos cambios aún no pudieron sincronizarse.",
+    retry: "Reintentar",
+  },
   common: {
     skipToContent: "Saltar al contenido",
     cancel: "Cancelar",

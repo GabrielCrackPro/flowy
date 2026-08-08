@@ -138,6 +138,7 @@ export {
   Wallet,
   Watch,
   Wifi,
+  WifiOff,
   X,
   XCircle,
   XIcon,
