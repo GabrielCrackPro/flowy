@@ -1,0 +1,108 @@
+name: Update Board on Merge
+run-name: 'Board · PR #${{ github.event.pull_request.number || inputs.pr_number || inputs.issue }}'
+
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: PR number to process (manual runs)
+        required: false
+        type: number
+      issue:
+        description: Issue number to move to Done (manual runs / testing)
+        required: false
+        type: number
+      dry_run:
+        description: Log what would change without mutating the board
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  projects: write
+  pull-requests: read
+
+jobs:
+  move-to-done:
+    name: ✅ Move linked issues to Done
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Update board
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const projectId = "PVT_kwHOAoO6As4BfwO_";       // Flowy board (user projectV2 #1)
+            const fieldId = "PVTSSF_lAHOAoO6As4BfwO_zhaA4l4"; // Status field
+            const doneOptionId = "98236657";                 // Status: Done
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const issueInput = parseInt(core.getInput("issue") || "0", 10);
+            const prNumber =
+              context.payload.pull_request?.number ||
+              parseInt(core.getInput("pr_number") || "0", 10);
+            const dryRun = core.getInput("dry_run") === "true";
+
+            let issues = [];
+            if (issueInput > 0) {
+              issues = [issueInput];
+            } else if (prNumber > 0) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: prNumber,
+              });
+              issues = [...new Set((pr.body || "").match(/Closes #\d+|Fixes #\d+|Resolves #\d+/g) || [])]
+                .map((m) => parseInt(m.replace(/\D/g, ""), 10));
+              console.log(`PR #${prNumber} references issues: ${issues.join(", ") || "none"}`);
+            } else {
+              console.log("No PR number and no issue input — nothing to do.");
+            }
+
+            if (issues.length === 0) {
+              console.log("No linked issues found — nothing to update.");
+              return;
+            }
+
+            // Resolve board item node IDs for the project
+            const itemsQuery = `query {
+              user(login: "${owner}") {
+                projectV2(number: 1) {
+                  items(first: 100) {
+                    nodes { id content { ... on Issue { number } } }
+                  }
+                }
+              }
+            }`;
+            const items = await github.graphql(itemsQuery);
+            const byNumber = new Map(
+              items.user.projectV2.items.nodes
+                .filter((n) => n.content?.number)
+                .map((n) => [n.content.number, n.id]),
+            );
+
+            for (const issueNumber of issues) {
+              const itemId = byNumber.get(issueNumber);
+              if (!itemId) {
+                console.log(`Issue #${issueNumber} is not on the board — skipped.`);
+                continue;
+              }
+              if (dryRun) {
+                console.log(`[dry-run] would move issue #${issueNumber} to Done`);
+                continue;
+              }
+              await github.graphql(
+                `mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $project, itemId: $item, fieldId: $field,
+                    value: { singleSelectOptionId: $option }
+                  }) { projectV2Item { id } }
+                }`,
+                { project: projectId, item: itemId, field: fieldId, option: doneOptionId },
+              );
+              console.log(`✅ Issue #${issueNumber} moved to Done`);
+            }

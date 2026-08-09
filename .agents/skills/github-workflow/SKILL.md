@@ -73,7 +73,7 @@ $GH pr merge <branch> --squash --delete-branch
 
 ## 5. After merging
 
-1. **Update the Flowy board** (via the `github-project-board` skill): resolve the linked issue's board-item node ID, then move its Status to **Done** (`singleSelectOptionId: "98236657"`). Confirm with the user first (board writes are confirmed writes).
+1. **Board update is automated** — the `Update Board on Merge` workflow (`.github/workflows/board-update.yml`) parses `Closes/Fixes/Resolves #N` from the merged PR and moves those issues to **Done** on the Flowy board. No manual step. Use the `github-project-board` skill only for other board changes (still with explicit user confirmation).
 2. **Verify the production deploy** (unless the branch used `[skip deploy]`): `gh run list --branch main --limit 3` and, once the deploy finishes, smoke-test https://flowy-jade.vercel.app (HTTP 200).
 3. **Sync local:** `git checkout main && git pull`.
 4. **Release PRs:** merging a `release-please[bot]` PR bumps the version + changelog and creates the GitHub release; it triggers a **no-op Vercel redeploy** (release commits can't carry `[skip deploy]`) — harmless, same code.
