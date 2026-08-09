@@ -35,8 +35,9 @@ jobs:
         run: |
           echo "Checking application health..."
           DEPLOY_URL="${{ github.event.deployment_status.environment_url }}"
-          if curl -f -s -o /dev/null "$DEPLOY_URL"; then
+          if curl -f -s -o /dev/null --max-time 30 "$DEPLOY_URL"; then
             echo "✅ Application is responding"
           else
-            echo "⚠️  Application deployed but not responding"
+            echo "❌ Application deployed but not responding: $DEPLOY_URL"
+            exit 1
           fi
