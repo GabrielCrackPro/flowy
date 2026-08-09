@@ -86,8 +86,6 @@ cp .env.example .env
 
 Fill in the values — required: `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. See the [environment variables](#-environment-variables) table.
 
-> 📝 Note: `.env.example` doesn't exist in the repo yet — create it from the table below if needed.
-
 ### 3. Apply the database schema
 
 Schema changes live in two places: raw SQL under `supabase/migrations/` (RLS policies, triggers, realtime) and the Prisma schema. On a fresh database, apply the SQL migrations first, then the Prisma migrations:
@@ -143,9 +141,13 @@ supabase/migrations  SQL migrations (RLS, triggers, realtime, indexes)
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Supabase anonymous (publishable) key for the browser |
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Service role key for admin/server operations — server only |
 | `CRON_SECRET` | ✅ | Protects cron endpoints, e.g. `/api/cron/alerts` |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | — | Web Push public key (generate with `npx web-push generate-vapid-keys`) |
+| `VAPID_PRIVATE_KEY` | — | Web Push private key — server only |
+| `VAPID_SUBJECT` | — | Contact for the push service (defaults to `mailto:no-reply@flowy.app`) |
 | `RATE_LIMIT_ENABLED` | — | `false` disables API rate limiting (enabled by default) |
+| `RATE_LIMIT_*_REQUESTS` / `RATE_LIMIT_*_WINDOW` | — | Per-route rate limit overrides (requests / window in ms) |
 
-`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` is accepted as a fallback for `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` is accepted as a fallback for `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Every variable listed here is documented in `.env.example`.
 
 ## 🚢 Deployment
 
@@ -160,19 +162,21 @@ The project deploys on **Vercel**. `vercel.json` pins the build command, the reg
 
 ### CI
 
-Two GitHub Actions workflows guard the repo:
+Four GitHub Actions workflows guard the repo:
 
-| Workflow | What it checks |
+| Workflow | What it does |
 | --- | --- |
-| **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` on every PR and push to `main` |
+| **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` plus a `Branch & PR conventions` guardrails job (branch naming, issue links, bot-exempt) on every PR and push to `main` |
 | **Commit conventions** | PR titles and commit messages match conventional commits |
+| **Release** | Release-please auto-generates the changelog + GitHub releases from conventional commits |
+| **Deployment monitor** | Reports Vercel deployment status and runs a health check |
 
 To make these required before merging, enable branch protection on `main` and mark them as required status checks.
 
 ## 🧑‍💻 Contributing
 
 - **Commits** must follow [conventional commits](https://www.conventionalcommits.org) (`feat:`, `fix(scope):`, ...) — enforced by the local `commit-msg` hook and CI. For docs-only changes, `git commit --no-verify` skips the pre-commit checks.
-- **Quality gates**: pre-commit runs Biome + `pnpm typecheck`; CI runs lint, typecheck, and build. All must pass.
+- **Quality gates**: pre-commit runs Biome (lint-staged) and typecheck when the commit touches TypeScript; CI runs lint, typecheck, and build on every PR. All must pass.
 - **Schema changes** ship as both a numbered SQL migration in `supabase/migrations/` and the matching Prisma schema update.
 - **User-facing strings** must be added to both `src/lib/i18n/locales/en.ts` and `es.ts`.
 - **Issues & board**: see [AGENTS.md](AGENTS.md) — AI agents in this repo use the `github-issues` skill to create issues and the `github-project-board` skill to triage the Flowy board.

@@ -35,7 +35,7 @@ src/types           Shared TypeScript types
 src/context         Providers (auth, theme, locale, offline, realtime, notifications)
 prisma/schema.prisma  Prisma schema (mirrors the SQL schema)
 supabase/migrations   SQL migrations: RLS, triggers, realtime, indexes
-.githooks           pre-commit (Biome + typecheck) and commit-msg (commitlint) hooks
+.githooks           pre-commit (Biome + typecheck on TS changes) and commit-msg (commitlint) hooks
 .agents/skills      Agent skills (load by name)
 ```
 
@@ -108,7 +108,7 @@ Prisma schema maps 1:1 to the Supabase SQL schema (`@map`/`@@map`). Core tables 
 ## Conventions
 
 - **Commits:** conventional format (`feat:`, `fix(scope):`, ...) — enforced by the local `commit-msg` hook and CI (`commit-conventions.yml`). Use `git commit --no-verify` only for docs-only changes.
-- **Quality gates:** `pnpm typecheck` and `pnpm lint` run in the pre-commit hook and in `ci.yml`; `pnpm build` runs in CI. All three must pass before merge.
+- **Quality gates:** `pnpm lint` runs in the pre-commit hook (lint-staged) and `pnpm typecheck` runs there too when the commit touches TypeScript; `ci.yml` runs lint, typecheck, and build on every PR. All three must pass before merge.
 - **Auth/security:** `SUPABASE_SERVICE_ROLE_KEY` is server-only. The browser uses `NEXT_PUBLIC_SUPABASE_ANON_KEY`; RLS in `supabase/migrations/002_rls.sql` is the data boundary. Never leak service-role keys or secrets into client code or commits (`.env*` are gitignored).
 - **i18n:** any user-facing string must exist in both `src/lib/i18n/locales/en.ts` and `es.ts` — no hardcoded text (existing hardcoded Spanish error strings are a known debt; don't add more).
 - **Offline/realtime:** mutations must remain consistent with the offline queue and realtime invalidation (temp IDs, `PENDING_SYNC_FLAG`, dependent keys). Session changes must not strand clients in a half-authenticated state.
@@ -134,5 +134,5 @@ Skills in `.agents/skills/` are loadable by name: `write-issues` (draft an issue
 
 - No Python installed — use Node (`node`) for one-off data formatting.
 - No Docker, `vercel` CLI, or `supabase` CLI installed.
-- The README references `.env.example`, but that file does not exist yet — create it if you need it (values are documented in the README's environment-variables table).
+- `.env.example` documents every environment variable the app reads (including the Web Push and rate-limit ones) — copy it to `.env` for local development.
 - Turbopack dev (`pnpm dev`) cannot be started from automation/session-0 contexts on this machine (child process spawn fails with `0xc0000142`). Run it from an interactive terminal, or test against the production URL instead.
