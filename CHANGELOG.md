@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.4...flowy-v0.1.5) (2026-08-09)
+
+
+### Chores
+
+* add descriptive run names and vercel deploy badges [skip deploy] ([#43](https://github.com/GabrielCrackPro/flowy/issues/43)) ([3d2bdd0](https://github.com/GabrielCrackPro/flowy/commit/3d2bdd02333a481b9dc4cfddc442b3ecaf6d1a52))
+
 ## [0.1.4](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.3...flowy-v0.1.4) (2026-08-09)
 
 
