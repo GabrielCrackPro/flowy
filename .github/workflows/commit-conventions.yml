@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   validate:
-    name: Validate Conventional Commits
+    name: 📝 Conventional commits
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

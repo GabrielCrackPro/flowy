@@ -7,6 +7,7 @@ on:
 
 jobs:
   monitor-vercel:
+    name: 📡 Vercel API monitor
     runs-on: ubuntu-latest
     steps:
       - name: Monitor Vercel Deployments
