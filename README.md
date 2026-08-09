@@ -1,22 +1,53 @@
-# Flowy
+<div align="center">
 
-Flowy is a personal finance manager built with Next.js and Supabase. You track income and expenses, plan budgets, save toward goals, and keep an eye on recurring subscriptions, alone or in shared spaces with other people.
+<img src="public/app-icon.svg" alt="Flowy" width="88" height="88" />
 
-## Features
+# 🌊 Flowy
 
-- **Transactions**: log income and expenses with categories, payment methods, notes, and receipt uploads; mark transactions as recurring
-- **Budgets**: set a monthly limit per category and track spending against it
-- **Goals**: define savings targets with deadlines and track progress
-- **Subscriptions**: list recurring bills with billing cycles and next payment dates
-- **Spaces**: create shared workspaces with join codes and invite members; each space has its own transactions, budgets, and goals
-- **Comments and activity**: discuss any transaction, budget, or goal, and see a timeline of who changed what
-- **Alerts**: get notified about budget overspending, low savings, upcoming subscription payments, and goal deadlines, deduplicated and dismissible
-- **Dashboard**: charts and configurable cards showing your balance, spending, and budget health
-- **Export**: download your transactions as a PDF
-- **Localization**: Spanish and English, with a language selector and locale-aware formatting
-- **Themes**: light and dark mode with customizable accent colors
+**A personal finance manager that flows with you.**
 
-## Tech stack
+Track income and expenses, plan budgets, save toward goals, and keep an eye on recurring subscriptions — alone or in shared spaces with the people you trust. Works offline, syncs in realtime, speaks Spanish and English.
+
+[![Next.js](https://img.shields.io/badge/Next.js%2016-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React%2019-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS%204-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![PWA](https://img.shields.io/badge/PWA-5A0FC8?logo=pwa&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
+[![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20ES-4285F4?logo=googletranslate&logoColor=white)](src/lib/i18n)
+[![CI](https://img.shields.io/github/actions/workflow/status/GabrielCrackPro/flowy/ci.yml?label=CI&logo=github)](.github/workflows/ci.yml)
+
+</div>
+
+---
+
+## ✨ Highlights
+
+| 💸 **Transactions** | 🎯 **Budgets** | 🏆 **Goals** |
+| :--- | :--- | :--- |
+| Income & expenses with categories, payment methods, notes, receipts and recurring entries | Monthly limits per category with live spending tracking | Savings targets with deadlines and progress tracking |
+
+| 🔁 **Subscriptions** | 👥 **Spaces** | 🔔 **Alerts** |
+| :--- | :--- | :--- |
+| Recurring bills with billing cycles and next-payment dates | Shared workspaces with join codes, members, and per-space data | Overspending, low savings, upcoming payments, deadlines — deduplicated |
+
+| 📊 **Dashboard** | 📝 **Comments & activity** | 📦 **Export** |
+| :--- | :--- | :--- |
+| Charts and configurable cards for balance, spending, and budget health | Discuss any entity and follow who changed what | Download transactions as a PDF |
+
+Plus: **offline-first PWA** (installable, works without a connection, syncs when you're back), **realtime sync** across devices, **Spanish & English**, and **light/dark themes with customizable accent colors**.
+
+## 📸 Screenshots
+
+<div align="center">
+  <img src="public/screenshots/screenshot-desktop.png" alt="Flowy desktop dashboard" width="70%" />
+  <br />
+  <img src="public/screenshots/screenshot-mobile.png" alt="Flowy mobile view" width="28%" />
+</div>
+
+## 🧰 Tech Stack
 
 | Layer | Choice |
 | --- | --- |
@@ -26,66 +57,71 @@ Flowy is a personal finance manager built with Next.js and Supabase. You track i
 | Auth | Supabase Auth with server-side session validation |
 | Data fetching | TanStack Query, react-hook-form with Zod |
 | Charts | Recharts |
-| Other | framer-motion, i18next, next-themes, sonner, lucide-react |
+| Real-time & offline | Supabase Realtime, custom offline sync + PWA service worker |
+| Notifications | Web Push, in-app alerts |
+| Other | framer-motion, i18next, next-themes, sonner, jspdf, lucide-react |
 
-## Getting started
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 22.13 or newer (pnpm 11 requires it; Next.js 16 needs 20.9+) — CI runs on Node 24
-- pnpm (this repo uses a pnpm workspace)
-- A Supabase project (free tier works)
-- A PostgreSQL connection string for Prisma
+- **Node.js 22.13+** (Next.js 16 needs 20.9+; CI runs on Node 24)
+- **pnpm** (v11 — this repo uses a pnpm workspace)
+- A **Supabase project** (free tier works)
+- A **PostgreSQL connection string** for Prisma
 
-### Install dependencies
+### 1. Install dependencies
 
 ```bash
 pnpm install
 ```
 
-This runs `prisma generate` through the `postinstall` script, so the Prisma client is ready after install.
+`postinstall` runs `prisma generate`, so the Prisma client is ready right after.
 
-### Configure environment variables
+### 2. Configure environment variables
 
 ```bash
 cp .env.example .env
 ```
 
-Fill in the values. The required variables are `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`. See [Environment variables](#environment-variables) for the full list.
+Fill in the values — required: `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. See the [environment variables](#-environment-variables) table.
 
-### Apply the database schema
+> 📝 Note: `.env.example` doesn't exist in the repo yet — create it from the table below if needed.
 
-Schema changes live in two places: raw SQL under `supabase/migrations/` (RLS policies, triggers, realtime) and Prisma migrations under `prisma/migrations/`. On a fresh database, apply the Supabase SQL migrations first, then the Prisma migrations:
+### 3. Apply the database schema
+
+Schema changes live in two places: raw SQL under `supabase/migrations/` (RLS policies, triggers, realtime) and the Prisma schema. On a fresh database, apply the SQL migrations first, then the Prisma migrations:
 
 ```bash
 psql "$DATABASE_URL" -f supabase/migrations/001_init.sql
 pnpm prisma migrate deploy
 ```
 
-Avoid `pnpm db:push` on a Supabase database: cross-schema references can break introspection, and the error only affects schema-push operations, not the migrations above.
+> ⚠️ Avoid `pnpm db:push` on a Supabase database — cross-schema references can break introspection.
 
-### Run the development server
+### 4. Run it
 
 ```bash
 pnpm dev
 ```
 
-Open http://localhost:3000. The first page creates an account, then you can add transactions and set up budgets.
+Open http://localhost:3000 — create an account, then add your first transactions and budgets.
 
-## Environment variables
+## 📁 Project Structure
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `DATABASE_URL` | Yes | PostgreSQL connection string used by Prisma |
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous (publishable) key for the browser |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Service role key for admin and server-side operations; keep it server-only |
-| `CRON_SECRET` | Yes | Secret that protects the cron endpoints, for example `/api/cron/alerts` |
-| `RATE_LIMIT_ENABLED` | No | Set to `false` to disable API rate limiting (enabled by default) |
+```text
+src/app              Pages, API routes, auth, dashboard, manifest
+src/components       Feature components and shared UI
+src/hooks            Client hooks: data fetching, forms, filters
+src/lib              Services, Supabase/Prisma clients, i18n, schemas, rate limiting
+src/types            Shared TypeScript types
+prisma               Prisma schema
+supabase/migrations  SQL migrations (RLS, triggers, realtime, indexes)
+.agents/skills       Agent skills for AI-assisted development
+.githooks            Git hooks (pre-commit, commit-msg)
+```
 
-`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` is accepted as a fallback for `NEXT_PUBLIC_SUPABASE_ANON_KEY` in the middleware and browser client.
-
-## Scripts
+## 📜 Scripts
 
 | Command | What it does |
 | --- | --- |
@@ -95,57 +131,56 @@ Open http://localhost:3000. The first page creates an account, then you can add 
 | `pnpm lint` | Run Biome checks on the whole repo |
 | `pnpm format` | Auto-format all files with Biome |
 | `pnpm typecheck` | Run `tsc --noEmit` |
-| `pnpm db:push` | Push the Prisma schema to the database |
 | `pnpm db:generate` | Regenerate the Prisma client |
 | `pnpm prisma` | Run any Prisma CLI command |
 
-## Git hooks
+## 🔐 Environment Variables
 
-The repo ships hooks under `.githooks/`, activated via `git config core.hooksPath` in the `prepare` script:
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `DATABASE_URL` | ✅ | PostgreSQL connection string used by Prisma |
+| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Supabase anonymous (publishable) key for the browser |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Service role key for admin/server operations — server only |
+| `CRON_SECRET` | ✅ | Protects cron endpoints, e.g. `/api/cron/alerts` |
+| `RATE_LIMIT_ENABLED` | — | `false` disables API rate limiting (enabled by default) |
 
-- **pre-commit**: runs Biome `check --write` on staged files through lint-staged, then `pnpm typecheck`; a failure aborts the commit
-- **commit-msg**: validates conventional commit messages with commitlint, for example `feat: add budget export` or `fix(auth): refresh session on redirect`
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` is accepted as a fallback for `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
-Keep commit messages in the conventional format so the hook does not block you. To skip the pre-commit checks for a single commit (for example a docs-only change), use `git commit --no-verify` — git runs the pre-commit hook before the commit message exists, so it cannot skip itself based on message content.
+## 🚢 Deployment
 
-## Deployment
-
-The project deploys on Vercel. `vercel.json` pins the build command, the region, and a daily cron that runs `/api/cron/alerts`. Commits whose message contains `[skip deploy]` cancel the deployment via Vercel's ignored build step, configured entirely in `vercel.json` (no dashboard setup needed): the `ignoreCommand` checks the latest commit message with `git log` and exits `0` to cancel the build.
+The project deploys on **Vercel**. `vercel.json` pins the build command, the region, and a daily cron that runs `/api/cron/alerts`.
 
 1. Push the repo to GitHub and import it in Vercel
-2. Add every variable from the [Environment variables](#environment-variables) table under Project Settings
-3. Deploy; Vercel runs `pnpm install` (which generates the Prisma client), then `pnpm build`
+2. Add every variable from the [environment table](#-environment-variables) under Project Settings
+3. Deploy — Vercel runs `pnpm install` (generating the Prisma client), then `pnpm build`
+4. After deploying, run `pnpm prisma migrate deploy` against the production database once
 
-After deploying, run `pnpm prisma migrate deploy` against the production database once.
+💡 Commits whose message contains `[skip deploy]` cancel the deployment via Vercel's ignored build step — configured entirely in `vercel.json`, no dashboard setup needed.
 
-## CI checks
+### CI
 
-The repo ships two GitHub Actions workflows:
+Two GitHub Actions workflows guard the repo:
 
-- **`ci.yml`** — runs `pnpm lint`, `pnpm typecheck`, and `pnpm build` on every pull request and push to `main`, using a frozen lockfile. Merges through the GitHub UI bypass the local pre-commit hook, so this is the real quality gate.
-- **`commit-conventions.yml`** — validates pull request titles and commit messages against conventional commits (mirroring the local commit-msg hook) using `action-semantic-pull-request` and commitlint.
+| Workflow | What it checks |
+| --- | --- |
+| **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` on every PR and push to `main` |
+| **Commit conventions** | PR titles and commit messages match conventional commits |
 
-To make these checks required before merging, enable branch protection on `main` and mark them as required status checks.
+To make these required before merging, enable branch protection on `main` and mark them as required status checks.
 
-## Project structure
+## 🧑‍💻 Contributing
 
-```text
-src/app            App Router pages: auth, dashboard, and API routes
-src/components     UI primitives and feature components
-src/hooks          Client hooks: data fetching, forms, filters
-src/lib            Services: Supabase, Prisma, i18n, schemas, rate limiting
-src/types          Shared TypeScript types
-prisma             Prisma schema
-supabase/migrations  SQL migrations for the Supabase database
-.githooks          Git hooks (pre-commit, commit-msg)
-```
+- **Commits** must follow [conventional commits](https://www.conventionalcommits.org) (`feat:`, `fix(scope):`, ...) — enforced by the local `commit-msg` hook and CI. For docs-only changes, `git commit --no-verify` skips the pre-commit checks.
+- **Quality gates**: pre-commit runs Biome + `pnpm typecheck`; CI runs lint, typecheck, and build. All must pass.
+- **Schema changes** ship as both a numbered SQL migration in `supabase/migrations/` and the matching Prisma schema update.
+- **User-facing strings** must be added to both `src/lib/i18n/locales/en.ts` and `es.ts`.
+- **Issues & board**: see [AGENTS.md](AGENTS.md) — AI agents in this repo use the `github-issues` skill to create issues and the `github-project-board` skill to triage the Flowy board.
 
-## FAQ
+## ❓ FAQ
 
-### Can I host this somewhere other than Vercel?
+**Can I host this somewhere other than Vercel?**
+Yes — it's a standard Next.js build and runs on any Node.js host that provides the environment variables. You lose Vercel's cron for alerts unless you schedule `/api/cron/alerts` yourself.
 
-Yes. The app is a standard Next.js build, so it runs on any Node.js host that provides the environment variables. You lose the Vercel cron for alerts unless you schedule `/api/cron/alerts` yourself.
-
-### Do I need the service role key in the browser?
-
+**Do I need the service role key in the browser?**
 No. `SUPABASE_SERVICE_ROLE_KEY` is server-only. The browser uses `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and row-level security in `supabase/migrations/002_rls.sql` restricts what signed-in users can read and write.
