@@ -18,6 +18,8 @@ Track income and expenses, plan budgets, save toward goals, and keep an eye on r
 [![PWA](https://img.shields.io/badge/PWA-5A0FC8?logo=pwa&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
 [![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20ES-4285F4?logo=googletranslate&logoColor=white)](src/lib/i18n)
 [![CI](https://img.shields.io/github/actions/workflow/status/GabrielCrackPro/flowy/ci.yml?label=CI&logo=github)](.github/workflows/ci.yml)
+[![Vercel Production](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Production?label=vercel%20production&logo=vercel)](https://flowy-jade.vercel.app)
+[![Vercel Preview](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Preview?label=vercel%20preview&logo=vercel)](https://github.com/GabrielCrackPro/flowy/deployments)
 
 </div>
 
