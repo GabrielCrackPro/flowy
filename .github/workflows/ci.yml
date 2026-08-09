@@ -14,7 +14,9 @@ concurrency:
 
 jobs:
   quality:
-    name: ✅ Lint, Typecheck & Build
+    # NOTE: keep this exact job name — the "Block main" ruleset requires the
+    # status check "Lint, Typecheck & Build". Renaming it blocks merges.
+    name: Lint, Typecheck & Build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

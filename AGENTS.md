@@ -124,6 +124,7 @@ Repo: `GabrielCrackPro/flowy` (public). The `gh` CLI is authenticated on this ma
 - To read or update the **Flowy** project board, load the **`github-project-board`** skill (project/field/option IDs are documented there).
 - Board writes and issue writes require explicit user confirmation.
 - **Automation in this repo:** `ci.yml` runs a `guardrails` job on PRs (branch name must be `<type>/<kebab-slug>`, and `feat`/`fix`/`refactor`/`perf`/`test` PRs must link an issue). PRs authored by any bot account (`*[bot]` — e.g. `github-actions[bot]`, `release-please[bot]`) are exempt, since tool-generated branches/PRs don't follow human conventions. `release-please` (`.github/workflows/release-please.yml`) auto-creates a changelog + GitHub releases on merges to `main`. **Dependabot is disabled** (no `dependabot.yml`) — dependency upgrades are manual decisions.
+- **"Block main" ruleset:** `main` is protected by a repository ruleset (requires a PR, codeowner review, no force-push/deletion, and the required status check named **`Lint, Typecheck & Build`**). Never rename that job without updating the ruleset's required checks.
 - Merging a `release-please[bot]` PR bumps the version and creates a GitHub release; its merge triggers a harmless no-op Vercel redeploy (release commits can't carry `[skip deploy]`).
 
 ## Skills
