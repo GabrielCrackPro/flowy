@@ -1,0 +1,47 @@
+# Changelog
+
+## [0.1.1](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.0...flowy-v0.1.1) (2026-08-09)
+
+
+### Features
+
+* add offline support ([#18](https://github.com/GabrielCrackPro/flowy/issues/18)) ([bc52044](https://github.com/GabrielCrackPro/flowy/commit/bc52044c4d24b44c94e8846711810cc5c9094a76))
+* add pwa ([#17](https://github.com/GabrielCrackPro/flowy/issues/17)) ([98852a4](https://github.com/GabrielCrackPro/flowy/commit/98852a4391d5748dc8390aecb35730e9405924b4))
+* add rate limiting ([068c63c](https://github.com/GabrielCrackPro/flowy/commit/068c63ca3960dd2306aa6dfc34ed139a02069c42))
+* handle rate limiting on frontend ([001e14b](https://github.com/GabrielCrackPro/flowy/commit/001e14b5281a4bf2d575601793cdb89a3e6c9f19))
+
+
+### Bug Fixes
+
+* add use client directives to hooks with React hooks ([951a053](https://github.com/GabrielCrackPro/flowy/commit/951a053c19e87e9a419efbe4a896c5feddc1d0f0))
+* fix circular dependencies ([1f5d04f](https://github.com/GabrielCrackPro/flowy/commit/1f5d04f37f2a6d9d632065ef846279d2c8cb15d5))
+* improve arch ([2c0aa72](https://github.com/GabrielCrackPro/flowy/commit/2c0aa72fad5fc8d0d41d1d0d025664c7605d7d94))
+* improve auth ui ([8b28b7f](https://github.com/GabrielCrackPro/flowy/commit/8b28b7fc7f55c22236dda72565fa1ba2ece7b120))
+* improve ui and add skills ([ab52792](https://github.com/GabrielCrackPro/flowy/commit/ab52792c08ea7c01fca1d9901cce099c8e4afff6))
+* rate limiting imporvements ([dff2b26](https://github.com/GabrielCrackPro/flowy/commit/dff2b26ab89084ba04730aec361db3aa5b8f6ff5))
+* rate limiting imporvements ([386bb76](https://github.com/GabrielCrackPro/flowy/commit/386bb766d74cf902073b0bc01eac7ef05bde155e))
+* run cron once per day ([74dada8](https://github.com/GabrielCrackPro/flowy/commit/74dada87488af7ea35212248b2d793dfe9e2b405))
+* ui improvements ([6a93f6f](https://github.com/GabrielCrackPro/flowy/commit/6a93f6f976f39cbab96346536af5f9bc24e058fb))
+* various fixes ([46dcf95](https://github.com/GabrielCrackPro/flowy/commit/46dcf954034d209f10413fb802cbe9f6242c4e09))
+
+
+### Chores
+
+* add CI guardrails, dependabot and release automation [skip deploy] ([#20](https://github.com/GabrielCrackPro/flowy/issues/20)) ([8927ff8](https://github.com/GabrielCrackPro/flowy/commit/8927ff83e81a0c157845a50618eeb38a9600ad9b))
+* add codeowners [skip deploy] ([c27a0db](https://github.com/GabrielCrackPro/flowy/commit/c27a0db11bd9d4f69bcaa99d5f18562e8be77120))
+* add PR template [skip deploy] ([176001e](https://github.com/GabrielCrackPro/flowy/commit/176001e0b21d41540cc5f44080a218fbc2b99280))
+* add useful actions and checks [skip deploy] ([e3501f5](https://github.com/GabrielCrackPro/flowy/commit/e3501f5747d59e6a8cd6e3a399caf37f38ce5df2))
+* add useful actions and checks [skip deploy] ([bfc8ec4](https://github.com/GabrielCrackPro/flowy/commit/bfc8ec49831e7bf39a46bdfb65a4efa12517709c))
+* add useful actions and checks [skip deploy] ([193d70c](https://github.com/GabrielCrackPro/flowy/commit/193d70cb461b760b4f36b91003fa53422ddf3b75))
+
+
+### Documentation
+
+* add agent tooling and refresh project docs [skip deploy] ([#19](https://github.com/GabrielCrackPro/flowy/issues/19)) ([2c9010a](https://github.com/GabrielCrackPro/flowy/commit/2c9010a9d39547e33fb50d80fbea82e9d9c4661b))
+* add skill and issue template [skip deploy] ([1c6c84b](https://github.com/GabrielCrackPro/flowy/commit/1c6c84b8af898e1cbf43b4a8fbc452dd8d3564c5))
+
+
+### CI
+
+* check PR author not actor for bot exemption [skip deploy] ([#36](https://github.com/GabrielCrackPro/flowy/issues/36)) ([1d142a0](https://github.com/GabrielCrackPro/flowy/commit/1d142a062832d60b8310f2bc5956a7dfaced6454))
+* exempt bot-authored PRs from guardrails [skip deploy] ([#35](https://github.com/GabrielCrackPro/flowy/issues/35)) ([8439ef0](https://github.com/GabrielCrackPro/flowy/commit/8439ef07ce5867a6b6dab3305821a4aaa9b38c0c))
