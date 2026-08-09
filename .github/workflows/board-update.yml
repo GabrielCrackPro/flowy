@@ -36,7 +36,12 @@ jobs:
           # GITHUB_TOKEN cannot write user-level Projects v2 boards — use a
           # personal access token with the `project` scope when provided.
           # Set it once: gh auth token | gh secret set FLOWY_PROJECT_TOKEN
-          token: ${{ secrets.FLOWY_PROJECT_TOKEN || github.token }}
+          github-token: ${{ secrets.FLOWY_PROJECT_TOKEN || github.token }}
+          # workflow_dispatch inputs are exposed as INPUT_* env vars by actions
+          # (not via core.getInput), so map them explicitly:
+          issue: ${{ inputs.issue || '' }}
+          pr_number: ${{ inputs.pr_number || '' }}
+          dry_run: ${{ inputs.dry_run || 'false' }}
           script: |
             const projectId = "PVT_kwHOAoO6As4BfwO_";       // Flowy board (user projectV2 #1)
             const fieldId = "PVTSSF_lAHOAoO6As4BfwO_zhaA4l4"; // Status field
@@ -44,11 +49,13 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            const issueInput = parseInt(core.getInput("issue") || "0", 10);
+            // workflow_dispatch inputs are not exposed via core.getInput —
+            // they are mapped to env vars below.
+            const issueInput = parseInt(process.env.INPUT_ISSUE || "0", 10);
             const prNumber =
               context.payload.pull_request?.number ||
-              parseInt(core.getInput("pr_number") || "0", 10);
-            const dryRun = core.getInput("dry_run") === "true";
+              parseInt(process.env.INPUT_PR_NUMBER || "0", 10);
+            const dryRun = process.env.INPUT_DRY_RUN === "true";
 
             let issues = [];
             if (issueInput > 0) {
