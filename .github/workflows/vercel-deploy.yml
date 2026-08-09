@@ -1,4 +1,5 @@
 name: Vercel Deployment Monitor
+run-name: 'Deploy monitor · ${{ github.event.deployment_status.environment }}'
 
 on:
   deployment_status:

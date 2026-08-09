@@ -1,4 +1,5 @@
 name: Vercel API Monitor
+run-name: 'Vercel API monitor · ${{ github.ref_name }}'
 
 on:
   push:
