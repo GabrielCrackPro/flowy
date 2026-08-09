@@ -85,4 +85,4 @@ $GH pr merge <branch> --squash --delete-branch
 - Never force-push to shared branches; never delete branches other than the one you created.
 - Keep commit messages honest: a `[skip deploy]` on real code changes would silently skip the production deploy.
 - Use the `github-issues` skill to create/link issues and `github-project-board` to update the Flowy board if the task asks for it.
-- Dependabot and release-please PRs exist in this repo and are exempt from branch-name conventions — but still apply the ask-before-merge rule to them.
+- release-please PRs are exempt from branch-name conventions — but still apply the ask-before-merge rule to them. (Dependabot is disabled in this repo.)
