@@ -23,7 +23,7 @@ git config core.hooksPath      # should print `.githooks` (set automatically by 
 
 - If `core.hooksPath` is empty, run `pnpm install` once to install the hooks.
 - Pull the latest main before branching: `git checkout main && git pull --rebase origin main`.
-- **Slow commits:** the pre-commit hook runs lint-staged **and a full `pnpm typecheck`** (~1–2 min). When running `git commit` through automation, use a generous timeout (≥180s). A timeout mid-hook aborts the commit without creating it — it is safe to simply re-run.
+- **Fast commits:** the pre-commit hook runs lint-staged always, but `pnpm typecheck` **only when the commit touches TypeScript files** (docs/config/JSON-only commits skip it — CI typechecks every PR regardless). Commits are fast; a generous timeout (≥60s) is still wise through automation, and a timeout mid-hook aborts without creating the commit — safe to re-run.
 - **Bot PRs are exempt** from the branch-name/issue-link guardrails (CI skips any author ending in `[bot]`): `dependabot[bot]` (dependency bumps), `github-actions[bot]` (e.g. release-please PRs created with `GITHUB_TOKEN` — this is the actual author of release PRs, not `release-please[bot]`), and `release-please[bot]`. Don't try to make them follow human conventions.
 
 ## 1. New branch
@@ -36,7 +36,7 @@ git config core.hooksPath      # should print `.githooks` (set automatically by 
 ## 2. Commit
 
 - **Format:** conventional commits — `type(scope): subject`, e.g. `feat(export): add CSV download`, `fix(auth): refresh session on redirect`. Enforced by the local `commit-msg` hook and CI (`commit-conventions.yml`). Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `ci`, `perf`, `test`.
-- The pre-commit hook runs Biome + `pnpm typecheck` automatically; a failure aborts the commit — fix it, don't bypass.
+- The pre-commit hook runs Biome (lint-staged) automatically, plus `pnpm typecheck` when the commit touches TypeScript files; a failure aborts the commit — fix it, don't bypass.
 - **`[skip deploy]` rule:** if the change contains **no code changes** (docs, screenshots, config-only, README, workflows, `.env.example`, skill files), append `[skip deploy]` to the commit message (e.g. `docs: update README [skip deploy]`). Vercel's `ignoreCommand` (`vercel.json`) greps the **latest** commit message and exits 0 (canceling the production deploy) when it matches — so put it in the latest commit of the branch. Real code changes must NOT include it.
 - Multi-commit PRs: one conventional message per commit; the final commit message is what Vercel checks.
 - If you can't determine whether the change is code vs. non-code, ask the user before committing.
