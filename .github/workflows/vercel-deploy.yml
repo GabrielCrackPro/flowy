@@ -5,6 +5,7 @@ on:
 
 jobs:
   monitor-deployment:
+    name: 🌐 Deploy status & health
     runs-on: ubuntu-latest
     if: github.event.deployment_status.state == 'success' || github.event.deployment_status.state == 'failure'
     steps:

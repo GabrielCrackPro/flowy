@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   release-please:
-    name: Release Please
+    name: 🚀 Release please
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

@@ -14,6 +14,8 @@ concurrency:
 
 jobs:
   quality:
+    # NOTE: keep this exact job name — the "Block main" ruleset requires the
+    # status check "Lint, Typecheck & Build". Renaming it blocks merges.
     name: Lint, Typecheck & Build
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -60,7 +62,7 @@ jobs:
           CRON_SECRET: placeholder-cron-secret
 
   guardrails:
-    name: Branch & PR conventions
+    name: 🛡️ Branch & PR conventions
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: github.event_name == 'pull_request'
