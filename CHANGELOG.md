@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.2...flowy-v0.1.3) (2026-08-09)
+
+
+### Chores
+
+* add env example, license and faster pre-commit [skip deploy] ([#39](https://github.com/GabrielCrackPro/flowy/issues/39)) ([ca76272](https://github.com/GabrielCrackPro/flowy/commit/ca762724c308c2ef10c08e06b52eb7e895cad7ce))
+
 ## [0.1.2](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.1...flowy-v0.1.2) (2026-08-09)
 
 
