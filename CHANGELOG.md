@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.6](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.5...flowy-v0.1.6) (2026-08-09)
+
+
+### Chores
+
+* drop dead monitor, harden health check, auto-update board [skip deploy] ([#45](https://github.com/GabrielCrackPro/flowy/issues/45)) ([d2eaa3d](https://github.com/GabrielCrackPro/flowy/commit/d2eaa3dafe4c494658502c58a8d4d9fe0ff8eed1))
+
+
+### CI
+
+* fix board update token access [skip deploy] ([#47](https://github.com/GabrielCrackPro/flowy/issues/47)) ([c6810e7](https://github.com/GabrielCrackPro/flowy/commit/c6810e7ca19eccbde2a861ec7243062c0aee5422))
+
 ## [0.1.5](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.4...flowy-v0.1.5) (2026-08-09)
 
 
