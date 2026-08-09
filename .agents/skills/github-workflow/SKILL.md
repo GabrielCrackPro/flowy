@@ -24,7 +24,7 @@ git config core.hooksPath      # should print `.githooks` (set automatically by 
 - If `core.hooksPath` is empty, run `pnpm install` once to install the hooks.
 - Pull the latest main before branching: `git checkout main && git pull --rebase origin main`.
 - **Slow commits:** the pre-commit hook runs lint-staged **and a full `pnpm typecheck`** (~1–2 min). When running `git commit` through automation, use a generous timeout (≥180s). A timeout mid-hook aborts the commit without creating it — it is safe to simply re-run.
-- **Bot PRs are exempt** from the branch-name/issue-link guardrails (CI handles them): `dependabot[bot]` (dependency bumps) and `release-please[bot]` (release PRs). Don't try to make them follow human conventions.
+- **Bot PRs are exempt** from the branch-name/issue-link guardrails (CI skips any author ending in `[bot]`): `dependabot[bot]` (dependency bumps), `github-actions[bot]` (e.g. release-please PRs created with `GITHUB_TOKEN` — this is the actual author of release PRs, not `release-please[bot]`), and `release-please[bot]`. Don't try to make them follow human conventions.
 
 ## 1. New branch
 
