@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.1...flowy-v0.1.2) (2026-08-09)
+
+
+### Chores
+
+* disable dependabot [skip deploy] ([#37](https://github.com/GabrielCrackPro/flowy/issues/37)) ([d566d8f](https://github.com/GabrielCrackPro/flowy/commit/d566d8f95df7b0715362ca1174965ad00ace891c))
+
 ## [0.1.1](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.0...flowy-v0.1.1) (2026-08-09)
 
 
