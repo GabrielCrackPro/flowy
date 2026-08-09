@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.7](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.6...flowy-v0.1.7) (2026-08-09)
+
+
+### CI
+
+* fix board update workflow inputs [skip deploy] ([#48](https://github.com/GabrielCrackPro/flowy/issues/48)) ([bda4bfd](https://github.com/GabrielCrackPro/flowy/commit/bda4bfd129eb932fb31173b141d19e40d5da9356))
+
 ## [0.1.6](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.5...flowy-v0.1.6) (2026-08-09)
 
 
