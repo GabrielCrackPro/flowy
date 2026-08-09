@@ -22,7 +22,6 @@ on:
 
 permissions:
   contents: read
-  projects: write
   pull-requests: read
 
 jobs:
@@ -34,6 +33,10 @@ jobs:
       - name: Update board
         uses: actions/github-script@v7
         with:
+          # GITHUB_TOKEN cannot write user-level Projects v2 boards — use a
+          # personal access token with the `project` scope when provided.
+          # Set it once: gh auth token | gh secret set FLOWY_PROJECT_TOKEN
+          token: ${{ secrets.FLOWY_PROJECT_TOKEN || github.token }}
           script: |
             const projectId = "PVT_kwHOAoO6As4BfwO_";       // Flowy board (user projectV2 #1)
             const fieldId = "PVTSSF_lAHOAoO6As4BfwO_zhaA4l4"; // Status field
