@@ -21,8 +21,8 @@ importers:
         specifier: ^5.5.7
         version: 5.5.7(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.83.0(react@19.2.4))(zod@4.4.3)
       '@prisma/client':
-        specifier: ^5.13.0
-        version: 5.22.0(prisma@5.22.0)
+        specifier: ^7.9.1
+        version: 7.9.1(prisma@5.22.0)(typescript@5.9.3)
       '@supabase/ssr':
         specifier: ^0.12.3
         version: 0.12.3(@supabase/supabase-js@2.110.8)
@@ -827,13 +827,19 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
-  '@prisma/client@5.22.0':
-    resolution: {integrity: sha512-M0SVXfyHnQREBKxCgyo7sffrKttwE6R8PMq330MIUF0pTwjUhLbW84pFDlf06B27XyCR++VtjugEnIHdr07SVA==}
-    engines: {node: '>=16.13'}
+  '@prisma/client-runtime-utils@7.9.1':
+    resolution: {integrity: sha512-mVIBGYdO5CFmK0HvjxrtfIyQQcPdb88pSCeVQriVQPVZyDovIWblpHfOgcS8QO187j3QF0ePArH8qPhp0AU2vg==}
+
+  '@prisma/client@7.9.1':
+    resolution: {integrity: sha512-+xgrh2EhJVF79wC0yX5G4PI1Rdcm7Qn/nekNQ+t/O153wtNggruHal+fXHSa0QE+Tp/Cw5wvxeCEhZZ59xGm8Q==}
+    engines: {node: ^20.19 || ^22.12 || >=24.0}
     peerDependencies:
       prisma: '*'
+      typescript: '>=5.4.0'
     peerDependenciesMeta:
       prisma:
+        optional: true
+      typescript:
         optional: true
 
   '@prisma/debug@5.22.0':
@@ -3574,9 +3580,14 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.1
 
-  '@prisma/client@5.22.0(prisma@5.22.0)':
+  '@prisma/client-runtime-utils@7.9.1': {}
+
+  '@prisma/client@7.9.1(prisma@5.22.0)(typescript@5.9.3)':
+    dependencies:
+      '@prisma/client-runtime-utils': 7.9.1
     optionalDependencies:
       prisma: 5.22.0
+      typescript: 5.9.3
 
   '@prisma/debug@5.22.0': {}
 
