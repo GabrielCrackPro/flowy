@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.3...flowy-v0.1.4) (2026-08-09)
+
+
+### Chores
+
+* polish workflow and job names [skip deploy] ([#41](https://github.com/GabrielCrackPro/flowy/issues/41)) ([3572a3a](https://github.com/GabrielCrackPro/flowy/commit/3572a3aeeb5c611585b78b596d97113bcb0662d9))
+
 ## [0.1.3](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.2...flowy-v0.1.3) (2026-08-09)
 
 
