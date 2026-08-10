@@ -10,6 +10,36 @@ Flowy is a personal finance manager: track income/expenses, plan budgets per cat
 
 **Production URL:** https://flowy-jade.vercel.app
 
+## Working strategy (solo, spare-time)
+
+Flowy is a **solo project** developed in spare time with **variable availability** (sessions range from ~30 minutes to a few hours). Workflow is deliberately lightweight agile — no sprints, no ceremonies:
+
+- **The only hard deadline is the MVP milestone** (the "MVP" milestone on GitHub). Nothing else is time-boxed.
+- **Kanban pull-flow, WIP 1 (max 2):** keep exactly one item in `In Progress` on the Flowy board. Pull from `Ready` — don't plan a batch.
+- **Always shippable:** work in small slices; every merge to `main` should produce a working increment (release-please ships it). Don't batch work into release boundaries.
+- **Cycles, not sprints:** the board's `Iteration` field holds rolling 7-day **Cycle 1/2/3** windows (started 2026-08-10). They are focus windows, not commitments — an item slipping to a later cycle is normal.
+
+### Board conventions
+
+- Pipeline: `Backlog → Ready → In Progress → Done` (+ `Blocked`). Backlog = ideas; Ready = picked and ready to pull.
+- Fields: `Effort` (S/M/L/XL — "is this a one-session item?"), `Type` (Frontend/Backend/Full-stack/DevOps/Docs), `Iteration` (rolling cycles).
+- Milestones: **MVP** = launch scope, **Improvements** = post-MVP backlog. See the `github-project-board` skill for field/option IDs.
+
+### Working-session playbook (for humans)
+
+1. Open the board → pull **one** `Ready` item into `In Progress` (highest priority first).
+2. Work until done **or** a natural stopping point. If interrupted, leave it `In Progress` with a short comment capturing where it stands.
+3. When green (lint, typecheck, build), merge and ship — the milestone progress ticks on its own.
+4. End the session by recording the next session's first action in an issue comment.
+
+### What this means for AI agents
+
+- **Respect the WIP limit:** never spread work across multiple board items; take the current `In Progress` item or pull exactly one new one.
+- **Prefer finishing over starting:** complete one item end-to-end (code, i18n, docs, board status) rather than partially touching several.
+- **Follow the relaxed cadence:** no artificial deadlines, no sprint framing — reference `Cycle N` only as a focus window.
+- **Keep context cheap:** when a session is interrupted, record the next action in an issue comment so the next session (human or agent) resumes in minutes.
+- Board writes and issue writes still require explicit user confirmation.
+
 ## Commands
 
 | Command | What it does |
@@ -119,6 +149,7 @@ Prisma schema maps 1:1 to the Supabase SQL schema (`@map`/`@@map`). Core tables 
 
 Repo: `GabrielCrackPro/flowy` (public). The `gh` CLI is authenticated on this machine (OAuth token in the Windows keyring; scopes `gist`, `project`, `read:org`, `repo`).
 
+- **Never commit to `main` directly.** Every change — including docs and config — ships via the **`github-workflow` skill**: new branch → conventional commit → push → PR to `main` → ask before merge. If a commit ever lands on local `main`, move it onto a branch (`git checkout -b <type>/<kebab-slug>`) and reset `main` back to `origin/main` before doing anything else.
 - In fresh shells use `export GH=~/ghcli/bin/gh.exe` (or just `gh` once on PATH).
 - To create or update issues, load the **`github-issues`** skill — it encodes the project's issue template, labels, and `gh` commands.
 - To read or update the **Flowy** project board, load the **`github-project-board`** skill (project/field/option IDs are documented there).

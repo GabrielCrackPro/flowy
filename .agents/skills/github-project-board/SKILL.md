@@ -26,19 +26,27 @@ export GH=~/ghcli/bin/gh.exe
 
 If `gh` is on PATH, plain `gh` works. Verify auth once with `$GH auth status`.
 
-## Board reference (verified 2026-08-09)
+## Board reference (verified 2026-08-10)
 
 **Status field** (single-select) — field ID `PVTSSF_lAHOAoO6As4BfwO_zhaA4l4`:
 
 | Option | Option ID |
 |---|---|
-| Idea | `29a1f406` |
-| Pending | `68a4ccdc` |
+| Backlog (was Idea) | `29a1f406` |
+| Ready (was Pending) | `68a4ccdc` |
 | In Progress | `47fc9ee4` |
 | Done | `98236657` |
 | Blocked | `0c552fd9` |
 
 Other board fields: Title, Assignees, Labels, Linked pull requests, Milestone, Repository, Reviewers, Parent issue, Sub-issues progress, Created, Updated, Closed.
+
+**Custom fields** (all settable via `updateProjectV2ItemFieldValue` with `fieldId` + `singleSelectOptionId` / `iterationId`):
+
+- **Effort** (S/M/L/XL) — field `PVTSSF_lAHOAoO6As4BfwO_zhaKNHY`: S `c5b1d4d3`, M `fa75e593`, L `687d75ec`, XL `172a5f53`
+- **Type** (Frontend/Backend/Full-stack/DevOps/Docs) — field `PVTSSF_lAHOAoO6As4BfwO_zhaKNHc`: Frontend `b2cce8e4`, Backend `911ebdb5`, Full-stack `16078ad0`, DevOps `cc380ec3`, Docs `cd4d77fd`
+- **Iteration** (rolling 7-day cycles, Mon–Sun) — field `PVTIF_lAHOAoO6As4BfwO_zhaKNHg`: Cycle 1 `dda595fe` (2026-08-10), Cycle 2 `db803409` (2026-08-17), Cycle 3 `560f59c0` (2026-08-24). **Gotcha:** rewriting the iteration configuration via `updateProjectV2Field` regenerates iteration IDs and silently drops item assignments — re-apply `iterationId` values afterwards.
+
+**Views:** Tasks (board, id `PVTV_lAHOAoO6As4BfwO_zgLPLHI`), Frontend (board, filter `Type:Frontend`, id `PVTV_lAHOAoO6As4BfwO_zgLPM14`), Backend (board, filter `Type:Backend`, id `PVTV_lAHOAoO6As4BfwO_zgLPM6c`), Sprints (table, id `PVTV_lAHOAoO6As4BfwO_zgLQVEM`). All show Title, Status, Effort, Type, Iteration, Assignees, Labels. Grouping is UI-only — the API (`createProjectV2View`/`updateProjectV2View`) supports only `name`, `layout`, `filter`, and `visibleFieldIds`.
 
 ## 1. List the user's projects
 
@@ -52,7 +60,7 @@ $GH api graphql -f query='{ viewer { projectsV2(first: 20) { nodes { title numbe
 $GH api graphql -f query='{ user(login: "GabrielCrackPro") { projectV2(number: 1) { title fields(first: 30) { nodes { ... on ProjectV2FieldCommon { name } } } items(first: 50) { nodes { content { __typename ... on Issue { title number state } ... on PullRequest { title number state } } fieldValues(first: 15) { nodes { ... on ProjectV2ItemFieldSingleSelectValue { name field { ... on ProjectV2FieldCommon { name } } } ... on ProjectV2ItemFieldTextValue { text field { ... on ProjectV2FieldCommon { name } } } } } } } } } }'
 ```
 
-Summarize results grouped by the `Status` value (Idea / Pending / In Progress / Done / Blocked). Note `fieldValues` entries are ordered like the board's columns; match on the `field.name` key, not position.
+Summarize results grouped by the `Status` value (Backlog / Ready / In Progress / Done / Blocked). Note `fieldValues` entries are ordered like the board's columns; match on the `field.name` key, not position.
 
 ## 3. Resolve an item's node ID (needed to update it)
 
