@@ -8,11 +8,12 @@
 
 Track income and expenses, plan budgets, save toward goals, and keep an eye on recurring subscriptions — alone or in shared spaces with the people you trust. Works offline, syncs in realtime, speaks Spanish and English.
 
-[![Release](https://img.shields.io/github/v/release/GabrielCrackPro/flowy?label=release&logo=semver)](https://github.com/GabrielCrackPro/flowy/releases)
-[![CI](https://img.shields.io/github/actions/workflow/status/GabrielCrackPro/flowy/ci.yml?label=CI&logo=github)](.github/workflows/ci.yml)
-[![Production](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Production?label=production&logo=vercel)](https://flowy-jade.vercel.app)
-[![Preview](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Preview?label=preview&logo=vercel)](https://github.com/GabrielCrackPro/flowy/deployments)
-[![License](https://img.shields.io/github/license/GabrielCrackPro/flowy?label=license)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/GabrielCrackPro/flowy?style=flat-square&label=release&color=3b82f6&labelColor=1e3a8a&logo=semver&logoColor=white)](https://github.com/GabrielCrackPro/flowy/releases)
+[![Build](https://img.shields.io/github/actions/workflow/status/GabrielCrackPro/flowy/ci.yml?style=flat-square&label=build&labelColor=1e3a8a&logo=github&logoColor=white)](.github/workflows/ci.yml)
+[![Production](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Production?style=flat-square&label=production&labelColor=1e3a8a&logo=vercel&logoColor=white)](https://flowy-jade.vercel.app)
+[![Preview](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Preview?style=flat-square&label=preview&labelColor=1e3a8a&logo=vercel&logoColor=white)](https://github.com/GabrielCrackPro/flowy/deployments)
+[![Last commit](https://img.shields.io/github/last-commit/GabrielCrackPro/flowy?style=flat-square&label=last%20commit&color=3b82f6&labelColor=1e3a8a&logo=git&logoColor=white)](https://github.com/GabrielCrackPro/flowy/commits/main)
+[![License](https://img.shields.io/github/license/GabrielCrackPro/flowy?style=flat-square&label=license&color=3b82f6&labelColor=1e3a8a)](LICENSE)
 
 **Try it live → [flowy-jade.vercel.app](https://flowy-jade.vercel.app)**
 
@@ -50,14 +51,24 @@ Track income and expenses, plan budgets, save toward goals, and keep an eye on r
 | :--- | :--- | :--- |
 | Charts and configurable cards for balance, spending, and budget health | Discuss any entity and follow who changed what | Download transactions as a PDF |
 
-Plus: **offline-first PWA** (installable, works without a connection, syncs when you're back), **realtime sync** across devices, **Spanish & English**, and **light/dark themes with customizable accent colors**.
+**And every day, everywhere:**
+
+- 📴 **Offline-first PWA** — installable, works without a connection, syncs when you're back
+- ⚡ **Realtime sync** — changes show up across your devices instantly
+- 🌍 **Spanish & English** — full i18n with a language switcher
+- 🌗 **Themes** — light & dark, with customizable accent colors
 
 ## 📸 Screenshots
 
 <div align="center">
   <img src="public/screenshots/screenshot-desktop.png" alt="Flowy desktop dashboard" width="70%" />
   <br />
+  <em>Desktop dashboard</em>
+  <br />
+  <br />
   <img src="public/screenshots/screenshot-mobile.png" alt="Flowy mobile view" width="28%" />
+  <br />
+  <em>Mobile</em>
 </div>
 
 ## 🧰 Tech Stack
@@ -116,7 +127,7 @@ pnpm prisma migrate deploy
 pnpm dev
 ```
 
-Open http://localhost:3000 — create an account, then add your first transactions and budgets.
+Open http://localhost:3000 — create an account, then add your first transactions and budgets. That's it. 🌊
 
 ## 📁 Project Structure
 
@@ -211,3 +222,13 @@ No. `SUPABASE_SERVICE_ROLE_KEY` is server-only. The browser uses `NEXT_PUBLIC_SU
 ## 📄 License
 
 Flowy is released under the [MIT License](LICENSE). © 2026 Gabriel Vargas.
+
+---
+
+<div align="center">
+
+[Issues](https://github.com/GabrielCrackPro/flowy/issues) · [Releases](https://github.com/GabrielCrackPro/flowy/releases) · [AGENTS.md](AGENTS.md) · [License](LICENSE)
+
+<sub>Made with 💙 by [Gabriel Vargas](https://github.com/GabrielCrackPro)</sub>
+
+</div>
