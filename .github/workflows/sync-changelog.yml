@@ -1,0 +1,75 @@
+name: Sync changelog data
+run-name: 'Sync changelog data · ${{ github.ref_name }}'
+
+# After every release-please merge, CHANGELOG.md and package.json change but
+# release-please cannot regenerate src/lib/changelog/generated.json (the
+# in-app "What's new" data). This workflow regenerates it on main and, when
+# it drifts, opens a chore PR with the synced data and auto-merges it once
+# the required checks (and any codeowner review) are satisfied.
+#
+# The sync PR deliberately does NOT carry `[skip deploy]` — production needs
+# a deploy to serve the updated changelog entries.
+#
+# Path-filtered to runs that can actually change the data; workflow_dispatch
+# is available for manual backfills.
+on:
+  push:
+    branches: [main]
+    paths:
+      - CHANGELOG.md
+      - package.json
+      - scripts/generate-changelog.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: changelog-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Regenerate + open sync PR if drifted
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Regenerate and open sync PR if drifted
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          node scripts/generate-changelog.mjs
+
+          if git diff --exit-code -- src/lib/changelog/generated.json >/dev/null 2>&1; then
+            echo "In-app changelog data is in sync — nothing to do."
+            exit 0
+          fi
+
+          VERSION="$(node -p "require('./package.json').version")"
+          BRANCH="chore/changelog-sync-$VERSION"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add src/lib/changelog/generated.json
+          git commit -m "chore: sync in-app changelog data"
+          git push -u origin "$BRANCH"
+
+          # Only skip when a sync PR for this version is already OPEN —
+          # `gh pr view` also matches closed/merged PRs.
+          STATE="$(gh pr view "$BRANCH" --repo "$GITHUB_REPOSITORY" --json state --jq .state 2>/dev/null || echo NONE)"
+          if [ "$STATE" = "OPEN" ]; then
+            echo "Sync PR already open — branch updated."
+            exit 0
+          fi
+
+          gh pr create --base main --head "$BRANCH" \
+            --title "chore: sync in-app changelog data" \
+            --body "Auto-generated after release **v$VERSION**: regenerated \`src/lib/changelog/generated.json\` from CHANGELOG.md so the in-app *What's new* sheet shows the latest release."
+          gh pr merge "$BRANCH" --repo "$GITHUB_REPOSITORY" --squash --auto --delete-branch

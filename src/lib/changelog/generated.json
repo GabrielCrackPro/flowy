@@ -2,6 +2,18 @@
   "currentVersion": "0.1.14",
   "entries": [
     {
+      "version": "0.1.14",
+      "date": "2026-08-10",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            "add an in-app changelog (What is new) (#75)"
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.13",
       "date": "2026-08-10",
       "sections": [

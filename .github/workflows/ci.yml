@@ -138,7 +138,8 @@ jobs:
     #
     # PRs only (main is always the result of a merged green PR) and release
     # PRs are exempt: release-please cannot run the generator, but bumps
-    # $.currentVersion via extra-files and the next code PR syncs the rest.
+    # $.currentVersion via extra-files and the sync-changelog workflow
+    # (sync-changelog.yml) syncs the new entries right after the release.
     name: Changelog (drift guard)
     runs-on: ubuntu-latest
     timeout-minutes: 5
