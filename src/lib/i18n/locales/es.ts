@@ -5,9 +5,9 @@ export const auth: AuthTranslationMessages = {
     title: "Encuentra tu serenidad financiera.",
     description:
       "Gestiona tus activos con la claridad y calma que te mereces. Una experiencia diseñada para tu tranquilidad.",
-    smartAnalyticsTitle: "Análisis Inteligente",
+    smartAnalyticsTitle: "Resumen de Gastos",
     smartAnalyticsDesc:
-      "Rastrea tus patrones de gasto con insights impulsados por IA",
+      "Controla tus ingresos y gastos con gráficos y presupuestos claros",
     budgetControlTitle: "Control de Presupuesto",
     budgetControlDesc:
       "Establece límites y recibe notificaciones antes de excederte",
@@ -318,7 +318,7 @@ export const app: AppTranslationMessages = {
       "Una visión rápida del estado actual de tus finanzas.",
     analysis: "Análisis",
     analysisDesc:
-      "Comprende cómo se distribuyen tus ingresos y recibe recomendaciones basadas en tu actividad.",
+      "Comprende cómo se distribuyen tus ingresos con gráficos y presupuestos claros.",
     statsNotLoaded: "No se pudieron cargar las estadísticas",
     retry: "Reintentar",
     updated: "Actualizado",

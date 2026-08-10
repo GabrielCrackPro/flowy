@@ -5,8 +5,9 @@ export const auth: AuthTranslationMessages = {
     title: "Find Your Financial Peace",
     description:
       "Manage your assets with the clarity and calm you deserve. An experience designed for your tranquility.",
-    smartAnalyticsTitle: "Smart Analytics",
-    smartAnalyticsDesc: "Track your spending patterns with AI-powered insights",
+    smartAnalyticsTitle: "Spending Overview",
+    smartAnalyticsDesc:
+      "Track your income and expenses with clear charts and budgets",
     budgetControlTitle: "Budget Control",
     budgetControlDesc: "Set limits and get notified before overspending",
     securePrivateTitle: "Secure & Private",
@@ -311,7 +312,7 @@ export const app: AppTranslationMessages = {
     financialSummaryDesc: "A quick overview of your current financial status.",
     analysis: "Analysis",
     analysisDesc:
-      "Understand how your income is distributed and get recommendations based on your activity.",
+      "Understand how your income is distributed with clear charts and budgets.",
     statsNotLoaded: "Could not load statistics",
     retry: "Retry",
     updated: "Updated",
