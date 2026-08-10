@@ -59,6 +59,51 @@ type Json = Record<string, unknown>;
  */
 const DATE_FIELDS = new Set(["date", "deadline", "nextPayment"]);
 
+/**
+ * Descriptions applied to Zod-derived request schemas by field name (the Zod
+ * `toJSONSchema()` output carries no descriptions). Keep in sync with the
+ * hand-written entity schemas below.
+ */
+const FIELD_DESC: Record<string, string> = {
+  type: "INCOME or EXPENSE",
+  amount: "Decimal amount (user's currency)",
+  description: "Short human-readable description",
+  categoryIds: "Category UUIDs to apply",
+  paymentMethod: "How the transaction was paid",
+  date: "Transaction date (YYYY-MM-DD)",
+  notes: "Free-form notes",
+  receiptUrl: "Public URL of an uploaded receipt",
+  isRecurring: "Whether the transaction repeats automatically",
+  budgetId: "Optional budget this transaction contributes to",
+  budgetLimit: "Monthly limit for the category",
+  month: "Month 1–12, or null for a whole-year budget",
+  year: "Calendar year",
+  name: "Display name",
+  icon: "Emoji or icon key",
+  color: "Hex color or theme color key",
+  title: "Goal name",
+  targetAmount: "Amount to save",
+  savedAmount: "Amount saved so far",
+  deadline: "Target date (YYYY-MM-DD), if any",
+  merchant: "Service or merchant name",
+  billingCycle: "How often the subscription renews",
+  nextPayment: "Next charge date (YYYY-MM-DD)",
+  active: "Whether the subscription is currently active",
+  entityType: "Kind of entity the comment belongs to",
+  entityId: "Entity the comment belongs to",
+  parentId: "Parent comment UUID for replies",
+  content: "Comment body",
+  currency: "ISO 4217 currency code (e.g. EUR, USD)",
+  locale: "BCP 47 language tag (e.g. en, es)",
+  showLanguageSelector: "Whether to show the in-app language switcher",
+  dashboardCards: "Ordered dashboard card keys",
+  primaryColor: "CSS color for the primary theme",
+  secondaryColor: "CSS color for the secondary theme",
+  accentColor: "CSS color used for accents",
+  avatarUrl: "Public URL of the profile avatar",
+  updatedBy: "Profile UUID of the last editor, if any",
+};
+
 function jsObject(schema: {
   shape?: Record<string, { isOptional?(): boolean; toJSONSchema?(): unknown }>;
   toJSONSchema?(): unknown;
@@ -82,6 +127,15 @@ function jsObject(schema: {
       }
     }
     if (!field.isOptional?.()) required.push(key);
+    const description = FIELD_DESC[key];
+    if (
+      description &&
+      properties[key] &&
+      typeof properties[key] === "object" &&
+      !(properties[key] as Json).description
+    ) {
+      properties[key] = { ...(properties[key] as Json), description };
+    }
   }
   const result: Json = { type: "object", properties };
   if (required.length) result.required = required;
@@ -248,11 +302,15 @@ function op(input: {
 const paginated = (itemName: string): Json => ({
   type: "object",
   properties: {
-    data: { type: "array", items: ref(itemName) },
+    data: {
+      type: "array",
+      items: ref(itemName),
+      description: "Rows for the current page",
+    },
     total: { type: "integer", description: "Total rows matching the filters" },
     page: { type: "integer", description: "Current page (1-based)" },
     limit: { type: "integer", description: "Page size" },
-    totalPages: { type: "integer" },
+    totalPages: { type: "integer", description: "Total number of pages" },
   },
   required: ["data", "total", "page", "limit", "totalPages"],
 });
@@ -282,16 +340,37 @@ const BASE_FIELDS = {
   },
 };
 
+const OWNER_PROFILE = {
+  ...ref("ProfileIdentity"),
+  description: "Profile of the owner (id, name, email, avatar)",
+};
+const UPDATED_BY_PROFILE = {
+  ...nullable("ProfileIdentity"),
+  description: "Profile of the last editor, if any",
+};
+const SPACE_SCOPE = {
+  type: ["string", "null"],
+  format: "uuid",
+  description: "Owning space UUID, or null for personal data",
+};
+
 const schemas: Record<string, Json> = {
-  Uuid: { type: "string", format: "uuid" },
+  Uuid: {
+    type: "string",
+    format: "uuid",
+    description: "Universally unique identifier",
+  },
   ProfileIdentity: {
     type: "object",
     description: "Lightweight profile summary embedded in owned entities.",
     properties: {
-      id: UUID,
-      name: { type: ["string", "null"] },
-      email: { type: ["string", "null"] },
-      avatarUrl: { type: ["string", "null"] },
+      id: { ...UUID, description: "Entity UUID" },
+      name: { type: ["string", "null"], description: "Display name" },
+      email: { type: ["string", "null"], description: "Email address" },
+      avatarUrl: {
+        type: ["string", "null"],
+        description: "Public URL of the profile avatar",
+      },
     },
   },
   Category: {
@@ -309,8 +388,8 @@ const schemas: Record<string, Json> = {
         enum: ["INCOME", "EXPENSE"],
         description: "Category kind",
       },
-      user: ref("ProfileIdentity"),
-      updatedByProfile: nullable("ProfileIdentity"),
+      user: OWNER_PROFILE,
+      updatedByProfile: UPDATED_BY_PROFILE,
     },
     required: ["id", "userId", "name", "type", "createdAt", "updatedAt"],
   },
@@ -365,9 +444,12 @@ const schemas: Record<string, Json> = {
         items: ref("Category"),
         description: "Categories applied to the transaction",
       },
-      user: ref("ProfileIdentity"),
-      updatedByProfile: nullable("ProfileIdentity"),
-      budget: nullable("BudgetSummary"),
+      user: OWNER_PROFILE,
+      updatedByProfile: UPDATED_BY_PROFILE,
+      budget: {
+        ...nullable("BudgetSummary"),
+        description: "Budget this transaction contributes to, if any",
+      },
     },
     required: [
       "id",
@@ -384,12 +466,24 @@ const schemas: Record<string, Json> = {
     type: "object",
     description: "Budget attached to a transaction.",
     properties: {
-      id: UUID,
-      categoryId: UUID,
-      budgetLimit: { type: "number" },
-      month: { type: ["integer", "null"] },
-      year: { type: ["integer", "null"] },
-      category: ref("Category"),
+      id: { ...UUID, description: "Entity UUID" },
+      categoryId: {
+        ...UUID,
+        description: "Category the budget applies to",
+      },
+      budgetLimit: {
+        type: "number",
+        description: "Monthly limit for the category",
+      },
+      month: {
+        type: ["integer", "null"],
+        description: "Month 1–12, or null for a whole-year budget",
+      },
+      year: { type: ["integer", "null"], description: "Calendar year" },
+      category: {
+        ...ref("Category"),
+        description: "Category the budget covers",
+      },
     },
   },
   Budget: {
@@ -419,9 +513,12 @@ const schemas: Record<string, Json> = {
         type: "number",
         description: "Remaining limit (budgetLimit minus expenses)",
       },
-      category: ref("Category"),
-      user: ref("ProfileIdentity"),
-      updatedByProfile: nullable("ProfileIdentity"),
+      category: {
+        ...ref("Category"),
+        description: "Category the budget covers",
+      },
+      user: OWNER_PROFILE,
+      updatedByProfile: UPDATED_BY_PROFILE,
     },
     required: [
       "id",
@@ -447,8 +544,8 @@ const schemas: Record<string, Json> = {
         format: "date",
         description: "Target date (YYYY-MM-DD), if any",
       },
-      user: ref("ProfileIdentity"),
-      updatedByProfile: nullable("ProfileIdentity"),
+      user: OWNER_PROFILE,
+      updatedByProfile: UPDATED_BY_PROFILE,
     },
     required: [
       "id",
@@ -486,17 +583,20 @@ const schemas: Record<string, Json> = {
         type: "boolean",
         description: "Whether the subscription is currently active",
       },
-      user: ref("ProfileIdentity"),
-      updatedByProfile: nullable("ProfileIdentity"),
+      user: OWNER_PROFILE,
+      updatedByProfile: UPDATED_BY_PROFILE,
     },
     required: ["id", "userId", "active", "createdAt", "updatedAt"],
   },
   Comment: {
     type: "object",
     properties: {
-      id: UUID,
-      userId: UUID,
-      spaceId: { type: ["string", "null"], format: "uuid" },
+      id: { ...UUID, description: "Entity UUID" },
+      userId: {
+        ...UUID,
+        description: "Owner profile UUID",
+      },
+      spaceId: SPACE_SCOPE,
       entityType: {
         type: "string",
         enum: ["transaction", "goal", "budget", "subscription"],
@@ -509,8 +609,16 @@ const schemas: Record<string, Json> = {
         description: "Parent comment UUID for replies",
       },
       content: { type: "string", description: "Comment body" },
-      createdAt: { type: "string", format: "date-time" },
-      updatedAt: { type: "string", format: "date-time" },
+      createdAt: {
+        type: "string",
+        format: "date-time",
+        description: "Creation timestamp (ISO 8601)",
+      },
+      updatedAt: {
+        type: "string",
+        format: "date-time",
+        description: "Last update timestamp (ISO 8601)",
+      },
     },
     required: [
       "id",
@@ -525,9 +633,12 @@ const schemas: Record<string, Json> = {
   Activity: {
     type: "object",
     properties: {
-      id: UUID,
-      userId: UUID,
-      spaceId: { type: ["string", "null"], format: "uuid" },
+      id: { ...UUID, description: "Entity UUID" },
+      userId: {
+        ...UUID,
+        description: "Owner profile UUID",
+      },
+      spaceId: SPACE_SCOPE,
       actorId: {
         type: ["string", "null"],
         format: "uuid",
@@ -551,29 +662,44 @@ const schemas: Record<string, Json> = {
         additionalProperties: true,
         description: "Extra context about the action",
       },
-      createdAt: { type: "string", format: "date-time" },
+      createdAt: {
+        type: "string",
+        format: "date-time",
+        description: "Creation timestamp (ISO 8601)",
+      },
     },
     required: ["id", "userId", "type", "createdAt"],
   },
   SpaceMember: {
     type: "object",
+    description: "A user's membership in a shared space.",
     properties: {
-      id: UUID,
-      spaceId: UUID,
-      userId: UUID,
+      id: { ...UUID, description: "Entity UUID" },
+      spaceId: {
+        ...UUID,
+        description: "Space this membership belongs to",
+      },
+      userId: {
+        ...UUID,
+        description: "Profile UUID of the member",
+      },
       role: {
         type: "string",
         enum: ["owner", "member"],
         description: "Permission level within the space",
       },
-      joinedAt: { type: "string", format: "date-time" },
-      user: ref("ProfileIdentity"),
+      joinedAt: {
+        type: "string",
+        format: "date-time",
+        description: "When the user joined the space",
+      },
+      user: { ...ref("ProfileIdentity"), description: "Profile of the member" },
     },
   },
   Space: {
     type: "object",
     properties: {
-      id: UUID,
+      id: { ...UUID, description: "Entity UUID" },
       name: { type: "string", description: "Display name" },
       slug: { type: ["string", "null"], description: "URL-friendly slug" },
       joinCode: {
@@ -606,9 +732,12 @@ const schemas: Record<string, Json> = {
   Alert: {
     type: "object",
     properties: {
-      id: UUID,
-      userId: UUID,
-      spaceId: { type: ["string", "null"], format: "uuid" },
+      id: { ...UUID, description: "Entity UUID" },
+      userId: {
+        ...UUID,
+        description: "Owner profile UUID",
+      },
+      spaceId: SPACE_SCOPE,
       type: { type: "string", description: "Alert rule type" },
       severity: {
         type: "string",
@@ -644,7 +773,11 @@ const schemas: Record<string, Json> = {
         format: "date-time",
         description: "When the alert was resolved",
       },
-      createdAt: { type: "string", format: "date-time" },
+      createdAt: {
+        type: "string",
+        format: "date-time",
+        description: "Creation timestamp (ISO 8601)",
+      },
     },
     required: [
       "id",
@@ -659,10 +792,13 @@ const schemas: Record<string, Json> = {
   Profile: {
     type: "object",
     properties: {
-      id: UUID,
-      email: { type: ["string", "null"] },
-      name: { type: ["string", "null"] },
-      avatarUrl: { type: ["string", "null"] },
+      id: { ...UUID, description: "Entity UUID" },
+      email: { type: ["string", "null"], description: "Email address" },
+      name: { type: ["string", "null"], description: "Display name" },
+      avatarUrl: {
+        type: ["string", "null"],
+        description: "Public URL of the profile avatar",
+      },
       currency: {
         type: "string",
         description: "ISO 4217 currency code (e.g. EUR, USD)",
@@ -697,22 +833,31 @@ const schemas: Record<string, Json> = {
         type: ["string", "null"],
         description: "CSS color used for accents",
       },
-      createdAt: { type: "string", format: "date-time" },
+      createdAt: {
+        type: "string",
+        format: "date-time",
+        description: "Creation timestamp (ISO 8601)",
+      },
     },
     required: ["id", "currency", "locale", "createdAt"],
   },
   DailyStatsPoint: {
     type: "object",
+    description: "One day in the monthly series.",
     properties: {
-      day: { type: "integer" },
-      income: { type: "number" },
-      expenses: { type: "number" },
-      balance: { type: "number" },
+      day: { type: "integer", description: "Day of the month (1–31)" },
+      income: { type: "number", description: "Income on that day" },
+      expenses: { type: "number", description: "Expenses on that day" },
+      balance: { type: "number", description: "Running balance at end of day" },
     },
   },
   ExpenseCategoryStat: {
     type: "object",
-    properties: { name: { type: "string" }, amount: { type: "number" } },
+    description: "Expenses aggregated per category.",
+    properties: {
+      name: { type: "string", description: "Category name" },
+      amount: { type: "number", description: "Amount spent in that category" },
+    },
   },
   DashboardStats: {
     type: "object",
@@ -769,23 +914,46 @@ const schemas: Record<string, Json> = {
     type: "object",
     description: "Budget with the amount actually spent so far.",
     allOf: [{ $ref: "#/components/schemas/Budget" }],
-    properties: { spent: { type: "number" } },
+    properties: {
+      spent: { type: "number", description: "Amount actually spent so far" },
+    },
   },
   DashboardData: {
     type: "object",
+    description: "Payload for the dashboard page.",
     properties: {
-      stats: ref("DashboardStats"),
-      recentTransactions: { type: "array", items: ref("Transaction") },
-      budgets: { type: "array", items: ref("BudgetWithSpent") },
-      goals: { type: "array", items: ref("Goal") },
-      subscriptions: { type: "array", items: ref("Subscription") },
-      activities: { type: "array", items: ref("Activity") },
+      stats: { ...ref("DashboardStats"), description: "Monthly aggregates" },
+      recentTransactions: {
+        type: "array",
+        items: ref("Transaction"),
+        description: "Most recent transactions",
+      },
+      budgets: {
+        type: "array",
+        items: ref("BudgetWithSpent"),
+        description: "Budgets with spent amounts",
+      },
+      goals: {
+        type: "array",
+        items: ref("Goal"),
+        description: "Savings goals",
+      },
+      subscriptions: {
+        type: "array",
+        items: ref("Subscription"),
+        description: "Tracked subscriptions",
+      },
+      activities: {
+        type: "array",
+        items: ref("Activity"),
+        description: "Recent activity entries",
+      },
     },
   },
   SearchResultItem: {
     type: "object",
     properties: {
-      id: UUID,
+      id: { ...UUID, description: "Entity UUID" },
       type: {
         type: "string",
         enum: ["transaction", "category", "budget", "goal", "subscription"],
@@ -807,35 +975,67 @@ const schemas: Record<string, Json> = {
   SearchResponse: {
     type: "object",
     properties: {
-      query: { type: "string" },
-      results: { type: "array", items: ref("SearchResultItem") },
-      total: { type: "integer" },
+      query: { type: "string", description: "Normalized search query" },
+      results: {
+        type: "array",
+        items: ref("SearchResultItem"),
+        description: "Matching entities, ranked",
+      },
+      total: { type: "integer", description: "Number of results" },
     },
     required: ["query", "results", "total"],
   },
   NotificationsResponse: {
     type: "object",
     properties: {
-      alerts: { type: "array", items: ref("Alert") },
-      unreadCount: { type: "integer" },
+      alerts: {
+        type: "array",
+        items: ref("Alert"),
+        description: "Alerts in the active space (up to 50)",
+      },
+      unreadCount: { type: "integer", description: "Unread alerts" },
     },
     required: ["alerts", "unreadCount"],
   },
   HealthResponse: {
     type: "object",
     properties: {
-      status: { type: "string", enum: ["healthy"] },
-      database: { type: "string", enum: ["connected"] },
-      timestamp: { type: "string", format: "date-time" },
+      status: {
+        type: "string",
+        enum: ["healthy"],
+        description: "Health state",
+      },
+      database: {
+        type: "string",
+        enum: ["connected"],
+        description: "Database connectivity",
+      },
+      timestamp: {
+        type: "string",
+        format: "date-time",
+        description: "Check time (ISO 8601)",
+      },
     },
   },
   HealthErrorResponse: {
     type: "object",
     properties: {
-      status: { type: "string", enum: ["unhealthy"] },
-      database: { type: "string", enum: ["disconnected"] },
-      error: { type: "string" },
-      timestamp: { type: "string", format: "date-time" },
+      status: {
+        type: "string",
+        enum: ["unhealthy"],
+        description: "Health state",
+      },
+      database: {
+        type: "string",
+        enum: ["disconnected"],
+        description: "Database connectivity",
+      },
+      error: { type: "string", description: "Failure detail" },
+      timestamp: {
+        type: "string",
+        format: "date-time",
+        description: "Check time (ISO 8601)",
+      },
     },
   },
   Error: {
@@ -843,11 +1043,23 @@ const schemas: Record<string, Json> = {
     description:
       "Uniform error envelope. `category` is one of the ErrorCategory values in src/lib/errors/error-types.ts (validation, authentication, authorization, not_found, rate_limit, database, service_unavailable, network, server, unknown).",
     properties: {
-      message: { type: "string" },
-      category: { type: "string" },
-      severity: { type: ["string", "null"] },
-      statusCode: { type: ["integer", "null"] },
-      isRetryable: { type: "boolean" },
+      message: { type: "string", description: "Human-readable error message" },
+      category: {
+        type: "string",
+        description: "Error category (validation, authentication, ...)",
+      },
+      severity: {
+        type: ["string", "null"],
+        description: "Severity level, when assigned",
+      },
+      statusCode: {
+        type: ["integer", "null"],
+        description: "HTTP status code",
+      },
+      isRetryable: {
+        type: "boolean",
+        description: "Whether retrying may succeed",
+      },
       errors: {
         type: ["array", "null"],
         items: { type: "object", additionalProperties: true },
@@ -857,7 +1069,11 @@ const schemas: Record<string, Json> = {
         type: ["integer", "null"],
         description: "Seconds until the rate-limit window resets",
       },
-      retryAt: { type: ["string", "null"], format: "date-time" },
+      retryAt: {
+        type: ["string", "null"],
+        format: "date-time",
+        description: "ISO time when the rate-limit window resets",
+      },
     },
     required: ["message"],
   },
@@ -866,31 +1082,56 @@ const schemas: Record<string, Json> = {
     description:
       "429 response body. Include `Retry-After` in the next request.",
     properties: {
-      message: { type: "string" },
-      retryAfter: { type: "integer" },
-      retryAt: { type: "string", format: "date-time" },
-      category: { type: "string" },
-      isRetryable: { type: "boolean" },
+      message: { type: "string", description: "Human-readable error message" },
+      retryAfter: {
+        type: "integer",
+        description: "Seconds until the window resets",
+      },
+      retryAt: {
+        type: "string",
+        format: "date-time",
+        description: "ISO time when the window resets",
+      },
+      category: {
+        type: "string",
+        description: "Error category (rate_limit)",
+      },
+      isRetryable: {
+        type: "boolean",
+        description: "Whether retrying may succeed",
+      },
     },
   },
   SuccessResponse: {
     type: "object",
-    properties: { success: { type: "boolean" } },
+    properties: {
+      success: {
+        type: "boolean",
+        description: "Whether the operation succeeded",
+      },
+    },
     required: ["success"],
   },
   DeleteAccountResponse: {
     type: "object",
-    properties: { message: { type: "string" } },
+    properties: {
+      message: { type: "string", description: "Confirmation message" },
+    },
   },
   BulkDeleteRequest: {
     type: "object",
     properties: {
-      action: { type: "string", const: "bulkDelete" },
+      action: {
+        type: "string",
+        const: "bulkDelete",
+        description: "Discriminator for the bulk-delete operation",
+      },
       ids: {
         type: "array",
         items: { type: "string", format: "uuid" },
         minItems: 1,
         maxItems: 100,
+        description: "Entity UUIDs to delete (1–100)",
       },
     },
     required: ["action", "ids"],
@@ -898,8 +1139,14 @@ const schemas: Record<string, Json> = {
   BulkDeleteResponse: {
     type: "object",
     properties: {
-      success: { type: "boolean" },
-      deletedCount: { type: "integer" },
+      success: {
+        type: "boolean",
+        description: "Whether the operation succeeded",
+      },
+      deletedCount: {
+        type: "integer",
+        description: "Entities deleted",
+      },
     },
     required: ["success", "deletedCount"],
   },
@@ -910,13 +1157,21 @@ const schemas: Record<string, Json> = {
         type: "string",
         description: 'Defaults to "Nuevo espacio" when omitted',
       },
-      isPersonal: { type: "boolean", default: false },
+      isPersonal: {
+        type: "boolean",
+        default: false,
+        description: "Create as a personal (non-shared) space",
+      },
     },
   },
   JoinSpaceRequest: {
     type: "object",
     properties: {
-      action: { type: "string", const: "join" },
+      action: {
+        type: "string",
+        const: "join",
+        description: "Discriminator for the join operation",
+      },
       joinCode: {
         type: "string",
         description: "Space invite code (case-insensitive)",
@@ -932,21 +1187,39 @@ const schemas: Record<string, Json> = {
       action: {
         type: "string",
         enum: ["setActive", "rename", "leave", "removeMember"],
+        description: "Which operation to perform",
       },
-      name: { type: "string" },
-      isPersonal: { type: "boolean" },
-      memberUserId: { type: "string", format: "uuid" },
+      name: { type: "string", description: "New space name (rename only)" },
+      isPersonal: {
+        type: "boolean",
+        description: "Whether the space is personal (rename only)",
+      },
+      memberUserId: {
+        type: "string",
+        format: "uuid",
+        description: "Member to remove (removeMember only)",
+      },
     },
     required: ["action"],
   },
   SetActiveSpaceResponse: {
     type: "object",
-    properties: { activeSpaceId: { type: ["string", "null"], format: "uuid" } },
+    properties: {
+      activeSpaceId: {
+        type: ["string", "null"],
+        format: "uuid",
+        description: "The user's new active space",
+      },
+    },
   },
   MarkNotificationsReadRequest: {
     type: "object",
     properties: {
-      ids: { type: "array", items: { type: "string", format: "uuid" } },
+      ids: {
+        type: "array",
+        items: { type: "string", format: "uuid" },
+        description: "Alert UUIDs to mark as read",
+      },
       all: {
         type: "boolean",
         description:
@@ -958,36 +1231,66 @@ const schemas: Record<string, Json> = {
     type: "object",
     description: "Web Push subscription (PushManager.subscribe output).",
     properties: {
-      endpoint: { type: "string", format: "uri" },
-      p256dh: { type: "string" },
-      auth: { type: "string" },
+      endpoint: {
+        type: "string",
+        format: "uri",
+        description: "Push endpoint URL",
+      },
+      p256dh: {
+        type: "string",
+        description: "Client public key (base64url)",
+      },
+      auth: { type: "string", description: "Client auth secret (base64url)" },
     },
     required: ["endpoint", "p256dh", "auth"],
   },
   DeletePushSubscriptionRequest: {
     type: "object",
-    properties: { endpoint: { type: "string", format: "uri" } },
+    properties: {
+      endpoint: {
+        type: "string",
+        format: "uri",
+        description: "Push endpoint URL to remove",
+      },
+    },
     required: ["endpoint"],
   },
   PushSubscriptionResponse: {
     type: "object",
     properties: {
-      ok: { type: "boolean" },
-      id: { type: "string", format: "uuid" },
+      ok: { type: "boolean", description: "Whether the operation succeeded" },
+      id: {
+        type: "string",
+        format: "uuid",
+        description: "Stored push subscription UUID",
+      },
     },
     required: ["ok", "id"],
   },
   ChangePasswordRequest: {
     type: "object",
     properties: {
-      currentPassword: { type: "string" },
-      newPassword: { type: "string", minLength: 8 },
+      currentPassword: {
+        type: "string",
+        description: "The user's current password",
+      },
+      newPassword: {
+        type: "string",
+        minLength: 8,
+        description: "New password (min 8 characters)",
+      },
     },
     required: ["currentPassword", "newPassword"],
   },
   UploadResponse: {
     type: "object",
-    properties: { url: { type: "string", format: "uri" } },
+    properties: {
+      url: {
+        type: "string",
+        format: "uri",
+        description: "Public URL of the uploaded file",
+      },
+    },
     required: ["url"],
   },
   CronAlertsResponse: {

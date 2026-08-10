@@ -131,7 +131,8 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/Transaction"
-                      }
+                      },
+                      "description": "Rows for the current page"
                     },
                     "total": {
                       "type": "integer",
@@ -146,7 +147,8 @@
                       "description": "Page size"
                     },
                     "totalPages": {
-                      "type": "integer"
+                      "type": "integer",
+                      "description": "Total number of pages"
                     }
                   },
                   "required": [
@@ -541,7 +543,8 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/Budget"
-                      }
+                      },
+                      "description": "Rows for the current page"
                     },
                     "total": {
                       "type": "integer",
@@ -556,7 +559,8 @@
                       "description": "Page size"
                     },
                     "totalPages": {
-                      "type": "integer"
+                      "type": "integer",
+                      "description": "Total number of pages"
                     }
                   },
                   "required": [
@@ -1079,7 +1083,8 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/Goal"
-                      }
+                      },
+                      "description": "Rows for the current page"
                     },
                     "total": {
                       "type": "integer",
@@ -1094,7 +1099,8 @@
                       "description": "Page size"
                     },
                     "totalPages": {
-                      "type": "integer"
+                      "type": "integer",
+                      "description": "Total number of pages"
                     }
                   },
                   "required": [
@@ -1358,7 +1364,8 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/Subscription"
-                      }
+                      },
+                      "description": "Rows for the current page"
                     },
                     "total": {
                       "type": "integer",
@@ -1373,7 +1380,8 @@
                       "description": "Page size"
                     },
                     "totalPages": {
-                      "type": "integer"
+                      "type": "integer",
+                      "description": "Total number of pages"
                     }
                   },
                   "required": [
@@ -3044,32 +3052,37 @@
     "schemas": {
       "Uuid": {
         "type": "string",
-        "format": "uuid"
+        "format": "uuid",
+        "description": "Universally unique identifier"
       },
       "ProfileIdentity": {
         "type": "object",
         "description": "Lightweight profile summary embedded in owned entities.",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Entity UUID"
           },
           "name": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "Display name"
           },
           "email": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "Email address"
           },
           "avatarUrl": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "Public URL of the profile avatar"
           }
         }
       },
@@ -3137,7 +3150,8 @@
             "description": "Category kind"
           },
           "user": {
-            "$ref": "#/components/schemas/ProfileIdentity"
+            "$ref": "#/components/schemas/ProfileIdentity",
+            "description": "Profile of the owner (id, name, email, avatar)"
           },
           "updatedByProfile": {
             "anyOf": [
@@ -3147,7 +3161,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Profile of the last editor, if any"
           }
         },
         "required": [
@@ -3273,7 +3288,8 @@
             "description": "Categories applied to the transaction"
           },
           "user": {
-            "$ref": "#/components/schemas/ProfileIdentity"
+            "$ref": "#/components/schemas/ProfileIdentity",
+            "description": "Profile of the owner (id, name, email, avatar)"
           },
           "updatedByProfile": {
             "anyOf": [
@@ -3283,7 +3299,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Profile of the last editor, if any"
           },
           "budget": {
             "anyOf": [
@@ -3293,7 +3310,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Budget this transaction contributes to, if any"
           }
         },
         "required": [
@@ -3312,28 +3330,34 @@
         "description": "Budget attached to a transaction.",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Entity UUID"
           },
           "categoryId": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Category the budget applies to"
           },
           "budgetLimit": {
-            "type": "number"
+            "type": "number",
+            "description": "Monthly limit for the category"
           },
           "month": {
             "type": [
               "integer",
               "null"
-            ]
+            ],
+            "description": "Month 1–12, or null for a whole-year budget"
           },
           "year": {
             "type": [
               "integer",
               "null"
-            ]
+            ],
+            "description": "Calendar year"
           },
           "category": {
-            "$ref": "#/components/schemas/Category"
+            "$ref": "#/components/schemas/Category",
+            "description": "Category the budget covers"
           }
         }
       },
@@ -3412,10 +3436,12 @@
             "description": "Remaining limit (budgetLimit minus expenses)"
           },
           "category": {
-            "$ref": "#/components/schemas/Category"
+            "$ref": "#/components/schemas/Category",
+            "description": "Category the budget covers"
           },
           "user": {
-            "$ref": "#/components/schemas/ProfileIdentity"
+            "$ref": "#/components/schemas/ProfileIdentity",
+            "description": "Profile of the owner (id, name, email, avatar)"
           },
           "updatedByProfile": {
             "anyOf": [
@@ -3425,7 +3451,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Profile of the last editor, if any"
           }
         },
         "required": [
@@ -3498,7 +3525,8 @@
             "description": "Target date (YYYY-MM-DD), if any"
           },
           "user": {
-            "$ref": "#/components/schemas/ProfileIdentity"
+            "$ref": "#/components/schemas/ProfileIdentity",
+            "description": "Profile of the owner (id, name, email, avatar)"
           },
           "updatedByProfile": {
             "anyOf": [
@@ -3508,7 +3536,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Profile of the last editor, if any"
           }
         },
         "required": [
@@ -3600,7 +3629,8 @@
             "description": "Whether the subscription is currently active"
           },
           "user": {
-            "$ref": "#/components/schemas/ProfileIdentity"
+            "$ref": "#/components/schemas/ProfileIdentity",
+            "description": "Profile of the owner (id, name, email, avatar)"
           },
           "updatedByProfile": {
             "anyOf": [
@@ -3610,7 +3640,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Profile of the last editor, if any"
           }
         },
         "required": [
@@ -3625,17 +3656,20 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Entity UUID"
           },
           "userId": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Owner profile UUID"
           },
           "spaceId": {
             "type": [
               "string",
               "null"
             ],
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Owning space UUID, or null for personal data"
           },
           "entityType": {
             "type": "string",
@@ -3665,11 +3699,13 @@
           },
           "createdAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Creation timestamp (ISO 8601)"
           },
           "updatedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Last update timestamp (ISO 8601)"
           }
         },
         "required": [
@@ -3686,17 +3722,20 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Entity UUID"
           },
           "userId": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Owner profile UUID"
           },
           "spaceId": {
             "type": [
               "string",
               "null"
             ],
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Owning space UUID, or null for personal data"
           },
           "actorId": {
             "type": [
@@ -3735,7 +3774,8 @@
           },
           "createdAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Creation timestamp (ISO 8601)"
           }
         },
         "required": [
@@ -3747,15 +3787,19 @@
       },
       "SpaceMember": {
         "type": "object",
+        "description": "A user's membership in a shared space.",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Entity UUID"
           },
           "spaceId": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Space this membership belongs to"
           },
           "userId": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Profile UUID of the member"
           },
           "role": {
             "type": "string",
@@ -3767,10 +3811,12 @@
           },
           "joinedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the user joined the space"
           },
           "user": {
-            "$ref": "#/components/schemas/ProfileIdentity"
+            "$ref": "#/components/schemas/ProfileIdentity",
+            "description": "Profile of the member"
           }
         }
       },
@@ -3778,7 +3824,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Entity UUID"
           },
           "name": {
             "type": "string",
@@ -3837,17 +3884,20 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Entity UUID"
           },
           "userId": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Owner profile UUID"
           },
           "spaceId": {
             "type": [
               "string",
               "null"
             ],
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Owning space UUID, or null for personal data"
           },
           "type": {
             "type": "string",
@@ -3912,7 +3962,8 @@
           },
           "createdAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Creation timestamp (ISO 8601)"
           }
         },
         "required": [
@@ -3929,25 +3980,29 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Entity UUID"
           },
           "email": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "Email address"
           },
           "name": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "Display name"
           },
           "avatarUrl": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "Public URL of the profile avatar"
           },
           "currency": {
             "type": "string",
@@ -4002,7 +4057,8 @@
           },
           "createdAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Creation timestamp (ISO 8601)"
           }
         },
         "required": [
@@ -4014,29 +4070,37 @@
       },
       "DailyStatsPoint": {
         "type": "object",
+        "description": "One day in the monthly series.",
         "properties": {
           "day": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Day of the month (1–31)"
           },
           "income": {
-            "type": "number"
+            "type": "number",
+            "description": "Income on that day"
           },
           "expenses": {
-            "type": "number"
+            "type": "number",
+            "description": "Expenses on that day"
           },
           "balance": {
-            "type": "number"
+            "type": "number",
+            "description": "Running balance at end of day"
           }
         }
       },
       "ExpenseCategoryStat": {
         "type": "object",
+        "description": "Expenses aggregated per category.",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Category name"
           },
           "amount": {
-            "type": "number"
+            "type": "number",
+            "description": "Amount spent in that category"
           }
         }
       },
@@ -4105,45 +4169,53 @@
         ],
         "properties": {
           "spent": {
-            "type": "number"
+            "type": "number",
+            "description": "Amount actually spent so far"
           }
         }
       },
       "DashboardData": {
         "type": "object",
+        "description": "Payload for the dashboard page.",
         "properties": {
           "stats": {
-            "$ref": "#/components/schemas/DashboardStats"
+            "$ref": "#/components/schemas/DashboardStats",
+            "description": "Monthly aggregates"
           },
           "recentTransactions": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Transaction"
-            }
+            },
+            "description": "Most recent transactions"
           },
           "budgets": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/BudgetWithSpent"
-            }
+            },
+            "description": "Budgets with spent amounts"
           },
           "goals": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Goal"
-            }
+            },
+            "description": "Savings goals"
           },
           "subscriptions": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Subscription"
-            }
+            },
+            "description": "Tracked subscriptions"
           },
           "activities": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Activity"
-            }
+            },
+            "description": "Recent activity entries"
           }
         }
       },
@@ -4151,7 +4223,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Uuid"
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Entity UUID"
           },
           "type": {
             "type": "string",
@@ -4196,16 +4269,19 @@
         "type": "object",
         "properties": {
           "query": {
-            "type": "string"
+            "type": "string",
+            "description": "Normalized search query"
           },
           "results": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SearchResultItem"
-            }
+            },
+            "description": "Matching entities, ranked"
           },
           "total": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of results"
           }
         },
         "required": [
@@ -4221,10 +4297,12 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Alert"
-            }
+            },
+            "description": "Alerts in the active space (up to 50)"
           },
           "unreadCount": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Unread alerts"
           }
         },
         "required": [
@@ -4239,17 +4317,20 @@
             "type": "string",
             "enum": [
               "healthy"
-            ]
+            ],
+            "description": "Health state"
           },
           "database": {
             "type": "string",
             "enum": [
               "connected"
-            ]
+            ],
+            "description": "Database connectivity"
           },
           "timestamp": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Check time (ISO 8601)"
           }
         }
       },
@@ -4260,20 +4341,24 @@
             "type": "string",
             "enum": [
               "unhealthy"
-            ]
+            ],
+            "description": "Health state"
           },
           "database": {
             "type": "string",
             "enum": [
               "disconnected"
-            ]
+            ],
+            "description": "Database connectivity"
           },
           "error": {
-            "type": "string"
+            "type": "string",
+            "description": "Failure detail"
           },
           "timestamp": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Check time (ISO 8601)"
           }
         }
       },
@@ -4282,25 +4367,30 @@
         "description": "Uniform error envelope. `category` is one of the ErrorCategory values in src/lib/errors/error-types.ts (validation, authentication, authorization, not_found, rate_limit, database, service_unavailable, network, server, unknown).",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Human-readable error message"
           },
           "category": {
-            "type": "string"
+            "type": "string",
+            "description": "Error category (validation, authentication, ...)"
           },
           "severity": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "Severity level, when assigned"
           },
           "statusCode": {
             "type": [
               "integer",
               "null"
-            ]
+            ],
+            "description": "HTTP status code"
           },
           "isRetryable": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether retrying may succeed"
           },
           "errors": {
             "type": [
@@ -4325,7 +4415,8 @@
               "string",
               "null"
             ],
-            "format": "date-time"
+            "format": "date-time",
+            "description": "ISO time when the rate-limit window resets"
           }
         },
         "required": [
@@ -4337,20 +4428,25 @@
         "description": "429 response body. Include `Retry-After` in the next request.",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Human-readable error message"
           },
           "retryAfter": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Seconds until the window resets"
           },
           "retryAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "ISO time when the window resets"
           },
           "category": {
-            "type": "string"
+            "type": "string",
+            "description": "Error category (rate_limit)"
           },
           "isRetryable": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether retrying may succeed"
           }
         }
       },
@@ -4358,7 +4454,8 @@
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the operation succeeded"
           }
         },
         "required": [
@@ -4369,7 +4466,8 @@
         "type": "object",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Confirmation message"
           }
         }
       },
@@ -4378,7 +4476,8 @@
         "properties": {
           "action": {
             "type": "string",
-            "const": "bulkDelete"
+            "const": "bulkDelete",
+            "description": "Discriminator for the bulk-delete operation"
           },
           "ids": {
             "type": "array",
@@ -4387,7 +4486,8 @@
               "format": "uuid"
             },
             "minItems": 1,
-            "maxItems": 100
+            "maxItems": 100,
+            "description": "Entity UUIDs to delete (1–100)"
           }
         },
         "required": [
@@ -4399,10 +4499,12 @@
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the operation succeeded"
           },
           "deletedCount": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Entities deleted"
           }
         },
         "required": [
@@ -4419,7 +4521,8 @@
           },
           "isPersonal": {
             "type": "boolean",
-            "default": false
+            "default": false,
+            "description": "Create as a personal (non-shared) space"
           }
         }
       },
@@ -4428,7 +4531,8 @@
         "properties": {
           "action": {
             "type": "string",
-            "const": "join"
+            "const": "join",
+            "description": "Discriminator for the join operation"
           },
           "joinCode": {
             "type": "string",
@@ -4451,17 +4555,21 @@
               "rename",
               "leave",
               "removeMember"
-            ]
+            ],
+            "description": "Which operation to perform"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "New space name (rename only)"
           },
           "isPersonal": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the space is personal (rename only)"
           },
           "memberUserId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Member to remove (removeMember only)"
           }
         },
         "required": [
@@ -4476,7 +4584,8 @@
               "string",
               "null"
             ],
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The user's new active space"
           }
         }
       },
@@ -4488,7 +4597,8 @@
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Alert UUIDs to mark as read"
           },
           "all": {
             "type": "boolean",
@@ -4502,13 +4612,16 @@
         "properties": {
           "endpoint": {
             "type": "string",
-            "format": "uri"
+            "format": "uri",
+            "description": "Push endpoint URL"
           },
           "p256dh": {
-            "type": "string"
+            "type": "string",
+            "description": "Client public key (base64url)"
           },
           "auth": {
-            "type": "string"
+            "type": "string",
+            "description": "Client auth secret (base64url)"
           }
         },
         "required": [
@@ -4522,7 +4635,8 @@
         "properties": {
           "endpoint": {
             "type": "string",
-            "format": "uri"
+            "format": "uri",
+            "description": "Push endpoint URL to remove"
           }
         },
         "required": [
@@ -4533,11 +4647,13 @@
         "type": "object",
         "properties": {
           "ok": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the operation succeeded"
           },
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Stored push subscription UUID"
           }
         },
         "required": [
@@ -4549,11 +4665,13 @@
         "type": "object",
         "properties": {
           "currentPassword": {
-            "type": "string"
+            "type": "string",
+            "description": "The user's current password"
           },
           "newPassword": {
             "type": "string",
-            "minLength": 8
+            "minLength": 8,
+            "description": "New password (min 8 characters)"
           }
         },
         "required": [
@@ -4566,7 +4684,8 @@
         "properties": {
           "url": {
             "type": "string",
-            "format": "uri"
+            "format": "uri",
+            "description": "Public URL of the uploaded file"
           }
         },
         "required": [
@@ -4603,15 +4722,18 @@
             "enum": [
               "INCOME",
               "EXPENSE"
-            ]
+            ],
+            "description": "INCOME or EXPENSE"
           },
           "amount": {
             "type": "number",
-            "exclusiveMinimum": 0
+            "exclusiveMinimum": 0,
+            "description": "Decimal amount (user's currency)"
           },
           "description": {
             "type": "string",
-            "maxLength": 255
+            "maxLength": 255,
+            "description": "Short human-readable description"
           },
           "categoryIds": {
             "type": "array",
@@ -4619,7 +4741,8 @@
               "type": "string",
               "format": "uuid",
               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-            }
+            },
+            "description": "Category UUIDs to apply"
           },
           "paymentMethod": {
             "type": "string",
@@ -4630,15 +4753,18 @@
               "BIZUM",
               "PAYPAL",
               "OTHER"
-            ]
+            ],
+            "description": "How the transaction was paid"
           },
           "date": {
             "type": "string",
-            "format": "date"
+            "format": "date",
+            "description": "Transaction date (YYYY-MM-DD)"
           },
           "notes": {
             "type": "string",
-            "maxLength": 2000
+            "maxLength": 2000,
+            "description": "Free-form notes"
           },
           "receiptUrl": {
             "anyOf": [
@@ -4649,10 +4775,12 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Public URL of an uploaded receipt"
           },
           "isRecurring": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the transaction repeats automatically"
           },
           "budgetId": {
             "anyOf": [
@@ -4664,7 +4792,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Optional budget this transaction contributes to"
           }
         },
         "required": [
@@ -4680,15 +4809,18 @@
             "enum": [
               "INCOME",
               "EXPENSE"
-            ]
+            ],
+            "description": "INCOME or EXPENSE"
           },
           "amount": {
             "type": "number",
-            "exclusiveMinimum": 0
+            "exclusiveMinimum": 0,
+            "description": "Decimal amount (user's currency)"
           },
           "description": {
             "type": "string",
-            "maxLength": 255
+            "maxLength": 255,
+            "description": "Short human-readable description"
           },
           "categoryIds": {
             "type": "array",
@@ -4696,7 +4828,8 @@
               "type": "string",
               "format": "uuid",
               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-            }
+            },
+            "description": "Category UUIDs to apply"
           },
           "paymentMethod": {
             "type": "string",
@@ -4707,15 +4840,18 @@
               "BIZUM",
               "PAYPAL",
               "OTHER"
-            ]
+            ],
+            "description": "How the transaction was paid"
           },
           "date": {
             "type": "string",
-            "format": "date"
+            "format": "date",
+            "description": "Transaction date (YYYY-MM-DD)"
           },
           "notes": {
             "type": "string",
-            "maxLength": 2000
+            "maxLength": 2000,
+            "description": "Free-form notes"
           },
           "receiptUrl": {
             "anyOf": [
@@ -4726,10 +4862,12 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Public URL of an uploaded receipt"
           },
           "isRecurring": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the transaction repeats automatically"
           },
           "budgetId": {
             "anyOf": [
@@ -4741,7 +4879,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Optional budget this transaction contributes to"
           }
         }
       },
@@ -4755,16 +4894,19 @@
               "type": "string",
               "format": "uuid",
               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-            }
+            },
+            "description": "Category UUIDs to apply"
           },
           "budgetLimit": {
             "type": "number",
-            "exclusiveMinimum": 0
+            "exclusiveMinimum": 0,
+            "description": "Monthly limit for the category"
           },
           "month": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 12
+            "maximum": 12,
+            "description": "Month 1–12, or null for a whole-year budget"
           },
           "year": {
             "anyOf": [
@@ -4776,7 +4918,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Calendar year"
           }
         },
         "required": [
@@ -4794,16 +4937,19 @@
               "type": "string",
               "format": "uuid",
               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-            }
+            },
+            "description": "Category UUIDs to apply"
           },
           "budgetLimit": {
             "type": "number",
-            "exclusiveMinimum": 0
+            "exclusiveMinimum": 0,
+            "description": "Monthly limit for the category"
           },
           "month": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 12
+            "maximum": 12,
+            "description": "Month 1–12, or null for a whole-year budget"
           },
           "year": {
             "anyOf": [
@@ -4815,7 +4961,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Calendar year"
           }
         }
       },
@@ -4825,22 +4972,26 @@
           "name": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 50
+            "maxLength": 50,
+            "description": "Display name"
           },
           "icon": {
             "type": "string",
-            "maxLength": 50
+            "maxLength": 50,
+            "description": "Emoji or icon key"
           },
           "color": {
             "type": "string",
-            "maxLength": 20
+            "maxLength": 20,
+            "description": "Hex color or theme color key"
           },
           "type": {
             "type": "string",
             "enum": [
               "INCOME",
               "EXPENSE"
-            ]
+            ],
+            "description": "INCOME or EXPENSE"
           }
         },
         "required": [
@@ -4854,22 +5005,26 @@
           "name": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 50
+            "maxLength": 50,
+            "description": "Display name"
           },
           "icon": {
             "type": "string",
-            "maxLength": 50
+            "maxLength": 50,
+            "description": "Emoji or icon key"
           },
           "color": {
             "type": "string",
-            "maxLength": 20
+            "maxLength": 20,
+            "description": "Hex color or theme color key"
           },
           "type": {
             "type": "string",
             "enum": [
               "INCOME",
               "EXPENSE"
-            ]
+            ],
+            "description": "INCOME or EXPENSE"
           }
         }
       },
@@ -4879,20 +5034,24 @@
           "title": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 100
+            "maxLength": 100,
+            "description": "Goal name"
           },
           "targetAmount": {
             "type": "number",
-            "exclusiveMinimum": 0
+            "exclusiveMinimum": 0,
+            "description": "Amount to save"
           },
           "savedAmount": {
             "default": 0,
             "type": "number",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Amount saved so far"
           },
           "deadline": {
             "type": "string",
-            "format": "date"
+            "format": "date",
+            "description": "Target date (YYYY-MM-DD), if any"
           }
         },
         "required": [
@@ -4906,22 +5065,27 @@
           "title": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 100
+            "maxLength": 100,
+            "description": "Goal name"
           },
           "targetAmount": {
             "type": "number",
-            "exclusiveMinimum": 0
+            "exclusiveMinimum": 0,
+            "description": "Amount to save"
           },
           "savedAmount": {
             "type": "number",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Amount saved so far"
           },
           "deadline": {
             "type": "string",
-            "format": "date"
+            "format": "date",
+            "description": "Target date (YYYY-MM-DD), if any"
           },
           "updatedBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Profile UUID of the last editor, if any"
           }
         }
       },
@@ -4931,11 +5095,13 @@
           "merchant": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 100
+            "maxLength": 100,
+            "description": "Service or merchant name"
           },
           "amount": {
             "type": "number",
-            "exclusiveMinimum": 0
+            "exclusiveMinimum": 0,
+            "description": "Decimal amount (user's currency)"
           },
           "billingCycle": {
             "type": "string",
@@ -4945,15 +5111,18 @@
               "MONTHLY",
               "QUARTERLY",
               "YEARLY"
-            ]
+            ],
+            "description": "How often the subscription renews"
           },
           "nextPayment": {
             "type": "string",
-            "format": "date"
+            "format": "date",
+            "description": "Next charge date (YYYY-MM-DD)"
           },
           "active": {
             "default": true,
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the subscription is currently active"
           }
         },
         "required": [
@@ -4968,11 +5137,13 @@
           "merchant": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 100
+            "maxLength": 100,
+            "description": "Service or merchant name"
           },
           "amount": {
             "type": "number",
-            "exclusiveMinimum": 0
+            "exclusiveMinimum": 0,
+            "description": "Decimal amount (user's currency)"
           },
           "billingCycle": {
             "type": "string",
@@ -4982,14 +5153,17 @@
               "MONTHLY",
               "QUARTERLY",
               "YEARLY"
-            ]
+            ],
+            "description": "How often the subscription renews"
           },
           "nextPayment": {
             "type": "string",
-            "format": "date"
+            "format": "date",
+            "description": "Next charge date (YYYY-MM-DD)"
           },
           "active": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the subscription is currently active"
           }
         }
       },
@@ -5003,12 +5177,14 @@
               "goal",
               "budget",
               "subscription"
-            ]
+            ],
+            "description": "Kind of entity the comment belongs to"
           },
           "entityId": {
             "type": "string",
             "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Entity the comment belongs to"
           },
           "parentId": {
             "anyOf": [
@@ -5020,12 +5196,14 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Parent comment UUID for replies"
           },
           "content": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 1000
+            "maxLength": 1000,
+            "description": "Comment body"
           }
         },
         "required": [
@@ -5040,7 +5218,8 @@
           "content": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 1000
+            "maxLength": 1000,
+            "description": "Comment body"
           }
         },
         "required": [
@@ -5053,7 +5232,8 @@
           "name": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 100
+            "maxLength": 100,
+            "description": "Display name"
           },
           "avatarUrl": {
             "anyOf": [
@@ -5064,26 +5244,31 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Public URL of the profile avatar"
           },
           "currency": {
             "type": "string",
             "minLength": 3,
-            "maxLength": 8
+            "maxLength": 8,
+            "description": "ISO 4217 currency code (e.g. EUR, USD)"
           },
           "locale": {
             "type": "string",
             "minLength": 2,
-            "maxLength": 10
+            "maxLength": 10,
+            "description": "BCP 47 language tag (e.g. en, es)"
           },
           "showLanguageSelector": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether to show the in-app language switcher"
           },
           "dashboardCards": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Ordered dashboard card keys"
           }
         }
       },
@@ -5099,7 +5284,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "CSS color for the primary theme"
           },
           "secondaryColor": {
             "anyOf": [
@@ -5110,7 +5296,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "CSS color for the secondary theme"
           },
           "accentColor": {
             "anyOf": [
@@ -5121,7 +5308,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "CSS color used for accents"
           }
         }
       }
