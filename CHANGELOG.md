@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.9](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.8...flowy-v0.1.9) (2026-08-10)
+
+
+### Features
+
+* pick language and currency at sign-up ([#60](https://github.com/GabrielCrackPro/flowy/issues/60)) ([d204f61](https://github.com/GabrielCrackPro/flowy/commit/d204f61082c348a93e804b021f6466fa121d7f74)), closes [#9](https://github.com/GabrielCrackPro/flowy/issues/9)
+
 ## [0.1.8](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.7...flowy-v0.1.8) (2026-08-10)
 
 
