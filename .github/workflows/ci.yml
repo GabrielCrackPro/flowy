@@ -238,3 +238,12 @@ jobs:
           else
             echo "PR type '$TYPE' does not require an issue link."
           fi
+
+      - name: Push trigger paths in sync with code-change regex
+        # The push-trigger `paths` filter (on.push) must mirror the "Detect
+        # code changes" regex in the quality job — if they drift, a code
+        # merge could silently skip the push re-verification. The check
+        # derives both sides from the workflow file and fails on any mismatch
+        # (extensions, root config files, prisma/). Bot PRs are not exempt:
+        # a bot that touches ci.yml must keep it consistent too.
+        run: node scripts/check-ci-trigger-sync.mjs

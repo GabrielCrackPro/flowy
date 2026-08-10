@@ -206,7 +206,7 @@ Five GitHub Actions workflows guard the repo:
 
 | Workflow | What it does |
 | --- | --- |
-| **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` on every PR, and on pushes to `main` only when the merge touched code/config (docs/CI-only merges skip it). Typecheck & build skip on docs/config-only changes (the required check is always reported); a `Branch & PR conventions` guardrails job enforces branch naming and issue links; an `API Docs` job regenerates the OpenAPI spec, fails on drift, and lints it with Redocly |
+| **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` on every PR, and on pushes to `main` only when the merge touched code/config (docs/CI-only merges skip it). Typecheck & build skip on docs/config-only changes (the required check is always reported); a `Branch & PR conventions` guardrails job enforces branch naming, issue links, and keeps the push-trigger paths in sync with the code-change regex; an `API Docs` job regenerates the OpenAPI spec, fails on drift, and lints it with Redocly |
 | **Commit conventions** | PR titles and commit messages match conventional commits |
 | **Release** | Release-please auto-generates the changelog + GitHub releases from conventional commits — **only `feat`/`fix`/`perf` (and breaking changes) trigger a release**; docs/CI work rides along silently |
 | **Manual Deploy** (`deploy-manual.yml`) | Triggered from the Actions tab (`workflow_dispatch`): deploy any ref to `production` or `preview`, with a post-deploy health check. Production runs in the protected `deploy-production` environment (needs your approval; `main` only) |
