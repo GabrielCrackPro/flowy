@@ -281,6 +281,35 @@ export type AppTranslationMessages = {
     showLess: string;
     viewFull: string;
   };
+  insights: {
+    title: string;
+    description: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    spendingMoreThanEarning: string;
+    spendingMoreThanEarningDesc: string;
+    lowSavingsRate: string;
+    lowSavingsRateDesc: string;
+    goodSavingsRate: string;
+    goodSavingsRateDesc: string;
+    budgetExceeded: string;
+    budgetExceededDesc: string;
+    budgetNearLimit: string;
+    budgetNearLimitDesc: string;
+    expensesUp: string;
+    expensesUpDesc: string;
+    expensesDown: string;
+    expensesDownDesc: string;
+    incomeUp: string;
+    incomeUpDesc: string;
+    incomeDown: string;
+    incomeDownDesc: string;
+    topCategory: string;
+    topCategoryDesc: string;
+    subscriptionTotal: string;
+    subscriptionTotalDesc: string;
+    unknownCategory: string;
+  };
   header: {
     home: string;
     profile: string;

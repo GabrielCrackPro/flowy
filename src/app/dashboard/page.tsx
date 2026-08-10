@@ -7,6 +7,7 @@ import {
   DashboardHeader,
   DistributionCard,
   GoalProgressCard,
+  InsightsCard,
   MonthPicker,
   RecentTransactionsCard,
   SubscriptionCardList,
@@ -119,6 +120,7 @@ export default function DashboardPage() {
     setYear(y);
   }, []);
 
+  const showInsights = isCardEnabled("insights");
   const showStats = isCardEnabled("stats");
   const showCashFlow = isCardEnabled("cashFlow");
   const showExpenseDistribution = isCardEnabled("expenseDistribution");
@@ -160,6 +162,11 @@ export default function DashboardPage() {
         {showStats && (
           <ErrorBoundary>
             <StatsCardGroup month={month} year={year} />
+          </ErrorBoundary>
+        )}
+        {showInsights && (
+          <ErrorBoundary>
+            <InsightsCard month={month} year={year} />
           </ErrorBoundary>
         )}
       </section>

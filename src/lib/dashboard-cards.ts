@@ -1,5 +1,6 @@
 export const DASHBOARD_CARD_IDS = [
   "stats",
+  "insights",
   "cashFlow",
   "expenseDistribution",
   "distribution",
@@ -30,7 +31,7 @@ export const DASHBOARD_CARD_GROUPS: ReadonlyArray<{
   {
     id: "summary",
     labelKey: "dashboard.cards.groups.summary",
-    cards: ["stats"],
+    cards: ["stats", "insights"],
   },
   {
     id: "charts",

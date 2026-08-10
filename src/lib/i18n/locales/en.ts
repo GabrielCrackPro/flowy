@@ -295,6 +295,47 @@ export const app: AppTranslationMessages = {
     showLess: "Show less",
     viewFull: "View full changelog",
   },
+  insights: {
+    title: "Insights",
+    description: "Smart observations about your finances this month",
+    emptyTitle: "Not enough data yet",
+    emptyDescription:
+      "Add a few transactions to start seeing personalized insights about your spending patterns.",
+    spendingMoreThanEarning: "Spending more than you earn",
+    spendingMoreThanEarningDesc:
+      "Your expenses exceed your income by {{amount}} this month. Review your budgets and subscriptions.",
+    lowSavingsRate: "Low savings rate",
+    lowSavingsRateDesc:
+      "You're saving {{rate}} of your income. Try to reach at least {{target}} by reducing non-essential spending.",
+    goodSavingsRate: "Healthy savings rate",
+    goodSavingsRateDesc:
+      "You're saving {{rate}} of your income. Keep up the good work!",
+    budgetExceeded: "Budget exceeded: {{category}}",
+    budgetExceededDesc:
+      "You've gone {{overspent}} over your {{category}} budget. Consider adjusting the limit or reducing spending.",
+    budgetNearLimit: "Budget almost at its limit: {{category}}",
+    budgetNearLimitDesc:
+      "You've used {{pct}} of your {{category}} budget with {{remaining}} left. Spend wisely.",
+    expensesUp: "Expenses on the rise",
+    expensesUpDesc:
+      "Your expenses are up {{pct}} compared to last month ({{amount}} more). Check what's driving the increase.",
+    expensesDown: "Expenses are down",
+    expensesDownDesc:
+      "Your expenses decreased {{pct}} compared to last month ({{amount}} less). Great progress!",
+    incomeUp: "Income is up",
+    incomeUpDesc:
+      "Your income increased {{pct}} compared to last month (+{{amount}}). Nice!",
+    incomeDown: "Income is down",
+    incomeDownDesc:
+      "Your income decreased {{pct}} compared to last month (-{{amount}}). Consider boosting your income streams.",
+    topCategory: "Top spending category",
+    topCategoryDesc:
+      "{{category}} accounts for {{pct}} of your spending ({{amount}}). Check if this aligns with your priorities.",
+    subscriptionTotal: "Recurring subscriptions",
+    subscriptionTotalDesc:
+      "Your subscriptions total {{total}} per month across {{count}} services ({{pct}} of income).",
+    unknownCategory: "Unknown",
+  },
   header: {
     home: "Home",
     profile: "Profile",
