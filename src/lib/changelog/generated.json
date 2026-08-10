@@ -2,6 +2,18 @@
   "currentVersion": "0.1.17",
   "entries": [
     {
+      "version": "0.1.17",
+      "date": "2026-08-10",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            "add rule-based spending insights to the dashboard (#103)"
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.16",
       "date": "2026-08-10",
       "sections": [
