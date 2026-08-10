@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.13](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.12...flowy-v0.1.13) (2026-08-10)
+
+
+### Features
+
+* complete API schema docs and match docs theme to the app ([#72](https://github.com/GabrielCrackPro/flowy/issues/72)) ([3b4bccd](https://github.com/GabrielCrackPro/flowy/commit/3b4bccd0e7c5ecd89681d86ee3f43a05d8d57ec0)), closes [#71](https://github.com/GabrielCrackPro/flowy/issues/71)
+
 ## [0.1.12](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.11...flowy-v0.1.12) (2026-08-10)
 
 
