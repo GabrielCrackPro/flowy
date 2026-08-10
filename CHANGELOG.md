@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.9...flowy-v0.1.10) (2026-08-10)
+
+
+### Features
+
+* add generated OpenAPI docs with Scalar viewer ([#63](https://github.com/GabrielCrackPro/flowy/issues/63)) ([b66bac0](https://github.com/GabrielCrackPro/flowy/commit/b66bac079893cd818147ca471c251fd0994d04a6)), closes [#1](https://github.com/GabrielCrackPro/flowy/issues/1)
+
 ## [0.1.9](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.8...flowy-v0.1.9) (2026-08-10)
 
 
