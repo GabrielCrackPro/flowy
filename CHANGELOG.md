@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.16](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.15...flowy-v0.1.16) (2026-08-10)
+
+
+### Features
+
+* seed default categories on signup ([#99](https://github.com/GabrielCrackPro/flowy/issues/99)) ([41aa185](https://github.com/GabrielCrackPro/flowy/commit/41aa1850c0492e25bfeac2c0bda682e0271a3eda))
+
+
+### Bug Fixes
+
+* remove misleading AI claims from landing page and dashboard ([#101](https://github.com/GabrielCrackPro/flowy/issues/101)) ([ccaa8ce](https://github.com/GabrielCrackPro/flowy/commit/ccaa8ce8c740131d5c9f86ea81250f513f4f2da1))
+
 ## [0.1.15](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.14...flowy-v0.1.15) (2026-08-10)
 
 
