@@ -833,6 +833,11 @@ const schemas: Record<string, Json> = {
         type: ["string", "null"],
         description: "CSS color used for accents",
       },
+      categoriesSeeded: {
+        type: "boolean",
+        description:
+          "Whether default categories have been seeded for this user",
+      },
       createdAt: {
         type: "string",
         format: "date-time",
