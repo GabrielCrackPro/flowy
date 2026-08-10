@@ -29,6 +29,7 @@ Track income and expenses, plan budgets, save toward goals, and keep an eye on r
 - [Quick Start](#-quick-start)
 - [Project Structure](#-project-structure)
 - [Scripts](#-scripts)
+- [API Reference](#-api-reference)
 - [Environment Variables](#-environment-variables)
 - [Deployment](#-deployment)
 - [Contributing](#-contributing)
@@ -153,8 +154,21 @@ supabase/migrations  SQL migrations (RLS, triggers, realtime, indexes)
 | `pnpm lint` | Run Biome checks on the whole repo |
 | `pnpm format` | Auto-format all files with Biome |
 | `pnpm typecheck` | Run `tsc --noEmit` |
+| `pnpm generate:openapi` | Regenerate `public/openapi.json` from the route surface and Zod schemas |
+| `pnpm lint:openapi` | Lint the OpenAPI spec with Redocly |
+| `pnpm check:openapi-routes` | Fail if a route handler is undocumented (or a spec route no longer exists) |
+| `pnpm check:openapi` | Full spec check: regenerate → drift diff → Redocly lint → route guard |
 | `pnpm db:generate` | Regenerate the Prisma client |
 | `pnpm prisma` | Run any Prisma CLI command |
+
+## 📡 API Reference
+
+Flowy ships an **OpenAPI 3.1** specification for its whole REST surface (53 operations across transactions, budgets, goals, subscriptions, categories, comments, activity, spaces, dashboard, stats, search, profile, notifications, push, uploads, account, cron and health).
+
+- **Interactive docs:** open **`/api/docs`** in the running app — a Scalar-powered reference with "try it" support. The page is public, so it can be shared.
+- **Raw spec:** [`public/openapi.json`](public/openapi.json) — machine-readable and consumed by Scalar.
+- **Generated from code:** request-body schemas are derived from the Zod schemas in `src/lib/schemas` (`pnpm generate:openapi`), and the CI `api-docs` job regenerates the spec, fails on drift, lints it with Redocly, and verifies every route handler is documented — so the docs can't rot.
+- **Auth:** send your Supabase session cookies or `Authorization: Bearer <access_token>`. **Rate limits** are per-route (see the `x-flowy-rate-limit` extension). Errors follow the `Error` schema with a `category` from `src/lib/errors/error-types.ts`.
 
 ## 🔐 Environment Variables
 
@@ -192,7 +206,7 @@ Five GitHub Actions workflows guard the repo:
 
 | Workflow | What it does |
 | --- | --- |
-| **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` on every PR and push to `main`. Typecheck & build skip on docs/config-only changes (the required check is always reported); a `Branch & PR conventions` guardrails job enforces branch naming and issue links |
+| **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` on every PR and push to `main`. Typecheck & build skip on docs/config-only changes (the required check is always reported); a `Branch & PR conventions` guardrails job enforces branch naming and issue links; an `API Docs` job regenerates the OpenAPI spec, fails on drift, and lints it with Redocly |
 | **Commit conventions** | PR titles and commit messages match conventional commits |
 | **Release** | Release-please auto-generates the changelog + GitHub releases from conventional commits — **only `feat`/`fix`/`perf` (and breaking changes) trigger a release**; docs/CI work rides along silently |
 | **Manual Deploy** (`deploy-manual.yml`) | Triggered from the Actions tab (`workflow_dispatch`): deploy any ref to `production` or `preview`, with a post-deploy health check. Production runs in the protected `deploy-production` environment (needs your approval; `main` only) |
