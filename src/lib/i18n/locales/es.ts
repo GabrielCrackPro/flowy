@@ -300,6 +300,47 @@ export const app: AppTranslationMessages = {
     showLess: "Mostrar menos",
     viewFull: "Ver historial completo",
   },
+  insights: {
+    title: "Perspectivas",
+    description: "Observaciones inteligentes sobre tus finanzas este mes",
+    emptyTitle: "Datos insuficientes",
+    emptyDescription:
+      "Añade algunas transacciones para empezar a ver perspectivas personalizadas sobre tus hábitos de gasto.",
+    spendingMoreThanEarning: "Gastas más de lo que ingresas",
+    spendingMoreThanEarningDesc:
+      "Tus gastos superan tus ingresos en {{amount}} este mes. Revisa tus presupuestos y suscripciones.",
+    lowSavingsRate: "Tasa de ahorro baja",
+    lowSavingsRateDesc:
+      "Estás ahorrando el {{rate}} de tus ingresos. Intenta alcanzar al menos {{target}} reduciendo gastos no esenciales.",
+    goodSavingsRate: "Buena tasa de ahorro",
+    goodSavingsRateDesc:
+      "Estás ahorrando el {{rate}} de tus ingresos. ¡Sigue así!",
+    budgetExceeded: "Presupuesto superado: {{category}}",
+    budgetExceededDesc:
+      "Te has pasado por {{overspent}} de tu presupuesto de {{category}}. Considera ajustar el límite o reducir gastos.",
+    budgetNearLimit: "Presupuesto casi al límite: {{category}}",
+    budgetNearLimitDesc:
+      "Has usado el {{pct}} de tu presupuesto de {{category}} con {{remaining}} restantes. Gasta con cuidado.",
+    expensesUp: "Gastos al alza",
+    expensesUpDesc:
+      "Tus gastos subieron un {{pct}} respecto al mes pasado ({{amount}} más). Revisa qué está impulsando el aumento.",
+    expensesDown: "Gastos a la baja",
+    expensesDownDesc:
+      "Tus gastos bajaron un {{pct}} respecto al mes pasado ({{amount}} menos). ¡Buen progreso!",
+    incomeUp: "Ingresos al alza",
+    incomeUpDesc:
+      "Tus ingresos aumentaron un {{pct}} respecto al mes pasado (+{{amount}}). ¡Bien!",
+    incomeDown: "Ingresos a la baja",
+    incomeDownDesc:
+      "Tus ingresos bajaron un {{pct}} respecto al mes pasado (-{{amount}}). Considera aumentar tus fuentes de ingresos.",
+    topCategory: "Categoría con más gasto",
+    topCategoryDesc:
+      "{{category}} representa el {{pct}} de tus gastos ({{amount}}). Verifica si esto se alinea con tus prioridades.",
+    subscriptionTotal: "Suscripciones recurrentes",
+    subscriptionTotalDesc:
+      "Tus suscripciones suman {{total}} al mes en {{count}} servicios ({{pct}} de tus ingresos).",
+    unknownCategory: "Desconocida",
+  },
   header: {
     home: "Inicio",
     profile: "Perfil",

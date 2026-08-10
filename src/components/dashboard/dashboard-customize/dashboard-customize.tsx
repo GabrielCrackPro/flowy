@@ -20,6 +20,7 @@ import {
   ChartPie,
   Info,
   LayoutGrid,
+  Lightbulb,
   Loader2,
   Receipt,
   Repeat2,
@@ -31,6 +32,7 @@ import { cn } from "@/lib/utils";
 
 const CARD_LABEL_KEYS: Record<DashboardCardId, string> = {
   stats: "dashboard.cards.stats",
+  insights: "insights.title",
   cashFlow: "dashboard.cards.cashFlow",
   expenseDistribution: "dashboard.cards.expenseDistribution",
   distribution: "dashboard.cards.distribution",
@@ -43,6 +45,7 @@ const CARD_LABEL_KEYS: Record<DashboardCardId, string> = {
 
 const CARD_ICONS: Record<DashboardCardId, IconProps["icon"]> = {
   stats: BarChart3,
+  insights: Lightbulb,
   cashFlow: ChartLine,
   expenseDistribution: ChartPie,
   distribution: ChartArea,
