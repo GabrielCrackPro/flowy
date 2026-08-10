@@ -8,24 +8,35 @@
 
 Track income and expenses, plan budgets, save toward goals, and keep an eye on recurring subscriptions — alone or in shared spaces with the people you trust. Works offline, syncs in realtime, speaks Spanish and English.
 
-[![Next.js](https://img.shields.io/badge/Next.js%2016-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
-[![React](https://img.shields.io/badge/React%2019-61DAFB?logo=react&logoColor=black)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com)
-[![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io)
-[![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS%204-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![PWA](https://img.shields.io/badge/PWA-5A0FC8?logo=pwa&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
-[![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20ES-4285F4?logo=googletranslate&logoColor=white)](src/lib/i18n)
+[![Release](https://img.shields.io/github/v/release/GabrielCrackPro/flowy?label=release&logo=semver)](https://github.com/GabrielCrackPro/flowy/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/GabrielCrackPro/flowy/ci.yml?label=CI&logo=github)](.github/workflows/ci.yml)
-[![Vercel Production](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Production?label=vercel%20production&logo=vercel)](https://flowy-jade.vercel.app)
-[![Vercel Preview](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Preview?label=vercel%20preview&logo=vercel)](https://github.com/GabrielCrackPro/flowy/deployments)
+[![Production](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Production?label=production&logo=vercel)](https://flowy-jade.vercel.app)
+[![Preview](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Preview?label=preview&logo=vercel)](https://github.com/GabrielCrackPro/flowy/deployments)
+[![License](https://img.shields.io/github/license/GabrielCrackPro/flowy?label=license)](LICENSE)
+
+**Try it live → [flowy-jade.vercel.app](https://flowy-jade.vercel.app)**
 
 </div>
 
 ---
 
-## ✨ Highlights
+## Table of Contents
+
+- [Features](#-features)
+- [Screenshots](#-screenshots)
+- [Tech Stack](#-tech-stack)
+- [Quick Start](#-quick-start)
+- [Project Structure](#-project-structure)
+- [Scripts](#-scripts)
+- [Environment Variables](#-environment-variables)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [FAQ](#-faq)
+- [License](#-license)
+
+---
+
+## ✨ Features
 
 | 💸 **Transactions** | 🎯 **Budgets** | 🏆 **Goals** |
 | :--- | :--- | :--- |
@@ -164,26 +175,30 @@ The project deploys on **Vercel**. `vercel.json` pins the build command, the reg
 
 ▶️ **Manual deploy:** if a deploy was skipped (`[skip deploy]`) or failed, run the **Manual Deploy** workflow from the Actions tab — pick `production` or `preview` and a ref (branch/tag/SHA) to force it. Uses the `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` secrets. **Production manual deploys require your approval** — they run in the protected `deploy-production` environment (required reviewer + `main`-only branch policy), kept separate from Vercel's own `Production` environment so auto-deploys are never blocked.
 
-### CI
+### CI & Automation
 
-Four GitHub Actions workflows guard the repo:
+Five GitHub Actions workflows guard the repo:
 
 | Workflow | What it does |
 | --- | --- |
-| **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` plus a `Branch & PR conventions` guardrails job (branch naming, issue links, bot-exempt) on every PR and push to `main` |
+| **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` on every PR and push to `main`. Typecheck & build skip on docs/config-only changes (the required check is always reported); a `Branch & PR conventions` guardrails job enforces branch naming and issue links |
 | **Commit conventions** | PR titles and commit messages match conventional commits |
-| **Release** | Release-please auto-generates the changelog + GitHub releases from conventional commits |
+| **Release** | Release-please auto-generates the changelog + GitHub releases from conventional commits — **only `feat`/`fix`/`perf` (and breaking changes) trigger a release**; docs/CI work rides along silently |
 | **Manual Deploy** (`deploy-manual.yml`) | Triggered from the Actions tab (`workflow_dispatch`): deploy any ref to `production` or `preview`, with a post-deploy health check. Production runs in the protected `deploy-production` environment (needs your approval; `main` only) |
+| **Update Board on Merge** (`board-update.yml`) | Moves issues referenced with `Closes/Fixes/Resolves #N` to Done on the Flowy board |
 
-To make these required before merging, enable branch protection on `main` and mark them as required status checks.
+`main` is protected by the **"Block main"** ruleset: pull requests required, codeowner review, no force-push/deletion, and the `Lint, Typecheck & Build` status check must pass before merge.
 
-## 🧑‍💻 Contributing
+## 🤝 Contributing
 
-- **Commits** must follow [conventional commits](https://www.conventionalcommits.org) (`feat:`, `fix(scope):`, ...) — enforced by the local `commit-msg` hook and CI. For docs-only changes, `git commit --no-verify` skips the pre-commit checks.
-- **Quality gates**: pre-commit runs Biome (lint-staged) and typecheck when the commit touches TypeScript; CI runs lint, typecheck, and build on every PR. All must pass.
+Flowy is a solo project developed in spare time, but contributions are welcome — the workflow is small and fast:
+
+- **Branches, not `main`:** every change ships as a pull request. Create a `<type>/<kebab-slug>` branch, commit with a conventional message, push, and open a PR — never commit to `main` directly.
+- **Commits** must follow [conventional commits](https://www.conventionalcommits.org) (`feat:`, `fix(scope):`, ...) — enforced by the local `commit-msg` hook and CI. Docs-only changes should carry `[skip deploy]`.
+- **Quality gates**: pre-commit runs Biome (lint-staged) and typecheck when the commit touches TypeScript; CI runs lint, typecheck, and build on every PR. All must pass before merge.
 - **Schema changes** ship as both a numbered SQL migration in `supabase/migrations/` and the matching Prisma schema update.
 - **User-facing strings** must be added to both `src/lib/i18n/locales/en.ts` and `es.ts`.
-- **Issues & board**: see [AGENTS.md](AGENTS.md) — AI agents in this repo use the `github-issues` skill to create issues and the `github-project-board` skill to triage the Flowy board.
+- **AI-assisted development:** see [AGENTS.md](AGENTS.md) for the working strategy and conventions — it also documents the `github-issues` and `github-project-board` skills used to manage the Flowy board.
 
 ## ❓ FAQ
 
@@ -192,3 +207,7 @@ Yes — it's a standard Next.js build and runs on any Node.js host that provides
 
 **Do I need the service role key in the browser?**
 No. `SUPABASE_SERVICE_ROLE_KEY` is server-only. The browser uses `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and row-level security in `supabase/migrations/002_rls.sql` restricts what signed-in users can read and write.
+
+## 📄 License
+
+Flowy is released under the [MIT License](LICENSE). © 2026 Gabriel Vargas.
