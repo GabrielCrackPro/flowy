@@ -8,12 +8,12 @@
 
 Track income and expenses, plan budgets, save toward goals, and keep an eye on recurring subscriptions — alone or in shared spaces with the people you trust. Works offline, syncs in realtime, speaks Spanish and English.
 
-[![Release](https://img.shields.io/github/v/release/GabrielCrackPro/flowy?style=flat-square&label=release&color=3b82f6&labelColor=1e3a8a&logo=semver&logoColor=white)](https://github.com/GabrielCrackPro/flowy/releases)
-[![Build](https://img.shields.io/github/actions/workflow/status/GabrielCrackPro/flowy/ci.yml?style=flat-square&label=build&labelColor=1e3a8a&logo=github&logoColor=white)](.github/workflows/ci.yml)
-[![Production](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Production?style=flat-square&label=production&labelColor=1e3a8a&logo=vercel&logoColor=white)](https://flowy-jade.vercel.app)
-[![Preview](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Preview?style=flat-square&label=preview&labelColor=1e3a8a&logo=vercel&logoColor=white)](https://github.com/GabrielCrackPro/flowy/deployments)
-[![Last commit](https://img.shields.io/github/last-commit/GabrielCrackPro/flowy?style=flat-square&label=last%20commit&color=3b82f6&labelColor=1e3a8a&logo=git&logoColor=white)](https://github.com/GabrielCrackPro/flowy/commits/main)
-[![License](https://img.shields.io/github/license/GabrielCrackPro/flowy?style=flat-square&label=license&color=3b82f6&labelColor=1e3a8a)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/GabrielCrackPro/flowy?style=flat-square&labelColor=24292f&logo=semver&logoColor=white)](https://github.com/GabrielCrackPro/flowy/releases)
+[![Build](https://github.com/GabrielCrackPro/flowy/actions/workflows/ci.yml/badge.svg?branch=main)](.github/workflows/ci.yml)
+[![Production](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Production?style=flat-square&label=production&labelColor=24292f&logo=vercel&logoColor=white)](https://flowy-jade.vercel.app)
+[![Preview](https://img.shields.io/github/deployments/GabrielCrackPro/flowy/Preview?style=flat-square&label=preview&labelColor=24292f&logo=vercel&logoColor=white)](https://github.com/GabrielCrackPro/flowy/deployments)
+[![Last commit](https://img.shields.io/github/last-commit/GabrielCrackPro/flowy?style=flat-square&labelColor=24292f&logo=git&logoColor=white)](https://github.com/GabrielCrackPro/flowy/commits/main)
+[![License](https://img.shields.io/github/license/GabrielCrackPro/flowy?style=flat-square&labelColor=24292f)](LICENSE)
 
 **Try it live → [flowy-jade.vercel.app](https://flowy-jade.vercel.app)**
 
