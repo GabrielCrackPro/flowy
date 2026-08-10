@@ -197,7 +197,6 @@ export const TransactionService = {
   },
 
   async create(userId: string, data: CreateTransactionInput) {
-    console.log("TransactionService.create called with data:", data);
     if (data.categoryIds?.length) {
       for (const categoryId of data.categoryIds) {
         await ensureUserCategory(userId, categoryId);
