@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.14](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.13...flowy-v0.1.14) (2026-08-10)
+
+
+### Features
+
+* add an in-app changelog (What is new) ([#75](https://github.com/GabrielCrackPro/flowy/issues/75)) ([4512c09](https://github.com/GabrielCrackPro/flowy/commit/4512c09aaad85f51bb7e2bb2ae4a980b749ae855))
+
 ## [0.1.13](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.12...flowy-v0.1.13) (2026-08-10)
 
 
