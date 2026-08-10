@@ -2,6 +2,18 @@
   "currentVersion": "0.1.15",
   "entries": [
     {
+      "version": "0.1.15",
+      "date": "2026-08-10",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            "show pending state and feedback for CSV/PDF exports (#82)"
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.14",
       "date": "2026-08-10",
       "sections": [
