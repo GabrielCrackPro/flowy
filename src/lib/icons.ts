@@ -139,6 +139,7 @@ export {
   Watch,
   Wifi,
   WifiOff,
+  Wrench,
   X,
   XCircle,
   XIcon,

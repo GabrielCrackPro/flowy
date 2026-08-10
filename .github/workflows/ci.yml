@@ -131,6 +131,27 @@ jobs:
       - name: Route inventory drift guard
         run: pnpm check:openapi-routes
 
+  changelog:
+    # Keeps the in-app changelog data (src/lib/changelog/generated.json)
+    # truthful: regenerates it from CHANGELOG.md and fails if the committed
+    # file drifts. Pure Node — no dependency install needed.
+    name: Changelog (drift guard)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Regenerate changelog data from CHANGELOG.md
+        run: node scripts/generate-changelog.mjs
+
+      - name: Data must be committed (no drift)
+        run: |
+          if ! git diff --exit-code -- src/lib/changelog/generated.json; then
+            echo "::error::src/lib/changelog/generated.json is out of date — run 'pnpm generate:changelog' and commit the result."
+            exit 1
+          fi
+
   guardrails:
     name: 🛡️ Branch & PR conventions
     runs-on: ubuntu-latest
