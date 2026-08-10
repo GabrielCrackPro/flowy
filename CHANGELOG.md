@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.11](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.10...flowy-v0.1.11) (2026-08-10)
+
+
+### Bug Fixes
+
+* harden API docs page against spec load failures ([#66](https://github.com/GabrielCrackPro/flowy/issues/66)) ([d792dac](https://github.com/GabrielCrackPro/flowy/commit/d792dac8d4aa792447291c725ee31eb8713b3105))
+
 ## [0.1.10](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.9...flowy-v0.1.10) (2026-08-10)
 
 
