@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CURRENCIES, LOCALES } from "@/lib/preferences";
 
 type Translate = (key: string) => string;
 
@@ -22,6 +23,10 @@ export function createRegisterSchema(t: Translate) {
       confirmPassword: z
         .string()
         .nonempty(t("validation.confirmPasswordRequired")),
+      locale: z.enum(LOCALES, { message: t("validation.localeRequired") }),
+      currency: z.enum(CURRENCIES, {
+        message: t("validation.currencyRequired"),
+      }),
       acceptedTerms: z.boolean().refine((value) => value, {
         message: t("validation.acceptTermsRequired"),
       }),

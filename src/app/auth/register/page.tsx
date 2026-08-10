@@ -1,6 +1,14 @@
 "use client";
 
-import { Button, Input } from "@components/ui";
+import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@components/ui";
 import {
   Form,
   FormAlert,
@@ -16,9 +24,11 @@ import { createRegisterSchema } from "@lib/schemas";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared";
+import { updateProfile } from "@/lib/api/profile";
+import { getLocaleCookie, getLocaleStorage, normalizeLocale } from "@/lib/i18n";
 import {
   ArrowRight,
   Eye,
@@ -28,6 +38,13 @@ import {
   Mail,
   User,
 } from "@/lib/icons";
+import {
+  CURRENCIES,
+  currencyName,
+  detectCurrency,
+  LOCALES,
+  languageName,
+} from "@/lib/preferences";
 import { signUpWithEmail } from "@/lib/supabase";
 
 export default function RegisterPage() {
@@ -51,6 +68,10 @@ export default function RegisterPage() {
       email: "",
       password: "",
       confirmPassword: "",
+      // Server-stable defaults; the real detected values are applied after
+      // mount (see below) so the initial HTML and client render match.
+      locale: "es",
+      currency: "USD",
       acceptedTerms: false,
     },
     schema: registerSchema,
@@ -59,6 +80,7 @@ export default function RegisterPage() {
         values.email,
         values.password,
         values.fullName,
+        { currency: values.currency, locale: values.locale },
       );
 
       if (error) {
@@ -66,7 +88,18 @@ export default function RegisterPage() {
         return;
       }
 
-      if (data.session) {
+      if (data.session && data.user) {
+        // Belt-and-suspenders: the profile trigger (migration 016) already
+        // copies currency/locale from the auth metadata at signup time, so
+        // this PATCH only matters for databases that haven't applied it yet.
+        try {
+          await updateProfile(data.user.id, {
+            currency: values.currency,
+            locale: values.locale,
+          });
+        } catch {
+          // Ignore — the metadata path still applies.
+        }
         router.replace("/dashboard");
         router.refresh();
         return;
@@ -75,6 +108,26 @@ export default function RegisterPage() {
       form.setStatus(t("register.statusCreated"));
     },
   });
+
+  // Hydration-safe preference detection: runs once after mount, then syncs
+  // the detected language/currency into the form fields.
+  const appliedPreferences = useRef(false);
+  useEffect(() => {
+    if (appliedPreferences.current) return;
+    appliedPreferences.current = true;
+
+    const browserLanguage =
+      typeof navigator !== "undefined" ? navigator.language : "";
+    const storedLocale = getLocaleStorage() ?? getLocaleCookie();
+    form.setFieldValue(
+      "locale",
+      normalizeLocale(storedLocale ?? (browserLanguage || undefined)),
+    );
+    form.setFieldValue(
+      "currency",
+      detectCurrency(browserLanguage || storedLocale || "es"),
+    );
+  }, [form]);
 
   const { form: rhfForm, error, status, busy, handleSubmit } = form;
 
@@ -258,9 +311,111 @@ export default function RegisterPage() {
           </motion.div>
 
           <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.325 }}
+          >
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium text-foreground">
+                {t("register.preferencesTitle")}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("register.preferencesHint")}
+              </p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.375 }}
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <RHFFormField
+                name="locale"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>{t("register.localeLabel")}</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={(value) => {
+                          if (value !== null) field.onChange(value);
+                        }}
+                      >
+                        <SelectTrigger
+                          className="h-11 w-full"
+                          aria-label={t("register.localeLabel")}
+                        >
+                          <SelectValue
+                            placeholder={form.values.locale}
+                            options={LOCALES.map((locale) => ({
+                              value: locale,
+                              label: languageName(locale, form.values.locale),
+                            }))}
+                          />
+                        </SelectTrigger>
+                        <SelectContent className="w-full">
+                          {LOCALES.map((locale) => (
+                            <SelectItem key={locale} value={locale}>
+                              {languageName(locale, form.values.locale)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <RHFFormField
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>
+                      {t("register.currencyLabel")}
+                    </FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={(value) => {
+                          if (value !== null) field.onChange(value);
+                        }}
+                      >
+                        <SelectTrigger
+                          className="h-11 w-full"
+                          aria-label={t("register.currencyLabel")}
+                        >
+                          <SelectValue
+                            placeholder={form.values.currency}
+                            options={CURRENCIES.map((currency) => ({
+                              value: currency,
+                              label: `${currencyName(currency, form.values.locale)} (${currency})`,
+                            }))}
+                          />
+                        </SelectTrigger>
+                        <SelectContent className="w-full">
+                          {CURRENCIES.map((currency) => (
+                            <SelectItem key={currency} value={currency}>
+                              {currencyName(currency, form.values.locale)} (
+                              {currency})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </motion.div>
+
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.35 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
           >
             <RHFFormField
               name="acceptedTerms"

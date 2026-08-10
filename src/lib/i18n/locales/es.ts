@@ -56,6 +56,11 @@ export const auth: AuthTranslationMessages = {
     statusCreated:
       "Cuenta creada. Revisa tu correo para confirmar el inicio de sesión.",
     haveAccountLink: "Inicia sesión",
+    preferencesTitle: "Preferencias",
+    preferencesHint:
+      "Elige cómo te saluda Flowy. Puedes cambiarlo cuando quieras en los ajustes.",
+    localeLabel: "Idioma",
+    currencyLabel: "Moneda",
   },
   validation: {
     emailRequired: "El correo es obligatorio",
@@ -65,6 +70,8 @@ export const auth: AuthTranslationMessages = {
     passwordsMustMatch: "Las contraseñas no coinciden.",
     fullNameRequired: "El nombre completo es obligatorio",
     acceptTermsRequired: "Debes aceptar los términos y condiciones.",
+    localeRequired: "Elige un idioma",
+    currencyRequired: "Elige una moneda",
   },
   forgotPassword: {
     title: "Recupera tu contraseña",

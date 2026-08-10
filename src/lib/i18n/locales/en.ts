@@ -52,6 +52,11 @@ export const auth: AuthTranslationMessages = {
     formDescription: "Fill in the fields to create your account.",
     statusCreated: "Account created. Check your email to confirm sign in.",
     haveAccountLink: "Sign in",
+    preferencesTitle: "Preferences",
+    preferencesHint:
+      "Pick how Flowy greets you. You can change these anytime in Settings.",
+    localeLabel: "Language",
+    currencyLabel: "Currency",
   },
   validation: {
     emailRequired: "Email is required",
@@ -61,6 +66,8 @@ export const auth: AuthTranslationMessages = {
     passwordsMustMatch: "Passwords do not match.",
     fullNameRequired: "Full name is required",
     acceptTermsRequired: "You must accept the terms and conditions.",
+    localeRequired: "Choose a language",
+    currencyRequired: "Choose a currency",
   },
   forgotPassword: {
     title: "Reset your password",
