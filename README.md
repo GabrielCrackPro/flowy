@@ -162,6 +162,8 @@ The project deploys on **Vercel**. `vercel.json` pins the build command, the reg
 
 💡 Commits whose message contains `[skip deploy]` cancel the deployment via Vercel's ignored build step — configured entirely in `vercel.json`, no dashboard setup needed.
 
+▶️ **Manual deploy:** if a deploy was skipped (`[skip deploy]`) or failed, run the **Manual Deploy** workflow from the Actions tab — pick `production` or `preview` and a ref (branch/tag/SHA) to force it. Uses the `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` secrets.
+
 ### CI
 
 Four GitHub Actions workflows guard the repo:
@@ -171,7 +173,7 @@ Four GitHub Actions workflows guard the repo:
 | **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` plus a `Branch & PR conventions` guardrails job (branch naming, issue links, bot-exempt) on every PR and push to `main` |
 | **Commit conventions** | PR titles and commit messages match conventional commits |
 | **Release** | Release-please auto-generates the changelog + GitHub releases from conventional commits |
-| **Deployment monitor** | Reports Vercel deployment status and runs a health check |
+| **Manual Deploy** (`deploy-manual.yml`) | Triggered from the Actions tab (`workflow_dispatch`): deploy any ref to `production` or `preview`, with a post-deploy health check |
 
 To make these required before merging, enable branch protection on `main` and mark them as required status checks.
 

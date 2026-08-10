@@ -1,0 +1,77 @@
+name: Manual Deploy
+run-name: 'Deploy · ${{ inputs.environment }} · ${{ inputs.ref }} · @${{ github.actor }}'
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        type: choice
+        options:
+          - production
+          - preview
+        default: production
+      ref:
+        description: 'Git ref (branch, tag, or SHA) to deploy'
+        type: string
+        default: 'main'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: manual-deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout ${{ inputs.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Deploy to Vercel
+        id: vercel
+        uses: vercel/vercel-action@v3
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: ${{ inputs.environment == 'production' && '--prod' || '' }}
+          github-comment: false
+
+      - name: Health check
+        run: |
+          if [ "${{ inputs.environment }}" == "production" ]; then
+            URL="https://flowy-jade.vercel.app"
+          else
+            URL="${{ steps.vercel.outputs.preview-url }}"
+          fi
+          if [ -z "$URL" ] || [ "$URL" == "null" ]; then
+            echo "::warning::No deployment URL available — skipping health check."
+            exit 0
+          fi
+          echo "Checking $URL ..."
+          for i in 1 2 3 4 5; do
+            if curl -f -s -o /dev/null --max-time 30 "$URL"; then
+              echo "✅ $URL is healthy"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
+          echo "❌ $URL did not become healthy"
+          exit 1
