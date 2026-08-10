@@ -16,13 +16,41 @@ concurrency:
 jobs:
   quality:
     # NOTE: keep this exact job name — the "Block main" ruleset requires the
-    # status check "Lint, Typecheck & Build". Renaming it blocks merges.
+    # status check "Lint, Typecheck & Build". Renaming it blocks merges. The job
+    # always runs (so the required check is always reported); Typecheck/Build are
+    # skipped inside it when a PR contains no code changes (docs/CI/config only).
     name: Lint, Typecheck & Build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Detect code changes
+        id: code
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+          if [ -n "$BASE" ] && git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            CHANGED=$(git diff --name-only "$BASE" "$GITHUB_SHA")
+          else
+            git fetch --no-tags --depth=1 origin "$BASE" 2>/dev/null || true
+            CHANGED=$(git diff --name-only "$BASE" "$GITHUB_SHA" 2>/dev/null || true)
+          fi
+          echo "Changed files:"
+          printf '%s\n' "$CHANGED"
+          if [ -z "$CHANGED" ] || printf '%s\n' "$CHANGED" | grep -qE '(\.(ts|tsx|js|jsx|mjs|cjs|css|prisma)$)|(^prisma/)|(^package\.json$)|(^pnpm-lock\.yaml$)|(^next\.config\.ts$)|(^tailwind\.config\.ts$)|(^postcss\.config\.mjs$)|(^components\.json$)'
+          then
+            echo "code_changed=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Code changes detected — running Typecheck & Build."
+          else
+            echo "code_changed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Docs/config-only change — skipping Typecheck & Build."
+          fi
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -48,9 +76,11 @@ jobs:
         run: pnpm lint
 
       - name: Typecheck
+        if: steps.code.outputs.code_changed == 'true'
         run: pnpm typecheck
 
       - name: Build
+        if: steps.code.outputs.code_changed == 'true'
         run: pnpm build
         env:
           # Dummy values only: the build constructs Prisma and Supabase clients
