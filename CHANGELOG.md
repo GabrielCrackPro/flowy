@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.11...flowy-v0.1.12) (2026-08-10)
+
+
+### Features
+
+* brand the API reference and enrich schema docs ([#69](https://github.com/GabrielCrackPro/flowy/issues/69)) ([c307b93](https://github.com/GabrielCrackPro/flowy/commit/c307b93ada04ac5b8acaea6c31bf500476998073)), closes [#68](https://github.com/GabrielCrackPro/flowy/issues/68)
+
 ## [0.1.11](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.10...flowy-v0.1.11) (2026-08-10)
 
 
