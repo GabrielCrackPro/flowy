@@ -7,6 +7,7 @@ export * from "./dashboard-header";
 export * from "./distribution-card";
 export * from "./goal-progress";
 export * from "./header";
+export * from "./insights-card";
 export * from "./month-picker";
 export * from "./new-transaction";
 export * from "./recent-transactions";
