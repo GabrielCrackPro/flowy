@@ -206,13 +206,13 @@ Five GitHub Actions workflows guard the repo:
 
 | Workflow | What it does |
 | --- | --- |
-| **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` on every PR and push to `main`. Typecheck & build skip on docs/config-only changes (the required check is always reported); a `Branch & PR conventions` guardrails job enforces branch naming and issue links; an `API Docs` job regenerates the OpenAPI spec, fails on drift, and lints it with Redocly |
+| **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` on every PR, and on pushes to `main` only when the merge touched code/config (docs/CI-only merges skip it). Typecheck & build skip on docs/config-only changes (the required check is always reported); a `Branch & PR conventions` guardrails job enforces branch naming and issue links; an `API Docs` job regenerates the OpenAPI spec, fails on drift, and lints it with Redocly |
 | **Commit conventions** | PR titles and commit messages match conventional commits |
 | **Release** | Release-please auto-generates the changelog + GitHub releases from conventional commits — **only `feat`/`fix`/`perf` (and breaking changes) trigger a release**; docs/CI work rides along silently |
 | **Manual Deploy** (`deploy-manual.yml`) | Triggered from the Actions tab (`workflow_dispatch`): deploy any ref to `production` or `preview`, with a post-deploy health check. Production runs in the protected `deploy-production` environment (needs your approval; `main` only) |
 | **Update Board on Merge** (`board-update.yml`) | Moves issues referenced with `Closes/Fixes/Resolves #N` to Done on the Flowy board |
 
-`main` is protected by the **"Block main"** ruleset: pull requests required, no force-push/deletion, and the `Lint, Typecheck & Build` status check must pass before merge. Codeowner review is not required, so bot PRs (like the changelog sync) auto-merge once CI is green.
+`main` is protected by the **"Block main"** ruleset: pull requests required, no force-push/deletion, and three status checks must pass before merge — `Lint, Typecheck & Build`, `API Docs (OpenAPI drift + lint)` and `Changelog (drift guard)`. Codeowner review is not required, so bot PRs (like the changelog sync) auto-merge once CI is green.
 
 ## 🤝 Contributing
 

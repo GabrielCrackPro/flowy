@@ -5,6 +5,29 @@ on:
   pull_request:
   push:
     branches: [main]
+    # Every main commit is a squash-merged PR that already ran CI, so the
+    # push run is a re-verification, not the first pass. Only re-run it when
+    # the merge actually touched code/config that affects the build —
+    # docs/CI-only merges (README, .github/workflows, CHANGELOG) skip it.
+    # Keep this list in sync with the "Detect code changes" regex in the
+    # quality job below (which matches these extensions anywhere + these
+    # root config files).
+    paths:
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.js"
+      - "**/*.jsx"
+      - "**/*.mjs"
+      - "**/*.cjs"
+      - "**/*.css"
+      - "**/*.prisma"
+      - "prisma/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "next.config.ts"
+      - "tailwind.config.ts"
+      - "postcss.config.mjs"
+      - "components.json"
 
 permissions:
   contents: read
