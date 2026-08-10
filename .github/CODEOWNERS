@@ -1,5 +1,6 @@
 # Default code owner for all files in the repository.
 # GitHub automatically requests a review from these owners when a PR
-# touches matching paths. Merging is only blocked when branch protection
-# additionally requires a review from code owners (see README / repo settings).
+# touches matching paths. The "Block main" ruleset does NOT require
+# codeowner review (removed so bot PRs can auto-merge unattended), so
+# this only controls review *requests*, not merge gating.
 * @GabrielCrackPro

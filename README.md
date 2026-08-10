@@ -212,7 +212,7 @@ Five GitHub Actions workflows guard the repo:
 | **Manual Deploy** (`deploy-manual.yml`) | Triggered from the Actions tab (`workflow_dispatch`): deploy any ref to `production` or `preview`, with a post-deploy health check. Production runs in the protected `deploy-production` environment (needs your approval; `main` only) |
 | **Update Board on Merge** (`board-update.yml`) | Moves issues referenced with `Closes/Fixes/Resolves #N` to Done on the Flowy board |
 
-`main` is protected by the **"Block main"** ruleset: pull requests required, codeowner review, no force-push/deletion, and the `Lint, Typecheck & Build` status check must pass before merge.
+`main` is protected by the **"Block main"** ruleset: pull requests required, no force-push/deletion, and the `Lint, Typecheck & Build` status check must pass before merge. Codeowner review is not required, so bot PRs (like the changelog sync) auto-merge once CI is green.
 
 ## 🤝 Contributing
 
