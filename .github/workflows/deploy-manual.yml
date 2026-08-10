@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  deployments: write
 
 concurrency:
   group: manual-deploy-${{ inputs.environment }}
@@ -27,6 +28,7 @@ jobs:
   deploy:
     name: 🚀 Deploy to ${{ inputs.environment }}
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment == 'production' && 'deploy-production' || 'preview' }}
     timeout-minutes: 20
     steps:
       - name: Checkout ${{ inputs.ref }}

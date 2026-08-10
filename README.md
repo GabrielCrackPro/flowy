@@ -162,7 +162,7 @@ The project deploys on **Vercel**. `vercel.json` pins the build command, the reg
 
 💡 Commits whose message contains `[skip deploy]` cancel the deployment via Vercel's ignored build step — configured entirely in `vercel.json`, no dashboard setup needed.
 
-▶️ **Manual deploy:** if a deploy was skipped (`[skip deploy]`) or failed, run the **Manual Deploy** workflow from the Actions tab — pick `production` or `preview` and a ref (branch/tag/SHA) to force it. Uses the `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` secrets.
+▶️ **Manual deploy:** if a deploy was skipped (`[skip deploy]`) or failed, run the **Manual Deploy** workflow from the Actions tab — pick `production` or `preview` and a ref (branch/tag/SHA) to force it. Uses the `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` secrets. **Production manual deploys require your approval** — they run in the protected `deploy-production` environment (required reviewer + `main`-only branch policy), kept separate from Vercel's own `Production` environment so auto-deploys are never blocked.
 
 ### CI
 
@@ -173,7 +173,7 @@ Four GitHub Actions workflows guard the repo:
 | **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` plus a `Branch & PR conventions` guardrails job (branch naming, issue links, bot-exempt) on every PR and push to `main` |
 | **Commit conventions** | PR titles and commit messages match conventional commits |
 | **Release** | Release-please auto-generates the changelog + GitHub releases from conventional commits |
-| **Manual Deploy** (`deploy-manual.yml`) | Triggered from the Actions tab (`workflow_dispatch`): deploy any ref to `production` or `preview`, with a post-deploy health check |
+| **Manual Deploy** (`deploy-manual.yml`) | Triggered from the Actions tab (`workflow_dispatch`): deploy any ref to `production` or `preview`, with a post-deploy health check. Production runs in the protected `deploy-production` environment (needs your approval; `main` only) |
 
 To make these required before merging, enable branch protection on `main` and mark them as required status checks.
 
