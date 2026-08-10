@@ -135,9 +135,14 @@ jobs:
     # Keeps the in-app changelog data (src/lib/changelog/generated.json)
     # truthful: regenerates it from CHANGELOG.md and fails if the committed
     # file drifts. Pure Node — no dependency install needed.
+    #
+    # PRs only (main is always the result of a merged green PR) and release
+    # PRs are exempt: release-please cannot run the generator, but bumps
+    # $.currentVersion via extra-files and the next code PR syncs the rest.
     name: Changelog (drift guard)
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -147,7 +152,11 @@ jobs:
 
       - name: Data must be committed (no drift)
         run: |
-          if ! git diff --exit-code -- src/lib/changelog/generated.json; then
+          if git diff --exit-code -- src/lib/changelog/generated.json; then
+            echo "Changelog data is in sync."
+          elif [[ "${{ github.event.pull_request.user.login }}" == *[bot] ]]; then
+            echo "::notice::Release PR: release-please does not run the generator — currentVersion is bumped via extra-files and the next code PR syncs the changelog entries."
+          else
             echo "::error::src/lib/changelog/generated.json is out of date — run 'pnpm generate:changelog' and commit the result."
             exit 1
           fi
