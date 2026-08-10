@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.17](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.16...flowy-v0.1.17) (2026-08-10)
+
+
+### Features
+
+* add rule-based spending insights to the dashboard ([#103](https://github.com/GabrielCrackPro/flowy/issues/103)) ([4131ba2](https://github.com/GabrielCrackPro/flowy/commit/4131ba2583155b581875e7878b0a8c2ea1e2d54d))
+
 ## [0.1.16](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.15...flowy-v0.1.16) (2026-08-10)
 
 
