@@ -149,6 +149,7 @@ Prisma schema maps 1:1 to the Supabase SQL schema (`@map`/`@@map`). Core tables 
 
 Repo: `GabrielCrackPro/flowy` (public). The `gh` CLI is authenticated on this machine (OAuth token in the Windows keyring; scopes `gist`, `project`, `read:org`, `repo`).
 
+- **Never commit to `main` directly.** Every change — including docs and config — ships via the **`github-workflow` skill**: new branch → conventional commit → push → PR to `main` → ask before merge. If a commit ever lands on local `main`, move it onto a branch (`git checkout -b <type>/<kebab-slug>`) and reset `main` back to `origin/main` before doing anything else.
 - In fresh shells use `export GH=~/ghcli/bin/gh.exe` (or just `gh` once on PATH).
 - To create or update issues, load the **`github-issues`** skill — it encodes the project's issue template, labels, and `gh` commands.
 - To read or update the **Flowy** project board, load the **`github-project-board`** skill (project/field/option IDs are documented there).
