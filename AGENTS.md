@@ -159,6 +159,7 @@ Repo: `GabrielCrackPro/flowy` (public). The `gh` CLI is authenticated on this ma
 - **`Update Board on Merge`** (`.github/workflows/board-update.yml`): on every merged PR, parses `Closes/Fixes/Resolves #N` from the body and moves those issues to **Done** on the Flowy board (GITHUB_TOKEN, `projects: write`). Also has `workflow_dispatch` inputs (`pr_number`, `issue`, `dry_run`) for manual runs.
 - **`Manual Deploy`** (`.github/workflows/deploy-manual.yml`): `workflow_dispatch` only — deploy any ref to `production` or `preview` when the Vercel auto-deploy was skipped (`[skip deploy]`) or failed. Requires `VERCEL_TOKEN`/`VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` secrets. Production runs in the protected **`deploy-production`** environment: a required reviewer must approve the run in the Actions tab, and a `main`-only branch policy applies. It is intentionally separate from Vercel's own `Production` environment so the approval gate never blocks auto-deploys.
 - Merging a `release-please[bot]` PR bumps the version and creates a GitHub release; its merge triggers a harmless no-op Vercel redeploy (release commits can't carry `[skip deploy]`).
+- `Sync changelog data` (`.github/workflows/sync-changelog.yml`): after a release merge, regenerates `src/lib/changelog/generated.json` (the in-app "What's new" data) and opens/auto-merges a `chore: sync in-app changelog data` PR when it drifts. Do not add `[skip deploy]` to that sync commit — production needs the redeploy to serve the new entries.
 
 ## Skills
 
