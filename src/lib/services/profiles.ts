@@ -5,6 +5,7 @@ import type {
   UpdateProfileInput,
   UpdateThemeInput,
 } from "@/lib/schemas/profile";
+import { CategoryService } from "./categories";
 import { SpaceService } from "./spaces/space-service";
 import { deleteAvatar, deleteReceipt } from "./storage";
 
@@ -79,6 +80,10 @@ export const ProfileService = {
       });
 
       if (existing) {
+        // Seed defaults for accounts created by the auth trigger (the
+        // common path — `created` stays false here). The latch makes this
+        // a no-op after the first successful seed.
+        await CategoryService.seedDefaults(existing.id);
         return { profile: existing, created: false };
       }
 
@@ -95,6 +100,8 @@ export const ProfileService = {
         where: { id: profile.id },
         data: { activeSpaceId: personalSpace.id },
       });
+
+      await CategoryService.seedDefaults(profile.id);
 
       return {
         profile: { ...profile, activeSpaceId: personalSpace.id },
