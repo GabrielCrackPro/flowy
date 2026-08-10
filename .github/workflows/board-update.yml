@@ -102,7 +102,7 @@ jobs:
                 continue;
               }
               if (dryRun) {
-                console.log(`[dry-run] would move issue #${issueNumber} to Done`);
+                console.log(`[dry-run] would move issue #${issueNumber} (item ${itemId}) to Done`);
                 continue;
               }
               await github.graphql(
@@ -114,5 +114,27 @@ jobs:
                 }`,
                 { project: projectId, item: itemId, field: fieldId, option: doneOptionId },
               );
-              console.log(`✅ Issue #${issueNumber} moved to Done`);
+              console.log(`Mutation accepted for issue #${issueNumber} (item ${itemId})`);
+
+              // Verify the write actually landed. A silent no-op was observed
+              // once: the run reported success but the board never changed, so
+              // re-read the Status field and fail loudly if it isn't Done.
+              const verifyQuery = `query($item: ID!) {
+                node(id: $item) {
+                  ... on ProjectV2Item {
+                    fieldValueByName(name: "Status") {
+                      ... on ProjectV2ItemFieldSingleSelectValue { name }
+                    }
+                  }
+                }
+              }`;
+              const verified = await github.graphql(verifyQuery, { item: itemId });
+              const statusNow = verified.node?.fieldValueByName?.name;
+              if (statusNow === "Done") {
+                console.log(`✅ Issue #${issueNumber} (item ${itemId}) is Done — verified`);
+              } else {
+                throw new Error(
+                  `Issue #${issueNumber}: mutation reported success but Status is "${statusNow}" — board write did not land`,
+                );
+              }
             }
