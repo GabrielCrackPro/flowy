@@ -92,6 +92,45 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role
           CRON_SECRET: placeholder-cron-secret
 
+  api-docs:
+    # Keeps the OpenAPI spec (public/openapi.json) truthful: regenerates it
+    # from code and fails if the committed file drifts, then lints it with
+    # Redocly and verifies every route handler is documented.
+    name: API Docs (OpenAPI drift + lint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Regenerate spec from code
+        run: pnpm generate:openapi
+
+      - name: Spec must be committed (no drift)
+        run: |
+          if ! git diff --exit-code -- public/openapi.json; then
+            echo "::error::public/openapi.json is out of date — run 'pnpm generate:openapi' and commit the result."
+            exit 1
+          fi
+
+      - name: Lint spec (Redocly)
+        run: pnpm lint:openapi
+
+      - name: Route inventory drift guard
+        run: pnpm check:openapi-routes
+
   guardrails:
     name: 🛡️ Branch & PR conventions
     runs-on: ubuntu-latest

@@ -10,6 +10,10 @@
     "lint": "biome check",
     "format": "biome format --write",
     "typecheck": "tsc --noEmit",
+    "generate:openapi": "tsx scripts/generate-openapi.ts",
+    "lint:openapi": "redocly lint public/openapi.json",
+    "check:openapi-routes": "node scripts/check-openapi-routes.mjs",
+    "check:openapi": "pnpm generate:openapi && git diff --exit-code -- public/openapi.json && pnpm lint:openapi && pnpm check:openapi-routes",
     "prepare": "git config core.hooksPath .githooks || true",
     "prisma": "prisma",
     "db:push": "prisma db push",
@@ -55,6 +59,7 @@
     "@biomejs/biome": "2.2.0",
     "@commitlint/cli": "^21.2.1",
     "@commitlint/config-conventional": "^21.2.0",
+    "@redocly/cli": "^2.46.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/jspdf": "^2.0.0",
     "@types/node": "^20",
@@ -64,6 +69,7 @@
     "lint-staged": "^17.3.0",
     "prisma": "^5.13.0",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.11",
     "typescript": "^5"
   },
   "overrides": {

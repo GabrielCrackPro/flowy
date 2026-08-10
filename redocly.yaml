@@ -1,0 +1,7 @@
+extends:
+  - recommended
+rules:
+  # Not every operation can meaningfully return a 4xx (e.g. /api/health
+  # only returns 200/503). Each operation still documents every status the
+  # handler actually produces.
+  operation-4xx-response: off
