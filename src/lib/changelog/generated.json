@@ -2,6 +2,24 @@
   "currentVersion": "0.1.16",
   "entries": [
     {
+      "version": "0.1.16",
+      "date": "2026-08-10",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            "seed default categories on signup (#99)"
+          ]
+        },
+        {
+          "type": "fixes",
+          "items": [
+            "remove misleading AI claims from landing page and dashboard (#101)"
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.15",
       "date": "2026-08-10",
       "sections": [
