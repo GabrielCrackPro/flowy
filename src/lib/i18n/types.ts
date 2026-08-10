@@ -631,8 +631,11 @@ export type AppTranslationMessages = {
     edit: string;
     delete: string;
     deleteConfirm: string;
+    export: string;
     exportCSV: string;
     exportPDF: string;
+    exportSuccess: string;
+    exportError: string;
     receiptsTitle: string;
     receiptsDesc: string;
     receiptsEmpty: string;
