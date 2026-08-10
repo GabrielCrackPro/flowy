@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.7...flowy-v0.1.8) (2026-08-10)
+
+
+### Documentation
+
+* add working-session playbook and forbid direct main commits [skip deploy] ([#50](https://github.com/GabrielCrackPro/flowy/issues/50)) ([ee83741](https://github.com/GabrielCrackPro/flowy/commit/ee83741f2e3bffbffb495e2db5fb76f0e867b581))
+
 ## [0.1.7](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.6...flowy-v0.1.7) (2026-08-09)
 
 
