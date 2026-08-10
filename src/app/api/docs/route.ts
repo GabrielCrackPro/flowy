@@ -23,17 +23,32 @@ const SCALAR_VERSION = "1.64.1";
 
 const SPEC_SOURCE = join(process.cwd(), "public", "openapi.json");
 
-// Flowy brand tokens (src/app/globals.css): blue-500 #3b82f6 (light) and
-// blue-400 #60a5fa (dark). Single-line CSS for the data-custom-css attribute —
-// no double quotes, "<" or "&" (none of which would survive attribute
-// escaping).
+// Flowy brand tokens straight from src/app/globals.css (HSL triplets):
+// background/foreground/primary/secondary/border map onto Scalar's theme
+// variables so the reference matches the app in light and dark mode.
+// Single-line CSS for the data-custom-css attribute — no double quotes, "<"
+// or "&" (none of which would survive attribute escaping).
 const BRAND_CSS = [
   ":root{",
-  "--scalar-color-accent:#3b82f6;",
+  "--scalar-color-accent:hsl(221.2 83.2% 53.3%);",
+  "--scalar-background-1:hsl(210 40% 98%);",
+  "--scalar-background-2:hsl(210 40% 96.1%);",
+  "--scalar-background-3:hsl(214.3 31.8% 91.4%);",
+  "--scalar-color-1:hsl(222.2 84% 4.9%);",
+  "--scalar-color-2:hsl(215.4 16.3% 46.9%);",
+  "--scalar-color-3:hsl(215.4 16.3% 65%);",
+  "--scalar-border-color:hsl(214.3 31.8% 91.4%);",
   "--scalar-radius:8px;",
   "}",
   ".dark{",
-  "--scalar-color-accent:#60a5fa;",
+  "--scalar-color-accent:hsl(217.2 91.2% 59.8%);",
+  "--scalar-background-1:hsl(222.2 84% 4.9%);",
+  "--scalar-background-2:hsl(222.2 47.4% 11.2%);",
+  "--scalar-background-3:hsl(217.2 32.6% 17.5%);",
+  "--scalar-color-1:hsl(210 40% 98%);",
+  "--scalar-color-2:hsl(215 20.2% 65.1%);",
+  "--scalar-color-3:hsl(215 20.2% 50%);",
+  "--scalar-border-color:hsl(217.2 32.6% 17.5%);",
   "}",
 ].join("");
 
@@ -78,11 +93,29 @@ export async function GET() {
       property="og:description"
       content="Interactive reference for the Flowy REST API, generated from code."
     />
+    <meta
+      property="og:image"
+      content="https://flowy-jade.vercel.app/app-icon.svg"
+    />
     <link rel="icon" href="/app-icon.svg" />
     <title>Flowy · API Reference</title>
   </head>
   <body>
-    <div id="fallback" hidden style="font-family: system-ui, sans-serif; padding: 24px; color: #666">
+    <div
+      id="fallback"
+      hidden
+      style="font-family: system-ui, sans-serif; padding: 32px; color: #666; text-align: center"
+    >
+      <img
+        src="/app-icon.svg"
+        alt="Flowy"
+        width="56"
+        height="56"
+        style="border-radius: 12px"
+      />
+      <p style="margin-top: 12px; font-weight: 600; color: #333">
+        Flowy API Reference
+      </p>
       <p>The interactive reference could not load.</p>
       <p>
         Open the <a href="/openapi.json">raw OpenAPI document</a> instead, or
