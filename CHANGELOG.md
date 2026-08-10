@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.15](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.14...flowy-v0.1.15) (2026-08-10)
+
+
+### Features
+
+* show pending state and feedback for CSV/PDF exports ([#82](https://github.com/GabrielCrackPro/flowy/issues/82)) ([e834e08](https://github.com/GabrielCrackPro/flowy/commit/e834e0890b87204ba8ab9010ccf4a01c8f5ce1d5))
+
 ## [0.1.14](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.13...flowy-v0.1.14) (2026-08-10)
 
 
