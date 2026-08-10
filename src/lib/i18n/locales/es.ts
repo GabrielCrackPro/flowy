@@ -685,8 +685,11 @@ export const app: AppTranslationMessages = {
     delete: "Eliminar",
     deleteConfirm:
       "¿Eliminar esta transacción? Esta acción no se puede deshacer.",
+    export: "Exportar",
     exportCSV: "Exportar CSV",
     exportPDF: "Exportar PDF",
+    exportSuccess: "Exportación generada correctamente",
+    exportError: "No se pudo generar la exportación",
     receiptsTitle: "Recibos",
     receiptsDesc: "Comprobantes adjuntos a tus transacciones",
     receiptsEmpty: "No hay recibos adjuntos a las transacciones filtradas",

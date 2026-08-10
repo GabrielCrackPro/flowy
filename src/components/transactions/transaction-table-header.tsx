@@ -1,16 +1,10 @@
 "use client";
 
 import { Icon, RelativeTime } from "@components/shared";
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@components/ui";
-import { exportCSV, exportPDF } from "@lib/export-transactions";
-import { Download, FileText, RefreshCw } from "@/lib/icons";
+import { Button } from "@components/ui";
+import { RefreshCw } from "@/lib/icons";
 import type { Transaction } from "@/types/Transaction";
+import { TransactionExportMenu } from "./transaction-export-menu";
 
 interface TransactionTableHeaderProps {
   transactions: Transaction[];
@@ -56,37 +50,12 @@ export function TransactionTableHeader({
       {/* Right: actions */}
       <div className="flex items-center gap-1">
         {transactions.length > 0 && (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  className="size-7 rounded-lg text-muted-foreground/40 hover:bg-muted/60 hover:text-foreground"
-                >
-                  <Icon icon={Download} className="size-3.5" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent
-              align="end"
-              sideOffset={4}
-              className="min-w-40"
-            >
-              <DropdownMenuItem
-                onClick={() => exportCSV(transactions, t, locale, currency)}
-              >
-                <Icon icon={Download} className="size-3.5" />
-                {t("transactions.exportCSV")}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => exportPDF(transactions, t, locale, currency)}
-              >
-                <Icon icon={FileText} className="size-3.5" />
-                {t("transactions.exportPDF")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <TransactionExportMenu
+            transactions={transactions}
+            locale={locale}
+            currency={currency}
+            t={t}
+          />
         )}
 
         <Button
