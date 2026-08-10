@@ -5,7 +5,8 @@ run-name: 'Sync changelog data · ${{ github.ref_name }}'
 # release-please cannot regenerate src/lib/changelog/generated.json (the
 # in-app "What's new" data). This workflow regenerates it on main and, when
 # it drifts, opens a chore PR with the synced data and auto-merges it once
-# the required checks (and any codeowner review) are satisfied.
+# the required checks are satisfied. The "Block main" ruleset has no
+# codeowner review requirement, so this auto-merge runs fully unattended.
 #
 # The sync PR deliberately does NOT carry `[skip deploy]` — production needs
 # a deploy to serve the updated changelog entries.
