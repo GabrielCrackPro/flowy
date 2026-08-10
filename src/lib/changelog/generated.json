@@ -19,7 +19,9 @@
       "sections": [
         {
           "type": "features",
-          "items": ["brand the API reference and enrich schema docs (#69)"]
+          "items": [
+            "brand the API reference and enrich schema docs (#69)"
+          ]
         }
       ]
     },
@@ -29,7 +31,9 @@
       "sections": [
         {
           "type": "fixes",
-          "items": ["harden API docs page against spec load failures (#66)"]
+          "items": [
+            "harden API docs page against spec load failures (#66)"
+          ]
         }
       ]
     },
@@ -39,7 +43,9 @@
       "sections": [
         {
           "type": "features",
-          "items": ["add generated OpenAPI docs with Scalar viewer (#63)"]
+          "items": [
+            "add generated OpenAPI docs with Scalar viewer (#63)"
+          ]
         }
       ]
     },
@@ -49,7 +55,9 @@
       "sections": [
         {
           "type": "features",
-          "items": ["pick language and currency at sign-up (#60)"]
+          "items": [
+            "pick language and currency at sign-up (#60)"
+          ]
         }
       ]
     },

@@ -13,7 +13,8 @@
       "!.next",
       "!dist",
       "!build",
-      "!public/openapi.json"
+      "!public/openapi.json",
+      "!src/lib/changelog/generated.json"
     ]
   },
   "formatter": {
