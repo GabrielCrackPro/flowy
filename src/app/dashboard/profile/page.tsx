@@ -20,9 +20,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useChangelog } from "@/context/ChangelogContext";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
-import { CalendarDays, Coins, Globe2, Mail, Pencil } from "@/lib/icons";
+import { changelog } from "@/lib/changelog";
+import {
+  CalendarDays,
+  Coins,
+  Droplet,
+  Globe2,
+  Mail,
+  Pencil,
+  Sparkles,
+} from "@/lib/icons";
 
 function currencyName(code: string, locale: string): string {
   try {
@@ -48,6 +58,7 @@ export default function SettingsPage() {
   const { t } = useTranslation();
   const { locale } = useLocaleContext();
   const { profile, loading } = useProfile();
+  const { openChangelog } = useChangelog();
   const [editing, setEditing] = useState(false);
 
   const memberSince = profile?.createdAt
@@ -214,6 +225,32 @@ export default function SettingsPage() {
         <PushNotificationsCard />
 
         <AccountSecurityActions />
+
+        <Card id="about" className="scroll-mt-20">
+          <CardHeader>
+            <CardTitle>{t("settings.about.title")}</CardTitle>
+            <CardDescription>{t("settings.about.description")}</CardDescription>
+            <CardAction>
+              <Button variant="outline" onClick={openChangelog}>
+                <Sparkles className="size-4" />
+                {t("settings.about.whatNew")}
+              </Button>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-md shadow-primary/20">
+                <Icon icon={Droplet} className="size-6" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-lg font-bold tracking-tight">Flowy</p>
+                  <Badge variant="secondary">v{changelog.currentVersion}</Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

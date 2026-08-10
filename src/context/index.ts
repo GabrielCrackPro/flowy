@@ -1,3 +1,4 @@
+export * from "./ChangelogContext";
 export * from "./NotificationProvider";
 export * from "./PhantomProvider";
 export * from "./ProfileContext";

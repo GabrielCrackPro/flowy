@@ -14,6 +14,8 @@
     "lint:openapi": "redocly lint public/openapi.json",
     "check:openapi-routes": "node scripts/check-openapi-routes.mjs",
     "check:openapi": "pnpm generate:openapi && git diff --exit-code -- public/openapi.json && pnpm lint:openapi && pnpm check:openapi-routes",
+    "generate:changelog": "node scripts/generate-changelog.mjs",
+    "check:changelog": "pnpm generate:changelog && git diff --exit-code -- src/lib/changelog/generated.json",
     "prepare": "git config core.hooksPath .githooks || true",
     "prisma": "prisma",
     "db:push": "prisma db push",

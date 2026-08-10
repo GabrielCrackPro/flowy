@@ -4,6 +4,7 @@ import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useChangelog } from "@/context/ChangelogContext";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useSignOut } from "@/hooks/useSignOut";
@@ -17,6 +18,7 @@ import {
   Plus,
   Repeat2,
   Settings,
+  Sparkles,
   Sun,
   Tag,
   Target,
@@ -197,6 +199,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const { isDark, toggleTheme } = useTheme();
   const { profile } = useProfile();
   const { locale } = useLocaleContext();
+  const { openChangelog } = useChangelog();
   const handleSignOut = useSignOut();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResultItem[]>([]);
@@ -233,6 +236,26 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         },
       },
       {
+        id: "whats-new",
+        icon: Sparkles,
+        label: t("search.whatsNew"),
+        keywords: [
+          "novedades",
+          "changelog",
+          "versión",
+          "version",
+          "release",
+          "actualizaciones",
+          "updates",
+          "news",
+          "nuevo",
+        ],
+        action: () => {
+          onOpenChange(false);
+          openChangelog();
+        },
+      },
+      {
         id: "sign-out",
         icon: LogOut,
         label: t("search.signOut"),
@@ -243,7 +266,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         },
       },
     ],
-    [isDark, onOpenChange, handleSignOut, t],
+    [isDark, onOpenChange, handleSignOut, t, openChangelog],
   );
 
   const refreshRecent = useCallback(() => {

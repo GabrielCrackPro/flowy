@@ -276,6 +276,23 @@ export const app: AppTranslationMessages = {
       disabled: "Disabled",
       denied: "Blocked in your browser settings",
     },
+    about: {
+      title: "About Flowy",
+      description: "App version and latest changes",
+      whatNew: "What's new",
+    },
+  },
+  changelog: {
+    title: "What's new",
+    description: "The latest features and fixes in Flowy",
+    currentVersion: "You're on this version",
+    latest: "Latest release",
+    features: "Features",
+    fixes: "Bug fixes",
+    noChanges: "No recent changes yet",
+    showAll: "Show all releases",
+    showLess: "Show less",
+    viewFull: "View full changelog",
   },
   header: {
     home: "Home",
@@ -807,6 +824,7 @@ export const app: AppTranslationMessages = {
     themeLight: "Light mode",
     themeDark: "Dark mode",
     signOut: "Sign out",
+    whatsNew: "What's new",
   },
   filters: {
     title: "Filters",

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChangelogProvider } from "@context/ChangelogContext";
 import { NotificationProvider } from "@context/NotificationProvider";
 import { OfflineProvider } from "@context/OfflineProvider";
 import { ProfileProvider } from "@context/ProfileContext";
@@ -21,13 +22,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <ProfileProvider>
             <ThemeProvider>
               <LocaleProvider>
-                <OfflineProvider>
-                  <PhantomProvider>
-                    <NotificationProvider>
-                      <RealtimeSyncProvider>{children}</RealtimeSyncProvider>
-                    </NotificationProvider>
-                  </PhantomProvider>
-                </OfflineProvider>
+                <ChangelogProvider>
+                  <OfflineProvider>
+                    <PhantomProvider>
+                      <NotificationProvider>
+                        <RealtimeSyncProvider>{children}</RealtimeSyncProvider>
+                      </NotificationProvider>
+                    </PhantomProvider>
+                  </OfflineProvider>
+                </ChangelogProvider>
               </LocaleProvider>
             </ThemeProvider>
           </ProfileProvider>

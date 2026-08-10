@@ -263,6 +263,23 @@ export type AppTranslationMessages = {
       disabled: string;
       denied: string;
     };
+    about: {
+      title: string;
+      description: string;
+      whatNew: string;
+    };
+  };
+  changelog: {
+    title: string;
+    description: string;
+    currentVersion: string;
+    latest: string;
+    features: string;
+    fixes: string;
+    noChanges: string;
+    showAll: string;
+    showLess: string;
+    viewFull: string;
   };
   header: {
     home: string;
@@ -765,6 +782,7 @@ export type AppTranslationMessages = {
     themeLight: string;
     themeDark: string;
     signOut: string;
+    whatsNew: string;
   };
   filters: {
     title: string;
