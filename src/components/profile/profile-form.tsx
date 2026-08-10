@@ -18,6 +18,12 @@ import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useReactForm } from "@/hooks/useReactForm";
 import { AtSign, Languages, UserRound } from "@/lib/icons";
+import {
+  CURRENCIES,
+  currencyName,
+  LOCALES,
+  languageName,
+} from "@/lib/preferences";
 import { updateProfileSchema } from "@/lib/schemas/profile";
 import type { Profile } from "@/types/Profile";
 import { AvatarUploader } from "./avatar-uploader";
@@ -27,46 +33,6 @@ interface ProfileFormProps {
   onCancel?: () => void;
   onSuccess?: () => void;
 }
-
-const CURRENCIES = [
-  "EUR",
-  "USD",
-  "GBP",
-  "MXN",
-  "ARS",
-  "CLP",
-  "COP",
-  "BRL",
-  "CAD",
-  "AUD",
-  "CHF",
-  "JPY",
-  "PEN",
-  "UYU",
-];
-
-const LOCALES = ["es", "en"] as const;
-
-function currencyName(code: string, locale: string): string {
-  try {
-    return (
-      new Intl.DisplayNames([locale], { type: "currency" }).of(code) ?? code
-    );
-  } catch {
-    return code;
-  }
-}
-
-function languageName(code: string, locale: string): string {
-  try {
-    return (
-      new Intl.DisplayNames([locale], { type: "language" }).of(code) ?? code
-    );
-  } catch {
-    return code;
-  }
-}
-
 export function ProfileForm({
   profile,
   onCancel,

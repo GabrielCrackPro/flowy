@@ -10,12 +10,18 @@ export async function signUpWithEmail(
   email: string,
   password: string,
   fullName?: string,
+  preferences?: { currency?: string; locale?: string },
 ) {
+  const data: Record<string, string> = {};
+  if (fullName) data.full_name = fullName;
+  if (preferences?.currency) data.currency = preferences.currency;
+  if (preferences?.locale) data.locale = preferences.locale;
+
   return supabase.auth.signUp({
     email,
     password,
     options: {
-      data: fullName ? { full_name: fullName } : undefined,
+      data: Object.keys(data).length > 0 ? data : undefined,
       emailRedirectTo: redirectUrl,
     },
   });

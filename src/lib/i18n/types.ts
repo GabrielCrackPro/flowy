@@ -49,6 +49,10 @@ export type AuthTranslationMessages = {
     formDescription: string;
     statusCreated: string;
     haveAccountLink: string;
+    preferencesTitle: string;
+    preferencesHint: string;
+    localeLabel: string;
+    currencyLabel: string;
   };
   validation: {
     emailRequired: string;
@@ -58,6 +62,8 @@ export type AuthTranslationMessages = {
     passwordsMustMatch: string;
     fullNameRequired: string;
     acceptTermsRequired: string;
+    localeRequired: string;
+    currencyRequired: string;
   };
   forgotPassword: {
     title: string;
