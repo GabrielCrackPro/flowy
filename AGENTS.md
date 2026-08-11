@@ -138,6 +138,7 @@ Prisma schema maps 1:1 to the Supabase SQL schema (`@map`/`@@map`). Core tables 
 ## Conventions
 
 - **Commits:** conventional format (`feat:`, `fix(scope):`, ...) — enforced by the local `commit-msg` hook and CI (`commit-conventions.yml`). Use `git commit --no-verify` only for docs-only changes.
+- **Collaborator metadata:** PR commits must never include collaborator trailers or co-author attribution. Do not add `Co-Authored-By` or any other collaborator footer; commit messages must identify only the actual author.
 - **Quality gates:** `pnpm lint` runs in the pre-commit hook (lint-staged) and `pnpm typecheck` runs there too when the commit touches TypeScript; `ci.yml` runs lint, typecheck, and build on every PR. All three must pass before merge.
 - **Auth/security:** `SUPABASE_SERVICE_ROLE_KEY` is server-only. The browser uses `NEXT_PUBLIC_SUPABASE_ANON_KEY`; RLS in `supabase/migrations/002_rls.sql` is the data boundary. Never leak service-role keys or secrets into client code or commits (`.env*` are gitignored).
 - **i18n:** any user-facing string must exist in both `src/lib/i18n/locales/en.ts` and `es.ts` — no hardcoded text (existing hardcoded Spanish error strings are a known debt; don't add more).

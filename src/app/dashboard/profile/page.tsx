@@ -6,7 +6,6 @@ import {
   PushNotificationsCard,
   SpaceManager,
 } from "@components/profile";
-import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ThemeCustomizationSheet } from "@/components/profile/theme-customization-modal";
@@ -26,7 +25,6 @@ import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
 import { changelog } from "@/lib/changelog";
 import {
-  BookOpen,
   CalendarDays,
   Coins,
   Droplet,
@@ -233,18 +231,10 @@ export default function SettingsPage() {
             <CardTitle>{t("settings.about.title")}</CardTitle>
             <CardDescription>{t("settings.about.description")}</CardDescription>
             <CardAction>
-              <div className="flex flex-wrap gap-2">
-                <Button asChild variant="outline">
-                  <Link href="/api/docs" target="_blank" rel="noreferrer">
-                    <Icon icon={BookOpen} className="size-4" />
-                    {t("settings.apiDocs.open")}
-                  </Link>
-                </Button>
-                <Button variant="outline" onClick={openChangelog}>
-                  <Sparkles className="size-4" />
-                  {t("settings.about.whatNew")}
-                </Button>
-              </div>
+              <Button variant="outline" onClick={openChangelog}>
+                <Sparkles className="size-4" />
+                {t("settings.about.whatNew")}
+              </Button>
             </CardAction>
           </CardHeader>
           <CardContent>
