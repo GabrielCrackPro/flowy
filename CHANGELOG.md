@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.19](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.18...flowy-v0.1.19) (2026-08-11)
+
+
+### Features
+
+* **api-docs:** restore branded Scalar API reference ([#110](https://github.com/GabrielCrackPro/flowy/issues/110)) ([4ed7191](https://github.com/GabrielCrackPro/flowy/commit/4ed71915c5d0edbb3fa2f5070cc456704ac898db))
+
 ## [0.1.18](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.17...flowy-v0.1.18) (2026-08-11)
 
 
