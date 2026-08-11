@@ -168,9 +168,6 @@ export type AppTranslationMessages = {
   };
   settings: {
     description: string;
-    apiDocs: {
-      open: string;
-    };
     profile: {
       title: string;
       description: string;

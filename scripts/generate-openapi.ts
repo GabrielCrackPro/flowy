@@ -175,12 +175,12 @@ const reqBody = (name: string): Json => jsonBody(ref(name));
 const RESPONSES = {
   BadRequest: {
     description:
-      "The request is invalid. Check the response's `errors` details and verify the parameters or JSON body.",
+      "Invalid request — body failed Zod validation or query parameters are invalid.",
     content: { "application/json": { schema: ref("Error") } },
   },
   Unauthorized: {
     description:
-      "Authentication is missing or invalid. Send a valid Supabase access token as `Authorization: Bearer <access_token>`.",
+      "Missing or invalid authentication. Authenticate with the Supabase session cookie or `Authorization: Bearer <access_token>`.",
     content: { "application/json": { schema: ref("Error") } },
   },
   Forbidden: {
@@ -189,17 +189,17 @@ const RESPONSES = {
     content: { "application/json": { schema: ref("Error") } },
   },
   NotFound: {
-    description: "The requested resource was not found in the active space.",
+    description: "The requested entity does not exist in the active space.",
     content: { "application/json": { schema: ref("Error") } },
   },
   Conflict: {
     description:
-      "The request conflicts with existing data, such as a duplicate name or already-registered resource.",
+      "The request conflicts with existing data (e.g. duplicate name).",
     content: { "application/json": { schema: ref("Error") } },
   },
   RateLimited: {
     description:
-      "Too many requests. Wait for the `Retry-After` period before trying again. The `X-RateLimit-*` headers describe the current limit window.",
+      "Rate limit exceeded. Retry after the `Retry-After` header. Headers `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset` describe the window.",
     headers: {
       "Retry-After": {
         description: "Seconds to wait before retrying",
@@ -221,7 +221,7 @@ const RESPONSES = {
     content: { "application/json": { schema: ref("RateLimitError") } },
   },
   ServerError: {
-    description: "The server could not complete the request. Try again later.",
+    description: "Unexpected server error.",
     content: { "application/json": { schema: ref("Error") } },
   },
 };
@@ -282,7 +282,6 @@ function op(input: {
   requestBody?: Json;
   responses: Json;
   rateLimit?: string;
-  scalarIgnore?: boolean;
 }): Json {
   const operation: Json = {
     operationId: input.operationId,
@@ -295,7 +294,6 @@ function op(input: {
   if (input.parameters?.length) operation.parameters = input.parameters;
   if (input.requestBody) operation.requestBody = input.requestBody;
   if (input.rateLimit) operation["x-flowy-rate-limit"] = input.rateLimit;
-  if (input.scalarIgnore) operation["x-scalar-ignore"] = true;
   return operation;
 }
 
@@ -323,8 +321,7 @@ const BASE_FIELDS = {
   spaceId: {
     type: ["string", "null"],
     format: "uuid",
-    description:
-      "Shared space containing this resource, or null for personal data",
+    description: "Owning space UUID, or null for personal data",
   },
   createdAt: {
     type: "string",
@@ -339,7 +336,7 @@ const BASE_FIELDS = {
   updatedBy: {
     type: ["string", "null"],
     format: "uuid",
-    description: "Profile that last edited this resource, when available",
+    description: "Profile UUID of the last editor, if any",
   },
 };
 
@@ -597,7 +594,7 @@ const schemas: Record<string, Json> = {
       id: { ...UUID, description: "Entity UUID" },
       userId: {
         ...UUID,
-        description: "Profile that owns this resource",
+        description: "Owner profile UUID",
       },
       spaceId: SPACE_SCOPE,
       entityType: {
@@ -639,7 +636,7 @@ const schemas: Record<string, Json> = {
       id: { ...UUID, description: "Entity UUID" },
       userId: {
         ...UUID,
-        description: "Profile that owns this resource",
+        description: "Owner profile UUID",
       },
       spaceId: SPACE_SCOPE,
       actorId: {
@@ -738,7 +735,7 @@ const schemas: Record<string, Json> = {
       id: { ...UUID, description: "Entity UUID" },
       userId: {
         ...UUID,
-        description: "Profile that owns this resource",
+        description: "Owner profile UUID",
       },
       spaceId: SPACE_SCOPE,
       type: { type: "string", description: "Alert rule type" },
@@ -1049,12 +1046,12 @@ const schemas: Record<string, Json> = {
   Error: {
     type: "object",
     description:
-      "Common error response returned when a request cannot be completed. Validation responses may include field-level details in `errors`.",
+      "Uniform error envelope. `category` is one of the ErrorCategory values in src/lib/errors/error-types.ts (validation, authentication, authorization, not_found, rate_limit, database, service_unavailable, network, server, unknown).",
     properties: {
       message: { type: "string", description: "Human-readable error message" },
       category: {
         type: "string",
-        description: "Broad error category for client-side handling",
+        description: "Error category (validation, authentication, ...)",
       },
       severity: {
         type: ["string", "null"],
@@ -2378,10 +2375,10 @@ paths["/api/cron/alerts"] = {
   post: op({
     operationId: "cron.alerts",
     summary: "Evaluate alerts for all users (cron)",
-    description: "Internal scheduled operation for processing pending alerts.",
+    description:
+      "Internal endpoint. Authenticates with `Authorization: Bearer <CRON_SECRET>`. Evaluates alert rules for every profile and sends push notifications.",
     tags: ["Cron"],
     security: [{ cronAuth: [] }],
-    scalarIgnore: true,
     responses: {
       200: {
         description: "Evaluation summary",
@@ -2431,18 +2428,27 @@ const doc: Json = {
       url: "https://github.com/GabrielCrackPro/flowy",
     },
     description: [
-      "Welcome to the **Flowy API**. Use it to manage transactions, budgets, savings goals, subscriptions, categories, and shared spaces.",
+      "Welcome to the **Flowy API** — the REST backend for Flowy, a personal finance manager. Track income and expenses, plan budgets per category, save toward goals, monitor subscriptions, and collaborate in shared spaces.",
       "",
-      "Use the sidebar or search (`Ctrl/Cmd + K`) to find an endpoint. Each operation includes its authentication, parameters, request body, response examples, and common errors.",
+      "Use the search bar (`Ctrl/Cmd + K`) to jump to an endpoint, or browse the tag groups in the sidebar. Every operation documents its authentication, rate limits, parameters and error responses.",
       "",
       "## Base URL",
-      "Production requests use `https://flowy-jade.vercel.app`. Local and preview deployments use the same-origin server. JSON endpoints accept and return `application/json` unless noted otherwise.",
+      "All endpoints are served from `https://flowy-jade.vercel.app` (production); local and preview deployments use the same-origin server. Request and response bodies are `application/json` unless stated otherwise.",
       "",
       "## Authentication",
-      "Send a Supabase access token with `Authorization: Bearer <access_token>`. Your requests use the authenticated user's active space; personal data is kept in the personal space.",
+      "Every endpoint except `/api/health` and `/api/cron/alerts` requires an authenticated Supabase session — send either the session cookies or `Authorization: Bearer <access_token>`.",
       "",
-      "## Errors and limits",
-      "Errors use a consistent `message` and `category` shape. Validation errors can include field-level details in `errors`. If a request is rate-limited, wait for `Retry-After` before retrying.",
+      "## Tenancy",
+      "All data is scoped to the caller's active space (see `SpaceService.getCurrent`); personal data lives in the user's personal space.",
+      "",
+      "## Errors",
+      "Non-2xx responses follow the `Error` schema with a `category` from `src/lib/errors/error-types.ts`. Zod validation failures return 400 with `message` + `errors` (the original Zod issues).",
+      "",
+      "## Rate limiting",
+      "In-memory fixed-window limiter (per instance). Limits vary by route — see the `x-flowy-rate-limit` extension per operation. Exceeded requests return 429 with `Retry-After` and `X-RateLimit-*` headers. Disable with `RATE_LIMIT_ENABLED=false`.",
+      "",
+      "## Generated from code",
+      "This specification is **generated from code** (`pnpm generate:openapi`) and guarded against drift in CI.",
     ].join("\n"),
   },
   servers: [
@@ -2453,29 +2459,24 @@ const doc: Json = {
     },
   ],
   tags: [
-    { name: "Transactions", description: "Track income and expenses" },
-    { name: "Budgets", description: "Plan spending by category and period" },
-    { name: "Categories", description: "Organize transaction categories" },
-    { name: "Goals", description: "Track progress toward savings goals" },
-    { name: "Subscriptions", description: "Manage recurring payments" },
-    { name: "Comments", description: "Add comments to supported entities" },
-    { name: "Activity", description: "Review recent account activity" },
-    { name: "Spaces", description: "Manage personal and shared spaces" },
-    { name: "Dashboard", description: "Load dashboard data and summaries" },
-    {
-      name: "Stats",
-      description: "Load income, expense, and balance statistics",
-    },
-    {
-      name: "Search",
-      description: "Find financial records across the active space",
-    },
-    { name: "Profile", description: "Manage profile and display preferences" },
-    { name: "Notifications", description: "Read and manage alerts" },
-    { name: "Push", description: "Register browser push notifications" },
-    { name: "Uploads", description: "Upload receipts and profile images" },
-    { name: "Account", description: "Manage account security and deletion" },
-    { name: "System", description: "Check service availability" },
+    { name: "Transactions", description: "Income and expense tracking" },
+    { name: "Budgets", description: "Per-category monthly budgets" },
+    { name: "Categories", description: "Transaction categories" },
+    { name: "Goals", description: "Savings goals" },
+    { name: "Subscriptions", description: "Recurring subscriptions" },
+    { name: "Comments", description: "Comments on entities" },
+    { name: "Activity", description: "Audit/activity feed" },
+    { name: "Spaces", description: "Shared workspaces" },
+    { name: "Dashboard", description: "Dashboard aggregates" },
+    { name: "Stats", description: "Statistics" },
+    { name: "Search", description: "Global search" },
+    { name: "Profile", description: "User profiles" },
+    { name: "Notifications", description: "Alerts" },
+    { name: "Push", description: "Web Push subscriptions" },
+    { name: "Uploads", description: "File uploads" },
+    { name: "Account", description: "Account management" },
+    { name: "Cron", description: "Scheduled jobs" },
+    { name: "System", description: "Operational endpoints" },
   ],
   externalDocs: {
     url: "https://github.com/GabrielCrackPro/flowy",
@@ -2490,13 +2491,12 @@ const doc: Json = {
         type: "http",
         scheme: "bearer",
         description:
-          "Supabase access token sent as `Authorization: Bearer <access_token>`.",
+          "Supabase access token. Alternatively, authenticate with the Supabase session cookies (same session as the web app).",
       },
       cronAuth: {
         type: "http",
         scheme: "bearer",
-        description:
-          "Internal scheduler credential. Not used by client applications.",
+        description: "The server-side CRON_SECRET (not a Supabase token).",
       },
     },
   },

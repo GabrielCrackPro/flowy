@@ -182,9 +182,6 @@ export const app: AppTranslationMessages = {
   },
   settings: {
     description: "Gestiona tu perfil y preferencias de la aplicación",
-    apiDocs: {
-      open: "Documentación API",
-    },
     profile: {
       title: "Perfil",
       description: "Actualiza tu información personal",
