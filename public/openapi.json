@@ -16,7 +16,7 @@
       "name": "Flowy",
       "url": "https://github.com/GabrielCrackPro/flowy"
     },
-    "description": "Welcome to the **Flowy API** — the REST backend for Flowy, a personal finance manager. Track income and expenses, plan budgets per category, save toward goals, monitor subscriptions, and collaborate in shared spaces.\n\nUse the search bar (`Ctrl/Cmd + K`) to jump to an endpoint, or browse the tag groups in the sidebar. Every operation documents its authentication, rate limits, parameters and error responses.\n\n## Base URL\nAll endpoints are served from `https://flowy-jade.vercel.app` (production); local and preview deployments use the same-origin server. Request and response bodies are `application/json` unless stated otherwise.\n\n## Authentication\nEvery endpoint except `/api/health` and `/api/cron/alerts` requires an authenticated Supabase session — send either the session cookies or `Authorization: Bearer <access_token>`.\n\n## Tenancy\nAll data is scoped to the caller's active space (see `SpaceService.getCurrent`); personal data lives in the user's personal space.\n\n## Errors\nNon-2xx responses follow the `Error` schema with a `category` from `src/lib/errors/error-types.ts`. Zod validation failures return 400 with `message` + `errors` (the original Zod issues).\n\n## Rate limiting\nIn-memory fixed-window limiter (per instance). Limits vary by route — see the `x-flowy-rate-limit` extension per operation. Exceeded requests return 429 with `Retry-After` and `X-RateLimit-*` headers. Disable with `RATE_LIMIT_ENABLED=false`.\n\n## Generated from code\nThis specification is **generated from code** (`pnpm generate:openapi`) and guarded against drift in CI."
+    "description": "Welcome to the **Flowy API**. Use it to manage transactions, budgets, savings goals, subscriptions, categories, and shared spaces.\n\nUse the sidebar or search (`Ctrl/Cmd + K`) to find an endpoint. Each operation includes its authentication, parameters, request body, response examples, and common errors.\n\n## Base URL\nProduction requests use `https://flowy-jade.vercel.app`. Local and preview deployments use the same-origin server. JSON endpoints accept and return `application/json` unless noted otherwise.\n\n## Authentication\nSend a Supabase access token with `Authorization: Bearer <access_token>`. Your requests use the authenticated user's active space; personal data is kept in the personal space.\n\n## Errors and limits\nErrors use a consistent `message` and `category` shape. Validation errors can include field-level details in `errors`. If a request is rate-limited, wait for `Retry-After` before retrying."
   },
   "servers": [
     {
@@ -31,75 +31,71 @@
   "tags": [
     {
       "name": "Transactions",
-      "description": "Income and expense tracking"
+      "description": "Track income and expenses"
     },
     {
       "name": "Budgets",
-      "description": "Per-category monthly budgets"
+      "description": "Plan spending by category and period"
     },
     {
       "name": "Categories",
-      "description": "Transaction categories"
+      "description": "Organize transaction categories"
     },
     {
       "name": "Goals",
-      "description": "Savings goals"
+      "description": "Track progress toward savings goals"
     },
     {
       "name": "Subscriptions",
-      "description": "Recurring subscriptions"
+      "description": "Manage recurring payments"
     },
     {
       "name": "Comments",
-      "description": "Comments on entities"
+      "description": "Add comments to supported entities"
     },
     {
       "name": "Activity",
-      "description": "Audit/activity feed"
+      "description": "Review recent account activity"
     },
     {
       "name": "Spaces",
-      "description": "Shared workspaces"
+      "description": "Manage personal and shared spaces"
     },
     {
       "name": "Dashboard",
-      "description": "Dashboard aggregates"
+      "description": "Load dashboard data and summaries"
     },
     {
       "name": "Stats",
-      "description": "Statistics"
+      "description": "Load income, expense, and balance statistics"
     },
     {
       "name": "Search",
-      "description": "Global search"
+      "description": "Find financial records across the active space"
     },
     {
       "name": "Profile",
-      "description": "User profiles"
+      "description": "Manage profile and display preferences"
     },
     {
       "name": "Notifications",
-      "description": "Alerts"
+      "description": "Read and manage alerts"
     },
     {
       "name": "Push",
-      "description": "Web Push subscriptions"
+      "description": "Register browser push notifications"
     },
     {
       "name": "Uploads",
-      "description": "File uploads"
+      "description": "Upload receipts and profile images"
     },
     {
       "name": "Account",
-      "description": "Account management"
-    },
-    {
-      "name": "Cron",
-      "description": "Scheduled jobs"
+      "description": "Manage account security and deletion"
     },
     {
       "name": "System",
-      "description": "Operational endpoints"
+      "description": "Check service availability"
     }
   ],
   "externalDocs": {
@@ -3011,7 +3007,8 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "Internal endpoint. Authenticates with `Authorization: Bearer <CRON_SECRET>`. Evaluates alert rules for every profile and sends push notifications."
+        "description": "Internal scheduled operation for processing pending alerts.",
+        "x-scalar-ignore": true
       }
     },
     "/api/health": {
@@ -3103,7 +3100,7 @@
               "null"
             ],
             "format": "uuid",
-            "description": "Owning space UUID, or null for personal data"
+            "description": "Shared space containing this resource, or null for personal data"
           },
           "createdAt": {
             "type": "string",
@@ -3121,7 +3118,7 @@
               "null"
             ],
             "format": "uuid",
-            "description": "Profile UUID of the last editor, if any"
+            "description": "Profile that last edited this resource, when available"
           },
           "name": {
             "type": "string",
@@ -3191,7 +3188,7 @@
               "null"
             ],
             "format": "uuid",
-            "description": "Owning space UUID, or null for personal data"
+            "description": "Shared space containing this resource, or null for personal data"
           },
           "createdAt": {
             "type": "string",
@@ -3209,7 +3206,7 @@
               "null"
             ],
             "format": "uuid",
-            "description": "Profile UUID of the last editor, if any"
+            "description": "Profile that last edited this resource, when available"
           },
           "type": {
             "type": "string",
@@ -3379,7 +3376,7 @@
               "null"
             ],
             "format": "uuid",
-            "description": "Owning space UUID, or null for personal data"
+            "description": "Shared space containing this resource, or null for personal data"
           },
           "createdAt": {
             "type": "string",
@@ -3397,7 +3394,7 @@
               "null"
             ],
             "format": "uuid",
-            "description": "Profile UUID of the last editor, if any"
+            "description": "Profile that last edited this resource, when available"
           },
           "categoryId": {
             "$ref": "#/components/schemas/Uuid",
@@ -3484,7 +3481,7 @@
               "null"
             ],
             "format": "uuid",
-            "description": "Owning space UUID, or null for personal data"
+            "description": "Shared space containing this resource, or null for personal data"
           },
           "createdAt": {
             "type": "string",
@@ -3502,7 +3499,7 @@
               "null"
             ],
             "format": "uuid",
-            "description": "Profile UUID of the last editor, if any"
+            "description": "Profile that last edited this resource, when available"
           },
           "title": {
             "type": "string",
@@ -3567,7 +3564,7 @@
               "null"
             ],
             "format": "uuid",
-            "description": "Owning space UUID, or null for personal data"
+            "description": "Shared space containing this resource, or null for personal data"
           },
           "createdAt": {
             "type": "string",
@@ -3585,7 +3582,7 @@
               "null"
             ],
             "format": "uuid",
-            "description": "Profile UUID of the last editor, if any"
+            "description": "Profile that last edited this resource, when available"
           },
           "merchant": {
             "type": [
@@ -3661,7 +3658,7 @@
           },
           "userId": {
             "$ref": "#/components/schemas/Uuid",
-            "description": "Owner profile UUID"
+            "description": "Profile that owns this resource"
           },
           "spaceId": {
             "type": [
@@ -3727,7 +3724,7 @@
           },
           "userId": {
             "$ref": "#/components/schemas/Uuid",
-            "description": "Owner profile UUID"
+            "description": "Profile that owns this resource"
           },
           "spaceId": {
             "type": [
@@ -3889,7 +3886,7 @@
           },
           "userId": {
             "$ref": "#/components/schemas/Uuid",
-            "description": "Owner profile UUID"
+            "description": "Profile that owns this resource"
           },
           "spaceId": {
             "type": [
@@ -4368,7 +4365,7 @@
       },
       "Error": {
         "type": "object",
-        "description": "Uniform error envelope. `category` is one of the ErrorCategory values in src/lib/errors/error-types.ts (validation, authentication, authorization, not_found, rate_limit, database, service_unavailable, network, server, unknown).",
+        "description": "Common error response returned when a request cannot be completed. Validation responses may include field-level details in `errors`.",
         "properties": {
           "message": {
             "type": "string",
@@ -4376,7 +4373,7 @@
           },
           "category": {
             "type": "string",
-            "description": "Error category (validation, authentication, ...)"
+            "description": "Broad error category for client-side handling"
           },
           "severity": {
             "type": [
@@ -5320,7 +5317,7 @@
     },
     "responses": {
       "BadRequest": {
-        "description": "Invalid request — body failed Zod validation or query parameters are invalid.",
+        "description": "The request is invalid. Check the response's `errors` details and verify the parameters or JSON body.",
         "content": {
           "application/json": {
             "schema": {
@@ -5330,7 +5327,7 @@
         }
       },
       "Unauthorized": {
-        "description": "Missing or invalid authentication. Authenticate with the Supabase session cookie or `Authorization: Bearer <access_token>`.",
+        "description": "Authentication is missing or invalid. Send a valid Supabase access token as `Authorization: Bearer <access_token>`.",
         "content": {
           "application/json": {
             "schema": {
@@ -5350,7 +5347,7 @@
         }
       },
       "NotFound": {
-        "description": "The requested entity does not exist in the active space.",
+        "description": "The requested resource was not found in the active space.",
         "content": {
           "application/json": {
             "schema": {
@@ -5360,7 +5357,7 @@
         }
       },
       "Conflict": {
-        "description": "The request conflicts with existing data (e.g. duplicate name).",
+        "description": "The request conflicts with existing data, such as a duplicate name or already-registered resource.",
         "content": {
           "application/json": {
             "schema": {
@@ -5370,7 +5367,7 @@
         }
       },
       "RateLimited": {
-        "description": "Rate limit exceeded. Retry after the `Retry-After` header. Headers `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset` describe the window.",
+        "description": "Too many requests. Wait for the `Retry-After` period before trying again. The `X-RateLimit-*` headers describe the current limit window.",
         "headers": {
           "Retry-After": {
             "description": "Seconds to wait before retrying",
@@ -5407,7 +5404,7 @@
         }
       },
       "ServerError": {
-        "description": "Unexpected server error.",
+        "description": "The server could not complete the request. Try again later.",
         "content": {
           "application/json": {
             "schema": {
@@ -5421,12 +5418,12 @@
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Supabase access token. Alternatively, authenticate with the Supabase session cookies (same session as the web app)."
+        "description": "Supabase access token sent as `Authorization: Bearer <access_token>`."
       },
       "cronAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "The server-side CRON_SECRET (not a Supabase token)."
+        "description": "Internal scheduler credential. Not used by client applications."
       }
     }
   }
