@@ -42,9 +42,9 @@ _Add screenshots for UI changes (light and dark mode if relevant)._
 
 ## Deployment impact
 
-- [ ] Requires a DB migration (`prisma/migrations/` or `supabase/migrations/` — RLS policies included)
+- [ ] Requires a DB migration (`prisma/migrations/` or `supabase/migrations/` — RLS policies included); if checked, describe apply order and rollback/forward-fix plan in the Test plan
 - [ ] Requires new environment variables (document them in the README)
-- [ ] Should not deploy: include `[skip deploy]` in the latest commit message (docs/config-only changes)
+- [ ] Should not deploy: include `[skip deploy]` in the latest commit message (documentation, workflow, or skill-only changes; never application, dependency, database, or deployment configuration changes)
 
 ---
 

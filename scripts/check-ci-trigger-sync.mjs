@@ -97,6 +97,8 @@ const rootsFromPaths = pushPaths.filter((p) => !p.includes("*")).sort();
 // prisma/ directory: regex `(^prisma/)` ⟷ paths `prisma/**`
 const prismaDirFromRegex = /\(\^prisma\/\)/.test(detectRegex);
 const prismaDirFromPaths = pushPaths.includes("prisma/**");
+const supabaseDirFromRegex = /\(\^supabase\/\)/.test(detectRegex);
+const supabaseDirFromPaths = pushPaths.includes("supabase/**");
 
 // --- Compare and report ----------------------------------------------------
 const problems = [];
@@ -115,6 +117,12 @@ if (prismaDirFromRegex !== prismaDirFromPaths) {
   problems.push(
     `prisma/ directory mismatch: paths=${prismaDirFromPaths ? "prisma/**" : "missing"}, ` +
       `regex=${prismaDirFromRegex ? "^prisma/" : "missing"}`,
+  );
+}
+if (supabaseDirFromRegex !== supabaseDirFromPaths) {
+  problems.push(
+    `supabase/ directory mismatch: paths=${supabaseDirFromPaths ? "supabase/**" : "missing"}, ` +
+      `regex=${supabaseDirFromRegex ? "^supabase/" : "missing"}`,
   );
 }
 

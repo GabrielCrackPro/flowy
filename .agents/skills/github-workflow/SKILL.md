@@ -37,8 +37,8 @@ git config core.hooksPath      # should print `.githooks` (set automatically by 
 
 - **Format:** conventional commits — `type(scope): subject`, e.g. `feat(export): add CSV download`, `fix(auth): refresh session on redirect`. Enforced by the local `commit-msg` hook and CI (`commit-conventions.yml`). Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `ci`, `perf`, `test`.
 - The pre-commit hook runs Biome (lint-staged) automatically, plus `pnpm typecheck` when the commit touches TypeScript files; a failure aborts the commit — fix it, don't bypass.
-- **`[skip deploy]` rule:** if the change contains **no code changes** (docs, screenshots, config-only, README, workflows, `.env.example`, skill files), append `[skip deploy]` to the commit message (e.g. `docs: update README [skip deploy]`). Vercel's `ignoreCommand` (`vercel.json`) greps the **latest** commit message and exits 0 (canceling the production deploy) when it matches — so put it in the latest commit of the branch. Real code changes must NOT include it.
-- Multi-commit PRs: one conventional message per commit; the final commit message is what Vercel checks.
+- **`[skip deploy]` rule:** if the change contains **no deploy-relevant changes** (for example docs, README, workflows, `.env.example`, or skill files), append `[skip deploy]` to the commit message (e.g. `docs: update README [skip deploy]`). `scripts/vercel-ignore-build.mjs` validates the changed paths before skipping. It also skips Release Please metadata commits while allowing the subsequent in-app changelog sync to deploy. Never use the marker for application, dependency, database, or deployment configuration changes.
+- Multi-commit PRs: one conventional message per commit; Vercel checks the final commit and its changed paths, so a skip marker cannot hide code changes.
 - If you can't determine whether the change is code vs. non-code, ask the user before committing.
 
 ## 3. Push & open the PR
@@ -69,7 +69,7 @@ $GH pr merge <branch> --squash --delete-branch
 
 - Prefer `--squash` so the merge commit message equals the PR title (which is conventional and passes CI's semantic-PR check).
 - Before merging, confirm: CI green, tests/manual plan done, no open review comments, and (for schema changes) the migration has been applied or is scheduled (`pnpm prisma migrate deploy` in the right environment).
-- After merging, the default branch update triggers Vercel deploy and CI automatically (unless `[skip deploy]` was in the message).
+- After merging, the default branch update triggers Vercel deploy and CI automatically. Release metadata-only commits are skipped by the path-aware Vercel command; application and changelog-data commits still deploy. A production smoke workflow then verifies `/api/health`.
 
 ## 5. After merging
 
