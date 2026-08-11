@@ -22,6 +22,7 @@ on:
       - "**/*.css"
       - "**/*.prisma"
       - "prisma/**"
+      - "supabase/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "next.config.ts"
@@ -47,7 +48,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Detect code changes
         id: code
@@ -66,7 +67,7 @@ jobs:
           fi
           echo "Changed files:"
           printf '%s\n' "$CHANGED"
-          if [ -z "$CHANGED" ] || printf '%s\n' "$CHANGED" | grep -qE '(\.(ts|tsx|js|jsx|mjs|cjs|css|prisma)$)|(^prisma/)|(^package\.json$)|(^pnpm-lock\.yaml$)|(^next\.config\.ts$)|(^tailwind\.config\.ts$)|(^postcss\.config\.mjs$)|(^components\.json$)'
+          if [ -z "$CHANGED" ] || printf '%s\n' "$CHANGED" | grep -qE '(\.(ts|tsx|js|jsx|mjs|cjs|css|prisma)$)|(^prisma/)|(^supabase/)|(^package\.json$)|(^pnpm-lock\.yaml$)|(^next\.config\.ts$)|(^tailwind\.config\.ts$)|(^postcss\.config\.mjs$)|(^components\.json$)'
           then
             echo "code_changed=true" >> "$GITHUB_OUTPUT"
             echo "::notice::Code changes detected — running Typecheck & Build."
@@ -76,10 +77,10 @@ jobs:
           fi
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: pnpm
@@ -88,7 +89,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Cache Next.js build
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
@@ -124,13 +125,13 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: pnpm
@@ -169,7 +170,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Regenerate changelog data from CHANGELOG.md
         run: node scripts/generate-changelog.mjs
@@ -198,7 +199,9 @@ jobs:
       pull-requests: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
 
       - name: Branch name convention
         # Bot PRs are exempt — their branches (dependabot/pnpm/...,
@@ -219,7 +222,8 @@ jobs:
           fi
           echo "Branch '$BRANCH' follows the <type>/<kebab-slug> convention."
 
-      - name: PR links an issue (code changes only)
+      - name: Read PR metadata
+        id: pr_body
         if: ${{ !endsWith(github.event.pull_request.user.login, '[bot]') }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -227,6 +231,19 @@ jobs:
           PR="${{ github.event.pull_request.number }}"
           TITLE=$(gh pr view "$PR" --repo "${{ github.repository }}" --json title -q .title)
           BODY=$(gh pr view "$PR" --repo "${{ github.repository }}" --json body -q .body)
+          {
+            echo 'body<<EOF'
+            echo "$BODY"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+
+      - name: PR links an issue (code changes only)
+        if: ${{ !endsWith(github.event.pull_request.user.login, '[bot]') }}
+        env:
+          TITLE: ${{ steps.pr_body.outputs.title }}
+          BODY: ${{ steps.pr_body.outputs.body }}
+        run: |
           TYPE="${TITLE%%:*}"        # "feat(export): ..." -> "feat(export)"
           TYPE="${TYPE%%(*}"         # strip scope         -> "feat"
           if [[ "$TYPE" =~ ^(feat|fix|refactor|perf|test)$ ]]; then
@@ -239,11 +256,36 @@ jobs:
             echo "PR type '$TYPE' does not require an issue link."
           fi
 
+      - name: Database migration disclosure
+        if: ${{ !endsWith(github.event.pull_request.user.login, '[bot]') }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
+          BODY: ${{ steps.pr_body.outputs.body }}
+        run: |
+          CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          MIGRATION_FILES=$(printf '%s\n' "$CHANGED" | grep -E '^(prisma/migrations/|supabase/migrations/|prisma/schema\.prisma$)' || true)
+
+          if [ -z "$MIGRATION_FILES" ]; then
+            echo "No database migration files changed."
+            exit 0
+          fi
+
+          echo "Database-related files changed:"
+          printf '%s\n' "$MIGRATION_FILES"
+          if ! grep -qiE '\[[xX]\][[:space:]]*Requires a DB migration' <<< "$BODY"; then
+            echo "::error::Database changes require the PR template checkbox '[x] Requires a DB migration' and an apply/rollback plan in the Test plan."
+            exit 1
+          fi
+
+          if printf '%s\n' "$MIGRATION_FILES" | grep -q '^prisma/schema\.prisma$' && ! printf '%s\n' "$CHANGED" | grep -q '^prisma/migrations/'; then
+            echo "::error::prisma/schema.prisma changed without a matching Prisma migration."
+            exit 1
+          fi
+          echo "Migration disclosure is present and schema changes include a Prisma migration."
+
       - name: Push trigger paths in sync with code-change regex
-        # The push-trigger `paths` filter (on.push) must mirror the "Detect
-        # code changes" regex in the quality job — if they drift, a code
-        # merge could silently skip the push re-verification. The check
-        # derives both sides from the workflow file and fails on any mismatch
-        # (extensions, root config files, prisma/). Bot PRs are not exempt:
-        # a bot that touches ci.yml must keep it consistent too.
+        # The push-trigger `paths` filter (on.push.paths) must mirror the
+        # "Detect code changes" regex in the quality job. The check derives
+        # both sides from the workflow file and fails on any mismatch.
         run: node scripts/check-ci-trigger-sync.mjs

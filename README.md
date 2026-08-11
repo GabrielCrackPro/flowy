@@ -90,7 +90,7 @@ Track income and expenses, plan budgets, save toward goals, and keep an eye on r
 
 ### Prerequisites
 
-- **Node.js 22.13+** (Next.js 16 needs 20.9+; CI runs on Node 24)
+- **Node.js 24.x** (pinned in `package.json`; CI and the production migration workflow use the same version)
 - **pnpm** (v11 — this repo uses a pnpm workspace)
 - A **Supabase project** (free tier works)
 - A **PostgreSQL connection string** for Prisma
@@ -98,7 +98,7 @@ Track income and expenses, plan budgets, save toward goals, and keep an eye on r
 ### 1. Install dependencies
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 ```
 
 `postinstall` runs `prisma generate`, so the Prisma client is ready right after.
@@ -184,6 +184,7 @@ Flowy ships an **OpenAPI 3.1** specification for its whole REST surface (53 oper
 | `VAPID_SUBJECT` | — | Contact for the push service (defaults to `mailto:no-reply@flowy.app`) |
 | `RATE_LIMIT_ENABLED` | — | `false` disables API rate limiting (enabled by default) |
 | `RATE_LIMIT_*_REQUESTS` / `RATE_LIMIT_*_WINDOW` | — | Per-route rate limit overrides (requests / window in ms) |
+| GitHub `deploy-production` → `DATABASE_URL` | ✅ for migrations | Environment secret used by the approval-gated production migration workflow |
 
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` is accepted as a fallback for `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Every variable listed here is documented in `.env.example`.
 
@@ -193,26 +194,31 @@ The project deploys on **Vercel**. `vercel.json` pins the build command, the reg
 
 1. Push the repo to GitHub and import it in Vercel
 2. Add every variable from the [environment table](#-environment-variables) under Project Settings
-3. Deploy — Vercel runs `pnpm install` (generating the Prisma client), then `pnpm build`
-4. After deploying, run `pnpm prisma migrate deploy` against the production database once
+3. Deploy — Vercel runs `pnpm install --frozen-lockfile` (generating the Prisma client), then `pnpm build`
+4. For schema changes, apply Prisma migrations first from the protected **Migrate production** workflow, then deploy the compatible application code. Supabase SQL migrations still require the documented controlled database process because the repository contains both Prisma and Supabase migration histories.
 
-💡 Commits whose message contains `[skip deploy]` cancel the deployment via Vercel's ignored build step — configured entirely in `vercel.json`, no dashboard setup needed.
+💡 `vercel.json` uses `scripts/vercel-ignore-build.mjs` to skip only explicitly non-deployable commits. It also skips the intermediate Release Please metadata commit; the following changelog sync PR still deploys the in-app release data. Application, dependency, database, and deployment configuration changes always deploy.
 
-▶️ **Manual deploy:** if a deploy was skipped (`[skip deploy]`) or failed, run the **Manual Deploy** workflow from the Actions tab — pick `production` or `preview` and a ref (branch/tag/SHA) to force it. Uses the `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` secrets. **Production manual deploys require your approval** — they run in the protected `deploy-production` environment (required reviewer + `main`-only branch policy), kept separate from Vercel's own `Production` environment so auto-deploys are never blocked.
+▶️ **Manual deploy:** if a deploy was skipped or failed, run the **Manual Deploy** workflow from the Actions tab — pick `production` or `preview` and a ref (branch/tag/SHA) to force it. Uses the `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` secrets and validates the database-backed `/api/health` endpoint. **Production manual deploys require your approval** — they run in the protected `deploy-production` environment (required reviewer + `main`-only branch policy), kept separate from Vercel's own `Production` environment so auto-deploys are never blocked.
+
+🗄️ **Production migrations:** when a PR changes Prisma migrations, run **Migrate production** with confirmation `APPLY` and approve the protected environment before deploying code that depends on the new schema. The workflow runs `pnpm prisma migrate deploy` from `main`; Supabase SQL migrations must be applied in their controlled order before the Prisma migration when both are needed. Configure `DATABASE_URL` as an environment secret on `deploy-production`.
 
 ### CI & Automation
 
-Five GitHub Actions workflows guard the repo:
+Eight GitHub Actions workflows guard the repo:
 
 | Workflow | What it does |
 | --- | --- |
 | **CI** (`ci.yml`) | `pnpm lint`, `pnpm typecheck`, `pnpm build` on every PR, and on pushes to `main` only when the merge touched code/config (docs/CI-only merges skip it). Typecheck & build skip on docs/config-only changes (the required check is always reported); a `Branch & PR conventions` guardrails job enforces branch naming, issue links, and keeps the push-trigger paths in sync with the code-change regex; an `API Docs` job regenerates the OpenAPI spec, fails on drift, and lints it with Redocly |
 | **Commit conventions** | PR titles and commit messages match conventional commits |
-| **Release** | Release-please auto-generates the changelog + GitHub releases from conventional commits — **only `feat`/`fix`/`perf` (and breaking changes) trigger a release**; docs/CI work rides along silently |
-| **Manual Deploy** (`deploy-manual.yml`) | Triggered from the Actions tab (`workflow_dispatch`): deploy any ref to `production` or `preview`, with a post-deploy health check. Production runs in the protected `deploy-production` environment (needs your approval; `main` only) |
+| **Release** | Release Please opens a release PR from conventional commits — merge it on the desired release cadence; **only `feat`/`fix`/`perf` (and breaking changes) trigger a release**, while docs/CI work rides along silently |
+| **Manual Deploy** (`deploy-manual.yml`) | Triggered from the Actions tab (`workflow_dispatch`): deploy any ref to `production` or `preview`, with a database-backed `/api/health` check. Production runs in the protected `deploy-production` environment (needs your approval; `main` only) |
+| **Production smoke** (`production-smoke.yml`) | Checks `/api/health` after every successful Vercel Production deployment |
+| **Migrate production** (`migrate-production.yml`) | Approval-gated `pnpm prisma migrate deploy` workflow for committed Prisma migrations |
 | **Update Board on Merge** (`board-update.yml`) | Moves issues referenced with `Closes/Fixes/Resolves #N` to Done on the Flowy board |
+| **Sync changelog data** (`sync-changelog.yml`) | Regenerates and deploys the in-app changelog after a Release Please publication |
 
-`main` is protected by the **"Block main"** ruleset: pull requests required, no force-push/deletion, **squash-only** merges (merge commits and rebase are disabled repo-wide, and branches auto-delete on merge), and three status checks must pass before merge — `Lint, Typecheck & Build`, `API Docs (OpenAPI drift + lint)` and `Changelog (drift guard)`. Codeowner review is not required, so bot PRs (like the changelog sync) auto-merge once CI is green.
+`main` is protected by the **"Block main"** ruleset: pull requests required, no force-push/deletion, **squash-only** merges (merge commits and rebase are disabled repo-wide, and branches auto-delete on merge), strict up-to-date status checks, and the quality, API docs, changelog, branch/PR guardrails, and conventional-commit checks must pass before merge. Codeowner review is not required, so bot PRs (like the changelog sync) can auto-merge once the required checks are green.
 
 ## 🤝 Contributing
 
@@ -220,8 +226,8 @@ Flowy is a solo project developed in spare time, but contributions are welcome �
 
 - **Branches, not `main`:** every change ships as a pull request. Create a `<type>/<kebab-slug>` branch, commit with a conventional message, push, and open a PR — never commit to `main` directly.
 - **Commits** must follow [conventional commits](https://www.conventionalcommits.org) (`feat:`, `fix(scope):`, ...) — enforced by the local `commit-msg` hook and CI. Docs-only changes should carry `[skip deploy]`.
-- **Quality gates**: pre-commit runs Biome (lint-staged) and typecheck when the commit touches TypeScript; CI runs lint, typecheck, and build on every PR. All must pass before merge.
-- **Schema changes** ship as both a numbered SQL migration in `supabase/migrations/` and the matching Prisma schema update.
+- **Quality gates**: pre-commit runs Biome (lint-staged) and typecheck when the commit touches TypeScript; CI runs lint, typecheck, build, API drift checks, changelog drift checks, branch/issue policy checks, and conventional-commit validation. Database changes must disclose the migration checkbox and an apply/rollback plan.
+- **Schema changes** ship as both a numbered SQL migration in `supabase/migrations/` and the matching Prisma schema update. Apply compatible database changes before dependent application code using the protected migration workflow.
 - **User-facing strings** must be added to both `src/lib/i18n/locales/en.ts` and `es.ts`.
 - **AI-assisted development:** see [AGENTS.md](AGENTS.md) for the working strategy and conventions — it also documents the `github-issues` and `github-project-board` skills used to manage the Flowy board.
 

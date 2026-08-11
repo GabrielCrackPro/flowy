@@ -1,0 +1,45 @@
+name: Production smoke check
+run-name: 'Production smoke · ${{ github.event.deployment.sha }}'
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-smoke
+  cancel-in-progress: true
+
+jobs:
+  health:
+    name: Production health endpoint
+    if: >-
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check production health
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://flowy-jade.vercel.app/api/health"
+          for attempt in 1 2 3 4 5; do
+            RESPONSE=$(curl -f -sS --max-time 30 "$URL" 2>/dev/null || true)
+            if [ -n "$RESPONSE" ] && printf '%s' "$RESPONSE" | node -e '
+              let input = "";
+              process.stdin.on("data", (chunk) => (input += chunk));
+              process.stdin.on("end", () => {
+                const body = JSON.parse(input);
+                process.exit(body.status === "healthy" && body.database === "connected" ? 0 : 1);
+              });
+            '; then
+              echo "✅ Production health check passed on attempt $attempt"
+              exit 0
+            fi
+            echo "Attempt $attempt failed; retrying in 5 seconds..."
+            sleep 5
+          done
+          echo "❌ Production health check failed"
+          exit 1
