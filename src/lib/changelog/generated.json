@@ -2,6 +2,18 @@
   "currentVersion": "0.1.18",
   "entries": [
     {
+      "version": "0.1.18",
+      "date": "2026-08-11",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            "**api-docs:** add branded Scalar API reference (#106)"
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.17",
       "date": "2026-08-10",
       "sections": [
