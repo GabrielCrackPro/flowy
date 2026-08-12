@@ -2,6 +2,21 @@
   "currentVersion": "0.1.28",
   "entries": [
     {
+      "version": "0.1.28",
+      "date": "2026-08-12",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "complete push notifications with preferences, devices, and reliability (#150)",
+              "scope": "pwa"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.27",
       "date": "2026-08-12",
       "sections": [
