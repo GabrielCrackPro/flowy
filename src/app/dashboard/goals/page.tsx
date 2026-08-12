@@ -116,7 +116,7 @@ export default function GoalsPage() {
             title={t("nav.goals")}
             href="/dashboard"
             actions={
-              <GradientButton onClick={openCreate}>
+              <GradientButton onClick={openCreate} fullWidth={false}>
                 <span className="hidden sm:inline">{t("goals.new")}</span>
               </GradientButton>
             }

@@ -145,8 +145,9 @@ export function EntityListView<T>({
           value={searchQuery}
           onChange={onSearchQueryChange}
           placeholder={searchPlaceholder}
+          className="min-w-0 flex-1"
         />
-        <ViewToggle value={view} onChange={onViewChange} />
+        <ViewToggle value={view} onChange={onViewChange} className="shrink-0" />
       </motion.div>
 
       <motion.div

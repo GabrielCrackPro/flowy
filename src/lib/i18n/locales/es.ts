@@ -289,6 +289,7 @@ export const app: AppTranslationMessages = {
       title: "Acerca de Flowy",
       description: "Versión de la app y últimos cambios",
       whatNew: "Novedades",
+      releasedOn: "Publicado",
     },
   },
   changelog: {

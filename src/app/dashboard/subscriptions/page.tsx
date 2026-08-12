@@ -279,7 +279,7 @@ export default function SubscriptionsPage() {
             title={t("nav.subscriptions")}
             href="/dashboard"
             actions={
-              <GradientButton onClick={openCreate}>
+              <GradientButton onClick={openCreate} fullWidth={false}>
                 <span className="hidden sm:inline">
                   {t("subscriptions.new")}
                 </span>
