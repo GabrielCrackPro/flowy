@@ -4,11 +4,13 @@ import type * as React from "react";
 import { Icon, type IconProps } from "@/components/shared/icon";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { X } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface SheetLayoutProps {
@@ -79,6 +81,10 @@ export function SheetLayout({
                 </p>
               )}
             </div>
+            <SheetClose className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground/40 transition hover:bg-muted/50 hover:text-foreground">
+              <Icon icon={X} className="size-4" />
+              <span className="sr-only">Close</span>
+            </SheetClose>
           </div>
         </SheetHeader>
 
