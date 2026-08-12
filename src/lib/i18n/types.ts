@@ -283,6 +283,15 @@ export type AppTranslationMessages = {
     showAll: string;
     showLess: string;
     viewFull: string;
+    countFeatures_one: string;
+    countFeatures_other: string;
+    countFixes_one: string;
+    countFixes_other: string;
+    olderReleases: string;
+    englishOnlyNote: string;
+    searchPlaceholder: string;
+    noFilterResults: string;
+    newLabel: string;
   };
   insights: {
     title: string;
