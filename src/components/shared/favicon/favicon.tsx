@@ -8,6 +8,8 @@ const FAVICONS = {
   dark: "/favicon-dark.svg?v=2",
 } as const;
 
+const FAVICON_LINK_ID = "flowy-theme-favicon";
+
 export function Favicon() {
   const { resolvedTheme } = useThemeContext();
   const linkRef = useRef<HTMLLinkElement | null>(null);
@@ -16,8 +18,10 @@ export function Favicon() {
     if (!resolvedTheme) return;
 
     linkRef.current?.remove();
+    document.getElementById(FAVICON_LINK_ID)?.remove();
 
     const link = document.createElement("link");
+    link.id = FAVICON_LINK_ID;
     link.rel = "icon";
     link.type = "image/svg+xml";
     link.sizes = "any";

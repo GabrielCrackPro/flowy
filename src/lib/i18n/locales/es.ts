@@ -611,6 +611,9 @@ export const app: AppTranslationMessages = {
     edit: "Editar suscripción",
     searchPlaceholder: "Buscar por nombre...",
     emptyAction: "Crear tu primera suscripción",
+    active: "Activas",
+    monthlyTotal: "Al mes",
+    yearlyTotal: "Al año",
     totalMonthly: "Gasto mensual",
     nextPayment: "Próximo cobro",
     cycles: {
@@ -634,6 +637,11 @@ export const app: AppTranslationMessages = {
     monthlyEquivalent: "Gasto mensual estimado",
     noNextPayment: "Sin fecha",
     quickPayment: "Registrar pago",
+    recordPayment: "Registrar pago",
+    confirmPayment: "Confirmar",
+    deleteTitle: "¿Eliminar suscripción?",
+    deleteDescription:
+      "Esto eliminará permanentemente esta suscripción. Esta acción no se puede deshacer.",
   },
   transaction: {
     pageTitle: "Nueva transacción",

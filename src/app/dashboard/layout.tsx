@@ -1,12 +1,14 @@
 import { Header, Sidebar } from "@components/dashboard";
 import { OfflineBanner } from "@components/shared/offline-banner";
 import { PageTransition } from "@components/shared/page-transition";
-import type { Metadata } from "next";
 import { Suspense } from "react";
+import { createPageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Resumen",
-};
+export const metadata = createPageMetadata(
+  "Dashboard",
+  "See your financial summary, cash flow, budgets, goals, and recurring payments in Flowy.",
+  "/dashboard",
+);
 
 export default function DashboardLayout({
   children,
