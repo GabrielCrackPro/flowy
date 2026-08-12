@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.25](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.24...flowy-v0.1.25) (2026-08-12)
+
+
+### Features
+
+* **pwa:** add background sync, bottom nav, FAB, haptics, and unify PWA hooks ([#136](https://github.com/GabrielCrackPro/flowy/issues/136)) ([94dde3b](https://github.com/GabrielCrackPro/flowy/commit/94dde3bdb07623f9ebb86bd3c18827d0494c2cef))
+
 ## [0.1.24](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.23...flowy-v0.1.24) (2026-08-12)
 
 
