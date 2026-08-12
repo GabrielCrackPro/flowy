@@ -3660,7 +3660,8 @@
         "parameters": [
           {
             "name": "component",
-            "in": "query",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string",
               "enum": [
@@ -3758,7 +3759,13 @@
         },
         "description": "Admin only. Posts a new incident that appears on the public status page.",
         "requestBody": {
-          "$ref": "#/components/schemas/CreateIncidentRequest"
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIncidentRequest"
+              }
+            }
+          }
         },
         "x-flowy-rate-limit": "20 requests / 120s"
       }
@@ -3806,15 +3813,23 @@
         "parameters": [
           {
             "name": "id",
-            "in": "query",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Entity UUID"
           }
         ],
         "requestBody": {
-          "$ref": "#/components/schemas/UpdateIncidentRequest"
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIncidentRequest"
+              }
+            }
+          }
         },
         "x-flowy-rate-limit": "20 requests / 120s"
       },
@@ -3860,11 +3875,13 @@
         "parameters": [
           {
             "name": "id",
-            "in": "query",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Entity UUID"
           }
         ],
         "x-flowy-rate-limit": "20 requests / 120s"
@@ -3904,11 +3921,13 @@
         "parameters": [
           {
             "name": "id",
-            "in": "query",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Entity UUID"
           }
         ],
         "x-flowy-rate-limit": "20 requests / 120s"

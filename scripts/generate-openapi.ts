@@ -243,6 +243,10 @@ function qp(name: string, schema: Json, description?: string): Json {
   return { name, in: "query", schema, description };
 }
 
+function pp(name: string, schema: Json, description?: string): Json {
+  return { name, in: "path", required: true, schema, description };
+}
+
 function responses(
   ok: Json,
   opts: {
@@ -3111,7 +3115,7 @@ paths["/api/status/component/{component}"] = {
     tags: ["System"],
     security: NO_AUTH,
     parameters: [
-      qp("component", {
+      pp("component", {
         type: "string",
         enum: ["api", "database", "auth", "push", "storage"],
       }),
@@ -3179,7 +3183,11 @@ paths["/api/status/incidents"] = {
     description:
       "Admin only. Posts a new incident that appears on the public status page.",
     tags: ["System"],
-    requestBody: ref("CreateIncidentRequest"),
+    requestBody: {
+      content: {
+        "application/json": { schema: ref("CreateIncidentRequest") },
+      },
+    },
     responses: responses(
       {
         201: {
@@ -3202,8 +3210,12 @@ paths["/api/status/incidents/{id}"] = {
     description:
       "Admin only. Changes the incident status (e.g. investigating → monitoring → resolved) and appends a timeline entry.",
     tags: ["System"],
-    parameters: [qp("id", { type: "string", format: "uuid" })],
-    requestBody: ref("UpdateIncidentRequest"),
+    parameters: [ID_PARAM],
+    requestBody: {
+      content: {
+        "application/json": { schema: ref("UpdateIncidentRequest") },
+      },
+    },
     responses: responses(
       {
         200: {
@@ -3223,7 +3235,7 @@ paths["/api/status/incidents/{id}"] = {
     description:
       "Admin only. Publishes a draft incident (auto-created from status checks) so it appears on the public status page.",
     tags: ["System"],
-    parameters: [qp("id", { type: "string", format: "uuid" })],
+    parameters: [ID_PARAM],
     responses: responses(
       {
         200: {
@@ -3243,7 +3255,7 @@ paths["/api/status/incidents/{id}"] = {
     description:
       "Admin only. Permanently removes the incident and its timeline from the status page.",
     tags: ["System"],
-    parameters: [qp("id", { type: "string", format: "uuid" })],
+    parameters: [ID_PARAM],
     responses: responses(
       {
         204: {
