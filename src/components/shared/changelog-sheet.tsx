@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared/icon";
+import { SearchInput } from "@/components/shared/search-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { SheetLayout } from "@/components/ui/sheet-layout";
 import { useLocaleContext } from "@/context/LocaleContext";
 import {
@@ -20,9 +20,7 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
-  Search,
   Sparkles,
-  X,
 } from "@/lib/icons";
 
 const CHANGELOG_URL =
@@ -275,27 +273,12 @@ export function ChangelogSheet({ open, onOpenChange }: ChangelogSheetProps) {
       }
     >
       {/* Search bar */}
-      <div className="relative mb-4">
-        <Icon
-          icon={Search}
-          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/50"
-        />
-        <Input
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={t("changelog.searchPlaceholder")}
-          className="h-9 pl-9 pr-8 text-sm"
-        />
-        {q && (
-          <button
-            type="button"
-            onClick={() => setSearchQuery("")}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground/50 hover:text-muted-foreground"
-          >
-            <X className="size-3.5" />
-          </button>
-        )}
-      </div>
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder={t("changelog.searchPlaceholder")}
+        className="mb-4"
+      />
 
       {isEmpty ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
