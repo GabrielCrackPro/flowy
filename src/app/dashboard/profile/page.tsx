@@ -32,6 +32,7 @@ import {
 } from "@/lib/changelog";
 import { scopeColor } from "@/lib/changelog/scope";
 import {
+  Activity,
   BookOpen,
   CalendarDays,
   Coins,
@@ -406,6 +407,12 @@ export default function SettingsPage() {
                     <Icon icon={ExternalLink} className="size-4" />
                     {t("changelog.viewFull")}
                   </a>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/status">
+                    <Icon icon={Activity} className="size-4" />
+                    {t("settings.about.status")}
+                  </Link>
                 </Button>
               </div>
             </CardContent>

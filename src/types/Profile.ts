@@ -11,5 +11,6 @@ export interface Profile {
   primaryColor: string | null;
   secondaryColor: string | null;
   accentColor: string | null;
+  role: "user" | "admin";
   createdAt: string;
 }

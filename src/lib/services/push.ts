@@ -9,6 +9,8 @@ export interface PushAlertPayload {
   tag?: string;
   /** Alert type, used to honor per-type push preferences. Absent on test pushes. */
   type?: string;
+  /** Status component, used to honor per-component status alert preferences. */
+  component?: string;
 }
 
 const NOTIFICATION_ICON = "/icons/icon-192.png";
@@ -27,6 +29,13 @@ function getWebPushClient(): typeof webpush | null {
 }
 
 export const PushService = {
+  /** Whether VAPID keys are configured (used by the status page). */
+  isConfigured(): boolean {
+    return (
+      Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) &&
+      Boolean(process.env.VAPID_PRIVATE_KEY)
+    );
+  },
   /**
    * Delivers push notifications for the given alerts to every device
    * subscribed by the user. Subscriptions that no longer exist on the push
@@ -100,6 +109,106 @@ export const PushService = {
                 p256dh: subscription.p256dh,
                 auth: subscription.auth,
               },
+            },
+            payload,
+            { TTL: NOTIFICATION_TTL_SECONDS },
+          );
+          sent += 1;
+        } catch (error) {
+          const statusCode = (error as { statusCode?: number }).statusCode;
+          if (statusCode === 404 || statusCode === 410) {
+            await prisma.pushSubscription.deleteMany({
+              where: { id: subscription.id },
+            });
+            removed += 1;
+          } else {
+            console.error("Push notification delivery failed", error);
+          }
+        }
+      }
+    }
+
+    return { sent, removed };
+  },
+
+  /**
+   * Sends alerts to every device subscribed across all users (used for
+   * platform-wide notices like the status page). Honors each user's status
+   * alert preferences (master switch + per-component opt-outs). Stale
+   * subscriptions (404/410) are removed from the database.
+   */
+  async broadcast(
+    alerts: PushAlertPayload[],
+  ): Promise<{ sent: number; removed: number }> {
+    const client = getWebPushClient();
+    if (!client || alerts.length === 0) {
+      return { sent: 0, removed: 0 };
+    }
+
+    const subscriptions = await prisma.pushSubscription.findMany({
+      select: {
+        id: true,
+        userId: true,
+        endpoint: true,
+        p256dh: true,
+        auth: true,
+      },
+    });
+
+    // Load each affected user's status alert preferences once, keyed by user.
+    const userIds = [...new Set(subscriptions.map((s) => s.userId))];
+    const profiles = await prisma.profile.findMany({
+      where: { id: { in: userIds } },
+      select: {
+        id: true,
+        statusAlertsEnabled: true,
+        statusAlertComponents: true,
+      },
+    });
+    const prefsByUser = new Map(
+      profiles.map((p) => [
+        p.id,
+        {
+          enabled: p.statusAlertsEnabled,
+          components: p.statusAlertComponents,
+        },
+      ]),
+    );
+
+    let sent = 0;
+    let removed = 0;
+
+    for (const subscription of subscriptions) {
+      const prefs = prefsByUser.get(subscription.userId);
+      // Users without a profile row default to receiving everything.
+      const enabled = prefs ? prefs.enabled : true;
+      if (!enabled) continue;
+      const allowedComponents = prefs ? prefs.components : [];
+
+      for (const alert of alerts) {
+        // Empty component list = all components (legacy default).
+        if (
+          alert.component &&
+          allowedComponents.length > 0 &&
+          !allowedComponents.includes(alert.component)
+        ) {
+          continue;
+        }
+
+        const payload = JSON.stringify({
+          title: alert.title,
+          body: alert.description ?? undefined,
+          url: alert.url ?? "/dashboard",
+          tag: alert.tag,
+          icon: NOTIFICATION_ICON,
+          badge: NOTIFICATION_ICON,
+        });
+
+        try {
+          await client.sendNotification(
+            {
+              endpoint: subscription.endpoint,
+              keys: { p256dh: subscription.p256dh, auth: subscription.auth },
             },
             payload,
             { TTL: NOTIFICATION_TTL_SECONDS },

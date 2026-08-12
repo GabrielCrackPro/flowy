@@ -243,6 +243,10 @@ function qp(name: string, schema: Json, description?: string): Json {
   return { name, in: "query", schema, description };
 }
 
+function pp(name: string, schema: Json, description?: string): Json {
+  return { name, in: "path", required: true, schema, description };
+}
+
 function responses(
   ok: Json,
   opts: {
@@ -1050,6 +1054,311 @@ const schemas: Record<string, Json> = {
       },
     },
   },
+  ServiceCheck: {
+    type: "object",
+    description: "A single component check powering the status page.",
+    properties: {
+      id: {
+        type: "string",
+        enum: ["api", "database", "auth", "push", "storage"],
+        description: "Component identifier",
+      },
+      status: {
+        type: "string",
+        enum: ["ok", "degraded", "down"],
+        description: "Component status",
+      },
+      latencyMs: {
+        type: "integer",
+        description: "Probe latency in milliseconds",
+      },
+      detail: {
+        type: ["string", "null"],
+        description: "Optional failure detail",
+      },
+    },
+  },
+  UptimeBar: {
+    type: "object",
+    description: "Worst component status recorded for a single UTC day.",
+    properties: {
+      date: {
+        type: "string",
+        format: "date",
+        description: "Day (yyyy-mm-dd, UTC)",
+      },
+      status: {
+        type: ["string", "null"],
+        enum: ["ok", "degraded", "down"],
+        description: "Worst status that day, or null when no checks ran",
+      },
+    },
+  },
+  StatusResponse: {
+    type: "object",
+    description:
+      "Live status snapshot plus uptime history for the status page.",
+    properties: {
+      overall: {
+        type: "string",
+        enum: ["ok", "degraded", "down"],
+        description: "Worst status across all components",
+      },
+      components: {
+        type: "array",
+        items: ref("ServiceCheck"),
+        description: "Per-component checks",
+      },
+      generatedAt: {
+        type: "string",
+        format: "date-time",
+        description: "Check time (ISO 8601)",
+      },
+      history: {
+        type: "object",
+        additionalProperties: {
+          type: "array",
+          items: ref("UptimeBar"),
+        },
+        description: "Per-component uptime bars for the last 90 days",
+      },
+      uptime: {
+        type: "object",
+        additionalProperties: {
+          type: ["number", "null"],
+          description: "Ok/total check ratio over the window, as a percentage",
+        },
+        description: "Per-component uptime percentage over the history window",
+      },
+      lastFailure: {
+        type: "object",
+        additionalProperties: {
+          type: ["string", "null"],
+          format: "date-time",
+          description: "Most recent non-ok check within the window, or null",
+        },
+        description: "Most recent failure time per component",
+      },
+      latency: {
+        type: "object",
+        additionalProperties: {
+          type: "array",
+          items: { type: "number", description: "Check latency in ms" },
+        },
+        description: "Recent check latencies per component, for sparklines",
+      },
+      incidents: {
+        type: "array",
+        items: ref("Incident"),
+        description: "Active (unresolved) incidents",
+      },
+      maintenance: {
+        type: "array",
+        items: ref("Incident"),
+        description: "Unresolved scheduled maintenance windows",
+      },
+    },
+  },
+  CronStatusResponse: {
+    type: "object",
+    properties: {
+      overall: {
+        type: "string",
+        enum: ["ok", "degraded", "down"],
+        description: "Worst status across all components",
+      },
+      components: {
+        type: "array",
+        items: { type: "string" },
+        description: "Checked component ids",
+      },
+      checkedAt: {
+        type: "string",
+        format: "date-time",
+        description: "Check time (ISO 8601)",
+      },
+      transitions: {
+        type: "integer",
+        description: "Number of status transitions detected (and alerted)",
+      },
+      drafts: {
+        type: "integer",
+        description: "Draft incidents auto-created from down transitions",
+      },
+    },
+  },
+  StatusSummaryResponse: {
+    type: "object",
+    description:
+      "Last recorded status snapshot without running live probes — cheap enough for the in-app header dot and external uptime monitors.",
+    properties: {
+      overall: {
+        type: "string",
+        enum: ["ok", "degraded", "down"],
+        description: "Worst status across all components",
+      },
+      components: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+              enum: ["api", "database", "auth", "push", "storage"],
+            },
+            status: {
+              type: "string",
+              enum: ["ok", "degraded", "down"],
+            },
+          },
+        },
+        description: "Last recorded status per component",
+      },
+      updatedAt: {
+        type: ["number", "null"],
+        description: "Unix ms of the most recent recorded check",
+      },
+      hasIncidents: {
+        type: "boolean",
+        description: "Whether any incident is currently active",
+      },
+      incidents: {
+        type: "array",
+        items: ref("Incident"),
+        description:
+          "Active (unresolved) incidents — used by the in-app banner",
+      },
+    },
+  },
+  IncidentUpdate: {
+    type: "object",
+    description: "A timeline entry for a status incident.",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      status: {
+        type: "string",
+        enum: ["investigating", "monitoring", "resolved"],
+      },
+      message: { type: ["string", "null"] },
+      createdAt: { type: "string", format: "date-time" },
+    },
+  },
+  Incident: {
+    type: "object",
+    description: "An outage or maintenance post shown on the status page.",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      title: { type: "string" },
+      message: { type: ["string", "null"] },
+      status: {
+        type: "string",
+        enum: ["investigating", "monitoring", "resolved"],
+      },
+      severity: {
+        type: "string",
+        enum: ["minor", "major", "critical"],
+        description: "Impact severity of the incident",
+      },
+      draft: {
+        type: "boolean",
+        description:
+          "Draft incidents are hidden from the public page until published",
+      },
+      component: {
+        type: ["string", "null"],
+        enum: ["api", "database", "auth", "push", "storage"],
+        description: "Affected component, or null for the whole platform",
+      },
+      type: {
+        type: "string",
+        enum: ["incident", "maintenance"],
+        description: "Outage incident or scheduled maintenance",
+      },
+      scheduledStart: {
+        type: ["string", "null"],
+        format: "date-time",
+        description: "Maintenance window start",
+      },
+      scheduledEnd: {
+        type: ["string", "null"],
+        format: "date-time",
+        description: "Maintenance window end",
+      },
+      createdAt: { type: "string", format: "date-time" },
+      updatedAt: { type: "string", format: "date-time" },
+      resolvedAt: { type: ["string", "null"], format: "date-time" },
+      updates: {
+        type: "array",
+        items: ref("IncidentUpdate"),
+        description: "Timeline of status changes",
+      },
+    },
+  },
+  CreateIncidentRequest: {
+    type: "object",
+    properties: {
+      title: { type: "string", maxLength: 200 },
+      message: { type: ["string", "null"], maxLength: 2000 },
+      status: {
+        type: "string",
+        enum: ["investigating", "monitoring"],
+        default: "investigating",
+      },
+      severity: {
+        type: "string",
+        enum: ["minor", "major", "critical"],
+        default: "major",
+      },
+      type: {
+        type: "string",
+        enum: ["incident", "maintenance"],
+        default: "incident",
+      },
+      component: {
+        type: ["string", "null"],
+        enum: ["api", "database", "auth", "push", "storage"],
+      },
+      scheduledStart: {
+        type: ["string", "null"],
+        format: "date-time",
+        description: "Required when type is maintenance",
+      },
+      scheduledEnd: {
+        type: ["string", "null"],
+        format: "date-time",
+        description: "Required when type is maintenance",
+      },
+    },
+    required: ["title"],
+  },
+  UpdateIncidentRequest: {
+    type: "object",
+    properties: {
+      status: {
+        type: "string",
+        enum: ["investigating", "monitoring", "resolved"],
+      },
+      message: { type: ["string", "null"], maxLength: 2000 },
+    },
+    required: ["status"],
+  },
+  IncidentsListResponse: {
+    type: "object",
+    properties: {
+      incidents: {
+        type: "array",
+        items: ref("Incident"),
+      },
+    },
+    required: ["incidents"],
+  },
+  IncidentResponse: {
+    type: "object",
+    properties: {
+      incident: ref("Incident"),
+    },
+    required: ["incident"],
+  },
   Error: {
     type: "object",
     description:
@@ -1315,6 +1624,22 @@ const schemas: Record<string, Json> = {
     },
     required: ["preferences"],
   },
+  UpdateStatusPreferencesRequest: {
+    type: "object",
+    description:
+      "Status alert preferences: master switch plus the components to alert on (empty array = all components).",
+    properties: {
+      enabled: { type: "boolean" },
+      components: {
+        type: "array",
+        items: {
+          type: "string",
+          enum: ["api", "database", "auth", "push", "storage"],
+        },
+      },
+    },
+    required: ["enabled", "components"],
+  },
   PushSubscriptionResponse: {
     type: "object",
     properties: {
@@ -1409,6 +1734,11 @@ const RATE = {
   search: "40 requests / 120s",
   stats: "50 requests / 120s",
   upload: "10 requests / 120s",
+  status: "30 requests / 120s",
+  statusSummary: "120 requests / 120s",
+  statusIncident: "20 requests / 120s",
+  statusComponent: "60 requests / 120s",
+  statusPreferences: "20 requests / 120s",
 };
 
 const paths: Record<string, Json> = {};
@@ -2468,6 +2798,68 @@ paths["/api/push-preferences"] = {
   }),
 };
 
+paths["/api/status-preferences"] = {
+  get: op({
+    operationId: "statusPreferences.get",
+    summary: "Get status alert preferences",
+    description:
+      "Returns the user's status alert preferences: a master enabled flag and the components they want alerts for (empty = all components).",
+    tags: ["System"],
+    responses: responses({
+      200: {
+        description: "Preferences",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                enabled: { type: "boolean" },
+                components: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                    enum: ["api", "database", "auth", "push", "storage"],
+                  },
+                },
+              },
+              required: ["enabled", "components"],
+            },
+          },
+        },
+      },
+    }),
+  }),
+  put: op({
+    operationId: "statusPreferences.update",
+    summary: "Update status alert preferences",
+    description:
+      "Sets the master switch and which components should push status alerts. An empty components array means all components.",
+    tags: ["System"],
+    requestBody: reqBody("UpdateStatusPreferencesRequest"),
+    responses: responses({
+      200: {
+        description: "Updated",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                ok: { type: "boolean" },
+                enabled: { type: "boolean" },
+                components: {
+                  type: "array",
+                  items: { type: "string" },
+                },
+              },
+              required: ["ok", "enabled", "components"],
+            },
+          },
+        },
+      },
+    }),
+  }),
+};
+
 // --- Uploads ---
 paths["/api/upload"] = {
   post: op({
@@ -2643,6 +3035,236 @@ paths["/api/health"] = {
         content: { "application/json": { schema: ref("HealthErrorResponse") } },
       },
     },
+  }),
+};
+
+paths["/api/status"] = {
+  get: op({
+    operationId: "status.get",
+    summary: "System status",
+    description:
+      "Public. Runs live component checks (API, database, auth, push, storage), records them for uptime history, and returns the snapshot plus 90-day history. Rate-limited per IP.",
+    tags: ["System"],
+    security: NO_AUTH,
+    responses: responses(
+      {
+        200: {
+          description: "Status snapshot and history",
+          content: {
+            "application/json": { schema: ref("StatusResponse") },
+          },
+        },
+      },
+      { rateLimited: true },
+    ),
+    rateLimit: RATE.status,
+  }),
+};
+
+paths["/api/cron/status"] = {
+  post: op({
+    operationId: "cron.status",
+    summary: "Record scheduled status checks (cron)",
+    description:
+      "Internal scheduled operation that runs and persists component checks so uptime history accrues without page visits. Detects status transitions and fires push alerts when a component changes state.",
+    tags: ["Cron"],
+    security: [{ cronAuth: [] }],
+    scalarIgnore: true,
+    responses: {
+      200: {
+        description: "Check summary",
+        content: { "application/json": { schema: ref("CronStatusResponse") } },
+      },
+      401: { $ref: "#/components/responses/Unauthorized" },
+      500: { $ref: "#/components/responses/ServerError" },
+    },
+  }),
+};
+
+paths["/api/status/summary"] = {
+  get: op({
+    operationId: "status.summary",
+    summary: "Status summary (no probes)",
+    description:
+      "Public. Returns the last recorded component statuses without running live probes — cheap enough for the in-app header dot and external uptime monitors. Rate-limited per IP.",
+    tags: ["System"],
+    security: NO_AUTH,
+    responses: responses(
+      {
+        200: {
+          description: "Last recorded status summary",
+          content: {
+            "application/json": {
+              schema: ref("StatusSummaryResponse"),
+            },
+          },
+        },
+      },
+      { rateLimited: true },
+    ),
+    rateLimit: RATE.statusSummary,
+  }),
+};
+
+paths["/api/status/component/{component}"] = {
+  get: op({
+    operationId: "status.componentHistory",
+    summary: "Component check history",
+    description:
+      "Public. Returns the recent individual checks (status, latency, time) for one component, powering the status page's component detail view. Rate-limited per IP.",
+    tags: ["System"],
+    security: NO_AUTH,
+    parameters: [
+      pp("component", {
+        type: "string",
+        enum: ["api", "database", "auth", "push", "storage"],
+      }),
+    ],
+    responses: responses(
+      {
+        200: {
+          description: "Component check history",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  component: { type: "string" },
+                  checks: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        checkedAt: { type: "string", format: "date-time" },
+                        status: {
+                          type: "string",
+                          enum: ["ok", "degraded", "down"],
+                        },
+                        latencyMs: { type: ["integer", "null"] },
+                      },
+                    },
+                  },
+                },
+                required: ["component", "checks"],
+              },
+            },
+          },
+        },
+      },
+      { rateLimited: true },
+    ),
+    rateLimit: RATE.statusComponent,
+  }),
+};
+
+paths["/api/status/incidents"] = {
+  get: op({
+    operationId: "status.incidents.list",
+    summary: "List status incidents (admin)",
+    description:
+      "Admin only. Lists all incidents (active and resolved) with their timelines, for the incident management UI in Settings.",
+    tags: ["System"],
+    responses: responses(
+      {
+        200: {
+          description: "Incident list",
+          content: {
+            "application/json": { schema: ref("IncidentsListResponse") },
+          },
+        },
+      },
+      { rateLimited: true, forbidden: true },
+    ),
+    rateLimit: RATE.statusIncident,
+  }),
+  post: op({
+    operationId: "status.incidents.create",
+    summary: "Create a status incident (admin)",
+    description:
+      "Admin only. Posts a new incident that appears on the public status page.",
+    tags: ["System"],
+    requestBody: {
+      content: {
+        "application/json": { schema: ref("CreateIncidentRequest") },
+      },
+    },
+    responses: responses(
+      {
+        201: {
+          description: "Incident created",
+          content: {
+            "application/json": { schema: ref("IncidentResponse") },
+          },
+        },
+      },
+      { rateLimited: true, forbidden: true },
+    ),
+    rateLimit: RATE.statusIncident,
+  }),
+};
+
+paths["/api/status/incidents/{id}"] = {
+  patch: op({
+    operationId: "status.incidents.update",
+    summary: "Update a status incident (admin)",
+    description:
+      "Admin only. Changes the incident status (e.g. investigating → monitoring → resolved) and appends a timeline entry.",
+    tags: ["System"],
+    parameters: [ID_PARAM],
+    requestBody: {
+      content: {
+        "application/json": { schema: ref("UpdateIncidentRequest") },
+      },
+    },
+    responses: responses(
+      {
+        200: {
+          description: "Incident updated",
+          content: {
+            "application/json": { schema: ref("IncidentResponse") },
+          },
+        },
+      },
+      { rateLimited: true, forbidden: true },
+    ),
+    rateLimit: RATE.statusIncident,
+  }),
+  post: op({
+    operationId: "status.incidents.publish",
+    summary: "Publish a draft status incident (admin)",
+    description:
+      "Admin only. Publishes a draft incident (auto-created from status checks) so it appears on the public status page.",
+    tags: ["System"],
+    parameters: [ID_PARAM],
+    responses: responses(
+      {
+        200: {
+          description: "Incident published",
+          content: {
+            "application/json": { schema: ref("IncidentResponse") },
+          },
+        },
+      },
+      { rateLimited: true, forbidden: true },
+    ),
+    rateLimit: RATE.statusIncident,
+  }),
+  delete: op({
+    operationId: "status.incidents.delete",
+    summary: "Delete a status incident (admin)",
+    description:
+      "Admin only. Permanently removes the incident and its timeline from the status page.",
+    tags: ["System"],
+    parameters: [ID_PARAM],
+    responses: responses(
+      {
+        204: {
+          description: "Incident deleted",
+        },
+      },
+      { rateLimited: true, forbidden: true },
+    ),
+    rateLimit: RATE.statusIncident,
   }),
 };
 

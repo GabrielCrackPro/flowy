@@ -2,6 +2,7 @@
 // This allows bundlers to only include the icons that are actually used
 
 export {
+  Activity,
   AlertCircle,
   AlertTriangle,
   ArrowDownCircle,
@@ -71,6 +72,7 @@ export {
   Globe2,
   GraduationCap,
   GripVertical,
+  HardDrive,
   HeartPulse,
   Home,
   Hourglass,
@@ -112,11 +114,13 @@ export {
   Search,
   SearchIcon,
   Send,
+  Server,
   Settings,
   Settings2,
   Share2,
   Shield,
   ShieldAlert,
+  ShieldCheck,
   Shirt,
   ShoppingCart,
   Smartphone,

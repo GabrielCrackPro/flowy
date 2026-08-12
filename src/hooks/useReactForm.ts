@@ -159,7 +159,14 @@ export function useReactForm<T extends Record<string, unknown>>({
     for (const key of Object.keys(raw) as (keyof T)[]) {
       const msg = raw[key];
       if (msg) {
-        translated[key] = msg.startsWith("validation.") ? t(msg) : msg;
+        // zodResolver v5 hands back FieldError objects ({ message, type, ref })
+        // rather than plain strings — normalize both shapes before translating.
+        const message =
+          typeof msg === "string"
+            ? msg
+            : (msg as { message?: unknown } | null | undefined)?.message;
+        const text = typeof message === "string" ? message : "";
+        translated[key] = text.startsWith("validation.") ? t(text) : text;
       }
     }
     return translated;

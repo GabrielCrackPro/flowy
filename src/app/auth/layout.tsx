@@ -2,7 +2,14 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { getServerT, LOCALE_COOKIE, normalizeLocale } from "@/lib/i18n";
-import { BarChart3, Droplet, Shield, Sparkles, Wallet } from "@/lib/icons";
+import {
+  Activity,
+  BarChart3,
+  Droplet,
+  Shield,
+  Sparkles,
+  Wallet,
+} from "@/lib/icons";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata(
@@ -117,10 +124,19 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
 
             {children}
 
-            <p className="mt-8 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground/80">
-              <Icon icon={Shield} className="size-3.5" />
-              {t("layout.securityNote")}
-            </p>
+            <div className="mt-8 space-y-2 text-center">
+              <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/80">
+                <Icon icon={Shield} className="size-3.5" />
+                {t("layout.securityNote")}
+              </p>
+              <a
+                href="/status"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-primary/80 transition hover:text-primary hover:underline underline-offset-2"
+              >
+                <Icon icon={Activity} className="size-3.5" />
+                {t("layout.statusPage")}
+              </a>
+            </div>
           </div>
         </main>
       </div>
