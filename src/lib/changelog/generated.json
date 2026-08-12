@@ -2,6 +2,21 @@
   "currentVersion": "0.1.30",
   "entries": [
     {
+      "version": "0.1.30",
+      "date": "2026-08-12",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "public status page, incidents, maintenance, and alert preferences (#158)",
+              "scope": "status"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.29",
       "date": "2026-08-12",
       "sections": [
