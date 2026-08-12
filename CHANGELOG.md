@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.20](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.19...flowy-v0.1.20) (2026-08-12)
+
+
+### Features
+
+* add metadata, theme-aware favicon, and fix subscription i18n ([#114](https://github.com/GabrielCrackPro/flowy/issues/114)) ([426f6b8](https://github.com/GabrielCrackPro/flowy/commit/426f6b83c675225481b583f1f6ec3f8a89678b4d))
+
 ## [0.1.19](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.18...flowy-v0.1.19) (2026-08-11)
 
 
