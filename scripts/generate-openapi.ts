@@ -2329,8 +2329,7 @@ paths["/api/push-subscription"] = {
                       id: { type: "string", format: "uuid" },
                       endpoint: { type: "string", format: "uri" },
                       userAgent: {
-                        type: "string",
-                        nullable: true,
+                        type: ["string", "null"],
                         description: "User-Agent header at registration time",
                       },
                       createdAt: {
