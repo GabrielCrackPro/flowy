@@ -28,10 +28,7 @@ export async function GET(_: NextRequest, { params }: Params) {
     const goal = await GoalService.get(auth.id, id);
 
     if (!goal) {
-      return NextResponse.json(
-        { message: "Objetivo no encontrado" },
-        { status: 404 },
-      );
+      return NextResponse.json({ message: "Goal not found" }, { status: 404 });
     }
 
     return NextResponse.json(goal);

@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { NotFoundError } from "@/lib/errors/error-types";
 import { prisma } from "@/lib/prisma/client";
 import type {
   CreateCategoryInput,
@@ -113,7 +114,7 @@ async function ensureCategory(userId: string, id: string) {
   });
 
   if (!category) {
-    throw new Error("Categoría no encontrada");
+    throw new NotFoundError("Category not found");
   }
 
   return category;

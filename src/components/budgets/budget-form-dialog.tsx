@@ -59,15 +59,7 @@ export function BudgetFormSheet({
       year: null as number | null,
     },
     schema: createBudgetSchema,
-    onSubmit: async (values) => {
-      // Additional client-side validation before submission
-      if (values.budgetLimit <= 0) {
-        throw new Error("El límite debe ser mayor que cero");
-      }
-      if (values.categoryIds.length === 0) {
-        throw new Error("Category is required");
-      }
-
+    onSubmit: (values) => {
       onSubmit({
         categoryIds: values.categoryIds,
         budgetLimit: values.budgetLimit,

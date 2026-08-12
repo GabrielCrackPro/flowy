@@ -49,15 +49,7 @@ export function GoalFormSheet({
       deadline: null as Date | null,
     },
     schema: createGoalSchema,
-    onSubmit: async (values) => {
-      // Additional client-side validation before submission
-      if (values.targetAmount <= 0) {
-        throw new Error("El importe debe ser mayor que cero");
-      }
-      if (!values.title || values.title.trim().length === 0) {
-        throw new Error("El título es obligatorio");
-      }
-
+    onSubmit: (values) => {
       onSubmit({
         title: values.title,
         targetAmount: values.targetAmount,

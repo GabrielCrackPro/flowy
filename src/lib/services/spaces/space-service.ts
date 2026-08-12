@@ -1,3 +1,8 @@
+import {
+  AuthorizationError,
+  NotFoundError,
+  ValidationError,
+} from "@/lib/errors/error-types";
 import { prisma } from "@/lib/prisma/client";
 import { ActivityService } from "../activities";
 
@@ -181,17 +186,17 @@ export const SpaceService = {
     const trimmedName = name?.trim();
 
     if (!trimmedName) {
-      throw new Error("El nombre del espacio no puede estar vacío");
+      throw new ValidationError("Space name cannot be empty");
     }
 
     const space = await prisma.space.findUnique({ where: { id: spaceId } });
 
     if (!space) {
-      throw new Error("Espacio no encontrado");
+      throw new NotFoundError("Space not found");
     }
 
     if (space.ownerId !== userId) {
-      throw new Error("No puedes editar este espacio");
+      throw new AuthorizationError("You cannot edit this space");
     }
 
     // Check if changing from shared to personal with members
@@ -220,7 +225,7 @@ export const SpaceService = {
     const space = await prisma.space.findUnique({ where: { id: spaceId } });
 
     if (!space) {
-      throw new Error("Espacio no encontrado");
+      throw new NotFoundError("Space not found");
     }
 
     const membership = await prisma.spaceMember.findUnique({
@@ -228,7 +233,7 @@ export const SpaceService = {
     });
 
     if (!membership) {
-      throw new Error("No perteneces a ese espacio");
+      throw new NotFoundError("Space member not found");
     }
 
     const isOwner = space.ownerId === userId;
@@ -293,11 +298,11 @@ export const SpaceService = {
     const space = await prisma.space.findUnique({ where: { id: spaceId } });
 
     if (!space) {
-      throw new Error("Espacio no encontrado");
+      throw new NotFoundError("Space not found");
     }
 
     if (space.ownerId !== userId) {
-      throw new Error("Unauthorized");
+      throw new AuthorizationError("Unauthorized");
     }
 
     const otherMembers = await prisma.spaceMember.count({
@@ -327,15 +332,15 @@ export const SpaceService = {
     const space = await prisma.space.findUnique({ where: { id: spaceId } });
 
     if (!space) {
-      throw new Error("Espacio no encontrado");
+      throw new NotFoundError("Space not found");
     }
 
     if (space.ownerId !== userId) {
-      throw new Error("Solo el propietario puede eliminar miembros");
+      throw new AuthorizationError("Only the owner can remove members");
     }
 
     if (memberUserId === userId) {
-      throw new Error("No puedes eliminarte a ti mismo");
+      throw new ValidationError("You cannot remove yourself");
     }
 
     const membership = await prisma.spaceMember.findUnique({
@@ -343,7 +348,7 @@ export const SpaceService = {
     });
 
     if (!membership) {
-      throw new Error("El usuario no es miembro de este espacio");
+      throw new NotFoundError("User is not a member of this space");
     }
 
     await prisma.spaceMember.delete({ where: { id: membership.id } });

@@ -402,11 +402,7 @@ export function classifyError(
     }
 
     // Not found errors
-    if (
-      message.includes("not found") ||
-      message.includes("no encontrado") ||
-      message.includes("404")
-    ) {
+    if (message.includes("not found") || message.includes("404")) {
       return new NotFoundError(error.message, context);
     }
 

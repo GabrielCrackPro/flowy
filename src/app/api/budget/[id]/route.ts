@@ -29,7 +29,7 @@ export async function GET(_: NextRequest, { params }: Params) {
 
     if (!budget) {
       return NextResponse.json(
-        { message: "Presupuesto no encontrado" },
+        { message: "Budget not found" },
         { status: 404 },
       );
     }

@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { ValidationError } from "@/lib/errors/error-types";
 
 const RECEIPTS_BUCKET = "receipts";
 const AVATARS_BUCKET = "avatars";
@@ -60,11 +61,11 @@ async function uploadFile(
   file: File,
 ): Promise<string> {
   if (!allowedTypes.includes(file.type)) {
-    throw new Error("Tipo de archivo no permitido");
+    throw new ValidationError("File type not allowed");
   }
   if (file.size > maxSize) {
-    throw new Error(
-      `El archivo excede el tamaño máximo de ${Math.round(maxSize / 1024 / 1024)} MB`,
+    throw new ValidationError(
+      `File exceeds the maximum size of ${Math.round(maxSize / 1024 / 1024)} MB`,
     );
   }
 

@@ -9,8 +9,8 @@ export const billingCycleSchema = z.enum([
 ]);
 
 export const createSubscriptionSchema = z.object({
-  merchant: z.string().trim().min(1, "El comerciante es obligatorio").max(100),
-  amount: z.number().positive("El importe debe ser mayor que cero"),
+  merchant: z.string().trim().min(1, "validation.fieldRequired").max(100),
+  amount: z.number().positive("validation.amountPositive"),
   billingCycle: billingCycleSchema,
   nextPayment: z.coerce.date().optional(),
   active: z.boolean().default(true),

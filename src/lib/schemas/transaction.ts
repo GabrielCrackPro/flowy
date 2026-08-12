@@ -13,7 +13,7 @@ export const paymentMethodSchema = z.enum([
 
 export const createTransactionSchema = z.object({
   type: transactionTypeSchema,
-  amount: z.coerce.number().positive("El importe debe ser mayor que cero"),
+  amount: z.coerce.number().positive("validation.amountPositive"),
   description: z.string().trim().max(255).optional(),
   categoryIds: z.array(z.string().uuid()).optional(),
   paymentMethod: paymentMethodSchema.optional(),

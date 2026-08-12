@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const commentEntityType = z.enum([
   "transaction",
@@ -19,16 +19,16 @@ export const createCommentSchema = z.object({
   content: z
     .string()
     .trim()
-    .min(1, "El comentario no puede estar vacío")
-    .max(1000, "El comentario es demasiado largo"),
+    .min(1, "validation.fieldRequired")
+    .max(1000, "validation.fieldMaxLength"),
 });
 
 export const updateCommentSchema = z.object({
   content: z
     .string()
     .trim()
-    .min(1, "El comentario no puede estar vacío")
-    .max(1000, "El comentario es demasiado largo"),
+    .min(1, "validation.fieldRequired")
+    .max(1000, "validation.fieldMaxLength"),
 });
 
 export type CreateCommentSchema = z.infer<typeof createCommentSchema>;

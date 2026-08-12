@@ -4,13 +4,13 @@ export const createGoalSchema = z.object({
   title: z
     .string()
     .trim()
-    .min(1, "El título es obligatorio")
-    .max(100, "El título es demasiado largo"),
+    .min(1, "validation.fieldRequired")
+    .max(100, "validation.fieldMaxLength"),
   targetAmount: z
     .number({
-      error: "El objetivo es obligatorio",
+      error: "validation.fieldRequired",
     })
-    .positive("El importe debe ser mayor que cero"),
+    .positive("validation.amountPositive"),
   savedAmount: z.number().min(0).default(0),
   deadline: z.coerce.date().nullable().optional(),
 });

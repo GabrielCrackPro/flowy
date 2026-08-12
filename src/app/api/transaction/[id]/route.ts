@@ -42,7 +42,7 @@ export async function GET(_: NextRequest, { params }: Params) {
 
     if (!transaction) {
       return NextResponse.json(
-        { message: "Transacción no encontrada" },
+        { message: "Transaction not found" },
         { status: 404 },
       );
     }

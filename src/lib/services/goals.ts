@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { toDateOnlyDatabaseValue } from "@/lib/date-only";
+import { NotFoundError } from "@/lib/errors/error-types";
 import { prisma } from "@/lib/prisma/client";
 import type {
   CreateGoalInput,
@@ -127,7 +128,7 @@ export const GoalService = {
     const goal = await this.get(userId, id);
 
     if (!goal) {
-      throw new Error("Objetivo no encontrado");
+      throw new NotFoundError("Goal not found");
     }
 
     const updateData: Prisma.GoalUpdateInput = {
@@ -180,7 +181,7 @@ export const GoalService = {
     const goal = await this.get(userId, id);
 
     if (!goal) {
-      throw new Error("Objetivo no encontrado");
+      throw new NotFoundError("Goal not found");
     }
 
     await prisma.goal.delete({

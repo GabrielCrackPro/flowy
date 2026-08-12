@@ -8,14 +8,7 @@ import { useTranslation } from "react-i18next";
 import { CARD_SHELL } from "@/components/shared/card-tokens";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
-import {
-  Calendar,
-  CreditCard,
-  Pencil,
-  Plus,
-  Repeat2,
-  Trash2,
-} from "@/lib/icons";
+import { Calendar, CreditCard, Pencil, Repeat2, Trash2 } from "@/lib/icons";
 import type { Subscription } from "@/types/Subscription";
 import {
   formatSubscriptionNextPayment,
@@ -104,6 +97,8 @@ export function SubscriptionCard({
   const monthly = subscriptionMonthlyEquivalent(subscription);
   const nextPayment = getSubscriptionNextPaymentInfo(
     subscription.nextPayment,
+    subscription.billingCycle,
+    subscription.active,
     locale,
   );
   const hasActions = Boolean(onEdit || onDelete);
@@ -152,16 +147,16 @@ export function SubscriptionCard({
   );
 
   const actions = hasActions && (
-    <div className="flex shrink-0 items-center gap-1.5 md:opacity-0 md:transition-opacity md:group-hover:opacity-100 md:focus-within:opacity-100">
+    <div className="flex shrink-0 items-center gap-1.5">
       {onQuickPayment && subscription.active && (
         <Button
           variant="ghost"
           size="icon-xs"
           aria-label={t("subscriptions.quickPayment")}
           onClick={() => onQuickPayment(subscription)}
-          className="size-7 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+          className="size-7 text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
         >
-          <Icon icon={Plus} className="size-3.5" />
+          <Icon icon={CreditCard} className="size-3.5" />
         </Button>
       )}
       {onEdit && (

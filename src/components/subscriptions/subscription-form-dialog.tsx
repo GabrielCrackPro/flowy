@@ -94,14 +94,6 @@ export function SubscriptionFormSheet({
     },
     schema: createSubscriptionSchema,
     onSubmit: (values) => {
-      // Additional client-side validation before submission
-      if (values.amount <= 0) {
-        throw new Error("El importe debe ser mayor que cero");
-      }
-      if (!values.merchant || values.merchant.trim().length === 0) {
-        throw new Error("El comerciante es obligatorio");
-      }
-
       onSubmit({
         merchant: values.merchant.trim() || undefined,
         amount: values.amount,

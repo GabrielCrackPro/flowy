@@ -1,4 +1,5 @@
 import type { Comment } from "@prisma/client";
+import { NotFoundError } from "@/lib/errors/error-types";
 import { prisma } from "@/lib/prisma/client";
 
 import type { CreateCommentInput, UpdateCommentInput } from "@/types/Comment";
@@ -30,12 +31,12 @@ export const CommentService = {
       parent = await prisma.comment.findFirst({
         where: { id: parentId, spaceId: activeSpace?.id ?? null },
       });
-      if (!parent) throw new Error("Comentario padre no encontrado");
+      if (!parent) throw new NotFoundError("Parent comment not found");
       if (
         parent.entityType !== data.entityType ||
         parent.entityId !== data.entityId
       ) {
-        throw new Error("Comentario padre no encontrado");
+        throw new NotFoundError("Parent comment not found");
       }
     }
 
@@ -80,7 +81,7 @@ export const CommentService = {
 
   async update(userId: string, id: string, data: UpdateCommentInput) {
     const comment = await this.get(userId, id);
-    if (!comment) throw new Error("Comentario no encontrado");
+    if (!comment) throw new NotFoundError("Comment not found");
 
     const updated = await prisma.comment.update({
       where: { id },
@@ -103,7 +104,7 @@ export const CommentService = {
 
   async delete(userId: string, id: string) {
     const comment = await this.get(userId, id);
-    if (!comment) throw new Error("Comentario no encontrado");
+    if (!comment) throw new NotFoundError("Comment not found");
 
     await prisma.comment.delete({ where: { id } });
 

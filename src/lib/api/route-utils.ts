@@ -29,8 +29,13 @@ const DOMAIN_ERROR_STATUS: Record<string, number> = {
   "Parent comment not found": 404,
   "Profile not found": 404,
   "Space not found": 404,
+  "Subscription not found": 404,
+  "Space member not found": 404,
   "Space name cannot be empty": 400,
   "You cannot edit this space": 403,
+  "You cannot remove yourself": 400,
+  "Only the owner can remove members": 403,
+  "User is not a member of this space": 404,
   Unauthorized: 403,
 };
 
