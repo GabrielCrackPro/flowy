@@ -709,6 +709,10 @@ const schemas: Record<string, Json> = {
         type: ["string", "null"],
         description: "Invite code used to join a shared space",
       },
+      avatarUrl: {
+        type: ["string", "null"],
+        description: "Public URL of the space picture",
+      },
       ownerId: { ...UUID, description: "Profile UUID of the space owner" },
       isPersonal: {
         type: "boolean",
@@ -1190,7 +1194,7 @@ const schemas: Record<string, Json> = {
   SpaceActionRequest: {
     type: "object",
     description:
-      "Action-based space update. Only the fields for the chosen action are read: setActive → none; rename → name, isPersonal; leave → none; removeMember → memberUserId.",
+      "Action-based space update. Only the fields for the chosen action are read: setActive → none; rename → name, isPersonal, avatarUrl; leave → none; removeMember → memberUserId.",
     properties: {
       action: {
         type: "string",
@@ -1201,6 +1205,11 @@ const schemas: Record<string, Json> = {
       isPersonal: {
         type: "boolean",
         description: "Whether the space is personal (rename only)",
+      },
+      avatarUrl: {
+        type: ["string", "null"],
+        description:
+          "Public URL of the space picture; null removes it (rename only)",
       },
       memberUserId: {
         type: "string",
@@ -1399,6 +1408,7 @@ const RATE = {
   profile: "30 requests / 120s",
   search: "40 requests / 120s",
   stats: "50 requests / 120s",
+  upload: "10 requests / 120s",
 };
 
 const paths: Record<string, Json> = {};
@@ -2478,12 +2488,48 @@ paths["/api/upload"] = {
         },
       },
     },
-    responses: responses({
-      200: {
-        description: "Uploaded file URL",
-        content: { "application/json": { schema: ref("UploadResponse") } },
+    responses: responses(
+      {
+        200: {
+          description: "Uploaded file URL",
+          content: { "application/json": { schema: ref("UploadResponse") } },
+        },
       },
-    }),
+      { rateLimited: true },
+    ),
+    rateLimit: RATE.upload,
+  }),
+};
+
+paths["/api/upload/space"] = {
+  post: op({
+    operationId: "uploads.spaceAvatar",
+    summary: "Upload a space picture",
+    description:
+      "Multipart/form-data with a `file` field. Returns the public URL of the stored space picture.",
+    tags: ["Uploads"],
+    requestBody: {
+      required: true,
+      content: {
+        "multipart/form-data": {
+          schema: {
+            type: "object",
+            properties: { file: { type: "string", format: "binary" } },
+            required: ["file"],
+          },
+        },
+      },
+    },
+    responses: responses(
+      {
+        200: {
+          description: "Uploaded file URL",
+          content: { "application/json": { schema: ref("UploadResponse") } },
+        },
+      },
+      { rateLimited: true },
+    ),
+    rateLimit: RATE.upload,
   }),
 };
 
@@ -2506,12 +2552,16 @@ paths["/api/upload/avatar"] = {
         },
       },
     },
-    responses: responses({
-      200: {
-        description: "Uploaded file URL",
-        content: { "application/json": { schema: ref("UploadResponse") } },
+    responses: responses(
+      {
+        200: {
+          description: "Uploaded file URL",
+          content: { "application/json": { schema: ref("UploadResponse") } },
+        },
       },
-    }),
+      { rateLimited: true },
+    ),
+    rateLimit: RATE.upload,
   }),
 };
 

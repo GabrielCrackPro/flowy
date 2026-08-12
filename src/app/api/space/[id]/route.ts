@@ -33,6 +33,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         id,
         body.name,
         body.isPersonal,
+        body.avatarUrl,
       );
       return NextResponse.json(space);
     }

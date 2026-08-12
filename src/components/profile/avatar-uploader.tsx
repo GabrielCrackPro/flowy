@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared";
+import { uploadImage } from "@/lib/api/upload";
 import { Camera, Loader2, Trash2 } from "@/lib/icons";
 import { cn, getUserInitials } from "@/lib/utils";
 import type { Profile } from "@/types/Profile";
@@ -30,11 +31,7 @@ export function AvatarUploader({
   const [error, setError] = useState<string | null>(null);
 
   const upload = async (file: File) => {
-    if (file.size > MAX_AVATAR_SIZE) {
-      setError(t("settings.profile.avatarHint"));
-      return;
-    }
-    if (!file.type.startsWith("image/")) {
+    if (file.size > MAX_AVATAR_SIZE || !file.type.startsWith("image/")) {
       setError(t("settings.profile.avatarHint"));
       return;
     }
@@ -43,16 +40,9 @@ export function AvatarUploader({
     setUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload/avatar", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok)
-        throw new Error(data.error ?? t("settings.profile.avatarError"));
-      onChange(data.url);
+      // Resized client-side to 512px and re-encoded as WebP before upload.
+      const url = await uploadImage("/api/upload/avatar", file);
+      onChange(url);
     } catch {
       setError(t("settings.profile.avatarError"));
     } finally {

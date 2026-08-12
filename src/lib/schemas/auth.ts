@@ -41,3 +41,25 @@ export function createRegisterSchema(t: Translate) {
       }
     });
 }
+
+export function createChangePasswordSchema(t: Translate) {
+  return z
+    .object({
+      currentPassword: z
+        .string()
+        .nonempty(t("validation.currentPasswordRequired")),
+      newPassword: z.string().min(8, t("validation.passwordMinLength")),
+      confirmPassword: z
+        .string()
+        .nonempty(t("validation.confirmPasswordRequired")),
+    })
+    .superRefine((values, ctx) => {
+      if (values.newPassword !== values.confirmPassword) {
+        ctx.addIssue({
+          path: ["confirmPassword"],
+          code: "custom",
+          message: t("validation.passwordsMustMatch"),
+        });
+      }
+    });
+}

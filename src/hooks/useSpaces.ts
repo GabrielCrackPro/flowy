@@ -1,6 +1,8 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+
 import { toast } from "@/components/shared/toast";
 
 import { useProfile } from "@/hooks/useProfile";
@@ -18,6 +20,7 @@ import {
 
 export function useSpaces() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { profile } = useProfile();
 
   const userId = profile?.id;
@@ -65,37 +68,37 @@ export function useSpaces() {
     mutationFn: ({ name, isPersonal }: { name: string; isPersonal: boolean }) =>
       createSpace(name, isPersonal),
     onSuccess: async () => {
-      toast.success("Espacio creado");
+      toast.success(t("profile.spaces.created"));
       await invalidateSpaceDependent();
     },
-    onError: () => toast.error("Could not create space"),
+    onError: () => toast.error(t("profile.spaces.createError")),
   });
 
   const join = useMutation({
     mutationFn: (code: string) => joinSpace(code),
     onSuccess: async () => {
-      toast.success("Te uniste al espacio");
+      toast.success(t("profile.spaces.joined"));
       await invalidateSpaceDependent();
     },
-    onError: () => toast.error("Could not join space"),
+    onError: () => toast.error(t("profile.spaces.joinError")),
   });
 
   const setActive = useMutation({
     mutationFn: (id: string) => setActiveSpace(id),
     onSuccess: async () => {
-      toast.success("Espacio activo actualizado");
+      toast.success(t("profile.spaces.activated"));
       await invalidateSpaceDependent();
     },
-    onError: () => toast.error("Could not update space"),
+    onError: () => toast.error(t("profile.spaces.setActiveError")),
   });
 
   const leave = useMutation({
     mutationFn: (id: string) => leaveSpace(id),
     onSuccess: async () => {
-      toast.success("Saliste del espacio");
+      toast.success(t("profile.spaces.left"));
       await invalidateSpaceDependent();
     },
-    onError: () => toast.error("Could not leave space"),
+    onError: () => toast.error(t("profile.spaces.leaveError")),
   });
 
   const rename = useMutation({
@@ -103,25 +106,27 @@ export function useSpaces() {
       id,
       name,
       isPersonal,
+      avatarUrl,
     }: {
       id: string;
       name: string;
       isPersonal?: boolean;
-    }) => updateSpaceName(id, name, isPersonal),
+      avatarUrl?: string | null;
+    }) => updateSpaceName(id, name, isPersonal, avatarUrl),
     onSuccess: async () => {
-      toast.success("Espacio actualizado");
+      toast.success(t("profile.spaces.updated"));
       await invalidateSpaces();
     },
-    onError: () => toast.error("Could not update space"),
+    onError: () => toast.error(t("profile.spaces.renameError")),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => deleteSpace(id),
     onSuccess: async () => {
-      toast.success("Espacio eliminado");
+      toast.success(t("profile.spaces.deleted"));
       await invalidateSpaceDependent();
     },
-    onError: () => toast.error("Could not delete space"),
+    onError: () => toast.error(t("profile.spaces.deleteError")),
   });
 
   const removeMemberMutation = useMutation({
@@ -133,10 +138,10 @@ export function useSpaces() {
       memberUserId: string;
     }) => removeMemberApi(spaceId, memberUserId),
     onSuccess: async () => {
-      toast.success("Miembro eliminado");
+      toast.success(t("profile.spaces.memberRemoved"));
       await invalidateSpaces();
     },
-    onError: () => toast.error("Could not delete member"),
+    onError: () => toast.error(t("profile.spaces.removeMemberError")),
   });
 
   const activeSpace: SpaceSummary | null =

@@ -3,6 +3,7 @@ import { ValidationError } from "@/lib/errors/error-types";
 
 const RECEIPTS_BUCKET = "receipts";
 const AVATARS_BUCKET = "avatars";
+const SPACES_BUCKET = "spaces";
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
 
@@ -53,6 +54,68 @@ async function ensureBucket(name: string, maxSize: number): Promise<void> {
   });
 }
 
+/**
+ * Best-effort magic-byte check so a file with a spoofed MIME type is rejected
+ * (PNG 89 50 4E 47, JPEG FF D8 FF, WebP RIFF....WEBP).
+ */
+async function hasValidImageSignature(file: File): Promise<boolean> {
+  try {
+    const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+    if (bytes.length < 3) return false;
+    // JPEG
+    if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff)
+      return true;
+    // PNG
+    if (
+      bytes.length >= 8 &&
+      bytes[0] === 0x89 &&
+      bytes[1] === 0x50 &&
+      bytes[2] === 0x4e &&
+      bytes[3] === 0x47 &&
+      bytes[4] === 0x0d &&
+      bytes[5] === 0x0a &&
+      bytes[6] === 0x1a &&
+      bytes[7] === 0x0a
+    ) {
+      return true;
+    }
+    // WebP (RIFF....WEBP)
+    if (
+      bytes.length >= 12 &&
+      bytes[0] === 0x52 &&
+      bytes[1] === 0x49 &&
+      bytes[2] === 0x46 &&
+      bytes[3] === 0x46 &&
+      bytes[8] === 0x57 &&
+      bytes[9] === 0x45 &&
+      bytes[10] === 0x42 &&
+      bytes[11] === 0x50
+    ) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/** Best-effort magic-byte check for PDFs (%PDF-). */
+async function hasValidPdfSignature(file: File): Promise<boolean> {
+  try {
+    const bytes = new Uint8Array(await file.slice(0, 5).arrayBuffer());
+    return (
+      bytes.length >= 5 &&
+      bytes[0] === 0x25 &&
+      bytes[1] === 0x50 &&
+      bytes[2] === 0x44 &&
+      bytes[3] === 0x46 &&
+      bytes[4] === 0x2d
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function uploadFile(
   bucket: string,
   maxSize: number,
@@ -67,6 +130,13 @@ async function uploadFile(
     throw new ValidationError(
       `File exceeds the maximum size of ${Math.round(maxSize / 1024 / 1024)} MB`,
     );
+  }
+  // Verify the actual file content, not just the user-supplied MIME type.
+  if (file.type.startsWith("image/") && !(await hasValidImageSignature(file))) {
+    throw new ValidationError("Invalid image file");
+  }
+  if (file.type === "application/pdf" && !(await hasValidPdfSignature(file))) {
+    throw new ValidationError("Invalid PDF file");
   }
 
   await ensureBucket(bucket, maxSize);
@@ -114,6 +184,19 @@ export async function uploadAvatar(
   );
 }
 
+export async function uploadSpaceAvatar(
+  userId: string,
+  file: File,
+): Promise<string> {
+  return uploadFile(
+    SPACES_BUCKET,
+    MAX_AVATAR_SIZE,
+    ALLOWED_AVATAR_TYPES,
+    userId,
+    file,
+  );
+}
+
 function publicPrefix(bucket: string): string {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/`;
 }
@@ -135,4 +218,8 @@ export async function deleteReceipt(url: string): Promise<void> {
 
 export async function deleteAvatar(url: string): Promise<void> {
   await deleteFile(AVATARS_BUCKET, url);
+}
+
+export async function deleteSpaceAvatar(url: string): Promise<void> {
+  await deleteFile(SPACES_BUCKET, url);
 }

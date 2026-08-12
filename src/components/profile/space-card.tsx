@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { SpaceSummary } from "@/lib/api/space";
 import {
+  CalendarDays,
   CheckCircle2,
   Copy,
   Crown,
@@ -22,10 +23,12 @@ import { cn } from "@/lib/utils";
 function SpaceGlyph({
   name,
   shared,
+  avatarUrl,
   className,
 }: {
   name: string;
   shared: boolean;
+  avatarUrl?: string | null;
   className?: string;
 }) {
   return (
@@ -38,7 +41,14 @@ function SpaceGlyph({
         className,
       )}
     >
-      {name ? (
+      {avatarUrl ? (
+        /* biome-ignore lint/performance/noImgElement: Avatars are served from Supabase public storage. */
+        <img
+          src={avatarUrl}
+          alt={name}
+          className="size-full rounded-xl object-cover"
+        />
+      ) : name ? (
         name.trim().charAt(0).toUpperCase()
       ) : (
         <Icon icon={Users} className="size-4" />
@@ -47,13 +57,49 @@ function SpaceGlyph({
   );
 }
 
+const MEMBER_COLORS = [
+  "bg-violet-500/15 text-violet-600 dark:text-violet-400",
+  "bg-sky-500/15 text-sky-600 dark:text-sky-400",
+  "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+  "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+  "bg-rose-500/15 text-rose-600 dark:text-rose-400",
+  "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400",
+];
+
+/** Deterministic color per user so the same member keeps the same avatar tint. */
+function avatarColor(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  }
+  return MEMBER_COLORS[Math.abs(hash) % MEMBER_COLORS.length];
+}
+
+function formatDate(
+  date: string | undefined,
+  locale: string,
+  options: Intl.DateTimeFormatOptions,
+): string {
+  if (!date) return "";
+  try {
+    return new Intl.DateTimeFormat(locale, options).format(new Date(date));
+  } catch {
+    return "";
+  }
+}
+
 function MemberStack({ space }: { space: SpaceSummary }) {
+  const { t, i18n } = useTranslation();
   const members = space.members;
   const visible = members.slice(0, 3);
   const overflow = members.length - visible.length;
 
   if (members.length === 0) {
-    return <span className="text-xs text-muted-foreground">Sin miembros</span>;
+    return (
+      <span className="text-xs text-muted-foreground">
+        {t("profile.spaces.memberNone")}
+      </span>
+    );
   }
 
   return (
@@ -68,8 +114,20 @@ function MemberStack({ space }: { space: SpaceSummary }) {
           return (
             <span
               key={member.id}
-              title={user.name ?? user.email ?? "Miembro"}
-              className="flex size-6 items-center justify-center rounded-full bg-linear-to-br from-muted-foreground/20 to-muted-foreground/5 text-[0.6rem] font-semibold text-muted-foreground ring-2 ring-background"
+              title={`${user.name ?? user.email ?? t("profile.user")} · ${t(
+                "profile.spaces.joinedOn",
+                {
+                  date: formatDate(member.joinedAt, i18n.language, {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  }),
+                },
+              )}`}
+              className={cn(
+                "flex size-6 items-center justify-center rounded-full text-[0.6rem] font-semibold ring-2 ring-background",
+                avatarColor(user.id),
+              )}
             >
               {initial}
             </span>
@@ -78,7 +136,9 @@ function MemberStack({ space }: { space: SpaceSummary }) {
 
         {overflow > 0 ? (
           <span
-            title={`${members.length} miembros`}
+            title={t("profile.spaces.member_other", {
+              count: members.length,
+            })}
             className="flex size-6 items-center justify-center rounded-full bg-muted text-[0.6rem] font-semibold text-muted-foreground ring-2 ring-background"
           >
             +{overflow}
@@ -87,7 +147,12 @@ function MemberStack({ space }: { space: SpaceSummary }) {
       </div>
 
       <span className="text-xs text-muted-foreground tabular-nums">
-        {members.length} {members.length === 1 ? "miembro" : "miembros"}
+        {t(
+          members.length === 1
+            ? "profile.spaces.member_one"
+            : "profile.spaces.member_other",
+          { count: members.length },
+        )}
       </span>
     </div>
   );
@@ -122,7 +187,7 @@ export function SpaceCard({
   onCopyCode,
   onManageMembers,
 }: SpaceCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const joinCode = space.joinCode ?? null;
 
   return (
@@ -150,6 +215,7 @@ export function SpaceCard({
         <SpaceGlyph
           name={space.name}
           shared={!space.isPersonal}
+          avatarUrl={space.avatarUrl}
           className="size-12 text-lg"
         />
 
@@ -188,6 +254,15 @@ export function SpaceCard({
                 {t("profile.spaces.sharedSpace")}
               </span>
             )}
+          </p>
+          <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground/70">
+            <Icon icon={CalendarDays} className="size-3" />
+            {t("profile.spaces.createdOn", {
+              date: formatDate(space.createdAt, i18n.language, {
+                month: "short",
+                year: "numeric",
+              }),
+            })}
           </p>
         </div>
       </div>

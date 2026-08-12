@@ -321,6 +321,17 @@ export function TransactionForm({
                   onChange={(url) =>
                     handleValueChange("receiptUrl")(url ?? undefined)
                   }
+                  labels={{
+                    uploadLabel: t("transaction.uploadReceipt"),
+                    dragHint: t("transaction.dragDropHint"),
+                    fileTypesHint: t("transaction.fileTypesHint"),
+                    changeLabel: t("transaction.changeFile"),
+                    removeLabel: t("transaction.removeFile"),
+                    uploadingLabel: t("transaction.uploadProgress"),
+                    errorLabel: t("transaction.uploadError"),
+                    retryLabel: t("transaction.retry"),
+                    maxSizeError: t("transaction.uploadTooLarge"),
+                  }}
                 />
               </FormField>
             </motion.div>

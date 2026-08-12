@@ -35,11 +35,13 @@ function SpaceGlyph({
   name,
   active,
   shared,
+  avatarUrl,
   className,
 }: {
   name: string;
   active?: boolean;
   shared?: boolean;
+  avatarUrl?: string | null;
   className?: string;
 }) {
   return (
@@ -52,7 +54,14 @@ function SpaceGlyph({
         className,
       )}
     >
-      {name ? (
+      {avatarUrl ? (
+        /* biome-ignore lint/performance/noImgElement: Avatars are served from Supabase public storage. */
+        <img
+          src={avatarUrl}
+          alt={name}
+          className="size-full rounded-lg object-cover"
+        />
+      ) : name ? (
         name.trim().charAt(0).toUpperCase()
       ) : (
         <Icon icon={Layers} className="size-3.5" />
@@ -121,6 +130,7 @@ export function SpaceSwitcher({
               name={activeSpace?.name ?? ""}
               active={!!activeSpace}
               shared={activeSpace ? !activeSpace.isPersonal : false}
+              avatarUrl={activeSpace?.avatarUrl}
               className={collapsed ? "size-9" : "size-8"}
             />
 
@@ -219,6 +229,7 @@ export function SpaceSwitcher({
                     <SpaceGlyph
                       name={space.name}
                       shared={!space.isPersonal}
+                      avatarUrl={space.avatarUrl}
                       className="size-8 text-sm"
                     />
 

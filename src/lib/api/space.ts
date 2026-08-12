@@ -6,9 +6,12 @@ export interface SpaceSummary {
   joinCode?: string | null;
   ownerId: string;
   isPersonal: boolean;
+  avatarUrl?: string | null;
+  createdAt: string;
   members: Array<{
     id: string;
     role: string;
+    joinedAt: string;
     user: {
       id: string;
       name: string | null;
@@ -52,10 +55,16 @@ export function updateSpaceName(
   id: string,
   name: string,
   isPersonal?: boolean,
+  avatarUrl?: string | null,
 ) {
   return authenticatedRequest<SpaceSummary>(`/api/space/${id}`, {
     method: "PATCH",
-    body: JSON.stringify({ action: "rename", name, isPersonal }),
+    body: JSON.stringify({
+      action: "rename",
+      name,
+      isPersonal,
+      ...(avatarUrl !== undefined && { avatarUrl }),
+    }),
   });
 }
 

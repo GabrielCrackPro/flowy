@@ -11,7 +11,11 @@ import { Check, Palette, RotateCcw, X } from "@/lib/icons";
 import { ColorPicker } from "./color-picker";
 import { ThemePreview } from "./theme-preview";
 
-export function ThemeCustomizationSheet() {
+export function ThemeCustomizationSheet({
+  label = false,
+}: {
+  label?: boolean;
+}) {
   const { t } = useTranslation();
   const { profile, update } = useProfile();
   const [open, setOpen] = useState(false);
@@ -76,10 +80,15 @@ export function ThemeCustomizationSheet() {
       trigger={
         <Button
           variant="ghost"
-          size="icon"
+          className={label ? "gap-1.5" : undefined}
           title={t("settings.theme.customize")}
         >
           <Palette className="size-4" />
+          {label ? (
+            <span className="hidden sm:inline">
+              {t("settings.theme.customize")}
+            </span>
+          ) : null}
         </Button>
       }
       title={t("settings.theme.title")}

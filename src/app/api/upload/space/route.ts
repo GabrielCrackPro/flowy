@@ -6,7 +6,7 @@ import {
   withRateLimit,
 } from "@/lib/api/route-utils";
 import { ValidationError } from "@/lib/errors/error-types";
-import { uploadAvatar } from "@/lib/services/storage";
+import { uploadSpaceAvatar } from "@/lib/services/storage";
 
 export async function POST(request: Request) {
   const auth = await requireAuth();
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "invalid_file" }, { status: 400 });
     }
 
-    const url = await uploadAvatar(auth.id, file);
+    const url = await uploadSpaceAvatar(auth.id, file);
     return applyRateLimitHeaders(NextResponse.json({ url }), auth.id, "upload");
   } catch (err) {
     const code =

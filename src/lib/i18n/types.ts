@@ -59,6 +59,7 @@ export type AuthTranslationMessages = {
     emailInvalid: string;
     passwordMinLength: string;
     confirmPasswordRequired: string;
+    currentPasswordRequired: string;
     passwordsMustMatch: string;
     fullNameRequired: string;
     acceptTermsRequired: string;
@@ -121,6 +122,9 @@ export type AppTranslationMessages = {
       manageSpaces: string;
       member_one: string;
       member_other: string;
+      memberNone: string;
+      createdOn: string;
+      joinedOn: string;
       count_one: string;
       count_other: string;
       create: string;
@@ -147,6 +151,7 @@ export type AppTranslationMessages = {
       noMembersHint: string;
       removeMember: string;
       removeMemberConfirm: string;
+      removeMemberConfirmName: string;
       removeMemberDescription: string;
       copyCode: string;
       codeCopied: string;
@@ -164,16 +169,36 @@ export type AppTranslationMessages = {
       leaveConfirmOwnerDescription: string;
       leaveSpace: string;
       deleteSpace: string;
+      created: string;
+      joined: string;
+      activated: string;
+      left: string;
+      updated: string;
+      deleted: string;
+      memberRemoved: string;
+      createError: string;
+      joinError: string;
+      setActiveError: string;
+      leaveError: string;
+      renameError: string;
+      deleteError: string;
+      removeMemberError: string;
+      avatarLabel: string;
+      avatarHint: string;
+      avatarRemove: string;
+      avatarError: string;
     };
   };
   settings: {
     description: string;
+    navLabel: string;
     apiDocs: {
       open: string;
     };
     profile: {
       title: string;
       description: string;
+      edit: string;
       memberSince: string;
       nameLabel: string;
       nameHint: string;
@@ -200,8 +225,7 @@ export type AppTranslationMessages = {
       currentPasswordLabel: string;
       newPasswordLabel: string;
       confirmPasswordLabel: string;
-      passwordMinLength: string;
-      passwordsMismatch: string;
+      wrongCurrentPassword: string;
       changePasswordSuccess: string;
       changePasswordError: string;
       deleteAccount: string;
@@ -266,6 +290,7 @@ export type AppTranslationMessages = {
       disabled: string;
       denied: string;
       test: string;
+      testSection: string;
       testSent: string;
       testTitle: string;
       testBody: string;
@@ -307,8 +332,11 @@ export type AppTranslationMessages = {
     about: {
       title: string;
       description: string;
+      tagline: string;
+      latestRelease: string;
       whatNew: string;
       releasedOn: string;
+      github: string;
     };
   };
   changelog: {
@@ -678,6 +706,7 @@ export type AppTranslationMessages = {
     deletePermanently: string;
     dateTime: string;
     uploadReceipt: string;
+    uploadTooLarge: string;
     dragDropHint: string;
     createdBy: string;
     updatedBy: string;

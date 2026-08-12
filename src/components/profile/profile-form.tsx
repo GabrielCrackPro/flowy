@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useReactForm } from "@/hooks/useReactForm";
-import { AtSign, Languages, UserRound } from "@/lib/icons";
+import { AtSign, Languages, Loader2, UserRound } from "@/lib/icons";
 import {
   CURRENCIES,
   currencyName,
@@ -208,10 +208,15 @@ export function ProfileForm({
         >
           {t("common.cancel")}
         </Button>
-        <Button type="submit" disabled={form.busy}>
-          {form.busy
-            ? t("settings.profile.saving")
-            : t("settings.profile.save")}
+        <Button type="submit" disabled={form.busy} className="gap-1.5">
+          {form.busy ? (
+            <>
+              <Icon icon={Loader2} className="size-4 animate-spin" />
+              {t("settings.profile.saving")}
+            </>
+          ) : (
+            t("settings.profile.save")
+          )}
         </Button>
       </div>
     </form>
