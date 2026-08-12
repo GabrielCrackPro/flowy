@@ -2,6 +2,21 @@
   "currentVersion": "0.1.29",
   "entries": [
     {
+      "version": "0.1.29",
+      "date": "2026-08-12",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "settings page overhaul, space pictures, and hardened uploads (#154)",
+              "scope": "settings"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.28",
       "date": "2026-08-12",
       "sections": [
