@@ -232,7 +232,9 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <PushNotificationsCard />
+        <div id="notifications" className="scroll-mt-20">
+          <PushNotificationsCard />
+        </div>
 
         <AccountSecurityActions />
 

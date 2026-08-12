@@ -89,6 +89,10 @@ export const DEFAULT_RATE_LIMITS: Record<string, RateLimitConfig> = {
     requests: getEnvNumber("RATE_LIMIT_ACCOUNT_REQUESTS", 20),
     window: getEnvNumber("RATE_LIMIT_ACCOUNT_WINDOW", 120 * 1000),
   },
+  "push-preferences": {
+    requests: getEnvNumber("RATE_LIMIT_PUSH_PREFERENCES_REQUESTS", 20),
+    window: getEnvNumber("RATE_LIMIT_PUSH_PREFERENCES_WINDOW", 120 * 1000),
+  },
 
   // Default limit for unconfigured routes
   default: {

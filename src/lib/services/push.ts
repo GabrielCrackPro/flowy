@@ -7,6 +7,8 @@ export interface PushAlertPayload {
   description?: string | null;
   url?: string | null;
   tag?: string;
+  /** Alert type, used to honor per-type push preferences. Absent on test pushes. */
+  type?: string;
 }
 
 const NOTIFICATION_ICON = "/icons/icon-192.png";
@@ -39,8 +41,11 @@ export const PushService = {
     userId: string,
     test: PushAlertPayload,
   ): Promise<{ sent: number; removed: number }> {
+    // A unique tag per test keeps each send a fresh toast: reusing the same
+    // tag makes the OS silently *update* the previous toast instead of
+    // popping a new one, which reads as "notifications stopped working".
     return this.sendAlertsToUser(userId, [
-      { ...test, tag: test.tag ?? "flowy-test" },
+      { ...test, tag: test.tag ?? `flowy-test-${Date.now()}` },
     ]);
   },
 
@@ -53,6 +58,22 @@ export const PushService = {
       return { sent: 0, removed: 0 };
     }
 
+    // Honor per-alert-type push preferences. An empty stored list means all
+    // types are enabled (legacy default); alerts without a type (test pushes)
+    // always go through.
+    const profile = await prisma.profile.findUnique({
+      where: { id: userId },
+      select: { pushPreferences: true },
+    });
+    const prefs = profile?.pushPreferences ?? [];
+    const enabled = prefs.length === 0 ? null : new Set(prefs);
+    const toSend = alerts.filter(
+      (alert) => !alert.type || !enabled || enabled.has(alert.type),
+    );
+    if (toSend.length === 0) {
+      return { sent: 0, removed: 0 };
+    }
+
     const subscriptions = await prisma.pushSubscription.findMany({
       where: { userId },
     });
@@ -61,7 +82,7 @@ export const PushService = {
     let removed = 0;
 
     for (const subscription of subscriptions) {
-      for (const alert of alerts) {
+      for (const alert of toSend) {
         const payload = JSON.stringify({
           title: alert.title,
           body: alert.description ?? undefined,

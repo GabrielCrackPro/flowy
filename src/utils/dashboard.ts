@@ -12,6 +12,7 @@ import {
 import type { DashboardData } from "@/types/Dashboard";
 import type { Goal } from "@/types/Goal";
 import type { Subscription } from "@/types/Subscription";
+import { computeNextBillingDate } from "@/utils/subscriptions";
 
 export function getMonthName(month?: number, year?: number, locale = "es-ES") {
   return new Intl.DateTimeFormat(locale, {
@@ -195,6 +196,9 @@ export function buildDashboardAlerts(
   locale: string,
   currency: string,
   t: (key: string, params?: Record<string, string | number>) => string,
+  /** Cap the number of returned alerts. The dashboard shows the top few;
+   * the alert/push service passes Infinity so every active condition fires. */
+  max = MAX_ALERTS,
 ): DashboardAlert[] {
   if (!data) return [];
 
@@ -269,10 +273,17 @@ export function buildDashboardAlerts(
     });
   }
 
-  // Upcoming subscription payments
+  // Upcoming subscription payments. The stored nextPayment may have passed
+  // (nothing advances it over time), so compute the effective date by
+  // advancing past cycles — otherwise active subscriptions never alert.
   const urgentSubscription = subscriptions
     .filter((sub) => sub.active && sub.nextPayment)
-    .map((sub) => ({ sub, days: daysUntil(sub.nextPayment) }))
+    .map((sub) => ({
+      sub,
+      days: daysUntil(
+        computeNextBillingDate(sub.nextPayment, sub.billingCycle, sub.active),
+      ),
+    }))
     .filter(
       (entry): entry is { sub: Subscription; days: number } =>
         entry.days !== null &&
@@ -396,5 +407,5 @@ export function buildDashboardAlerts(
 
   return alerts
     .sort((a, b) => priority[a.variant] - priority[b.variant])
-    .slice(0, MAX_ALERTS);
+    .slice(0, max);
 }

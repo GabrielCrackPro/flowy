@@ -1,10 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
+import { toast } from "@/components/shared/toast";
 import { pushApi } from "@/lib/api/push";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const SERVICE_WORKER_PATH = "/sw.js";
 
 function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -36,6 +39,7 @@ function arrayBufferToBase64Url(buffer: ArrayBuffer | null): string {
 interface PushState {
   supported: boolean;
   configured: boolean;
+  checked: boolean;
   permission: NotificationPermission | null;
   subscribed: boolean;
   busy: boolean;
@@ -43,10 +47,13 @@ interface PushState {
 
 function getInitialState(): PushState {
   // supported starts false so the server and the client render the same HTML;
-  // it is flipped to true after mount in the effect below.
+  // it is flipped to true after mount in the effect below. checked flips to
+  // true once the support check has run, so the UI can tell "still checking"
+  // from "definitely unavailable" without flashing a wrong state.
   return {
     supported: false,
     configured: Boolean(VAPID_PUBLIC_KEY),
+    checked: false,
     permission: null,
     subscribed: false,
     busy: false,
@@ -54,17 +61,17 @@ function getInitialState(): PushState {
 }
 
 export function usePushNotifications() {
+  const { t } = useTranslation();
   const [state, setState] = useState<PushState>(getInitialState);
 
   // Detect API support on the client only (avoids SSR hydration mismatches).
   useEffect(() => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-      return;
-    }
+    const isSupported = "serviceWorker" in navigator && "PushManager" in window;
     setState((prev) => ({
       ...prev,
-      supported: true,
-      permission: Notification.permission,
+      checked: true,
+      supported: isSupported,
+      permission: isSupported ? Notification.permission : null,
     }));
   }, []);
 
@@ -77,9 +84,20 @@ export function usePushNotifications() {
         return;
       }
       const subscription = await registration.pushManager.getSubscription();
+      // The toggle reflects the *stored* subscription: a browser subscription
+      // without a matching DB row (e.g. an expired endpoint after the service
+      // worker was unregistered) cannot receive pushes, so treat it as
+      // disabled until it is re-registered.
+      let stored = false;
+      try {
+        const result = await pushApi.status();
+        stored = Boolean(result.subscribed);
+      } catch {
+        stored = false;
+      }
       setState((prev) => ({
         ...prev,
-        subscribed: Boolean(subscription),
+        subscribed: Boolean(subscription) && stored,
         permission: Notification.permission,
       }));
     } catch {
@@ -105,9 +123,15 @@ export function usePushNotifications() {
         return;
       }
 
-      const registration = await navigator.serviceWorker.getRegistration();
+      // The service worker must be registered before push can be subscribed.
+      // Register it on demand when the page loaded before registration
+      // finished (or the worker was unregistered, e.g. local development).
+      let registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
-        throw new Error("Service worker not registered");
+        await navigator.serviceWorker.register(SERVICE_WORKER_PATH, {
+          scope: "/",
+        });
+        registration = await navigator.serviceWorker.ready;
       }
 
       let subscription = await registration.pushManager.getSubscription();
@@ -131,10 +155,11 @@ export function usePushNotifications() {
       }));
     } catch (error) {
       console.error("Could not enable push notifications", error);
+      toast.error(t("settings.notifications.enableError"));
     } finally {
       setState((prev) => ({ ...prev, busy: false }));
     }
-  }, [state.supported, state.configured]);
+  }, [state.supported, state.configured, t]);
 
   const disable = useCallback(async () => {
     if (!state.supported) return;
@@ -157,6 +182,7 @@ export function usePushNotifications() {
   return {
     supported: state.supported,
     configured: state.configured,
+    checked: state.checked,
     permission: state.permission,
     subscribed: state.subscribed,
     busy: state.busy,

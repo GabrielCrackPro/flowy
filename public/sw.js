@@ -163,8 +163,11 @@ self.addEventListener("push", (event) => {
       // When the app is open and focused, skip the OS notification (the
       // in-app realtime banner already surfaces the alert) but message the
       // client so it refetches immediately as a fallback if realtime drops.
+      // Test pushes always surface as OS notifications so the user can
+      // verify end-to-end delivery even with the app focused.
+      const isTest = typeof tag === "string" && tag.startsWith("flowy-test");
       const focused = windowClients.find((client) => client.focused);
-      if (focused) {
+      if (focused && !isTest) {
         focused.postMessage({
           type: "PUSH_RECEIVED",
           payload: { title, body, url, tag },

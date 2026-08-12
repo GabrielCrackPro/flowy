@@ -2,6 +2,7 @@ import { Header, Sidebar } from "@components/dashboard";
 import { OfflineBanner } from "@components/shared/offline-banner";
 import { PageTransition } from "@components/shared/page-transition";
 import { PullToRefresh } from "@components/shared/pull-to-refresh";
+import { PushNotificationsBanner } from "@components/shared/push-notifications-banner";
 import { PwaShell } from "@components/shared/pwa-shell";
 import { Suspense } from "react";
 import { createPageMetadata } from "@/lib/metadata";
@@ -28,6 +29,9 @@ export default function DashboardLayout({
         </Suspense>
         <Suspense fallback={null}>
           <Header />
+        </Suspense>
+        <Suspense fallback={null}>
+          <PushNotificationsBanner />
         </Suspense>
         <main
           id="main"

@@ -6,7 +6,22 @@ export interface PushSubscriptionPayload {
   auth: string;
 }
 
+export interface PushDevice {
+  id: string;
+  endpoint: string;
+  userAgent: string | null;
+  createdAt: string;
+}
+
 export const pushApi = {
+  status: () =>
+    authenticatedRequest<{
+      ok: boolean;
+      subscribed: boolean;
+      count: number;
+      subscriptions: PushDevice[];
+    }>("/api/push-subscription", { method: "GET" }),
+
   subscribe: (payload: PushSubscriptionPayload) =>
     authenticatedRequest<{ ok: boolean }>("/api/push-subscription", {
       method: "POST",
@@ -25,6 +40,20 @@ export const pushApi = {
       {
         method: "POST",
         body: JSON.stringify(payload),
+      },
+    ),
+
+  getPreferences: () =>
+    authenticatedRequest<{ preferences: string[] }>("/api/push-preferences", {
+      method: "GET",
+    }),
+
+  updatePreferences: (preferences: string[]) =>
+    authenticatedRequest<{ ok: boolean; preferences: string[] }>(
+      "/api/push-preferences",
+      {
+        method: "PUT",
+        body: JSON.stringify({ preferences }),
       },
     ),
 };
