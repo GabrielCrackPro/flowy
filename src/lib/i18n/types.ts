@@ -555,6 +555,9 @@ export type AppTranslationMessages = {
     edit: string;
     searchPlaceholder: string;
     emptyAction: string;
+    active: string;
+    monthlyTotal: string;
+    yearlyTotal: string;
     totalMonthly: string;
     nextPayment: string;
     cycles: {
@@ -577,6 +580,10 @@ export type AppTranslationMessages = {
     monthlyEquivalent: string;
     noNextPayment: string;
     quickPayment: string;
+    recordPayment: string;
+    confirmPayment: string;
+    deleteTitle: string;
+    deleteDescription: string;
   };
   transaction: {
     pageTitle: string;

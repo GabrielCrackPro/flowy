@@ -3,10 +3,13 @@ import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { getServerT, LOCALE_COOKIE, normalizeLocale } from "@/lib/i18n";
 import { BarChart3, Droplet, Shield, Sparkles, Wallet } from "@/lib/icons";
+import { createPageMetadata } from "@/lib/metadata";
 
-export const metadata = {
-  title: "Authentication",
-};
+export const metadata = createPageMetadata(
+  "Authentication",
+  "Sign in or create your Flowy account to manage your personal finances.",
+  "/auth",
+);
 
 async function AuthContent({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
