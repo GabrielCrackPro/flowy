@@ -2,6 +2,21 @@
   "currentVersion": "0.1.27",
   "entries": [
     {
+      "version": "0.1.27",
+      "date": "2026-08-12",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "integrate push notifications with test send and SW bridge (#146)",
+              "scope": "pwa"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.26",
       "date": "2026-08-12",
       "sections": [
