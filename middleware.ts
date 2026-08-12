@@ -11,10 +11,14 @@ const supabaseKey =
 
 const AUTH_PATHS = ["/auth/login", "/auth/register", "/auth/forgot"];
 
+// Public pages that don't require a session
+const PUBLIC_PATHS = ["/status"];
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const isAuthPath = AUTH_PATHS.some((p) => pathname.startsWith(p));
+  const isPublicPath = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 
   // Handle locale cookie
   const localeCookie = req.cookies.get(LOCALE_COOKIE);
@@ -61,7 +65,7 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && !isAuthPath) {
+  if (!user && !isAuthPath && !isPublicPath) {
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = "/auth/login";
     return redirectWithCookies(

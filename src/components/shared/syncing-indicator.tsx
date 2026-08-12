@@ -14,7 +14,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui";
 import { useOfflineStatus } from "@/context/OfflineProvider";
-import { Clock, Info, Loader2, Wifi, WifiOff } from "@/lib/icons";
+import { Activity, Clock, Info, Loader2, Wifi, WifiOff } from "@/lib/icons";
+import type { OverallStatus } from "@/lib/services/status";
 import { cn } from "@/lib/utils";
 import { Icon } from "./icon";
 import { RelativeTime } from "./relative-time";
@@ -72,6 +73,33 @@ export function SyncingIndicator({ className }: { className?: string }) {
   const syncing = settled && isFetching > 0;
   const offline = !isOnline;
   const hasPending = pendingCount > 0;
+
+  // System status (from the lightweight summary endpoint — no probes) shown
+  // inside the popover with a link to the public status page.
+  const [systemStatus, setSystemStatus] = useState<OverallStatus | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const response = await fetch("/api/status/summary", {
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+        const body = (await response.json()) as {
+          overall: OverallStatus;
+        };
+        if (!cancelled) setSystemStatus(body.overall);
+      } catch {
+        // Keep the last known state; a failed poll shouldn't break the popover.
+      }
+    };
+    void poll();
+    const interval = window.setInterval(poll, 60_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
   const label = offline
     ? t("offline.label")
     : hasPending
@@ -236,6 +264,45 @@ export function SyncingIndicator({ className }: { className?: string }) {
               />
             </div>
           )}
+
+          {/* System status */}
+          <a
+            href="/status"
+            className="flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-muted/40"
+          >
+            <Icon
+              icon={Activity}
+              aria-hidden="true"
+              className={cn(
+                "size-3.5 shrink-0",
+                systemStatus === "degraded"
+                  ? "text-amber-500"
+                  : systemStatus === "down"
+                    ? "text-red-500"
+                    : "text-emerald-500",
+              )}
+            />
+            <span className="flex-1">
+              {t("status.title")}:{" "}
+              {systemStatus === "degraded"
+                ? t("status.statusDegraded")
+                : systemStatus === "down"
+                  ? t("status.statusDown")
+                  : t("status.statusOk")}
+            </span>
+            <span className="flex size-3.5 shrink-0 items-center justify-center">
+              <span
+                className={cn(
+                  "size-2 rounded-full ring-2",
+                  systemStatus === "degraded"
+                    ? "bg-amber-500 ring-amber-500/20"
+                    : systemStatus === "down"
+                      ? "bg-red-500 ring-red-500/20"
+                      : "bg-emerald-500 ring-emerald-500/20",
+                )}
+              />
+            </span>
+          </a>
 
           {/* Legend of the dot states */}
           <div className="space-y-1.5 border-t border-border/60 pt-2.5">

@@ -18,6 +18,8 @@ export * from "./file-upload";
 export * from "./filter";
 export * from "./gradient-button";
 export * from "./icon";
+export * from "./incident-admin-panel";
+export * from "./incident-banner";
 export * from "./install-app-button";
 export * from "./offline-banner";
 export * from "./page-transition";

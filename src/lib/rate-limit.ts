@@ -100,6 +100,36 @@ export const DEFAULT_RATE_LIMITS: Record<string, RateLimitConfig> = {
     window: getEnvNumber("RATE_LIMIT_UPLOAD_WINDOW", 120 * 1000),
   },
 
+  // Public status page — polled by browsers, so a generous per-IP window
+  status: {
+    requests: getEnvNumber("RATE_LIMIT_STATUS_REQUESTS", 30),
+    window: getEnvNumber("RATE_LIMIT_STATUS_WINDOW", 120 * 1000),
+  },
+
+  // Lightweight status summary — the header dot polls it every minute
+  statusSummary: {
+    requests: getEnvNumber("RATE_LIMIT_STATUS_SUMMARY_REQUESTS", 120),
+    window: getEnvNumber("RATE_LIMIT_STATUS_SUMMARY_WINDOW", 120 * 1000),
+  },
+
+  // Incident management writes
+  statusIncident: {
+    requests: getEnvNumber("RATE_LIMIT_STATUS_INCIDENT_REQUESTS", 20),
+    window: getEnvNumber("RATE_LIMIT_STATUS_INCIDENT_WINDOW", 120 * 1000),
+  },
+
+  // Per-component check history (detail view)
+  statusComponent: {
+    requests: getEnvNumber("RATE_LIMIT_STATUS_COMPONENT_REQUESTS", 60),
+    window: getEnvNumber("RATE_LIMIT_STATUS_COMPONENT_WINDOW", 120 * 1000),
+  },
+
+  // Status alert preferences
+  statusPreferences: {
+    requests: getEnvNumber("RATE_LIMIT_STATUS_PREFERENCES_REQUESTS", 20),
+    window: getEnvNumber("RATE_LIMIT_STATUS_PREFERENCES_WINDOW", 120 * 1000),
+  },
+
   // Default limit for unconfigured routes
   default: {
     requests: getEnvNumber("RATE_LIMIT_DEFAULT_REQUESTS", 150),

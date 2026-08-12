@@ -3032,6 +3032,127 @@
         }
       }
     },
+    "/api/status-preferences": {
+      "get": {
+        "operationId": "statusPreferences.get",
+        "summary": "Get status alert preferences",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Preferences",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "components": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "api",
+                          "database",
+                          "auth",
+                          "push",
+                          "storage"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "components"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Returns the user's status alert preferences: a master enabled flag and the components they want alerts for (empty = all components)."
+      },
+      "put": {
+        "operationId": "statusPreferences.update",
+        "summary": "Update status alert preferences",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "components": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "enabled",
+                    "components"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Sets the master switch and which components should push status alerts. An empty components array means all components.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStatusPreferencesRequest"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/upload": {
       "post": {
         "operationId": "uploads.receipt",
@@ -3360,6 +3481,437 @@
           }
         },
         "description": "Public. Verifies the database connection."
+      }
+    },
+    "/api/status": {
+      "get": {
+        "operationId": "status.get",
+        "summary": "System status",
+        "tags": [
+          "System"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Status snapshot and history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Public. Runs live component checks (API, database, auth, push, storage), records them for uptime history, and returns the snapshot plus 90-day history. Rate-limited per IP.",
+        "x-flowy-rate-limit": "30 requests / 120s"
+      }
+    },
+    "/api/cron/status": {
+      "post": {
+        "operationId": "cron.status",
+        "summary": "Record scheduled status checks (cron)",
+        "tags": [
+          "Cron"
+        ],
+        "security": [
+          {
+            "cronAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Check summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CronStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Internal scheduled operation that runs and persists component checks so uptime history accrues without page visits. Detects status transitions and fires push alerts when a component changes state.",
+        "x-scalar-ignore": true
+      }
+    },
+    "/api/status/summary": {
+      "get": {
+        "operationId": "status.summary",
+        "summary": "Status summary (no probes)",
+        "tags": [
+          "System"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Last recorded status summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusSummaryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Public. Returns the last recorded component statuses without running live probes — cheap enough for the in-app header dot and external uptime monitors. Rate-limited per IP.",
+        "x-flowy-rate-limit": "120 requests / 120s"
+      }
+    },
+    "/api/status/component/{component}": {
+      "get": {
+        "operationId": "status.componentHistory",
+        "summary": "Component check history",
+        "tags": [
+          "System"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Component check history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "component": {
+                      "type": "string"
+                    },
+                    "checks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "checkedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "ok",
+                              "degraded",
+                              "down"
+                            ]
+                          },
+                          "latencyMs": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "component",
+                    "checks"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Public. Returns the recent individual checks (status, latency, time) for one component, powering the status page's component detail view. Rate-limited per IP.",
+        "parameters": [
+          {
+            "name": "component",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "api",
+                "database",
+                "auth",
+                "push",
+                "storage"
+              ]
+            }
+          }
+        ],
+        "x-flowy-rate-limit": "60 requests / 120s"
+      }
+    },
+    "/api/status/incidents": {
+      "get": {
+        "operationId": "status.incidents.list",
+        "summary": "List status incidents (admin)",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Incident list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentsListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Admin only. Lists all incidents (active and resolved) with their timelines, for the incident management UI in Settings.",
+        "x-flowy-rate-limit": "20 requests / 120s"
+      },
+      "post": {
+        "operationId": "status.incidents.create",
+        "summary": "Create a status incident (admin)",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Incident created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Admin only. Posts a new incident that appears on the public status page.",
+        "requestBody": {
+          "$ref": "#/components/schemas/CreateIncidentRequest"
+        },
+        "x-flowy-rate-limit": "20 requests / 120s"
+      }
+    },
+    "/api/status/incidents/{id}": {
+      "patch": {
+        "operationId": "status.incidents.update",
+        "summary": "Update a status incident (admin)",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Incident updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Admin only. Changes the incident status (e.g. investigating → monitoring → resolved) and appends a timeline entry.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/schemas/UpdateIncidentRequest"
+        },
+        "x-flowy-rate-limit": "20 requests / 120s"
+      },
+      "post": {
+        "operationId": "status.incidents.publish",
+        "summary": "Publish a draft status incident (admin)",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Incident published",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Admin only. Publishes a draft incident (auto-created from status checks) so it appears on the public status page.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "x-flowy-rate-limit": "20 requests / 120s"
+      },
+      "delete": {
+        "operationId": "status.incidents.delete",
+        "summary": "Delete a status incident (admin)",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Incident deleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Admin only. Permanently removes the incident and its timeline from the status page.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "x-flowy-rate-limit": "20 requests / 120s"
       }
     }
   },
@@ -4688,6 +5240,494 @@
           }
         }
       },
+      "ServiceCheck": {
+        "type": "object",
+        "description": "A single component check powering the status page.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "api",
+              "database",
+              "auth",
+              "push",
+              "storage"
+            ],
+            "description": "Component identifier"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded",
+              "down"
+            ],
+            "description": "Component status"
+          },
+          "latencyMs": {
+            "type": "integer",
+            "description": "Probe latency in milliseconds"
+          },
+          "detail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional failure detail"
+          }
+        }
+      },
+      "UptimeBar": {
+        "type": "object",
+        "description": "Worst component status recorded for a single UTC day.",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Day (yyyy-mm-dd, UTC)"
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "ok",
+              "degraded",
+              "down"
+            ],
+            "description": "Worst status that day, or null when no checks ran"
+          }
+        }
+      },
+      "StatusResponse": {
+        "type": "object",
+        "description": "Live status snapshot plus uptime history for the status page.",
+        "properties": {
+          "overall": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded",
+              "down"
+            ],
+            "description": "Worst status across all components"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceCheck"
+            },
+            "description": "Per-component checks"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Check time (ISO 8601)"
+          },
+          "history": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/UptimeBar"
+              }
+            },
+            "description": "Per-component uptime bars for the last 90 days"
+          },
+          "uptime": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Ok/total check ratio over the window, as a percentage"
+            },
+            "description": "Per-component uptime percentage over the history window"
+          },
+          "lastFailure": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time",
+              "description": "Most recent non-ok check within the window, or null"
+            },
+            "description": "Most recent failure time per component"
+          },
+          "latency": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "description": "Check latency in ms"
+              }
+            },
+            "description": "Recent check latencies per component, for sparklines"
+          },
+          "incidents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Incident"
+            },
+            "description": "Active (unresolved) incidents"
+          },
+          "maintenance": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Incident"
+            },
+            "description": "Unresolved scheduled maintenance windows"
+          }
+        }
+      },
+      "CronStatusResponse": {
+        "type": "object",
+        "properties": {
+          "overall": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded",
+              "down"
+            ],
+            "description": "Worst status across all components"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Checked component ids"
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Check time (ISO 8601)"
+          },
+          "transitions": {
+            "type": "integer",
+            "description": "Number of status transitions detected (and alerted)"
+          },
+          "drafts": {
+            "type": "integer",
+            "description": "Draft incidents auto-created from down transitions"
+          }
+        }
+      },
+      "StatusSummaryResponse": {
+        "type": "object",
+        "description": "Last recorded status snapshot without running live probes — cheap enough for the in-app header dot and external uptime monitors.",
+        "properties": {
+          "overall": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded",
+              "down"
+            ],
+            "description": "Worst status across all components"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "enum": [
+                    "api",
+                    "database",
+                    "auth",
+                    "push",
+                    "storage"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "ok",
+                    "degraded",
+                    "down"
+                  ]
+                }
+              }
+            },
+            "description": "Last recorded status per component"
+          },
+          "updatedAt": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Unix ms of the most recent recorded check"
+          },
+          "hasIncidents": {
+            "type": "boolean",
+            "description": "Whether any incident is currently active"
+          },
+          "incidents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Incident"
+            },
+            "description": "Active (unresolved) incidents — used by the in-app banner"
+          }
+        }
+      },
+      "IncidentUpdate": {
+        "type": "object",
+        "description": "A timeline entry for a status incident.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "investigating",
+              "monitoring",
+              "resolved"
+            ]
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Incident": {
+        "type": "object",
+        "description": "An outage or maintenance post shown on the status page.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "investigating",
+              "monitoring",
+              "resolved"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "minor",
+              "major",
+              "critical"
+            ],
+            "description": "Impact severity of the incident"
+          },
+          "draft": {
+            "type": "boolean",
+            "description": "Draft incidents are hidden from the public page until published"
+          },
+          "component": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "api",
+              "database",
+              "auth",
+              "push",
+              "storage"
+            ],
+            "description": "Affected component, or null for the whole platform"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "incident",
+              "maintenance"
+            ],
+            "description": "Outage incident or scheduled maintenance"
+          },
+          "scheduledStart": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Maintenance window start"
+          },
+          "scheduledEnd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Maintenance window end"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncidentUpdate"
+            },
+            "description": "Timeline of status changes"
+          }
+        }
+      },
+      "CreateIncidentRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "investigating",
+              "monitoring"
+            ],
+            "default": "investigating"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "minor",
+              "major",
+              "critical"
+            ],
+            "default": "major"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "incident",
+              "maintenance"
+            ],
+            "default": "incident"
+          },
+          "component": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "api",
+              "database",
+              "auth",
+              "push",
+              "storage"
+            ]
+          },
+          "scheduledStart": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Required when type is maintenance"
+          },
+          "scheduledEnd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Required when type is maintenance"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "UpdateIncidentRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "investigating",
+              "monitoring",
+              "resolved"
+            ]
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "IncidentsListResponse": {
+        "type": "object",
+        "properties": {
+          "incidents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Incident"
+            }
+          }
+        },
+        "required": [
+          "incidents"
+        ]
+      },
+      "IncidentResponse": {
+        "type": "object",
+        "properties": {
+          "incident": {
+            "$ref": "#/components/schemas/Incident"
+          }
+        },
+        "required": [
+          "incident"
+        ]
+      },
       "Error": {
         "type": "object",
         "description": "Common error response returned when a request cannot be completed. Validation responses may include field-level details in `errors`.",
@@ -5020,6 +6060,32 @@
         },
         "required": [
           "preferences"
+        ]
+      },
+      "UpdateStatusPreferencesRequest": {
+        "type": "object",
+        "description": "Status alert preferences: master switch plus the components to alert on (empty array = all components).",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "api",
+                "database",
+                "auth",
+                "push",
+                "storage"
+              ]
+            }
+          }
+        },
+        "required": [
+          "enabled",
+          "components"
         ]
       },
       "PushSubscriptionResponse": {

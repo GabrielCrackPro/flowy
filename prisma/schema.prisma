@@ -22,6 +22,9 @@ model Profile {
   accentColor          String?  @map("accent_color") @db.Text
   categoriesSeeded     Boolean  @default(false) @map("categories_seeded")
   pushPreferences      String[] @default([]) @map("push_preferences")
+  statusAlertsEnabled  Boolean  @default(true) @map("status_alerts_enabled")
+  statusAlertComponents String[] @default([]) @map("status_alert_components")
+  role                 String   @default("user") @db.VarChar(20) // user | admin
   createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   categories           Category[]
@@ -324,4 +327,59 @@ model Alert {
   @@index([userId, resolvedAt])
   @@index([userId, createdAt])
   @@map("alerts")
+}
+
+// Periodic component checks powering the public status page. Rows are
+// appended by /api/status and /api/cron/status; the page aggregates them
+// into per-day uptime bars.
+model ServiceCheck {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  component String   @db.VarChar(50)
+  status    String   @db.VarChar(20) // ok | degraded | down
+  latencyMs Int?     @map("latency_ms")
+  detail    String?  @db.Text
+  checkedAt DateTime @default(now()) @map("checked_at") @db.Timestamptz
+
+  @@index([component, checkedAt])
+  @@map("service_checks")
+}
+
+// Outages and maintenance posted on the public status page. An incident
+// carries a status (investigating | monitoring | resolved), a severity
+// (minor | major | critical) and a timeline of updates; `component` is null
+// for incidents affecting the whole platform. `draft` incidents are
+// auto-created from status checks and hidden from the public page until an
+// admin publishes them.
+model Incident {
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title          String            @db.Text
+  message        String?           @db.Text
+  status         String            @db.VarChar(20) // investigating | monitoring | resolved
+  severity       String            @default("major") @db.VarChar(20) // minor | major | critical
+  type           String            @default("incident") @db.VarChar(20) // incident | maintenance
+  component      String?           @db.VarChar(50)
+  draft          Boolean           @default(false)
+  scheduledStart DateTime?         @map("scheduled_start") @db.Timestamptz
+  scheduledEnd   DateTime?         @map("scheduled_end") @db.Timestamptz
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+  resolvedAt     DateTime?         @map("resolved_at") @db.Timestamptz
+  updates        IncidentUpdate[]
+
+  @@index([status, createdAt])
+  @@map("incidents")
+}
+
+// Timeline entries for an incident (each status change / progress note).
+model IncidentUpdate {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  incidentId String   @map("incident_id") @db.Uuid
+  status     String   @db.VarChar(20)
+  message    String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+
+  @@index([incidentId, createdAt])
+  @@map("incident_updates")
 }

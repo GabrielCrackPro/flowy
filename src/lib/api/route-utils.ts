@@ -9,6 +9,7 @@ import {
   RateLimitError,
   ValidationError,
 } from "@/lib/errors/error-types";
+import { prisma } from "@/lib/prisma/client";
 import {
   addRateLimitHeaders,
   checkRateLimit,
@@ -61,6 +62,27 @@ export function isAuthResponse(
   result: User | NextResponse,
 ): result is NextResponse {
   return result instanceof NextResponse;
+}
+
+/**
+ * Auth + admin guard for platform-level operations (e.g. managing status
+ * incidents). Returns the authenticated user, or a 401/403 response.
+ */
+export async function requireAdmin(): Promise<User | NextResponse> {
+  const auth = await requireAuth();
+  if (isAuthResponse(auth)) return auth;
+
+  const profile = await prisma.profile.findUnique({
+    where: { id: auth.id },
+    select: { role: true },
+  });
+  if (profile?.role !== "admin") {
+    return NextResponse.json(
+      { message: "Administrator role required" },
+      { status: 403 },
+    );
+  }
+  return auth;
 }
 
 export function handleApiError(error: unknown, fallbackMessage: string) {

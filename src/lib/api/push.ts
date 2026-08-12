@@ -56,4 +56,23 @@ export const pushApi = {
         body: JSON.stringify({ preferences }),
       },
     ),
+
+  getStatusPreferences: () =>
+    authenticatedRequest<{ enabled: boolean; components: string[] }>(
+      "/api/status-preferences",
+      { method: "GET" },
+    ),
+
+  updateStatusPreferences: (prefs: {
+    enabled: boolean;
+    components: string[];
+  }) =>
+    authenticatedRequest<{
+      ok: boolean;
+      enabled: boolean;
+      components: string[];
+    }>("/api/status-preferences", {
+      method: "PUT",
+      body: JSON.stringify(prefs),
+    }),
 };
