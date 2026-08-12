@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.23](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.22...flowy-v0.1.23) (2026-08-12)
+
+
+### Features
+
+* **ui:** add close buttons to all sheet headers ([#129](https://github.com/GabrielCrackPro/flowy/issues/129)) ([b5fb91d](https://github.com/GabrielCrackPro/flowy/commit/b5fb91d7c9292f1f32ef86eddf6cedd793a243ef))
+
 ## [0.1.22](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.21...flowy-v0.1.22) (2026-08-12)
 
 
