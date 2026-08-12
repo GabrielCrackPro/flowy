@@ -265,6 +265,10 @@ export type AppTranslationMessages = {
       enabled: string;
       disabled: string;
       denied: string;
+      test: string;
+      testSent: string;
+      testTitle: string;
+      testBody: string;
     };
     about: {
       title: string;

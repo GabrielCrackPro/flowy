@@ -284,6 +284,10 @@ export const app: AppTranslationMessages = {
       enabled: "Activadas — recibirás los avisos aquí",
       disabled: "Desactivadas",
       denied: "Bloqueadas en la configuración del navegador",
+      test: "Enviar prueba",
+      testSent: "Notificación de prueba enviada",
+      testTitle: "Flowy",
+      testBody: "Las notificaciones push funcionan",
     },
     about: {
       title: "Acerca de Flowy",

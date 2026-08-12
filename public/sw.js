@@ -150,10 +150,6 @@ self.addEventListener("push", (event) => {
         type: "window",
         includeUncontrolled: true,
       });
-      if (windowClients.some((client) => client.focused)) {
-        return;
-      }
-
       const { title, body, url, tag } = payload;
       const options = {
         body: body ?? "",
@@ -163,6 +159,18 @@ self.addEventListener("push", (event) => {
         tag,
         vibrate: [100, 50, 100],
       };
+
+      // When the app is open and focused, skip the OS notification (the
+      // in-app realtime banner already surfaces the alert) but message the
+      // client so it refetches immediately as a fallback if realtime drops.
+      const focused = windowClients.find((client) => client.focused);
+      if (focused) {
+        focused.postMessage({
+          type: "PUSH_RECEIVED",
+          payload: { title, body, url, tag },
+        });
+        return;
+      }
 
       await self.registration.showNotification(title ?? "Flowy", options);
     })(),
