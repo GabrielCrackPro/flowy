@@ -2,6 +2,21 @@
   "currentVersion": "0.1.26",
   "entries": [
     {
+      "version": "0.1.26",
+      "date": "2026-08-12",
+      "sections": [
+        {
+          "type": "fixes",
+          "items": [
+            {
+              "text": "improve responsive design and pin line endings to LF (#140)",
+              "scope": "ui"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.25",
       "date": "2026-08-12",
       "sections": [
