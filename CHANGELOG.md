@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.30](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.29...flowy-v0.1.30) (2026-08-12)
+
+
+### Features
+
+* **status:** public status page, incidents, maintenance, and alert preferences ([#158](https://github.com/GabrielCrackPro/flowy/issues/158)) ([362af88](https://github.com/GabrielCrackPro/flowy/commit/362af881f3142a465322c3118776f083179aab18))
+
 ## [0.1.29](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.28...flowy-v0.1.29) (2026-08-12)
 
 
