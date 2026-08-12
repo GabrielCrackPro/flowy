@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.27](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.26...flowy-v0.1.27) (2026-08-12)
+
+
+### Features
+
+* **pwa:** integrate push notifications with test send and SW bridge ([#146](https://github.com/GabrielCrackPro/flowy/issues/146)) ([77319c0](https://github.com/GabrielCrackPro/flowy/commit/77319c0b5b1913361c7c2587946b33006b74bf39))
+
 ## [0.1.26](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.25...flowy-v0.1.26) (2026-08-12)
 
 
