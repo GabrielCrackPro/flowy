@@ -2,6 +2,18 @@
   "currentVersion": "0.1.21",
   "entries": [
     {
+      "version": "0.1.21",
+      "date": "2026-08-12",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            "**subscriptions:** harden i18n, error codes, auto-renew display, and card UX (#119)"
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.20",
       "date": "2026-08-12",
       "sections": [
