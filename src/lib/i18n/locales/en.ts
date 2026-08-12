@@ -284,6 +284,7 @@ export const app: AppTranslationMessages = {
       title: "About Flowy",
       description: "App version and latest changes",
       whatNew: "What's new",
+      releasedOn: "Released",
     },
   },
   changelog: {

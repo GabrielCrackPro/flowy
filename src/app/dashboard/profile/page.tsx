@@ -70,6 +70,14 @@ export default function SettingsPage() {
       }).format(new Date(profile.createdAt))
     : "";
 
+  const releaseDate = changelog.entries[0]?.date
+    ? new Intl.DateTimeFormat(locale, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(new Date(changelog.entries[0].date))
+    : "";
+
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -234,29 +242,46 @@ export default function SettingsPage() {
             <CardDescription>{t("settings.about.description")}</CardDescription>
             <CardAction>
               <div className="flex flex-wrap gap-2">
-                <Button asChild variant="outline">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="px-2.5 sm:px-3"
+                >
                   <Link href="/api/docs" target="_blank" rel="noreferrer">
                     <Icon icon={BookOpen} className="size-4" />
-                    {t("settings.apiDocs.open")}
+                    <span className="hidden sm:inline">
+                      {t("settings.apiDocs.open")}
+                    </span>
                   </Link>
                 </Button>
-                <Button variant="outline" onClick={openChangelog}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="px-2.5 sm:px-3"
+                  onClick={openChangelog}
+                >
                   <Sparkles className="size-4" />
-                  {t("settings.about.whatNew")}
+                  <span className="hidden sm:inline">
+                    {t("settings.about.whatNew")}
+                  </span>
                 </Button>
               </div>
             </CardAction>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4">
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-md shadow-primary/20">
-                <Icon icon={Droplet} className="size-6" />
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-md shadow-primary/20 sm:size-14">
+                <Icon icon={Droplet} className="size-6 sm:size-7" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-lg font-bold tracking-tight">Flowy</p>
                   <Badge variant="secondary">v{changelog.currentVersion}</Badge>
                 </div>
+                <p className="mt-1 truncate text-xs text-muted-foreground sm:text-sm">
+                  {t("settings.about.releasedOn")} {releaseDate}
+                </p>
               </div>
             </div>
           </CardContent>

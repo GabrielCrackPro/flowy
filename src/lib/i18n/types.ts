@@ -270,6 +270,7 @@ export type AppTranslationMessages = {
       title: string;
       description: string;
       whatNew: string;
+      releasedOn: string;
     };
   };
   changelog: {

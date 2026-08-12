@@ -239,7 +239,7 @@ export default function CategoriesPage() {
             title={t("categories.title")}
             href="/dashboard"
             actions={
-              <GradientButton onClick={openCreate}>
+              <GradientButton onClick={openCreate} fullWidth={false}>
                 <span className="hidden sm:inline">{t("categories.new")}</span>
               </GradientButton>
             }

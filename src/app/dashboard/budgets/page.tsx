@@ -98,7 +98,7 @@ export default function BudgetsPage() {
             title={t("nav.budgets")}
             href="/dashboard"
             actions={
-              <GradientButton onClick={openCreate}>
+              <GradientButton onClick={openCreate} fullWidth={false}>
                 <span className="hidden sm:inline">{t("budgets.new")}</span>
               </GradientButton>
             }

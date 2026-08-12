@@ -54,6 +54,8 @@ Flowy is a **solo project** developed in spare time with **variable availability
 
 **Do not run `pnpm db:push` on a Supabase database** — cross-schema references can break introspection. Ship schema changes as migrations instead (see below).
 
+**Format only the files you changed.** `pnpm format` runs Biome across the whole repo and touches every file's mtime, which can leave the working tree looking dirty (stale git index stat cache). Prefer `pnpm exec biome check --write <files>` scoped to what you edited. Line endings are pinned to LF via `.gitattributes` and `biome.json` (`formatter.lineEnding: "lf"`).
+
 ## Repository layout
 
 ```text
