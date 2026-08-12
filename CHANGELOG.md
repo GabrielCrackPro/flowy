@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.29](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.28...flowy-v0.1.29) (2026-08-12)
+
+
+### Features
+
+* **settings:** settings page overhaul, space pictures, and hardened uploads ([#154](https://github.com/GabrielCrackPro/flowy/issues/154)) ([d83dee5](https://github.com/GabrielCrackPro/flowy/commit/d83dee563a7460ff86a7532f8da2cc6b9910b28f))
+
 ## [0.1.28](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.27...flowy-v0.1.28) (2026-08-12)
 
 
