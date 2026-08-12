@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { SheetLayout } from "@/components/ui/sheet-layout";
 import { Check, KeyRound, Loader2, Pencil, Plus, X } from "@/lib/icons";
 import { toast } from "../shared/toast";
+import { SpaceAvatarUploader } from "./space-avatar-uploader";
 import { SpaceCard } from "./space-card";
 import { SpaceMembersSheet } from "./space-members-sheet";
 
@@ -36,6 +37,7 @@ export function SpaceManager() {
   const [editingSpace, setEditingSpace] = useState<SpaceSummary | null>(null);
   const [editName, setEditName] = useState("");
   const [editIsPersonal, setEditIsPersonal] = useState(false);
+  const [editAvatar, setEditAvatar] = useState<string | null>(null);
   const [membersSpace, setMembersSpace] = useState<SpaceSummary | null>(null);
 
   const isOnlyMember = (space: SpaceSummary) =>
@@ -72,6 +74,7 @@ export function SpaceManager() {
     setEditingSpace(space);
     setEditName(space.name);
     setEditIsPersonal(space.isPersonal);
+    setEditAvatar(space.avatarUrl ?? null);
   };
 
   const handleEditSubmit = (event: React.FormEvent) => {
@@ -79,7 +82,12 @@ export function SpaceManager() {
     const value = editName.trim();
     if (!value || !editingSpace || rename.isPending) return;
     rename.mutate(
-      { id: editingSpace.id, name: value, isPersonal: editIsPersonal },
+      {
+        id: editingSpace.id,
+        name: value,
+        isPersonal: editIsPersonal,
+        avatarUrl: editAvatar,
+      },
       { onSuccess: () => setEditingSpace(null) },
     );
   };
@@ -97,10 +105,12 @@ export function SpaceManager() {
       <div className="grid gap-4 md:grid-cols-2">
         <form
           onSubmit={handleCreate}
-          className="rounded-2xl border border-border/40 bg-muted/20 p-4 transition-colors focus-within:border-primary/40"
+          className="relative overflow-hidden rounded-2xl border border-border/40 bg-muted/20 p-4 transition-colors focus-within:border-primary/40 sm:p-5"
         >
-          <div className="mb-3 flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-primary/40 via-primary/20 to-transparent" />
+
+          <div className="mb-4 flex items-center gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
               <Icon icon={Plus} className="size-4" />
             </span>
             <div>
@@ -119,12 +129,12 @@ export function SpaceManager() {
               onChange={(event) => setName(event.target.value)}
               placeholder={t("profile.spaces.createPlaceholder")}
               maxLength={60}
-              className="h-10"
+              className="h-11"
             />
             <Button
               type="submit"
               disabled={!name.trim() || create.isPending}
-              className="shrink-0"
+              className="h-11 shrink-0 gap-1.5"
             >
               {create.isPending ? (
                 <Icon icon={Loader2} className="size-4 animate-spin" />
@@ -135,17 +145,18 @@ export function SpaceManager() {
             </Button>
           </div>
 
-          <div className="flex items-center gap-3 rounded-lg bg-muted/30 px-3 py-2 mt-3">
+          <div className="mt-3 flex items-center gap-3 rounded-xl bg-muted/30 px-3 py-2.5">
             <Switch
               checked={isPersonal}
               onCheckedChange={setIsPersonal}
+              disabled={create.isPending}
               size="sm"
             />
             <div className="flex flex-col">
               <span className="text-xs font-medium text-foreground">
                 {t("profile.spaces.createPersonal")}
               </span>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-[11px] text-muted-foreground">
                 {t("profile.spaces.createPersonalHint")}
               </p>
             </div>
@@ -154,10 +165,12 @@ export function SpaceManager() {
 
         <form
           onSubmit={handleJoin}
-          className="rounded-2xl border border-border/40 bg-muted/20 p-4 transition-colors focus-within:border-primary/40"
+          className="relative overflow-hidden rounded-2xl border border-border/40 bg-muted/20 p-4 transition-colors focus-within:border-primary/40 sm:p-5"
         >
-          <div className="mb-3 flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-indigo-500/40 via-indigo-500/20 to-transparent" />
+
+          <div className="mb-4 flex items-center gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
               <Icon icon={KeyRound} className="size-4" />
             </span>
             <div>
@@ -178,13 +191,13 @@ export function SpaceManager() {
               }
               placeholder={t("profile.spaces.joinPlaceholder")}
               maxLength={8}
-              className="h-10 font-mono tracking-widest uppercase"
+              className="h-11 font-mono tracking-widest uppercase"
             />
             <Button
               type="submit"
               variant="outline"
               disabled={!joinCode.trim() || join.isPending}
-              className="shrink-0"
+              className="h-11 shrink-0 gap-1.5"
             >
               {join.isPending ? (
                 <Icon icon={Loader2} className="size-4 animate-spin" />
@@ -341,6 +354,13 @@ export function SpaceManager() {
         }
       >
         <form onSubmit={handleEditSubmit} className="space-y-6">
+          <SpaceAvatarUploader
+            name={editingSpace?.name ?? ""}
+            value={editAvatar}
+            onChange={setEditAvatar}
+            disabled={rename.isPending}
+          />
+
           <div className="space-y-2">
             <label
               className="text-sm font-medium text-foreground"
@@ -364,6 +384,7 @@ export function SpaceManager() {
               <Switch
                 checked={editIsPersonal}
                 onCheckedChange={setEditIsPersonal}
+                disabled={rename.isPending}
                 size="sm"
               />
               <div className="flex flex-col">

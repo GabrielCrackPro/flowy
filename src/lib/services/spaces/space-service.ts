@@ -4,6 +4,7 @@ import {
   ValidationError,
 } from "@/lib/errors/error-types";
 import { prisma } from "@/lib/prisma/client";
+import { deleteSpaceAvatar } from "@/lib/services/storage";
 import { ActivityService } from "../activities";
 
 function slugify(value: string) {
@@ -182,6 +183,7 @@ export const SpaceService = {
     spaceId: string,
     name: string,
     isPersonal?: boolean,
+    avatarUrl?: string | null,
   ) {
     const trimmedName = name?.trim();
 
@@ -212,13 +214,27 @@ export const SpaceService = {
       }
     }
 
-    return prisma.space.update({
+    const previousAvatar = space.avatarUrl;
+
+    const updated = await prisma.space.update({
       where: { id: spaceId },
       data: {
         name: trimmedName,
         ...(isPersonal !== undefined && { isPersonal }),
+        ...(avatarUrl !== undefined && { avatarUrl }),
       },
     });
+
+    // Best-effort cleanup of the replaced image so storage doesn't leak.
+    if (
+      avatarUrl !== undefined &&
+      previousAvatar &&
+      previousAvatar !== avatarUrl
+    ) {
+      await deleteSpaceAvatar(previousAvatar).catch(() => undefined);
+    }
+
+    return updated;
   },
 
   async leave(userId: string, spaceId: string) {

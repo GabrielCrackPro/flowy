@@ -3061,6 +3061,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
           "500": {
             "$ref": "#/components/responses/ServerError"
           }
@@ -3084,7 +3087,67 @@
               }
             }
           }
-        }
+        },
+        "x-flowy-rate-limit": "10 requests / 120s"
+      }
+    },
+    "/api/upload/space": {
+      "post": {
+        "operationId": "uploads.spaceAvatar",
+        "summary": "Upload a space picture",
+        "tags": [
+          "Uploads"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Uploaded file URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Multipart/form-data with a `file` field. Returns the public URL of the stored space picture.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "x-flowy-rate-limit": "10 requests / 120s"
       }
     },
     "/api/upload/avatar": {
@@ -3116,6 +3179,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
           "500": {
             "$ref": "#/components/responses/ServerError"
           }
@@ -3139,7 +3205,8 @@
               }
             }
           }
-        }
+        },
+        "x-flowy-rate-limit": "10 requests / 120s"
       }
     },
     "/api/account": {
@@ -4093,6 +4160,13 @@
             ],
             "description": "Invite code used to join a shared space"
           },
+          "avatarUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Public URL of the space picture"
+          },
           "ownerId": {
             "$ref": "#/components/schemas/Uuid",
             "description": "Profile UUID of the space owner"
@@ -4798,7 +4872,7 @@
       },
       "SpaceActionRequest": {
         "type": "object",
-        "description": "Action-based space update. Only the fields for the chosen action are read: setActive → none; rename → name, isPersonal; leave → none; removeMember → memberUserId.",
+        "description": "Action-based space update. Only the fields for the chosen action are read: setActive → none; rename → name, isPersonal, avatarUrl; leave → none; removeMember → memberUserId.",
         "properties": {
           "action": {
             "type": "string",
@@ -4817,6 +4891,13 @@
           "isPersonal": {
             "type": "boolean",
             "description": "Whether the space is personal (rename only)"
+          },
+          "avatarUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Public URL of the space picture; null removes it (rename only)"
           },
           "memberUserId": {
             "type": "string",

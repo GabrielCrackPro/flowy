@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { authenticatedRequest } from "@/lib/api/client";
 import {
   AlertCircle,
   Download,
@@ -17,6 +18,7 @@ import {
   Trash2,
   Upload,
 } from "@/lib/icons";
+import { resizeImage } from "@/lib/image-utils";
 import { cn } from "@/lib/utils";
 import { Icon } from "./icon";
 
@@ -29,6 +31,8 @@ interface FileUploadLabels {
   uploadingLabel?: string;
   errorLabel?: string;
   retryLabel?: string;
+  /** Supports the {{maxSize}} placeholder (in MB). */
+  maxSizeError?: string;
 }
 
 interface FileUploadProps {
@@ -42,14 +46,15 @@ interface FileUploadProps {
 }
 
 const DEFAULT_LABELS: FileUploadLabels = {
-  uploadLabel: "Subir comprobante",
-  dragHint: "Arrastra un archivo o haz clic para subir",
+  uploadLabel: "Upload receipt",
+  dragHint: "Drop a file or click to upload",
   fileTypesHint: "PNG, JPG, WebP, PDF \u2022 Max 10 MB",
-  changeLabel: "Cambiar",
-  removeLabel: "Eliminar",
-  uploadingLabel: "Subiendo...",
-  errorLabel: "Error al subir el archivo",
-  retryLabel: "Reintentar",
+  changeLabel: "Change",
+  removeLabel: "Remove",
+  uploadingLabel: "Uploading...",
+  errorLabel: "Couldn't upload the file",
+  retryLabel: "Retry",
+  maxSizeError: "File exceeds the maximum size of {{maxSize}} MB",
 };
 
 type UploadState =
@@ -86,32 +91,44 @@ export function FileUpload({
       if (file.size > maxSize) {
         setState({
           status: "error",
-          message: `El archivo excede el tamaño máximo de ${Math.round(maxSize / 1024 / 1024)} MB`,
+          message: (
+            labels.maxSizeError ??
+            DEFAULT_LABELS.maxSizeError ??
+            "File exceeds the maximum size of {{maxSize}} MB"
+          ).replace("{{maxSize}}", String(Math.round(maxSize / 1024 / 1024))),
         });
         return;
       }
 
       setState({ status: "uploading" });
 
+      // Images are downscaled client-side so receipts upload fast and stay
+      // small in storage; PDFs pass through untouched.
+      const payload = file.type.startsWith("image/")
+        ? await resizeImage(file, 1600)
+        : file;
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", payload);
 
       try {
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Error al subir");
+        // Goes through authenticatedRequest so uploads get the auth token,
+        // rate-limit retries, and typed errors like the rest of the app.
+        const data = await authenticatedRequest<{ url?: string }>(
+          "/api/upload",
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
+        if (!data?.url) throw new Error("upload_failed");
         onChange(data.url);
         setState({ status: "idle" });
-      } catch (err) {
+      } catch {
+        // Show the localized label, never raw server text.
         setState({
           status: "error",
-          message:
-            err instanceof Error
-              ? err.message
-              : (labels.errorLabel ?? "Error al subir el archivo"),
+          message: labels.errorLabel ?? DEFAULT_LABELS.errorLabel ?? "",
         });
       }
     },

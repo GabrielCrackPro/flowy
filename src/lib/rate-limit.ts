@@ -94,6 +94,12 @@ export const DEFAULT_RATE_LIMITS: Record<string, RateLimitConfig> = {
     window: getEnvNumber("RATE_LIMIT_PUSH_PREFERENCES_WINDOW", 120 * 1000),
   },
 
+  // File uploads are heavier payloads — stricter than plain writes
+  upload: {
+    requests: getEnvNumber("RATE_LIMIT_UPLOAD_REQUESTS", 10),
+    window: getEnvNumber("RATE_LIMIT_UPLOAD_WINDOW", 120 * 1000),
+  },
+
   // Default limit for unconfigured routes
   default: {
     requests: getEnvNumber("RATE_LIMIT_DEFAULT_REQUESTS", 150),

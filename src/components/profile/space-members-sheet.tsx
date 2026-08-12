@@ -9,7 +9,7 @@ import { SheetClose } from "@/components/ui/sheet";
 import { SheetLayout } from "@/components/ui/sheet-layout";
 import { useProfile } from "@/hooks/useProfile";
 import type { SpaceSummary } from "@/lib/api/space";
-import { Crown, Loader2, UserMinus, Users } from "@/lib/icons";
+import { CalendarDays, Crown, Loader2, UserMinus, Users } from "@/lib/icons";
 
 interface SpaceMembersSheetProps {
   space: SpaceSummary | null;
@@ -17,6 +17,19 @@ interface SpaceMembersSheetProps {
   onOpenChange: (open: boolean) => void;
   onRemoveMember: (memberUserId: string) => void;
   removePending?: boolean;
+}
+
+function formatDate(date: string | undefined, locale: string): string {
+  if (!date) return "";
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(date));
+  } catch {
+    return "";
+  }
 }
 
 export function SpaceMembersSheet({
@@ -27,7 +40,7 @@ export function SpaceMembersSheet({
   removePending = false,
 }: SpaceMembersSheetProps) {
   const { profile } = useProfile();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [removeTarget, setRemoveTarget] = useState<{
     userId: string;
     name: string;
@@ -71,7 +84,7 @@ export function SpaceMembersSheet({
                 <UserAvatar profile={owner.user} size="sm" />
                 <div>
                   <p className="font-medium">
-                    {owner.user.name ?? owner.user.email ?? "Usuario"}
+                    {owner.user.name ?? owner.user.email ?? t("profile.user")}
                   </p>
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Crown className="size-3 text-amber-500" />
@@ -96,10 +109,18 @@ export function SpaceMembersSheet({
                     <UserAvatar profile={member.user} size="sm" />
                     <div>
                       <p className="font-medium">
-                        {member.user.name ?? member.user.email ?? "Usuario"}
+                        {member.user.name ??
+                          member.user.email ??
+                          t("profile.user")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {member.user.email ?? "Sin email"}
+                        {member.user.email ?? t("profile.noEmail")}
+                      </p>
+                      <p className="inline-flex items-center gap-1 text-xs text-muted-foreground/70">
+                        <CalendarDays className="size-3" />
+                        {t("profile.spaces.joinedOn", {
+                          date: formatDate(member.joinedAt, i18n.language),
+                        })}
                       </p>
                     </div>
                   </div>
@@ -107,14 +128,18 @@ export function SpaceMembersSheet({
                     <Button
                       variant="ghost"
                       size="icon"
-                      title="Eliminar miembro"
-                      aria-label={`Eliminar ${member.user.name ?? member.user.email}`}
+                      title={t("profile.spaces.removeMember")}
+                      aria-label={`${t("profile.spaces.removeMember")} ${
+                        member.user.name ?? member.user.email
+                      }`}
                       className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                       onClick={() =>
                         setRemoveTarget({
                           userId: member.user.id,
                           name:
-                            member.user.name ?? member.user.email ?? "Usuario",
+                            member.user.name ??
+                            member.user.email ??
+                            t("profile.user"),
                         })
                       }
                       disabled={removePending}
@@ -148,7 +173,9 @@ export function SpaceMembersSheet({
         onOpenChange={(open) => {
           if (!open) setRemoveTarget(null);
         }}
-        title={`${t("profile.spaces.removeMemberConfirm")} ${removeTarget?.name ?? "este usuario"}?`}
+        title={t("profile.spaces.removeMemberConfirmName", {
+          name: removeTarget?.name ?? t("profile.user"),
+        })}
         description={t("profile.spaces.removeMemberDescription")}
         confirmLabel={t("profile.spaces.removeMember")}
         cancelLabel={t("profile.spaces.cancel")}

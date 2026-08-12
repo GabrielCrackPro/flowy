@@ -39,8 +39,11 @@ export async function authenticatedRequest<T>(
   const retryCount = init?.retryCount ?? 0;
   const accessToken = await getAccessToken();
 
+  // Multipart uploads need the browser to set the Content-Type (it includes
+  // the boundary); forcing application/json would break them.
+  const isFormData = init?.body instanceof FormData;
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(init?.headers as Record<string, string> | undefined),
   };
 
@@ -86,8 +89,9 @@ export async function authenticatedRequest<T>(
       throw error;
     }
 
-    // Handle other errors
-    throw new Error(body?.message ?? "Ha ocurrido un error");
+    // Handle other errors. Upload routes return `{ error: "<code>" }` instead
+    // of a message, so fall back to it to keep error codes flowing to callers.
+    throw new Error(body?.message ?? body?.error ?? "Ha ocurrido un error");
   }
 
   if (response.status === 204) {

@@ -50,6 +50,7 @@ model Space {
   name       String   @db.Text
   slug       String?  @db.Text
   joinCode   String?  @map("join_code") @db.Text
+  avatarUrl  String?  @map("avatar_url") @db.Text
   ownerId    String   @map("owner_id") @db.Uuid
   isPersonal Boolean  @default(false) @map("is_personal")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
