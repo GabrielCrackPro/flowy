@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.21](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.20...flowy-v0.1.21) (2026-08-12)
+
+
+### Features
+
+* **subscriptions:** harden i18n, error codes, auto-renew display, and card UX ([#119](https://github.com/GabrielCrackPro/flowy/issues/119)) ([10a192b](https://github.com/GabrielCrackPro/flowy/commit/10a192bc8d994c3cad32e6813abadf80a21af3dd))
+
 ## [0.1.20](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.19...flowy-v0.1.20) (2026-08-12)
 
 
