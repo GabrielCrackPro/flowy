@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.22](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.21...flowy-v0.1.22) (2026-08-12)
+
+
+### Features
+
+* **changelog:** add scope badges, search, New badges, and polished UI ([#123](https://github.com/GabrielCrackPro/flowy/issues/123)) ([cc238d2](https://github.com/GabrielCrackPro/flowy/commit/cc238d2aa6015771ce426c7cf79d40aa729352f0))
+
 ## [0.1.21](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.20...flowy-v0.1.21) (2026-08-12)
 
 
