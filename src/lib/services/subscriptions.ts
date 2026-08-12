@@ -1,6 +1,7 @@
 import { prisma } from "@lib/prisma/client";
 import type { Prisma } from "@prisma/client";
 import { toDateOnlyDatabaseValue } from "@/lib/date-only";
+import { NotFoundError } from "@/lib/errors/error-types";
 import type {
   CreateSubscriptionInput,
   SubscriptionFilters,
@@ -123,7 +124,7 @@ export const SubscriptionService = {
     const subscription = await this.get(userId, id);
 
     if (!subscription) {
-      throw new Error("Suscripción no encontrada");
+      throw new NotFoundError("Subscription not found");
     }
 
     const updatedSubscription = await prisma.subscription.update({
@@ -159,14 +160,14 @@ export const SubscriptionService = {
       },
     });
 
-    return subscription;
+    return updatedSubscription;
   },
 
   async delete(userId: string, id: string) {
     const subscription = await this.get(userId, id);
 
     if (!subscription) {
-      throw new Error("Suscripción no encontrada");
+      throw new NotFoundError("Subscription not found");
     }
 
     await prisma.subscription.delete({

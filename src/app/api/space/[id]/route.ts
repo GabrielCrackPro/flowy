@@ -89,10 +89,7 @@ export async function GET(_: NextRequest, { params }: Params) {
     const space = spaces.find((item) => item.id === id);
 
     if (!space) {
-      return NextResponse.json(
-        { message: "Espacio no encontrado" },
-        { status: 404 },
-      );
+      return NextResponse.json({ message: "Space not found" }, { status: 404 });
     }
 
     return NextResponse.json(space);

@@ -49,18 +49,9 @@ export function CategoryFormSheet({
       color: undefined as string | undefined,
     },
     schema: createCategorySchema,
-    onSubmit: async (values) => {
-      // Additional client-side validation before submission
-      const trimmedName = values.name.trim();
-      if (!trimmedName || trimmedName.length === 0) {
-        throw new Error("El nombre es obligatorio");
-      }
-      if (trimmedName.length > 50) {
-        throw new Error("El nombre es demasiado largo");
-      }
-
+    onSubmit: (values) => {
       onSubmit({
-        name: trimmedName,
+        name: values.name.trim(),
         type: values.type,
         icon: values.icon,
         color: values.color,

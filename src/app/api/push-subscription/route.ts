@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true, id: subscription.id });
   } catch (error) {
-    return handleApiError(error, "No se pudo guardar la suscripción");
+    return handleApiError(error, "Failed to save push subscription");
   }
 }
 
@@ -81,6 +81,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return handleApiError(error, "No se pudo eliminar la suscripción");
+    return handleApiError(error, "Failed to delete push subscription");
   }
 }

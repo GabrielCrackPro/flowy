@@ -4,8 +4,8 @@ export const createCategorySchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, "El nombre es obligatorio")
-    .max(50, "El nombre es demasiado largo"),
+    .min(1, "validation.fieldRequired")
+    .max(50, "validation.fieldMaxLength"),
   icon: z.string().trim().max(50).optional(),
   color: z.string().trim().max(20).optional(),
   type: z.enum(["INCOME", "EXPENSE"]),

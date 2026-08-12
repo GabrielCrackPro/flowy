@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   type DefaultValues,
   type Path,
@@ -153,7 +153,17 @@ export function useReactForm<T extends Record<string, unknown>>({
   }, [form, initialValues]);
 
   const values = form.watch() as T;
-  const errors = form.formState.errors as ReactFormErrors<T>;
+  const errors = useMemo(() => {
+    const raw = form.formState.errors as ReactFormErrors<T>;
+    const translated: ReactFormErrors<T> = {};
+    for (const key of Object.keys(raw) as (keyof T)[]) {
+      const msg = raw[key];
+      if (msg) {
+        translated[key] = msg.startsWith("validation.") ? t(msg) : msg;
+      }
+    }
+    return translated;
+  }, [form.formState.errors, t]);
 
   return {
     values,

@@ -13,7 +13,6 @@ import {
   Icon,
   NumberColumn,
   PageTransition,
-  QuickActionDialog,
   TextColumn,
   type ViewMode,
 } from "@components/shared";
@@ -249,6 +248,12 @@ export default function SubscriptionsPage() {
       ActionsColumn({
         actions: (subscription) => [
           {
+            label: t("subscriptions.quickPayment"),
+            icon: <Icon icon={CreditCard} className="size-3.5" />,
+            onClick: () => setQuickAddSubscription(subscription),
+            showWhen: subscription.active,
+          },
+          {
             label: t("subscriptions.edit"),
             icon: <Icon icon={Pencil} className="size-3.5" />,
             onClick: () => openEdit(subscription),
@@ -399,22 +404,22 @@ export default function SubscriptionsPage() {
           onConfirm={handleDelete}
         />
 
-        <QuickActionDialog
+        <ConfirmDialog
           open={!!quickAddSubscription}
           onOpenChange={() => setQuickAddSubscription(null)}
           title={t("subscriptions.recordPayment")}
-          description={quickAddSubscription?.merchant ?? undefined}
-          icon={CreditCard}
-          iconColor="text-violet-600"
-          iconBgColor="from-violet-500/20 to-violet-500/10"
-          buttonColor="from-violet-500 to-violet-600"
-          actionLabel={t("subscriptions.confirmPayment")}
-          actionType="add"
-          currentAmount={0}
-          targetAmount={1}
-          onAction={handleQuickPayment}
-          isSubmitting={isSubmitting}
-          hideAmountInput
+          description={
+            quickAddSubscription
+              ? t("subscriptions.recordPaymentDesc", {
+                  merchant: quickAddSubscription.merchant ?? "",
+                })
+              : ""
+          }
+          confirmLabel={t("subscriptions.confirmPayment")}
+          cancelLabel={t("common.cancel")}
+          variant="default"
+          icon={<Icon icon={CreditCard} className="size-6 text-violet-600" />}
+          onConfirm={handleQuickPayment}
         />
       </ErrorBoundary>
     </PageTransition>

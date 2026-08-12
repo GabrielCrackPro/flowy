@@ -581,6 +581,7 @@ export type AppTranslationMessages = {
     noNextPayment: string;
     quickPayment: string;
     recordPayment: string;
+    recordPaymentDesc: string;
     confirmPayment: string;
     deleteTitle: string;
     deleteDescription: string;
@@ -867,6 +868,13 @@ export type AppTranslationMessages = {
     syncFailed: string;
     retry: string;
   };
+  validation: {
+    amountPositive: string;
+    fieldRequired: string;
+    fieldMaxLength: string;
+    monthRange: string;
+    categoryRequired: string;
+  };
   common: {
     skipToContent: string;
     cancel: string;
@@ -897,6 +905,7 @@ export type AppTranslationMessages = {
     lightMode: string;
     darkMode: string;
     toggleTheme: string;
+    noResults: string;
   };
 };
 

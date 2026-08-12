@@ -638,6 +638,8 @@ export const app: AppTranslationMessages = {
     noNextPayment: "Sin fecha",
     quickPayment: "Registrar pago",
     recordPayment: "Registrar pago",
+    recordPaymentDesc:
+      "Marca el periodo actual de {{merchant}} como pagado. La fecha del próximo cobro avanzará automáticamente.",
     confirmPayment: "Confirmar",
     deleteTitle: "¿Eliminar suscripción?",
     deleteDescription:
@@ -940,6 +942,13 @@ export const app: AppTranslationMessages = {
     syncFailed: "Algunos cambios aún no pudieron sincronizarse.",
     retry: "Reintentar",
   },
+  validation: {
+    amountPositive: "El importe debe ser mayor que cero",
+    fieldRequired: "Este campo es obligatorio",
+    fieldMaxLength: "Este campo es demasiado largo",
+    monthRange: "El mes debe estar entre 1 y 12",
+    categoryRequired: "Se requiere al menos una categoría",
+  },
   common: {
     skipToContent: "Saltar al contenido",
     cancel: "Cancelar",
@@ -970,6 +979,7 @@ export const app: AppTranslationMessages = {
     lightMode: "Cambiar a modo claro",
     darkMode: "Cambiar a modo oscuro",
     toggleTheme: "Cambiar tema",
+    noResults: "No se encontraron resultados",
   },
 };
 

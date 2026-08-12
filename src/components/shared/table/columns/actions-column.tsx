@@ -18,6 +18,8 @@ interface ActionItem {
   variant?: "default" | "destructive";
   separator?: boolean;
   onClick?: () => void;
+  /** Only show this action when the condition is true. */
+  showWhen?: boolean;
 }
 
 interface ActionsColumnOptions<T> {
@@ -57,24 +59,26 @@ export function ActionsColumn<T>({
           />
 
           <DropdownMenuContent align="end" sideOffset={4} className="min-w-36">
-            {items.map((item) => {
-              if (item.separator) {
-                return <DropdownMenuSeparator key="separator" />;
-              }
-              return (
-                <DropdownMenuItem
-                  key={typeof item.label === "string" ? item.label : "action"}
-                  variant={item.variant}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    item.onClick?.();
-                  }}
-                >
-                  {item.icon}
-                  {item.label}
-                </DropdownMenuItem>
-              );
-            })}
+            {items
+              .filter((item) => item.showWhen !== false)
+              .map((item) => {
+                if (item.separator) {
+                  return <DropdownMenuSeparator key="separator" />;
+                }
+                return (
+                  <DropdownMenuItem
+                    key={typeof item.label === "string" ? item.label : "action"}
+                    variant={item.variant}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      item.onClick?.();
+                    }}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </DropdownMenuItem>
+                );
+              })}
           </DropdownMenuContent>
         </DropdownMenu>
       );

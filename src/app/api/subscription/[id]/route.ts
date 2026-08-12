@@ -28,7 +28,7 @@ export async function GET(_: NextRequest, { params }: Params) {
 
     if (!subscription) {
       return NextResponse.json(
-        { message: "Suscripción no encontrada" },
+        { message: "Subscription not found" },
         { status: 404 },
       );
     }

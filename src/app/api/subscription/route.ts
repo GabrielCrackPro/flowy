@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.json(subscriptions);
     return applyRateLimitHeaders(response, auth.id, "subscription");
   } catch (error) {
-    return handleApiError(error, "No se pudieron obtener las suscripciones");
+    return handleApiError(error, "Failed to load subscriptions");
   }
 }
 

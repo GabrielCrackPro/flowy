@@ -1,6 +1,7 @@
 import { prisma } from "@lib/prisma/client";
 import type { Prisma } from "@prisma/client";
 import { toDateOnlyDatabaseValue } from "@/lib/date-only";
+import { NotFoundError } from "@/lib/errors/error-types";
 import type {
   CreateTransactionInput,
   TransactionFilters,
@@ -264,7 +265,7 @@ export const TransactionService = {
     const existing = await this.get(userId, id);
 
     if (!existing) {
-      throw new Error("Transacción no encontrada");
+      throw new NotFoundError("Transaction not found");
     }
 
     if (data.categoryIds?.length) {
@@ -340,7 +341,7 @@ export const TransactionService = {
     const transaction = await this.get(userId, id);
 
     if (!transaction) {
-      throw new Error("Transacción no encontrada");
+      throw new NotFoundError("Transaction not found");
     }
 
     await prisma.transaction.delete({

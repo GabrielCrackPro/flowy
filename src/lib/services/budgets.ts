@@ -1,5 +1,6 @@
 import { prisma } from "@lib/prisma/client";
 import type { Prisma } from "@prisma/client";
+import { NotFoundError, ValidationError } from "@/lib/errors/error-types";
 import type {
   BudgetFilters,
   CreateBudgetInput,
@@ -236,7 +237,7 @@ export const BudgetService = {
 
   async create(userId: string, data: CreateBudgetInput) {
     if (!data.categoryIds || data.categoryIds.length === 0) {
-      throw new Error("Category is required");
+      throw new ValidationError("Category is required");
     }
 
     const categoryId = data.categoryIds[0]; // Use first category (one-to-one relationship)
@@ -351,7 +352,7 @@ export const BudgetService = {
     const existing = await this.get(userId, id);
 
     if (!existing) {
-      throw new Error("Presupuesto no encontrado");
+      throw new NotFoundError("Budget not found");
     }
 
     const categoryId = data.categoryIds?.[0] || existing.categoryId;
@@ -468,7 +469,7 @@ export const BudgetService = {
     const budget = await this.get(userId, id);
 
     if (!budget) {
-      throw new Error("Presupuesto no encontrado");
+      throw new NotFoundError("Budget not found");
     }
 
     await prisma.budget.delete({
