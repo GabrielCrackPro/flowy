@@ -14,6 +14,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Icon, type IconProps } from "@/components/shared";
 import { Button } from "@/components/ui";
+import { usePwa } from "@/hooks/usePwa";
 import {
   ArrowUpDown,
   Droplet,
@@ -362,6 +363,7 @@ export function SidebarContent({
 }
 
 export function Sidebar() {
+  const { isStandalone } = usePwa();
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const toggleCollapsed = useCallback(() => {
@@ -403,6 +405,9 @@ export function Sidebar() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [toggleCollapsed]);
+
+  // In PWA standalone mode the sidebar is replaced by the bottom nav bar
+  if (isStandalone) return null;
 
   return (
     <SidebarStateContext.Provider

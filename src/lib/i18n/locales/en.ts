@@ -917,6 +917,9 @@ export const app: AppTranslationMessages = {
     updateAvailable: "New version available",
     updateHint: "Restart to apply the latest changes.",
     updateAction: "Update",
+    pullToRefresh: "Pull to refresh",
+    releaseToRefresh: "Release to refresh",
+    refreshing: "Refreshing…",
   },
   offline: {
     label: "Offline",
