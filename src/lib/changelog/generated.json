@@ -2,6 +2,21 @@
   "currentVersion": "0.1.25",
   "entries": [
     {
+      "version": "0.1.25",
+      "date": "2026-08-12",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "add background sync, bottom nav, FAB, haptics, and unify PWA hooks (#136)",
+              "scope": "pwa"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.24",
       "date": "2026-08-12",
       "sections": [
