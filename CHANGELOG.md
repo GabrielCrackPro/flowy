@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.26](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.25...flowy-v0.1.26) (2026-08-12)
+
+
+### Bug Fixes
+
+* **ui:** improve responsive design and pin line endings to LF ([#140](https://github.com/GabrielCrackPro/flowy/issues/140)) ([271e431](https://github.com/GabrielCrackPro/flowy/commit/271e431275dbabe0e77d8b6da15091aee04fc3e7))
+
 ## [0.1.25](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.24...flowy-v0.1.25) (2026-08-12)
 
 
