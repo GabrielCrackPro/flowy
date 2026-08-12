@@ -302,6 +302,16 @@ export const app: AppTranslationMessages = {
     showAll: "Mostrar todas las versiones",
     showLess: "Mostrar menos",
     viewFull: "Ver historial completo",
+    countFeatures_one: "{{count}} novedad",
+    countFeatures_other: "{{count}} novedades",
+    countFixes_one: "{{count}} corrección",
+    countFixes_other: "{{count}} correcciones",
+    olderReleases: "...versiones anteriores",
+    englishOnlyNote:
+      "Las entradas del changelog están en inglés para coincidir con la convención de commits del proyecto, manteniéndolas consistentes con la fuente oficial en GitHub.",
+    searchPlaceholder: "Filtrar por funcionalidad o ámbito…",
+    noFilterResults: "Ninguna entrada coincide con tu búsqueda",
+    newLabel: "Nuevo",
   },
   insights: {
     title: "Perspectivas",

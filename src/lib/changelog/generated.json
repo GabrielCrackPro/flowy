@@ -8,7 +8,10 @@
         {
           "type": "features",
           "items": [
-            "**subscriptions:** harden i18n, error codes, auto-renew display, and card UX (#119)"
+            {
+              "text": "harden i18n, error codes, auto-renew display, and card UX (#119)",
+              "scope": "subscriptions"
+            }
           ]
         }
       ]
@@ -20,7 +23,10 @@
         {
           "type": "features",
           "items": [
-            "add metadata, theme-aware favicon, and fix subscription i18n (#114)"
+            {
+              "text": "add metadata, theme-aware favicon, and fix subscription i18n (#114)",
+              "scope": null
+            }
           ]
         }
       ]
@@ -32,7 +38,10 @@
         {
           "type": "features",
           "items": [
-            "**api-docs:** restore branded Scalar API reference (#110)"
+            {
+              "text": "restore branded Scalar API reference (#110)",
+              "scope": "api-docs"
+            }
           ]
         }
       ]
@@ -44,7 +53,10 @@
         {
           "type": "features",
           "items": [
-            "**api-docs:** add branded Scalar API reference (#106)"
+            {
+              "text": "add branded Scalar API reference (#106)",
+              "scope": "api-docs"
+            }
           ]
         }
       ]
@@ -56,7 +68,10 @@
         {
           "type": "features",
           "items": [
-            "add rule-based spending insights to the dashboard (#103)"
+            {
+              "text": "add rule-based spending insights to the dashboard (#103)",
+              "scope": null
+            }
           ]
         }
       ]
@@ -68,13 +83,19 @@
         {
           "type": "features",
           "items": [
-            "seed default categories on signup (#99)"
+            {
+              "text": "seed default categories on signup (#99)",
+              "scope": null
+            }
           ]
         },
         {
           "type": "fixes",
           "items": [
-            "remove misleading AI claims from landing page and dashboard (#101)"
+            {
+              "text": "remove misleading AI claims from landing page and dashboard (#101)",
+              "scope": null
+            }
           ]
         }
       ]
@@ -86,7 +107,10 @@
         {
           "type": "features",
           "items": [
-            "show pending state and feedback for CSV/PDF exports (#82)"
+            {
+              "text": "show pending state and feedback for CSV/PDF exports (#82)",
+              "scope": null
+            }
           ]
         }
       ]
@@ -98,7 +122,10 @@
         {
           "type": "features",
           "items": [
-            "add an in-app changelog (What is new) (#75)"
+            {
+              "text": "add an in-app changelog (What is new) (#75)",
+              "scope": null
+            }
           ]
         }
       ]
@@ -110,7 +137,10 @@
         {
           "type": "features",
           "items": [
-            "complete API schema docs and match docs theme to the app (#72)"
+            {
+              "text": "complete API schema docs and match docs theme to the app (#72)",
+              "scope": null
+            }
           ]
         }
       ]
@@ -122,7 +152,10 @@
         {
           "type": "features",
           "items": [
-            "brand the API reference and enrich schema docs (#69)"
+            {
+              "text": "brand the API reference and enrich schema docs (#69)",
+              "scope": null
+            }
           ]
         }
       ]
@@ -134,7 +167,10 @@
         {
           "type": "fixes",
           "items": [
-            "harden API docs page against spec load failures (#66)"
+            {
+              "text": "harden API docs page against spec load failures (#66)",
+              "scope": null
+            }
           ]
         }
       ]
@@ -146,7 +182,10 @@
         {
           "type": "features",
           "items": [
-            "add generated OpenAPI docs with Scalar viewer (#63)"
+            {
+              "text": "add generated OpenAPI docs with Scalar viewer (#63)",
+              "scope": null
+            }
           ]
         }
       ]
@@ -158,7 +197,10 @@
         {
           "type": "features",
           "items": [
-            "pick language and currency at sign-up (#60)"
+            {
+              "text": "pick language and currency at sign-up (#60)",
+              "scope": null
+            }
           ]
         }
       ]
@@ -170,25 +212,67 @@
         {
           "type": "features",
           "items": [
-            "add offline support (#18)",
-            "add pwa (#17)",
-            "add rate limiting",
-            "handle rate limiting on frontend"
+            {
+              "text": "add offline support (#18)",
+              "scope": null
+            },
+            {
+              "text": "add pwa (#17)",
+              "scope": null
+            },
+            {
+              "text": "add rate limiting",
+              "scope": null
+            },
+            {
+              "text": "handle rate limiting on frontend",
+              "scope": null
+            }
           ]
         },
         {
           "type": "fixes",
           "items": [
-            "add use client directives to hooks with React hooks",
-            "fix circular dependencies",
-            "improve arch",
-            "improve auth ui",
-            "improve ui and add skills",
-            "rate limiting imporvements",
-            "rate limiting imporvements",
-            "run cron once per day",
-            "ui improvements",
-            "various fixes"
+            {
+              "text": "add use client directives to hooks with React hooks",
+              "scope": null
+            },
+            {
+              "text": "fix circular dependencies",
+              "scope": null
+            },
+            {
+              "text": "improve arch",
+              "scope": null
+            },
+            {
+              "text": "improve auth ui",
+              "scope": null
+            },
+            {
+              "text": "improve ui and add skills",
+              "scope": null
+            },
+            {
+              "text": "rate limiting imporvements",
+              "scope": null
+            },
+            {
+              "text": "rate limiting imporvements",
+              "scope": null
+            },
+            {
+              "text": "run cron once per day",
+              "scope": null
+            },
+            {
+              "text": "ui improvements",
+              "scope": null
+            },
+            {
+              "text": "various fixes",
+              "scope": null
+            }
           ]
         }
       ]

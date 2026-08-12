@@ -2,9 +2,14 @@ import generated from "./generated.json";
 
 export type ChangelogSectionType = "features" | "fixes";
 
+export interface ChangelogItem {
+  text: string;
+  scope?: string | null;
+}
+
 export interface ChangelogSection {
   type: ChangelogSectionType;
-  items: string[];
+  items: ChangelogItem[];
 }
 
 export interface ChangelogEntry {

@@ -297,6 +297,16 @@ export const app: AppTranslationMessages = {
     showAll: "Show all releases",
     showLess: "Show less",
     viewFull: "View full changelog",
+    countFeatures_one: "{{count}} new feature",
+    countFeatures_other: "{{count}} new features",
+    countFixes_one: "{{count}} fix",
+    countFixes_other: "{{count}} fixes",
+    olderReleases: "...older releases",
+    englishOnlyNote:
+      "Changelog entries are written in English to match the project's commit convention, keeping them consistent with the source of truth on GitHub.",
+    searchPlaceholder: "Filter by feature or scope…",
+    noFilterResults: "No entries match your search",
+    newLabel: "New",
   },
   insights: {
     title: "Insights",

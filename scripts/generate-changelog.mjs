@@ -23,8 +23,18 @@ const SECTION_RE = /^### (.+)/;
 // Section heading text → canonical type. Anything else is dropped.
 const SECTION_TYPES = { Features: "features", "Bug Fixes": "fixes" };
 
+/** Extracts the conventional-commit scope from the bold prefix (e.g. "**api-docs:**"). */
+function parseScope(raw) {
+  const match = raw.match(/^\*\*([^*]+):\*\*\s*/);
+  if (match) {
+    return { scope: match[1].trim(), rest: raw.slice(match[0].length) };
+  }
+  return { scope: null, rest: raw };
+}
+
 function cleanItem(raw) {
-  let text = raw.trim();
+  const { scope, rest } = parseScope(raw);
+  let text = rest.trim();
   // [label](url) → label (keeps PR refs like "(#72)", drops links)
   text = text.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
   // Drop commit-hash refs: "(3b4bccd)"
@@ -32,7 +42,7 @@ function cleanItem(raw) {
   // Drop trailing "closes #71", "fixes #12 and #13"
   text = text.replace(/,\s*closes? #\d+(?: and #\d+)*\.?\s*$/i, "");
   text = text.replace(/\s+/g, " ").trim();
-  return text;
+  return { text, scope };
 }
 
 const changelogText = readFileSync(CHANGELOG_PATH, "utf8");
