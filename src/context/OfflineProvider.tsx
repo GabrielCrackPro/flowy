@@ -1,5 +1,13 @@
 "use client";
 
+// Background Sync API types (not yet in TS lib by default)
+declare global {
+  interface SyncManager {
+    register(tag: string): Promise<void>;
+    getTags(): Promise<string[]>;
+  }
+}
+
 import { onlineManager, useQueryClient } from "@tanstack/react-query";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import {
@@ -20,6 +28,7 @@ import {
   countPendingMutations,
   getLastSyncAt,
   purgeUserOfflineData,
+  storeAuthSession,
   subscribeOfflineChanges,
 } from "@/lib/offline/storage";
 import { type FlushResult, flushOfflineQueue } from "@/lib/offline/sync";
@@ -52,7 +61,7 @@ const OfflineContext = createContext<OfflineContextValue | undefined>(
  */
 export function OfflineProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { t } = useTranslation();
   const userId = user?.id ?? null;
 
@@ -179,6 +188,50 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
 
     return unsubscribe;
   }, [userId, queryClient, flush]);
+
+  // Store the Supabase session in IndexedDB so the service worker can
+  // access it for background sync when no client tab is open.
+  useEffect(() => {
+    if (userId && session?.access_token) {
+      void storeAuthSession({
+        accessToken: session.access_token,
+        expiresAt: session.expires_at ?? Date.now() / 1000 + 3600,
+        userId,
+      });
+    }
+  }, [userId, session?.access_token, session?.expires_at]);
+
+  // Register a background sync tag so the service worker replays the
+  // offline queue when connectivity returns — even with the app closed.
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    if (!("SyncManager" in window)) return;
+
+    void navigator.serviceWorker.ready.then((reg) => {
+      const sync = (reg as ServiceWorkerRegistration & { sync?: SyncManager })
+        .sync;
+      if (sync) {
+        void sync.register("flowy-offline-queue").catch(() => {
+          // sync not supported or permission denied — no-op
+        });
+      }
+    });
+  }, []);
+
+  // Re-register sync whenever pendingCount changes (new offline mutations)
+  useEffect(() => {
+    if (pendingCount === 0) return;
+    if (!("serviceWorker" in navigator)) return;
+    if (!("SyncManager" in window)) return;
+
+    void navigator.serviceWorker.ready.then((reg) => {
+      const sync = (reg as ServiceWorkerRegistration & { sync?: SyncManager })
+        .sync;
+      if (sync) {
+        void sync.register("flowy-offline-queue").catch(() => undefined);
+      }
+    });
+  }, [pendingCount]);
 
   const value = useMemo(
     () => ({

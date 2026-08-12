@@ -14,13 +14,15 @@ import type { PersistedClient } from "@tanstack/query-persist-client-core";
  *  - `meta`:   sync metadata (e.g. last successful sync timestamp).
  */
 
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_CACHE = "cache";
 const STORE_QUEUE = "queue";
 const STORE_META = "meta";
+const STORE_SESSION = "session";
 
 const CACHE_KEY = "client";
 const META_LAST_SYNC = "lastSyncAt";
+const SESSION_KEY = "supabase";
 
 export type OfflineMutationType = "create" | "update" | "delete";
 export type OfflineMutationStatus = "pending" | "failed";
@@ -79,6 +81,9 @@ function openDb(userId: string): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains(STORE_META)) {
         db.createObjectStore(STORE_META);
+      }
+      if (!db.objectStoreNames.contains(STORE_SESSION)) {
+        db.createObjectStore(STORE_SESSION);
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -335,4 +340,44 @@ export function purgeUserOfflineData(userId: string): Promise<void> {
     // If other connections are open the delete is queued; treat as success.
     request.onblocked = () => resolve();
   });
+}
+
+export interface StoredSession {
+  accessToken: string;
+  expiresAt: number;
+  userId: string;
+}
+
+/** Store the Supabase session so the service worker can access it for background sync. */
+export async function storeAuthSession(session: StoredSession): Promise<void> {
+  await withDb(session.userId, (db) => {
+    return new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_SESSION, "readwrite");
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error ?? new Error("Session store failed"));
+      tx.objectStore(STORE_SESSION).put(session, SESSION_KEY);
+    });
+  });
+}
+
+/** Read the stored Supabase session (used by the service worker). */
+export async function getAuthSession(
+  userId: string,
+): Promise<StoredSession | null> {
+  try {
+    const db = await openDb(userId);
+    try {
+      return new Promise<StoredSession | null>((resolve, reject) => {
+        const tx = db.transaction(STORE_SESSION, "readonly");
+        const req = tx.objectStore(STORE_SESSION).get(SESSION_KEY);
+        req.onsuccess = () => resolve(req.result ?? null);
+        req.onerror = () =>
+          reject(req.error ?? new Error("Session read failed"));
+      });
+    } finally {
+      db.close();
+    }
+  } catch {
+    return null;
+  }
 }

@@ -12,6 +12,7 @@ import {
   AlertDialogTitle,
 } from "@components/ui";
 import type { ReactNode } from "react";
+import { useHaptic } from "@/hooks/useHaptic";
 import { TriangleAlert } from "@/lib/icons";
 import { Icon } from "./icon";
 
@@ -38,13 +39,20 @@ export function ConfirmDialog({
   variant = "destructive",
   icon,
 }: ConfirmDialogProps) {
-  const VARAINT_STYLES = {
+  const haptic = useHaptic();
+
+  const VARIANT_STYLES = {
     destructive:
       "bg-destructive text-destructive-foreground hover:bg-destructive/90",
     default: "bg-primary text-primary-foreground hover:bg-primary/90",
   };
 
-  const actionClassName = VARAINT_STYLES[variant] ?? VARAINT_STYLES.default;
+  const actionClassName = VARIANT_STYLES[variant] ?? VARIANT_STYLES.default;
+
+  const handleConfirm = () => {
+    haptic("heavy");
+    onConfirm();
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -65,7 +73,10 @@ export function ConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className={actionClassName}>
+          <AlertDialogAction
+            onClick={handleConfirm}
+            className={actionClassName}
+          >
             {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>

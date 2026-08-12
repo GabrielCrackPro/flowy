@@ -10,16 +10,16 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { usePwaInstall } from "@/hooks/usePwaInstall";
+import { usePwa } from "@/hooks/usePwa";
 import { Download, Smartphone } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { Icon } from "./icon";
 
 export function InstallAppButton({ className }: { className?: string }) {
   const { t } = useTranslation();
-  const { canInstall, ios, standalone, install } = usePwaInstall();
+  const { canInstall, isIos, isStandalone, install } = usePwa();
 
-  if (standalone) {
+  if (isStandalone) {
     return null;
   }
 
@@ -42,7 +42,7 @@ export function InstallAppButton({ className }: { className?: string }) {
   }
 
   // iOS Safari has no install prompt: explain Add to Home Screen instead.
-  if (ios) {
+  if (isIos) {
     return (
       <Popover>
         <PopoverTrigger

@@ -858,6 +858,9 @@ export type AppTranslationMessages = {
     updateAvailable: string;
     updateHint: string;
     updateAction: string;
+    pullToRefresh: string;
+    releaseToRefresh: string;
+    refreshing: string;
   };
   offline: {
     label: string;

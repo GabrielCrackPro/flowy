@@ -169,6 +169,155 @@ self.addEventListener("push", (event) => {
   );
 });
 
+// ── Background Sync ────────────────────────────────────────────────
+// When connectivity returns, the browser fires a "sync" event for any
+// registered tag. The SW reads pending offline mutations from IndexedDB
+// and replays them — even if no client tab is open.
+
+const SYNC_TAG = "flowy-offline-queue";
+
+/** List all per-user offline databases by scanning IndexedDB names. */
+async function listOfflineDbNames() {
+  if (!("databases" in indexedDB)) return [];
+  try {
+    const dbs = await indexedDB.databases();
+    return dbs
+      .filter((db) => db.name?.startsWith("flowy-offline-"))
+      .map((db) => db.name.slice("flowy-offline-".length));
+  } catch {
+    return [];
+  }
+}
+
+/** Open a per-user offline database from the SW context. */
+function openSwDb(userId) {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(`flowy-offline-${userId}`, 2);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/** Read the stored Supabase session from the user's IDB. */
+async function getSwSession(userId) {
+  try {
+    const db = await openSwDb(userId);
+    try {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction("session", "readonly");
+        const req = tx.objectStore("session").get("supabase");
+        req.onsuccess = () => resolve(req.result ?? null);
+        req.onerror = () => reject(req.error);
+      });
+    } finally {
+      db.close();
+    }
+  } catch {
+    return null;
+  }
+}
+
+/** Get all pending mutations for a user. */
+async function getSwPendingMutations(userId) {
+  const db = await openSwDb(userId);
+  try {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction("queue", "readonly");
+      const idx = tx.objectStore("queue").index("status");
+      const req = idx.getAll("pending");
+      req.onsuccess = () => resolve(req.result ?? []);
+      req.onerror = () => reject(req.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+/** Remove synced mutations by id. */
+async function removeSwMutations(userId, ids) {
+  if (ids.length === 0) return;
+  const db = await openSwDb(userId);
+  try {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction("queue", "readwrite");
+      for (const id of ids) {
+        tx.objectStore("queue").delete(id);
+      }
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+/** Fetch an API endpoint with the stored auth token. */
+async function swFetch(path, options, token) {
+  const resp = await fetch(path, {
+    ...options,
+    headers: {
+      ...options?.headers,
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!resp.ok) {
+    throw new Error(`SW fetch failed: ${resp.status} ${path}`);
+  }
+  return resp.json();
+}
+
+self.addEventListener("sync", (event) => {
+  if (event.tag !== SYNC_TAG) return;
+
+  event.waitUntil(
+    (async () => {
+      const userIds = await listOfflineDbNames();
+      for (const userId of userIds) {
+        const session = await getSwSession(userId);
+        if (!session || Date.now() > session.expiresAt * 1000) continue;
+
+        const mutations = await getSwPendingMutations(userId);
+        if (mutations.length === 0) continue;
+
+        const synced = [];
+        for (const m of mutations) {
+          try {
+            const base = `/api/${m.entityKey}`;
+            if (m.type === "create") {
+              await swFetch(
+                base,
+                { method: "POST", body: JSON.stringify(m.input) },
+                session.accessToken,
+              );
+            } else if (m.type === "update") {
+              const { id, data } = m.input;
+              await swFetch(
+                `${base}/${id}`,
+                { method: "PATCH", body: JSON.stringify(data) },
+                session.accessToken,
+              );
+            } else if (m.type === "delete") {
+              await swFetch(
+                `${base}/${m.input}`,
+                { method: "DELETE" },
+                session.accessToken,
+              );
+            }
+            synced.push(m.id);
+          } catch {
+            // Individual mutation failure doesn't block others
+          }
+        }
+
+        if (synced.length > 0) {
+          await removeSwMutations(userId, synced);
+        }
+      }
+    })(),
+  );
+});
+
 // Open the relevant page when the user taps a notification.
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();

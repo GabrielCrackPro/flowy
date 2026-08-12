@@ -1,6 +1,8 @@
 import { Header, Sidebar } from "@components/dashboard";
 import { OfflineBanner } from "@components/shared/offline-banner";
 import { PageTransition } from "@components/shared/page-transition";
+import { PullToRefresh } from "@components/shared/pull-to-refresh";
+import { PwaShell } from "@components/shared/pwa-shell";
 import { Suspense } from "react";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -27,14 +29,22 @@ export default function DashboardLayout({
         <Suspense fallback={null}>
           <Header />
         </Suspense>
-        <main id="main" className="flex-1 overflow-y-auto">
+        <main
+          id="main"
+          className="flex-1 overflow-y-auto"
+          data-scroll-container
+        >
           <Suspense
             fallback={
               <div className="mx-auto w-full max-w-7xl p-4">{children}</div>
             }
           >
             <PageTransition>
-              <div className="mx-auto w-full max-w-7xl p-4">{children}</div>
+              <PullToRefresh>
+                <PwaShell>
+                  <div className="mx-auto w-full max-w-7xl p-4">{children}</div>
+                </PwaShell>
+              </PullToRefresh>
             </PageTransition>
           </Suspense>
         </main>

@@ -15,12 +15,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { useSpaces } from "@/hooks/useSpaces";
+import { SpaceSwitcherPill } from "@/components/shared/space-switcher-pill";
+import { usePwa } from "@/hooks/usePwa";
 import {
   ArrowUpDown,
   ChevronRight,
   Home,
-  Layers,
   Menu,
   Repeat2,
   SearchIcon,
@@ -29,6 +29,7 @@ import {
   User,
   Wallet,
 } from "@/lib/icons";
+import { cn } from "@/lib/utils";
 import { SidebarContent } from "../sidebar/Sidebar";
 import { Search } from "./Search";
 import { UserMenu } from "./UserMenu";
@@ -88,7 +89,7 @@ function buildCrumbs(pathname: string, t: (key: string) => string): Crumb[] {
 export function Header() {
   const pathname = usePathname();
   const { t } = useTranslation();
-  const { activeSpace } = useSpaces();
+  const { isStandalone } = usePwa();
   const crumbs = useMemo(() => buildCrumbs(pathname, t), [pathname, t]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -138,7 +139,10 @@ export function Header() {
                 variant="ghost"
                 size="icon"
                 aria-label={t("nav.openMenu")}
-                className="rounded-xl hover:bg-muted/40 md:hidden"
+                className={cn(
+                  "rounded-xl hover:bg-muted/40",
+                  isStandalone ? "hidden" : "md:hidden",
+                )}
                 onClick={() => setMobileNavOpen(true)}
               >
                 <Icon icon={Menu} className="size-5" />
@@ -199,22 +203,12 @@ export function Header() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2, delay: 0.15 }}
-              className="hidden shrink-0 md:block"
+              className={cn(
+                "shrink-0",
+                isStandalone ? "block" : "hidden md:block",
+              )}
             >
-              <Link
-                href="/dashboard/profile#spaces"
-                title={t("profile.spaces.manageSpaces")}
-                className="group inline-flex max-w-44 items-center gap-1.5 rounded-full border border-primary/20 bg-gradient-to-r from-primary/10 to-primary/5 py-1 pl-1.5 pr-2.5 text-xs font-medium text-primary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition hover:border-primary/40 hover:shadow-[0_2px_6px_rgba(0,0,0,0.05)]"
-              >
-                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-[0.6rem] font-bold text-primary-foreground shadow-sm shadow-primary/20">
-                  {activeSpace?.name?.charAt(0).toUpperCase() ?? (
-                    <Icon icon={Layers} className="size-2.5" />
-                  )}
-                </span>
-                <span className="truncate">
-                  {activeSpace?.name ?? t("profile.spaces.noSpace")}
-                </span>
-              </Link>
+              <SpaceSwitcherPill />
             </motion.div>
           </div>
 
