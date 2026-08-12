@@ -2,6 +2,21 @@
   "currentVersion": "0.1.22",
   "entries": [
     {
+      "version": "0.1.22",
+      "date": "2026-08-12",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "add scope badges, search, New badges, and polished UI (#123)",
+              "scope": "changelog"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.21",
       "date": "2026-08-12",
       "sections": [
