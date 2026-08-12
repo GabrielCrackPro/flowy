@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.24](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.23...flowy-v0.1.24) (2026-08-12)
+
+
+### Features
+
+* **changelog:** make issue references clickable with external link icon ([#130](https://github.com/GabrielCrackPro/flowy/issues/130)) ([86ecb7c](https://github.com/GabrielCrackPro/flowy/commit/86ecb7cc389066abbfc0c5a8ac7e9d6a7c8e806e))
+
 ## [0.1.23](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.22...flowy-v0.1.23) (2026-08-12)
 
 
