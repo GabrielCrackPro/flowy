@@ -185,6 +185,20 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     };
   }, [userId, activeSpaceId, queryClient, queryKey]);
 
+  // Fallback when realtime is unavailable: the service worker messages the
+  // client when a push arrives while the app is open, so refetch alerts.
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    const onMessage = (event: MessageEvent) => {
+      if (event.data?.type === "PUSH_RECEIVED") {
+        void queryClient.invalidateQueries({ queryKey });
+      }
+    };
+    navigator.serviceWorker.addEventListener("message", onMessage);
+    return () =>
+      navigator.serviceWorker.removeEventListener("message", onMessage);
+  }, [queryClient, queryKey]);
+
   const value = useMemo<AlertInboxContextValue>(
     () => ({
       alerts: query.data?.alerts ?? [],

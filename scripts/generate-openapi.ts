@@ -1263,6 +1263,24 @@ const schemas: Record<string, Json> = {
     },
     required: ["endpoint"],
   },
+  SendTestPushRequest: {
+    type: "object",
+    description: "Localized payload for a test push notification.",
+    properties: {
+      title: {
+        type: "string",
+        minLength: 1,
+        maxLength: 80,
+        description: "Notification title",
+      },
+      description: {
+        type: "string",
+        maxLength: 160,
+        description: "Optional notification body",
+      },
+    },
+    required: ["title"],
+  },
   PushSubscriptionResponse: {
     type: "object",
     properties: {
@@ -2267,6 +2285,37 @@ paths["/api/push-subscription"] = {
               type: "object",
               properties: { ok: { type: "boolean" } },
               required: ["ok"],
+            },
+          },
+        },
+      },
+    }),
+  }),
+};
+
+paths["/api/push-subscription/test"] = {
+  post: op({
+    operationId: "pushSubscriptions.sendTest",
+    summary: "Send a test push notification",
+    description:
+      "Sends a test notification to every registered device of the authenticated user so push delivery can be verified.",
+    tags: ["Push"],
+    requestBody: reqBody("SendTestPushRequest"),
+    responses: responses({
+      200: {
+        description: "Sent",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                ok: { type: "boolean" },
+                sent: {
+                  type: "integer",
+                  description: "Number of devices notified",
+                },
+              },
+              required: ["ok", "sent"],
             },
           },
         },

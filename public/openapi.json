@@ -2781,6 +2781,65 @@
         }
       }
     },
+    "/api/push-subscription/test": {
+      "post": {
+        "operationId": "pushSubscriptions.sendTest",
+        "summary": "Send a test push notification",
+        "tags": [
+          "Push"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "sent": {
+                      "type": "integer",
+                      "description": "Number of devices notified"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "sent"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Sends a test notification to every registered device of the authenticated user so push delivery can be verified.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendTestPushRequest"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/upload": {
       "post": {
         "operationId": "uploads.receipt",
@@ -4642,6 +4701,26 @@
         },
         "required": [
           "endpoint"
+        ]
+      },
+      "SendTestPushRequest": {
+        "type": "object",
+        "description": "Localized payload for a test push notification.",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "description": "Notification title"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 160,
+            "description": "Optional notification body"
+          }
+        },
+        "required": [
+          "title"
         ]
       },
       "PushSubscriptionResponse": {

@@ -30,6 +30,20 @@ export const PushService = {
    * subscribed by the user. Subscriptions that no longer exist on the push
    * service (404/410) are removed from the database.
    */
+  /**
+   * Sends a test notification to every device subscribed by the user, so they
+   * can verify push delivery works after enabling it. The caller passes the
+   * already-localized title/description.
+   */
+  async sendTestToUser(
+    userId: string,
+    test: PushAlertPayload,
+  ): Promise<{ sent: number; removed: number }> {
+    return this.sendAlertsToUser(userId, [
+      { ...test, tag: test.tag ?? "flowy-test" },
+    ]);
+  },
+
   async sendAlertsToUser(
     userId: string,
     alerts: PushAlertPayload[],

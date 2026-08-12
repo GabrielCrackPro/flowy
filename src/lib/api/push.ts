@@ -18,4 +18,13 @@ export const pushApi = {
       method: "DELETE",
       body: JSON.stringify({ endpoint }),
     }),
+
+  sendTest: (payload: { title: string; description?: string }) =>
+    authenticatedRequest<{ ok: boolean; sent: number }>(
+      "/api/push-subscription/test",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    ),
 };
