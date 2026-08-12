@@ -3,6 +3,7 @@
 import { Button } from "@components/ui";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -14,7 +15,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon, TransactionForm, TransactionIcon } from "@/components/shared";
 import { useTransactionApi } from "@/hooks/api";
-import { Plus } from "@/lib/icons";
+import { Plus, X } from "@/lib/icons";
 import type { CreateTransactionSchema } from "@/lib/schemas";
 
 interface NewTransactionProps {
@@ -100,9 +101,15 @@ export function NewTransaction({
               <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 text-indigo-600 dark:from-indigo-500/30 dark:to-indigo-500/20 dark:text-indigo-400">
                 <TransactionIcon size="lg" />
               </div>
-              <SheetTitle className="text-lg">
-                {t("nav.newTransaction")}
-              </SheetTitle>
+              <div className="flex-1">
+                <SheetTitle className="text-lg">
+                  {t("nav.newTransaction")}
+                </SheetTitle>
+              </div>
+              <SheetClose className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground/40 transition hover:bg-muted/50 hover:text-foreground">
+                <Icon icon={X} className="size-4" />
+                <span className="sr-only">Close</span>
+              </SheetClose>
             </div>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto">
