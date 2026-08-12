@@ -26,6 +26,7 @@ export * from "./pending-sync-badge";
 export * from "./quick-action-dialog";
 export * from "./rate-limit-status";
 export * from "./relative-time";
+export * from "./search-input";
 export * from "./section-card";
 export * from "./service-worker-register";
 export * from "./skeleton";

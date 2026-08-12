@@ -1,11 +1,9 @@
 "use client";
 
-import { Button, Input } from "@components/ui";
 import { cn } from "@lib/utils";
 import { motion, type Variants } from "framer-motion";
 import type { ReactNode } from "react";
-import { Search, X } from "@/lib/icons";
-import { Icon } from "./icon";
+import { SearchInput } from "./search-input";
 import { Skeleton } from "./skeleton";
 import { type Column, DataTable } from "./table/data-table";
 import { type ViewMode, ViewToggle } from "./view-toggle";
@@ -143,28 +141,11 @@ export function EntityListView<T>({
         transition={{ duration: 0.3, delay: 0.25 }}
         className="flex items-center gap-3"
       >
-        <div className="relative min-w-0 flex-1">
-          <Icon
-            icon={Search}
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60"
-          />
-          <Input
-            value={searchQuery}
-            onChange={(event) => onSearchQueryChange(event.target.value)}
-            placeholder={searchPlaceholder}
-            className="h-10 rounded-xl border-border/30 bg-muted/20 pl-9 pr-9 text-sm placeholder:text-muted-foreground/40 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 transition shadow-sm"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => onSearchQueryChange("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:bg-muted/60 hover:text-foreground"
-            >
-              <Icon icon={X} className="size-3.5" />
-            </Button>
-          )}
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onChange={onSearchQueryChange}
+          placeholder={searchPlaceholder}
+        />
         <ViewToggle value={view} onChange={onViewChange} />
       </motion.div>
 

@@ -5,11 +5,12 @@ import {
   DataFilters,
   Icon,
   RelativeTime,
+  SearchInput,
 } from "@components/shared";
-import { Button, Input } from "@components/ui";
+import { Button } from "@components/ui";
 import { cn } from "@lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Filter, FilterX, RefreshCw, Search, X } from "@/lib/icons";
+import { Filter, FilterX, RefreshCw } from "@/lib/icons";
 import type { Transaction } from "@/types/Transaction";
 import type { FilterField } from "@/types/ui";
 import { NewTransaction } from "../dashboard/new-transaction/new-transaction";
@@ -56,7 +57,7 @@ export function TransactionFilterToolbar({
 }: TransactionFilterToolbarProps) {
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="mr-auto">
           <h3 className="text-sm font-semibold tracking-tight">
             {t("transactions.title")}
@@ -67,46 +68,13 @@ export function TransactionFilterToolbar({
         </div>
 
         {/* Search */}
-        <div className="relative group w-full sm:w-auto sm:flex-1 sm:max-w-64">
-          <motion.div
-            className="relative"
-            whileFocus={{ scale: 1.02 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Icon
-              icon={Search}
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2"
-            />
-            <Input
-              value={filters.search ?? ""}
-              onChange={(e) =>
-                onFilterChange("search", e.target.value || undefined)
-              }
-              placeholder={t("transactions.searchPlaceholder")}
-              className="h-9 w-full rounded-xl border-border/30 bg-muted/20 pl-9 pr-9 text-xs placeholder:text-muted-foreground/40 focus-visible:bg-background focus-visible:pl-9 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 transition shadow-sm sm:w-56"
-            />
-          </motion.div>
-          <AnimatePresence>
-            {filters.search && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.12 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2"
-              >
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => onFilterChange("search", undefined)}
-                  className="flex size-5 items-center justify-center rounded-lg text-muted-foreground/40 transition-colors hover:text-foreground hover:bg-muted/30"
-                >
-                  <Icon icon={X} className="size-3.5" />
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <SearchInput
+          value={filters.search ?? ""}
+          onChange={(value) => onFilterChange("search", value || undefined)}
+          placeholder={t("transactions.searchPlaceholder")}
+          className="order-1 w-full min-w-0 sm:order-none sm:w-auto sm:flex-1 sm:max-w-64"
+          inputClassName="h-9 text-xs"
+        />
 
         {/* Filter toggle */}
         <motion.button
