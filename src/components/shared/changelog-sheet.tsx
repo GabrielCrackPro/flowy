@@ -88,6 +88,36 @@ function filterEntry(
   return { ...entry, sections };
 }
 
+const ISSUE_RE = /\(#(\d+)\)/g;
+const GITHUB_BASE = "https://github.com/GabrielCrackPro/flowy/issues";
+
+function RichText({ text }: { text: string }) {
+  const segments = text.split(ISSUE_RE);
+  if (segments.length === 1) return <>{text}</>;
+
+  // split with capture group produces: [before, num, after, num, after, ...]
+  const children: React.ReactNode[] = [];
+  for (let i = 0; i < segments.length; i++) {
+    if (i % 2 === 0) {
+      if (segments[i]) children.push(segments[i]);
+    } else {
+      children.push(
+        <a
+          key={i}
+          href={`${GITHUB_BASE}/${segments[i]}`}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-0.5 whitespace-nowrap text-[11px] text-primary/70 transition hover:text-primary hover:underline underline-offset-2"
+        >
+          #{segments[i]}
+          <ExternalLink className="size-3" />
+        </a>,
+      );
+    }
+  }
+  return <>{children}</>;
+}
+
 function ItemLine({ item }: { item: ChangelogItem }) {
   return (
     <span className="flex items-start gap-1.5">
@@ -99,7 +129,9 @@ function ItemLine({ item }: { item: ChangelogItem }) {
           {item.scope}
         </Badge>
       )}
-      <span className="min-w-0">{item.text}</span>
+      <span className="min-w-0">
+        <RichText text={item.text} />
+      </span>
     </span>
   );
 }
