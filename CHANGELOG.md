@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.28](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.27...flowy-v0.1.28) (2026-08-12)
+
+
+### Features
+
+* **pwa:** complete push notifications with preferences, devices, and reliability ([#150](https://github.com/GabrielCrackPro/flowy/issues/150)) ([b79696c](https://github.com/GabrielCrackPro/flowy/commit/b79696ce9d4daa61dee4d41e35d1f46caad23831))
+
 ## [0.1.27](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.26...flowy-v0.1.27) (2026-08-12)
 
 
