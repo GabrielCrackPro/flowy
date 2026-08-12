@@ -51,11 +51,14 @@ export const AlertsService = {
 
     const spaceId = activeSpace?.id ?? null;
 
+    // Evaluate every active condition, not just the top few: the dashboard
+    // strip caps its display, but alerts and pushes must fire for all types.
     const candidates = buildDashboardAlerts(
       data,
       profile.locale,
       profile.currency,
       t,
+      Number.POSITIVE_INFINITY,
     );
     const fingerprints = candidates.map((candidate) => candidate.id);
 

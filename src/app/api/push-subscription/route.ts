@@ -62,6 +62,29 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function GET() {
+  const auth = await requireAuth();
+  if (isAuthResponse(auth)) {
+    return auth;
+  }
+
+  try {
+    const subscriptions = await prisma.pushSubscription.findMany({
+      where: { userId: auth.id },
+      select: { id: true, endpoint: true, userAgent: true, createdAt: true },
+      orderBy: { createdAt: "asc" },
+    });
+    return NextResponse.json({
+      ok: true,
+      subscribed: subscriptions.length > 0,
+      count: subscriptions.length,
+      subscriptions,
+    });
+  } catch (error) {
+    return handleApiError(error, "Failed to load push subscription status");
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   const auth = await requireAuth();
   if (isAuthResponse(auth)) {

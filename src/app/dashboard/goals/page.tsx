@@ -53,7 +53,9 @@ export default function GoalsPage() {
     }
 
     try {
-      const newSavedAmount = quickAddGoal.savedAmount + amount;
+      // Coerce to number defensively: older cached payloads may carry the
+      // Prisma Decimal as a string, in which case + would concatenate.
+      const newSavedAmount = Number(quickAddGoal.savedAmount) + amount;
 
       // If the new amount reaches or exceeds the target, cap it at target
       if (newSavedAmount >= quickAddGoal.targetAmount) {

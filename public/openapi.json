@@ -2729,6 +2729,92 @@
           }
         }
       },
+      "get": {
+        "operationId": "pushSubscriptions.status",
+        "summary": "Check push subscription status",
+        "tags": [
+          "Push"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "subscribed": {
+                      "type": "boolean",
+                      "description": "Whether the user has at least one stored subscription"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Number of stored subscriptions"
+                    },
+                    "subscriptions": {
+                      "type": "array",
+                      "description": "Registered devices",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "endpoint": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "userAgent": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "User-Agent header at registration time"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "endpoint",
+                          "createdAt"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "subscribed",
+                    "count",
+                    "subscriptions"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Returns whether the authenticated user has stored push subscriptions, plus the list of registered devices."
+      },
       "delete": {
         "operationId": "pushSubscriptions.delete",
         "summary": "Unregister a Web Push subscription",
@@ -2834,6 +2920,112 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SendTestPushRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/push-preferences": {
+      "get": {
+        "operationId": "pushPreferences.get",
+        "summary": "Get push notification preferences",
+        "tags": [
+          "Push"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Preferences",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "preferences": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "preferences"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Returns the user's enabled alert types for OS-level push. An empty list means all types are enabled."
+      },
+      "put": {
+        "operationId": "pushPreferences.update",
+        "summary": "Update push notification preferences",
+        "tags": [
+          "Push"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "preferences": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "preferences"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Sets which alert types are pushed as OS notifications. An empty array enables all types.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePushPreferencesRequest"
               }
             }
           }
@@ -4721,6 +4913,32 @@
         },
         "required": [
           "title"
+        ]
+      },
+      "UpdatePushPreferencesRequest": {
+        "type": "object",
+        "description": "Enabled alert types for OS-level push. An empty array enables all types.",
+        "properties": {
+          "preferences": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "overspending",
+                "budget-exceeded",
+                "budget-near",
+                "upcoming-payment",
+                "goal-deadline",
+                "goal-achieved",
+                "low-savings",
+                "no-budgets"
+              ]
+            },
+            "description": "Alert types to push"
+          }
+        },
+        "required": [
+          "preferences"
         ]
       },
       "PushSubscriptionResponse": {

@@ -17,6 +17,30 @@ const profileIdentity = {
   avatarUrl: true,
 } satisfies Prisma.ProfileSelect;
 
+const goalInclude = {
+  user: {
+    select: profileIdentity,
+  },
+  updatedByProfile: {
+    select: profileIdentity,
+  },
+} satisfies Prisma.GoalInclude;
+
+type GoalResult = Prisma.GoalGetPayload<{ include: typeof goalInclude }>;
+
+/**
+ * Prisma Decimal fields (savedAmount/targetAmount) serialize to strings in
+ * JSON, but the client contract says number. Normalize so arithmetic on the
+ * client (e.g. quick-add savings) never string-concatenates.
+ */
+function serializeGoal(goal: GoalResult) {
+  return {
+    ...goal,
+    targetAmount: Number(goal.targetAmount),
+    savedAmount: Number(goal.savedAmount),
+  };
+}
+
 export const GoalService = {
   async list(userId: string, filters?: GoalFilters) {
     const page = filters?.page ?? 1;
@@ -31,14 +55,7 @@ export const GoalService = {
     const [goals, total] = await Promise.all([
       prisma.goal.findMany({
         where,
-        include: {
-          user: {
-            select: profileIdentity,
-          },
-          updatedByProfile: {
-            select: profileIdentity,
-          },
-        },
+        include: goalInclude,
         orderBy: {
           createdAt: "desc",
         },
@@ -62,7 +79,7 @@ export const GoalService = {
     }
 
     return {
-      data: filteredGoals,
+      data: filteredGoals.map(serializeGoal),
       total,
       page,
       limit,
@@ -72,20 +89,14 @@ export const GoalService = {
 
   async get(userId: string, id: string) {
     const activeSpace = await SpaceService.getCurrent(userId);
-    return prisma.goal.findFirst({
+    const goal = await prisma.goal.findFirst({
       where: {
         id,
         spaceId: activeSpace?.id ?? null,
       },
-      include: {
-        user: {
-          select: profileIdentity,
-        },
-        updatedByProfile: {
-          select: profileIdentity,
-        },
-      },
+      include: goalInclude,
     });
+    return goal ? serializeGoal(goal) : null;
   },
 
   async create(userId: string, data: CreateGoalInput) {
@@ -100,14 +111,7 @@ export const GoalService = {
         savedAmount: data.savedAmount ?? 0,
         deadline: toDateOnlyDatabaseValue(data.deadline) ?? null,
       },
-      include: {
-        user: {
-          select: profileIdentity,
-        },
-        updatedByProfile: {
-          select: profileIdentity,
-        },
-      },
+      include: goalInclude,
     });
 
     await ActivityService.record({
@@ -121,7 +125,7 @@ export const GoalService = {
       },
     });
 
-    return goal;
+    return serializeGoal(goal);
   },
 
   async update(userId: string, id: string, data: UpdateGoalInput) {
@@ -153,14 +157,7 @@ export const GoalService = {
         id,
       },
       data: updateData,
-      include: {
-        user: {
-          select: profileIdentity,
-        },
-        updatedByProfile: {
-          select: profileIdentity,
-        },
-      },
+      include: goalInclude,
     });
 
     await ActivityService.record({
@@ -174,7 +171,7 @@ export const GoalService = {
       },
     });
 
-    return updatedGoal;
+    return serializeGoal(updatedGoal);
   },
 
   async delete(userId: string, id: string) {

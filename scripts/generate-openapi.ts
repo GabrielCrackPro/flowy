@@ -1281,6 +1281,31 @@ const schemas: Record<string, Json> = {
     },
     required: ["title"],
   },
+  UpdatePushPreferencesRequest: {
+    type: "object",
+    description:
+      "Enabled alert types for OS-level push. An empty array enables all types.",
+    properties: {
+      preferences: {
+        type: "array",
+        items: {
+          type: "string",
+          enum: [
+            "overspending",
+            "budget-exceeded",
+            "budget-near",
+            "upcoming-payment",
+            "goal-deadline",
+            "goal-achieved",
+            "low-savings",
+            "no-budgets",
+          ],
+        },
+        description: "Alert types to push",
+      },
+    },
+    required: ["preferences"],
+  },
   PushSubscriptionResponse: {
     type: "object",
     properties: {
@@ -2271,6 +2296,58 @@ paths["/api/push-subscription"] = {
       { conflict: true },
     ),
   }),
+  get: op({
+    operationId: "pushSubscriptions.status",
+    summary: "Check push subscription status",
+    description:
+      "Returns whether the authenticated user has stored push subscriptions, plus the list of registered devices.",
+    tags: ["Push"],
+    responses: responses({
+      200: {
+        description: "Status",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                ok: { type: "boolean" },
+                subscribed: {
+                  type: "boolean",
+                  description:
+                    "Whether the user has at least one stored subscription",
+                },
+                count: {
+                  type: "integer",
+                  description: "Number of stored subscriptions",
+                },
+                subscriptions: {
+                  type: "array",
+                  description: "Registered devices",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: { type: "string", format: "uuid" },
+                      endpoint: { type: "string", format: "uri" },
+                      userAgent: {
+                        type: ["string", "null"],
+                        description: "User-Agent header at registration time",
+                      },
+                      createdAt: {
+                        type: "string",
+                        format: "date-time",
+                      },
+                    },
+                    required: ["id", "endpoint", "createdAt"],
+                  },
+                },
+              },
+              required: ["ok", "subscribed", "count", "subscriptions"],
+            },
+          },
+        },
+      },
+    }),
+  }),
   delete: op({
     operationId: "pushSubscriptions.delete",
     summary: "Unregister a Web Push subscription",
@@ -2316,6 +2393,63 @@ paths["/api/push-subscription/test"] = {
                 },
               },
               required: ["ok", "sent"],
+            },
+          },
+        },
+      },
+    }),
+  }),
+};
+
+paths["/api/push-preferences"] = {
+  get: op({
+    operationId: "pushPreferences.get",
+    summary: "Get push notification preferences",
+    description:
+      "Returns the user's enabled alert types for OS-level push. An empty list means all types are enabled.",
+    tags: ["Push"],
+    responses: responses({
+      200: {
+        description: "Preferences",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                preferences: {
+                  type: "array",
+                  items: { type: "string" },
+                },
+              },
+              required: ["preferences"],
+            },
+          },
+        },
+      },
+    }),
+  }),
+  put: op({
+    operationId: "pushPreferences.update",
+    summary: "Update push notification preferences",
+    description:
+      "Sets which alert types are pushed as OS notifications. An empty array enables all types.",
+    tags: ["Push"],
+    requestBody: reqBody("UpdatePushPreferencesRequest"),
+    responses: responses({
+      200: {
+        description: "Updated",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                ok: { type: "boolean" },
+                preferences: {
+                  type: "array",
+                  items: { type: "string" },
+                },
+              },
+              required: ["ok", "preferences"],
             },
           },
         },

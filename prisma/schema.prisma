@@ -21,6 +21,7 @@ model Profile {
   secondaryColor       String?  @map("secondary_color") @db.Text
   accentColor          String?  @map("accent_color") @db.Text
   categoriesSeeded     Boolean  @default(false) @map("categories_seeded")
+  pushPreferences      String[] @default([]) @map("push_preferences")
   createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   categories           Category[]
