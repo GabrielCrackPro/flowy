@@ -2,6 +2,21 @@
   "currentVersion": "0.1.32",
   "entries": [
     {
+      "version": "0.1.32",
+      "date": "2026-08-13",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "ship MFA, OTP input, and auth flow polish (#165)",
+              "scope": "auth"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.31",
       "date": "2026-08-13",
       "sections": [
