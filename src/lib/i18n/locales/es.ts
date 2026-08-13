@@ -373,6 +373,11 @@ export const app: AppTranslationMessages = {
       mfaChallengeChecking: "Comprobando MFA…",
       mfaChallengeAbort: "Volver al inicio de sesión",
       mfaChallengeBackToLogin: "Volver al inicio de sesión",
+      mfaBannerText:
+        "Añade una capa extra de seguridad a tu nueva cuenta con la verificación en dos pasos.",
+      mfaBannerHint:
+        "Introducirás un código de tu aplicación de autenticación al iniciar sesión.",
+      mfaBannerAction: "Activar MFA",
     },
     theme: {
       title: "Personalización del tema",

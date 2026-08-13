@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "flags-sdk": {
+      "source": "vercel/flags",
+      "sourceType": "github",
+      "skillPath": "skills/flags-sdk/SKILL.md",
+      "computedHash": "547d5a321c284baa1fe75add8c47dbda59469ed8c5db0f2b226cef6644a727e3"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",

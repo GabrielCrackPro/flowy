@@ -364,6 +364,11 @@ export const app: AppTranslationMessages = {
       mfaChallengeChecking: "Checking MFA…",
       mfaChallengeAbort: "Back to sign in",
       mfaChallengeBackToLogin: "Return to sign in",
+      mfaBannerText:
+        "Add an extra layer of security to your new account with two-step verification.",
+      mfaBannerHint:
+        "You'll enter a code from an authenticator app when signing in.",
+      mfaBannerAction: "Enable MFA",
     },
     theme: {
       title: "Theme Customization",

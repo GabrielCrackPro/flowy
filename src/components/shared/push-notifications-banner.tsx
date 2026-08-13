@@ -1,14 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
+import { Banner } from "@/components/shared/banner";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { Bell, X } from "@/lib/icons";
+import { Bell } from "@/lib/icons";
 
 const DISMISS_KEY = "flowy-push-banner-dismissed";
 
@@ -19,6 +18,7 @@ const DISMISS_KEY = "flowy-push-banner-dismissed";
  */
 export function PushNotificationsBanner() {
   const { t } = useTranslation();
+  const router = useRouter();
   const pathname = usePathname();
   const { checked, supported, configured, permission } = usePushNotifications({
     checkRemoteSubscription: false,
@@ -62,27 +62,16 @@ export function PushNotificationsBanner() {
           transition={{ duration: 0.2, ease: "easeInOut" }}
           className="overflow-hidden"
         >
-          <div className="border-b border-primary/20 bg-primary/5 px-4 py-2">
-            <div className="mx-auto flex w-full max-w-7xl items-center gap-2.5">
-              <Bell aria-hidden className="size-4 shrink-0 text-primary" />
-              <p className="min-w-0 flex-1 truncate text-sm text-foreground/80">
-                {t("settings.notifications.bannerText")}
-              </p>
-              <Button asChild size="sm" className="shrink-0 rounded-lg">
-                <Link href="/dashboard/profile#notifications">
-                  {t("settings.notifications.bannerAction")}
-                </Link>
-              </Button>
-              <button
-                type="button"
-                onClick={dismiss}
-                aria-label={t("common.close")}
-                className="shrink-0 rounded-md p-1 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-          </div>
+          <Banner
+            variant="strip"
+            severity="info"
+            icon={Bell}
+            title={t("settings.notifications.bannerText")}
+            actionLabel={t("settings.notifications.bannerAction")}
+            onAction={() => router.push("/dashboard/profile#notifications")}
+            onDismiss={dismiss}
+            dismissLabel={t("common.close")}
+          />
         </motion.div>
       )}
     </AnimatePresence>
