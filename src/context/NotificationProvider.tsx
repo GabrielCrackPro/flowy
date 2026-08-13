@@ -2,6 +2,7 @@
 
 import { Toaster } from "@components/ui/sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePathname } from "next/navigation";
 import {
   createContext,
   type ReactNode,
@@ -73,7 +74,9 @@ function sortByCreatedAtDesc(alerts: InboxAlert[]): InboxAlert[] {
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
+  const isDashboardHome = pathname === "/dashboard";
 
   const userId = user?.id;
   const activeSpaceId = profile?.activeSpaceId ?? null;
@@ -85,12 +88,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const query = useQuery({
     queryKey,
     queryFn: notificationsApi.list,
-    enabled: !!userId,
+    enabled: !!userId && isDashboardHome,
     staleTime: 30000,
   });
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !isDashboardHome) return;
 
     const channel = supabase
       .channel(`alerts-inbox-${userId}`)
@@ -221,7 +224,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [userId, activeSpaceId, queryClient, queryKey]);
+  }, [userId, activeSpaceId, isDashboardHome, queryClient, queryKey]);
 
   // Fallback when realtime is unavailable: the service worker messages the
   // client when a push arrives while the app is open, so refetch alerts.

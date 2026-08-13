@@ -50,6 +50,13 @@ export const auth: AuthTranslationMessages = {
     statusEmailSent:
       "Revisa tu correo para confirmar tu cuenta y luego inicia sesión.",
     createAccountLink: "Crea una cuenta",
+    oauthTitle: "O continúa con",
+    google: "Google",
+    apple: "Apple",
+    github: "GitHub",
+    oauthError: "No se pudo continuar con este proveedor",
+    callbackError:
+      "El enlace de inicio de sesión no es válido o ha caducado. Inténtalo de nuevo.",
   },
   register: {
     formTitle: "Crea tu cuenta",
@@ -87,10 +94,33 @@ export const auth: AuthTranslationMessages = {
     successMessage: "Te hemos enviado un enlace de recuperación a",
     successMessagePart2: "Revisa tu bandeja de entrada.",
   },
+  resetPassword: {
+    title: "Elige una nueva contraseña",
+    description: "Establece una nueva contraseña para tu cuenta de Flowy.",
+    newPasswordLabel: "Nueva contraseña",
+    confirmPasswordLabel: "Confirma la nueva contraseña",
+    submitButton: "Actualizar contraseña",
+    submittingButton: "Actualizando…",
+    successMessage: "Tu contraseña se actualizó. Ya puedes iniciar sesión.",
+    errorMessage:
+      "No se pudo actualizar la contraseña. Solicita un nuevo enlace de recuperación.",
+    backToLogin: "Volver al inicio de sesión",
+  },
+  errors: {
+    generic: "Algo salió mal. Inténtalo de nuevo.",
+    invalidCredentials: "El correo o la contraseña no son correctos.",
+    emailNotConfirmed: "Confirma tu correo antes de iniciar sesión.",
+    rateLimited: "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+    providerDisabled:
+      "Este proveedor de inicio de sesión no está disponible ahora.",
+    userAlreadyRegistered:
+      "Ya existe una cuenta con este correo. Inicia sesión con tu contraseña.",
+  },
   pageTitles: {
     login: "Iniciar sesión | Flowy",
     register: "Crear cuenta | Flowy",
     forgotPassword: "Recuperar contraseña | Flowy",
+    resetPassword: "Elige una nueva contraseña | Flowy",
   },
 };
 
@@ -250,6 +280,7 @@ export const app: AppTranslationMessages = {
       changePasswordSuccess: "Contraseña actualizada correctamente",
       changePasswordError: "No se pudo actualizar la contraseña",
       deleteAccount: "Eliminar cuenta",
+      deletingAccount: "Eliminando…",
       deleteAccountHint:
         "Esta acción es permanente y borra tus datos de la aplicación",
       deleteAccountConfirmTitle: "¿Eliminar tu cuenta?",
@@ -270,6 +301,78 @@ export const app: AppTranslationMessages = {
         "Se cerrarán todas las sesiones activas de Flowy, incluida la de este dispositivo.",
       signingOutAll: "Cerrando sesiones…",
       signOutAllError: "No se pudo cerrar la sesión en todos los dispositivos",
+      mfaTitle: "Aplicación de autenticación",
+      mfaDescription:
+        "Protege tu cuenta con un código temporal de autenticación.",
+      mfaEnabled: "Aplicación de autenticación activada",
+      mfaEnabledHint:
+        "Tu cuenta requiere un código de tu aplicación de autenticación después de iniciar sesión.",
+      mfaEnable: "Configurar aplicación de autenticación",
+      mfaAddBackup: "Añadir autenticador de respaldo",
+      mfaEnrolling: "Preparando configuración…",
+      mfaNameLabel: "Nombre del autenticador",
+      mfaNamePlaceholder: "Ej. Teléfono personal",
+      mfaNameHint:
+        "Elige un nombre que reconozcas, como Teléfono personal o Autenticador del trabajo.",
+      mfaNameRequired: "Introduce un nombre para este autenticador.",
+      mfaRename: "Renombrar autenticador",
+      mfaRenameSuccess: "Nombre del autenticador actualizado",
+      mfaContinue: "Continuar",
+      mfaSetupTitle: "Configura tu autenticador",
+      mfaSetupPreparing: "Preparando la configuración del autenticador…",
+      mfaSetupDescription:
+        "Escanea el código QR con tu aplicación de autenticación y confírmalo con un código de seis dígitos.",
+      mfaScanHint:
+        "Escanea este código QR con tu aplicación de autenticación e introduce el código de seis dígitos que genera.",
+      mfaManualSecret:
+        "¿No puedes escanearlo? Introduce manualmente esta clave:",
+      mfaManualSecretLabel: "Clave de configuración manual",
+      mfaCopySecret: "Copiar clave de configuración",
+      mfaSecretCopied: "Clave de configuración copiada",
+      mfaCodeLabel: "Código de autenticación",
+      mfaVerify: "Activar MFA",
+      mfaVerifying: "Verificando…",
+      mfaDisable: "Quitar autenticador",
+      mfaDisabling: "Quitando…",
+      mfaDisableConfirmTitle: "¿Quitar este autenticador?",
+      mfaDisableVerificationDescription:
+        "Introduce un código actual de este autenticador para confirmar que quieres quitarlo. Este paso adicional protege tu configuración de MFA.",
+      mfaAuthenticator: "Aplicación de autenticación",
+      mfaBackupWarning:
+        "Supabase no proporciona códigos de recuperación. Añade un autenticador de respaldo antes de quitar tu único dispositivo.",
+      mfaLoading: "Comprobando la configuración de MFA…",
+      mfaError:
+        "No se pudo actualizar la configuración de MFA. Inténtalo de nuevo.",
+      mfaErrors: {
+        invalidCode:
+          "El código de autenticación no es válido. Comprueba la hora de tu dispositivo e inténtalo de nuevo.",
+        challengeExpired:
+          "La solicitud de verificación ha caducado. Empieza de nuevo con un código nuevo.",
+        factorNameConflict:
+          "Ya existe un autenticador con este nombre. Inténtalo de nuevo para crear otro.",
+        sessionRefresh:
+          "Tu sesión está desactualizada. Recarga la página e inténtalo de nuevo.",
+        tooManyAttempts:
+          "Demasiados intentos de MFA. Espera un momento antes de volver a intentarlo.",
+      },
+      mfaSuccess: "Aplicación de autenticación activada correctamente",
+      mfaDisabled: "Aplicación de autenticación eliminada",
+      mfaQrAlt: "Código QR para configurar la aplicación de autenticación",
+      mfaChallengeTitle: "Verifica tu identidad",
+      mfaChallengeDescription:
+        "Introduce el código actual de tu aplicación de autenticación para continuar.",
+      mfaChallengeCodeLabel: "Código de autenticación",
+      mfaSelectAuthenticator: "Elige un autenticador",
+      mfaAuthenticatorNumber: "Autenticador {{number}}",
+      mfaChallengeVerify: "Verificar y continuar",
+      mfaChallengeVerifying: "Verificando…",
+      mfaChallengeError:
+        "El código de autenticación no es válido o ha caducado.",
+      mfaChallengeNoFactor:
+        "No se encontró un autenticador verificado para esta cuenta.",
+      mfaChallengeChecking: "Comprobando MFA…",
+      mfaChallengeAbort: "Volver al inicio de sesión",
+      mfaChallengeBackToLogin: "Volver al inicio de sesión",
     },
     theme: {
       title: "Personalización del tema",

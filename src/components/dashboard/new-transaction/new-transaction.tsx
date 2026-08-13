@@ -39,7 +39,7 @@ export function NewTransaction({
 }: NewTransactionProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const { create } = useTransactionApi();
+  const { create } = useTransactionApi(undefined, { enabled: false });
 
   const isSmall = size === "sm";
 

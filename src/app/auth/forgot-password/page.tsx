@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared";
+import { translateAuthError } from "@/lib/auth/errors";
 import { ArrowLeft, Mail } from "@/lib/icons";
 import { resetPassword } from "@/lib/supabase";
 
@@ -29,7 +30,7 @@ export default function ForgotPasswordPage() {
     const { error: err } = await resetPassword(email);
 
     if (err) {
-      setError(err.message);
+      setError(translateAuthError(err, t));
       setBusy(false);
       return;
     }

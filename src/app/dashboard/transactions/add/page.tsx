@@ -8,7 +8,7 @@ import type { CreateTransactionSchema } from "@/lib/schemas";
 
 export default function NewTransactionPage() {
   const router = useRouter();
-  const { create } = useTransactionApi();
+  const { create } = useTransactionApi(undefined, { enabled: false });
 
   const handleSubmit = async (values: CreateTransactionSchema) => {
     await create(values);

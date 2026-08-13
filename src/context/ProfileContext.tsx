@@ -32,7 +32,12 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const query = useQuery({
+  const {
+    data: profileData,
+    error: profileError,
+    isLoading: profileLoading,
+    refetch: refetchProfile,
+  } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: () => {
       if (!user?.id) throw new Error("No hay un usuario autenticado.");
@@ -59,11 +64,11 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      await query.refetch();
+      await refetchProfile();
     } catch {
       // Error handled by query
     }
-  }, [user?.id, query, queryClient]);
+  }, [user?.id, queryClient, refetchProfile]);
 
   const update = useCallback(
     async (values: Partial<Omit<Profile, "id" | "createdAt">>) => {
@@ -84,7 +89,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
     const loadProfile = async () => {
       try {
-        await query.refetch();
+        await refetchProfile();
       } catch {
         try {
           const profile = await ensureProfile();
@@ -98,17 +103,17 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     loadProfile().catch(() => {
       // Avoid unhandled promise rejection.
     });
-  }, [user?.id, query, queryClient]);
+  }, [user?.id, queryClient, refetchProfile]);
 
   const value = useMemo(
     () => ({
-      profile: query.data as Profile | null,
-      loading: query.isLoading,
-      error: query.error instanceof Error ? query.error.message : null,
+      profile: profileData as Profile | null,
+      loading: profileLoading,
+      error: profileError instanceof Error ? profileError.message : null,
       refresh,
       update,
     }),
-    [query.data, query.isLoading, query.error, refresh, update],
+    [profileData, profileLoading, profileError, refresh, update],
   );
 
   return (

@@ -2,9 +2,17 @@
 
 import type { Session, User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import supabase from "@/lib/supabase/client";
+import {
+  getSession,
+  type OAuthProvider,
+  onAuthStateChange,
+  signInWithEmail,
+  signOut as signOutSession,
+  signUpWithEmail,
+  signInWithOAuth as startOAuth,
+} from "@/lib/supabase/auth";
 
-export type OAuthProvider = "google" | "apple" | "github";
+export type { OAuthProvider } from "@/lib/supabase/auth";
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
@@ -12,38 +20,48 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
+    let authEventReceived = false;
+
+    const subscription = onAuthStateChange((event, newSession) => {
+      authEventReceived = true;
+
+      if (event === "SIGNED_OUT") {
+        setSession(null);
+        setUser(null);
+      } else {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+      }
+      setLoading(false);
+    });
+
     async function init() {
-      const {
-        data: { session: currentSession },
-      } = await supabase.auth.getSession();
+      const currentSession = await getSession();
+      if (!active || authEventReceived) return;
 
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setLoading(false);
     }
 
-    init();
+    void init();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_, newSession) => {
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const signIn = (email: string, password: string) =>
-    supabase.auth.signInWithPassword({ email, password });
+  const signIn = (email: string, password: string, rememberMe = true) =>
+    signInWithEmail(email, password, rememberMe);
 
   const signUp = (email: string, password: string) =>
-    supabase.auth.signUp({ email, password });
+    signUpWithEmail(email, password);
 
-  const signInWithOAuth = (provider: OAuthProvider) =>
-    supabase.auth.signInWithOAuth({ provider });
+  const signInWithOAuth = (provider: OAuthProvider) => startOAuth(provider);
 
-  const signOut = () => supabase.auth.signOut();
+  const signOut = () => signOutSession();
 
   return {
     session,

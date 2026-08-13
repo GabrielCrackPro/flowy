@@ -22,7 +22,7 @@ export default function EditTransactionPage() {
   const { profile } = useProfile();
   const activeSpaceId = profile?.activeSpaceId ?? null;
   const { t } = useTranslation();
-  const { update } = useTransactionApi();
+  const { update } = useTransactionApi(undefined, { enabled: false });
 
   const {
     data: transaction,

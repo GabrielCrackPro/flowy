@@ -48,6 +48,12 @@ export const auth: AuthTranslationMessages = {
     formDescription: "Enter your credentials to continue.",
     statusEmailSent: "Check your email to confirm your account, then sign in.",
     createAccountLink: "Create an account",
+    oauthTitle: "Or continue with",
+    google: "Google",
+    apple: "Apple",
+    github: "GitHub",
+    oauthError: "Could not continue with this provider",
+    callbackError: "This sign-in link is invalid or has expired. Try again.",
   },
   register: {
     formTitle: "Sign up",
@@ -84,10 +90,32 @@ export const auth: AuthTranslationMessages = {
     successMessage: "We've sent a recovery link to",
     successMessagePart2: "Check your inbox.",
   },
+  resetPassword: {
+    title: "Choose a new password",
+    description: "Set a new password for your Flowy account.",
+    newPasswordLabel: "New password",
+    confirmPasswordLabel: "Confirm new password",
+    submitButton: "Update password",
+    submittingButton: "Updating…",
+    successMessage: "Your password was updated. You can now sign in.",
+    errorMessage:
+      "Could not update your password. Request a new recovery link.",
+    backToLogin: "Back to sign in",
+  },
+  errors: {
+    generic: "Something went wrong. Please try again.",
+    invalidCredentials: "The email or password is incorrect.",
+    emailNotConfirmed: "Confirm your email address before signing in.",
+    rateLimited: "Too many attempts. Please wait a moment and try again.",
+    providerDisabled: "This sign-in provider is not available right now.",
+    userAlreadyRegistered:
+      "An account with this email already exists. Sign in with your password instead.",
+  },
   pageTitles: {
     login: "Sign in | Flowy",
     register: "Create account | Flowy",
     forgotPassword: "Reset password | Flowy",
+    resetPassword: "Choose a new password | Flowy",
   },
 };
 
@@ -247,6 +275,7 @@ export const app: AppTranslationMessages = {
       changePasswordSuccess: "Password updated successfully",
       changePasswordError: "Could not update the password",
       deleteAccount: "Delete account",
+      deletingAccount: "Deleting…",
       deleteAccountHint: "This action is permanent and removes your app data",
       deleteAccountConfirmTitle: "Delete your account?",
       deleteAccountConfirmDescription:
@@ -266,6 +295,75 @@ export const app: AppTranslationMessages = {
         "Every active Flowy session will be closed, including this device.",
       signingOutAll: "Signing out…",
       signOutAllError: "Couldn't sign out of all devices",
+      mfaTitle: "Authenticator app",
+      mfaDescription:
+        "Protect your account with a time-based authenticator code.",
+      mfaEnabled: "Authenticator app enabled",
+      mfaEnabledHint:
+        "Your account requires a code from an authenticator app after sign-in.",
+      mfaEnable: "Set up authenticator app",
+      mfaAddBackup: "Add backup authenticator",
+      mfaEnrolling: "Preparing setup…",
+      mfaNameLabel: "Authenticator name",
+      mfaNamePlaceholder: "e.g. Personal phone",
+      mfaNameHint:
+        "Choose a name you will recognize, such as Personal phone or Work authenticator.",
+      mfaNameRequired: "Enter a name for this authenticator.",
+      mfaRename: "Rename authenticator",
+      mfaRenameSuccess: "Authenticator name updated",
+      mfaContinue: "Continue",
+      mfaSetupTitle: "Set up your authenticator",
+      mfaSetupPreparing: "Preparing your authenticator setup…",
+      mfaSetupDescription:
+        "Use your authenticator app to scan the QR code, then confirm it with a six-digit code.",
+      mfaScanHint:
+        "Scan this QR code with your authenticator app, then enter the six-digit code it generates.",
+      mfaManualSecret: "Can't scan? Enter this setup key manually:",
+      mfaManualSecretLabel: "Manual setup key",
+      mfaCopySecret: "Copy setup key",
+      mfaSecretCopied: "Setup key copied",
+      mfaCodeLabel: "Authenticator code",
+      mfaVerify: "Enable MFA",
+      mfaVerifying: "Verifying…",
+      mfaDisable: "Remove authenticator",
+      mfaDisabling: "Removing…",
+      mfaDisableConfirmTitle: "Remove this authenticator?",
+      mfaDisableVerificationDescription:
+        "Enter a current code from this authenticator to confirm its removal. This extra step protects your MFA settings.",
+      mfaAuthenticator: "Authenticator app",
+      mfaBackupWarning:
+        "Supabase does not provide recovery codes. Add a backup authenticator before removing your only device.",
+      mfaLoading: "Checking MFA settings…",
+      mfaError: "Could not update MFA settings. Please try again.",
+      mfaErrors: {
+        invalidCode:
+          "That authenticator code is invalid. Check the time on your device and try again.",
+        challengeExpired:
+          "That verification request expired. Start again and enter a new code.",
+        factorNameConflict:
+          "An authenticator with this name already exists. Try again to create a new one.",
+        sessionRefresh:
+          "Your session is out of date. Refresh the page and try again.",
+        tooManyAttempts:
+          "Too many MFA attempts. Wait a moment before trying again.",
+      },
+      mfaSuccess: "Authenticator app enabled successfully",
+      mfaDisabled: "Authenticator app removed",
+      mfaQrAlt: "QR code for authenticator app setup",
+      mfaChallengeTitle: "Verify your identity",
+      mfaChallengeDescription:
+        "Enter the current code from your authenticator app to continue.",
+      mfaChallengeCodeLabel: "Authenticator code",
+      mfaSelectAuthenticator: "Choose an authenticator",
+      mfaAuthenticatorNumber: "Authenticator {{number}}",
+      mfaChallengeVerify: "Verify and continue",
+      mfaChallengeVerifying: "Verifying…",
+      mfaChallengeError: "That authenticator code is invalid or expired.",
+      mfaChallengeNoFactor:
+        "No verified authenticator was found for this account.",
+      mfaChallengeChecking: "Checking MFA…",
+      mfaChallengeAbort: "Back to sign in",
+      mfaChallengeBackToLogin: "Return to sign in",
     },
     theme: {
       title: "Theme Customization",

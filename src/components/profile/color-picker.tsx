@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronDown } from "@/lib/icons";
+import { Check, ChevronDown, RotateCcw } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface ColorPickerProps {
@@ -204,6 +204,7 @@ export function ColorPicker({
                   setIsOpen(false);
                 }}
               >
+                <RotateCcw className="size-3.5" />
                 {t("settings.theme.resetColor")}
               </Button>
             ) : null}

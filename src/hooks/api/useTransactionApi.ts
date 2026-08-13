@@ -15,7 +15,10 @@ import type {
   UpdateTransactionInput,
 } from "@/types/Transaction";
 
-export function useTransactionApi(filters?: TransactionFilters) {
+export function useTransactionApi(
+  filters?: TransactionFilters,
+  options?: { enabled?: boolean },
+) {
   const { data, ...rest } = useEntityApi<
     Transaction,
     TransactionFilters,
@@ -29,6 +32,7 @@ export function useTransactionApi(filters?: TransactionFilters) {
     deleteApi: deleteTransaction,
     entityName: "common.transaction",
     filters,
+    enabled: options?.enabled ?? true,
   });
 
   // Handle the new paginated response structure

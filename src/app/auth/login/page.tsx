@@ -13,17 +13,20 @@ import {
 import { useAuth } from "@hooks/useAuth";
 import { useReactForm } from "@hooks/useReactForm";
 import { createLoginSchema } from "@lib/schemas";
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import { Icon } from "@/components/shared";
+import { translateAuthError } from "@/lib/auth/errors";
 import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail } from "@/lib/icons";
-import { signInWithEmail } from "@/lib/supabase";
+import { signInWithEmail } from "@/lib/supabase/auth";
+import { getMfaAssuranceLevel } from "@/lib/supabase/mfa";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useTranslation("auth");
 
   const loginSchema = useMemo(() => createLoginSchema(t), [t]);
@@ -31,6 +34,9 @@ export default function LoginPage() {
   const { user, loading } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [authFlow, setAuthFlow] = useState<"idle" | "submitting" | "routing">(
+    "idle",
+  );
 
   useEffect(() => {
     document.title = t("pageTitles.login");
@@ -44,6 +50,7 @@ export default function LoginPage() {
     },
     schema: loginSchema,
     onSubmit: async (values) => {
+      setAuthFlow("submitting");
       const { data, error } = await signInWithEmail(
         values.email,
         values.password,
@@ -51,60 +58,63 @@ export default function LoginPage() {
       );
 
       if (error) {
-        form.setError(error.message);
+        setAuthFlow("idle");
+        form.setError(translateAuthError(error, t));
         return;
       }
 
       if (data.session) {
-        router.replace("/dashboard");
-        router.refresh();
+        const { data: assurance, error: assuranceError } =
+          await getMfaAssuranceLevel();
+        const requiresMfa =
+          assuranceError ||
+          (assurance.nextLevel === "aal2" && assurance.currentLevel !== "aal2");
+
+        setAuthFlow("routing");
+        router.replace(
+          requiresMfa
+            ? `/auth/mfa?next=${encodeURIComponent("/dashboard")}`
+            : "/dashboard",
+        );
         return;
       }
 
+      setAuthFlow("idle");
       form.setStatus(t("login.statusEmailSent"));
     },
   });
 
+  const callbackError = searchParams.get("error") === "callback";
   const { form: rhfForm, error, status, busy, handleSubmit } = form;
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && authFlow === "idle") {
       router.replace("/dashboard");
     }
-  }, [loading, user, router]);
+  }, [authFlow, loading, user, router]);
 
   return (
     <div className="space-y-8">
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="space-y-2"
-      >
+      <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
           {t("login.formTitle")}
         </h1>
         <p className="text-sm text-muted-foreground">
           {t("login.formDescription")}
         </p>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
-      >
-        <FormAlert message={error} variant="error" />
+      <div>
+        <FormAlert
+          message={callbackError ? t("login.callbackError") : error}
+          variant="error"
+        />
         <FormAlert message={status} variant="success" />
-      </motion.div>
+      </div>
 
       <Form {...rhfForm}>
         <form onSubmit={(e) => handleSubmit(e)} className="space-y-4">
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
-          >
+          <div>
             <RHFFormField
               name="email"
               render={({ field }) => (
@@ -124,13 +134,9 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-          >
+          <div>
             <RHFFormField
               name="password"
               render={({ field }) => (
@@ -169,14 +175,9 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.25 }}
-            className="flex items-center justify-between"
-          >
+          <div className="flex items-center justify-between">
             <RHFFormField
               name="rememberMe"
               render={({ field }) => (
@@ -198,13 +199,9 @@ export default function LoginPage() {
             >
               {t("common.forgotPassword")}
             </Link>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-          >
+          <div>
             <Button
               type="submit"
               className="h-11 w-full text-base"
@@ -222,16 +219,13 @@ export default function LoginPage() {
                 </>
               )}
             </Button>
-          </motion.div>
+          </div>
         </form>
       </Form>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.35 }}
-        className="text-center"
-      >
+      <OAuthButtons />
+
+      <div className="text-center">
         <p className="text-sm text-muted-foreground">
           {t("common.noAccount")}{" "}
           <Link
@@ -241,7 +235,7 @@ export default function LoginPage() {
             {t("login.createAccountLink")}
           </Link>
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 }

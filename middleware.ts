@@ -9,6 +9,9 @@ const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
   "";
 
+// Kept as explicit documentation for the primary auth pages. All /auth/*
+// routes are public because callback codes must be exchanged before a session
+// exists (OAuth, email confirmation, and recovery).
 const AUTH_PATHS = ["/auth/login", "/auth/register", "/auth/forgot"];
 
 // Public pages that don't require a session
@@ -16,25 +19,28 @@ const PUBLIC_PATHS = ["/status"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const isAuthPath =
+    pathname === "/auth" ||
+    pathname.startsWith("/auth/") ||
+    AUTH_PATHS.some((path) => pathname.startsWith(path));
+  const isPublicPath = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
+  const isAuthCallbackPath = pathname === "/auth/callback";
 
-  const isAuthPath = AUTH_PATHS.some((p) => pathname.startsWith(p));
-  const isPublicPath = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  if (!supabaseUrl || !supabaseKey) {
+    return NextResponse.next();
+  }
 
-  // Handle locale cookie
   const localeCookie = req.cookies.get(LOCALE_COOKIE);
   const acceptLanguage = req.headers.get("accept-language") || "";
   const detectedLocale = normalizeLocale(acceptLanguage.split(",")[0]);
+  const response = NextResponse.next({ request: req });
 
   if (!localeCookie) {
-    const localeResponse = NextResponse.next();
-    localeResponse.cookies.set(LOCALE_COOKIE, detectedLocale || defaultLocale, {
+    response.cookies.set(LOCALE_COOKIE, detectedLocale || defaultLocale, {
       path: "/",
       maxAge: 31536000, // 1 year
     });
-    return localeResponse;
   }
-
-  const response = NextResponse.next({ request: req });
 
   // Cookies written while refreshing the session. If getUser() refreshes the
   // tokens and we then redirect, they must be carried over to the redirect
@@ -74,7 +80,13 @@ export async function middleware(req: NextRequest) {
     );
   }
 
-  if (user && isAuthPath) {
+  if (
+    user &&
+    isAuthPath &&
+    !isAuthCallbackPath &&
+    pathname !== "/auth/reset-password" &&
+    pathname !== "/auth/mfa"
+  ) {
     return redirectWithCookies(
       NextResponse.redirect(new URL("/", req.url)),
       refreshedCookies,
