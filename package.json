@@ -28,6 +28,7 @@
   "dependencies": {
     "@aejkatappaja/phantom-ui": "^1.4.0",
     "@base-ui/react": "^1.6.0",
+    "@flags-sdk/vercel": "^1.4.6",
     "@hookform/resolvers": "^5.5.7",
     "@prisma/client": "^5.13.0",
     "@scalar/nextjs-api-reference": "0.11.13",
@@ -41,6 +42,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.4.0",
+    "flags": "^4.3.0",
     "framer-motion": "^12.42.2",
     "i18next": "^26.3.6",
     "jspdf": "^4.2.1",

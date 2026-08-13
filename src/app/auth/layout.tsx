@@ -2,6 +2,8 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { AuthPageTransition } from "@/components/auth/auth-page-transition";
+import { FlagsProvider } from "@/context/FlagsProvider";
+import { oauthEnabled } from "@/lib/flags";
 import { getServerT, LOCALE_COOKIE, normalizeLocale } from "@/lib/i18n";
 import {
   Activity,
@@ -24,6 +26,7 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
   const localeCookie = cookieStore.get(LOCALE_COOKIE)?.value;
   const locale = normalizeLocale(localeCookie);
   const t = await getServerT(locale, "auth");
+  const oauth = await oauthEnabled();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 transition-colors dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 md:p-7">
@@ -124,7 +127,11 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex min-h-[540px] w-full items-center">
-              <AuthPageTransition>{children}</AuthPageTransition>
+              <AuthPageTransition>
+                <FlagsProvider flags={{ oauthEnabled: oauth }}>
+                  {children}
+                </FlagsProvider>
+              </AuthPageTransition>
             </div>
 
             <div className="mt-8 space-y-2 text-center">

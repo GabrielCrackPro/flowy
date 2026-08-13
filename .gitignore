@@ -48,3 +48,6 @@ supabase/.temp
 
 # Freebuff agent workspace
 .freebuff/
+
+.vercel
+.env*
