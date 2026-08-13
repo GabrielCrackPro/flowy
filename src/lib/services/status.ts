@@ -15,7 +15,8 @@ export type IncidentSeverity = "minor" | "major" | "critical";
 export interface ComponentCheck {
   id: ComponentId;
   status: ComponentStatus;
-  latencyMs: number;
+  /** Null when the check has no meaningful measurable duration. */
+  latencyMs: number | null;
   detail?: string;
 }
 
@@ -75,16 +76,24 @@ async function withTimeout<T>(
 
 async function measure<T>(fn: () => Promise<T>): Promise<{
   value: T | null;
-  latencyMs: number;
+  latencyMs: number | null;
 }> {
   const start = performance.now();
   const value = await fn();
-  return { value, latencyMs: Math.round(performance.now() - start) };
+  const elapsed = performance.now() - start;
+  // Sub-millisecond timings are not meaningful at the precision shown by
+  // the status page. Keep them as unavailable instead of reporting a false
+  // 0ms measurement.
+  return {
+    value,
+    latencyMs: elapsed >= 1 ? Math.round(elapsed) : null,
+  };
 }
 
 async function checkApi(): Promise<ComponentCheck> {
-  // The route responding is itself the API check.
-  return { id: "api", status: "ok", latencyMs: 0 };
+  // The route responding is itself the API check, so there is no separate
+  // request to time from inside this handler.
+  return { id: "api", status: "ok", latencyMs: null };
 }
 
 async function checkDatabase(): Promise<ComponentCheck> {
@@ -121,13 +130,12 @@ async function checkPush(): Promise<ComponentCheck> {
   // Push is a config-level check: are VAPID keys wired up? We can't send a
   // real push to a device from the status page, so treat a valid client as
   // operational and missing keys as degraded.
-  const start = performance.now();
   const hasClient = PushService.isConfigured();
-  const latencyMs = Math.round(performance.now() - start);
   return {
     id: "push",
     status: hasClient ? "ok" : "degraded",
-    latencyMs,
+    // This is a configuration check, not a delivery probe.
+    latencyMs: null,
     detail: hasClient ? undefined : "VAPID keys not configured",
   };
 }
@@ -178,6 +186,10 @@ export interface UptimeBar {
   date: string;
   /** Worst status that day, or null when no checks ran that day. */
   status: ComponentStatus | null;
+  /** Number of checks recorded for this component on this day. */
+  checks: number;
+  /** Number of non-operational checks recorded for this component on this day. */
+  failures: number;
 }
 
 /**
@@ -249,7 +261,7 @@ export interface ComponentTransition {
   from: ComponentStatus;
   to: ComponentStatus;
   kind: TransitionKind;
-  latencyMs: number;
+  latencyMs: number | null;
   detail?: string;
 }
 
@@ -271,8 +283,14 @@ export const StatusService = {
   async checkAll(): Promise<StatusSnapshot> {
     const results = await Promise.all(
       COMPONENT_IDS.map(async (id) => {
-        const checked = await withTimeout(runCheck(id), 8000);
-        return checked ?? { id, status: "down" as const, latencyMs: 8000 };
+        try {
+          const checked = await withTimeout(runCheck(id), 8000);
+          return checked ?? { id, status: "down" as const, latencyMs: null };
+        } catch {
+          // A probe failure belongs to that component, not to the whole
+          // snapshot. This keeps the page useful when one dependency fails.
+          return { id, status: "down" as const, latencyMs: null };
+        }
       }),
     );
     return {
@@ -487,12 +505,6 @@ export const StatusService = {
    * HISTORY_DAYS days, worst-status-per-day per component, plus an honest
    * ok/total uptime percentage per component over the same window.
    */
-
-  /**
-   * Aggregates check history into per-day bars (UTC) for the last
-   * HISTORY_DAYS days, worst-status-per-day per component, plus an honest
-   * ok/total uptime percentage per component over the same window.
-   */
   async history(days = HISTORY_DAYS): Promise<StatusHistory> {
     const since = new Date();
     since.setUTCHours(0, 0, 0, 0);
@@ -509,17 +521,38 @@ export const StatusService = {
       orderBy: { checkedAt: "asc" },
     });
 
-    // Day -> component -> worst status, plus per-component ok/total counts.
-    const byDay = new Map<string, Map<ComponentId, ComponentStatus>>();
+    // Day -> component -> daily summary, plus per-component ok/total counts.
+    const byDay = new Map<
+      string,
+      Map<
+        ComponentId,
+        { status: ComponentStatus; checks: number; failures: number }
+      >
+    >();
     const counts = new Map<ComponentId, { ok: number; total: number }>();
     for (const row of rows) {
       const component = row.component as ComponentId;
       const day = row.checkedAt.toISOString().slice(0, 10);
-      const dayMap = byDay.get(day) ?? new Map<ComponentId, ComponentStatus>();
+      const dayMap =
+        byDay.get(day) ??
+        new Map<
+          ComponentId,
+          { status: ComponentStatus; checks: number; failures: number }
+        >();
       const status = row.status as ComponentStatus;
       const existing = dayMap.get(component);
-      if (!existing || rankStatus(status) > rankStatus(existing)) {
-        dayMap.set(component, status);
+      if (existing) {
+        existing.checks += 1;
+        if (status !== "ok") existing.failures += 1;
+        if (rankStatus(status) > rankStatus(existing.status)) {
+          existing.status = status;
+        }
+      } else {
+        dayMap.set(component, {
+          status,
+          checks: 1,
+          failures: status === "ok" ? 0 : 1,
+        });
       }
       byDay.set(day, dayMap);
 
@@ -539,9 +572,12 @@ export const StatusService = {
       const cursor = new Date(since);
       for (let i = 0; i < days; i++) {
         const date = cursor.toISOString().slice(0, 10);
+        const summary = byDay.get(date)?.get(component);
         componentBars.push({
           date,
-          status: byDay.get(date)?.get(component) ?? null,
+          status: summary?.status ?? null,
+          checks: summary?.checks ?? 0,
+          failures: summary?.failures ?? 0,
         });
         cursor.setUTCDate(cursor.getUTCDate() + 1);
       }
@@ -675,6 +711,12 @@ async function notifyPush(transitions: ComponentTransition[]): Promise<void> {
       url: STATUS_PAGE_URL,
       tag: `flowy-status-${t.component}`,
       component: t.component,
+      severity:
+        t.kind === "down"
+          ? "critical"
+          : t.kind === "degraded"
+            ? "major"
+            : "minor",
     })),
   );
 }

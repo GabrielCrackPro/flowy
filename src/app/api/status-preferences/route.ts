@@ -10,10 +10,12 @@ import {
 import { prisma } from "@/lib/prisma/client";
 
 const COMPONENT_IDS = ["api", "database", "auth", "push", "storage"] as const;
+const SEVERITIES = ["minor", "major", "critical"] as const;
 
 const statusPreferencesSchema = z.object({
   enabled: z.boolean(),
   components: z.array(z.enum(COMPONENT_IDS)).max(COMPONENT_IDS.length),
+  severities: z.array(z.enum(SEVERITIES)).max(SEVERITIES.length),
 });
 
 /** Per-user status alert preferences (master switch + components). */
@@ -24,11 +26,16 @@ export async function GET() {
   try {
     const profile = await prisma.profile.findUnique({
       where: { id: auth.id },
-      select: { statusAlertsEnabled: true, statusAlertComponents: true },
+      select: {
+        statusAlertsEnabled: true,
+        statusAlertComponents: true,
+        statusAlertSeverities: true,
+      },
     });
     return NextResponse.json({
       enabled: profile?.statusAlertsEnabled ?? true,
       components: profile?.statusAlertComponents ?? [],
+      severities: profile?.statusAlertSeverities ?? [],
     });
   } catch (error) {
     return handleApiError(error, "Could not load status preferences");
@@ -57,6 +64,7 @@ export async function PUT(request: NextRequest) {
       data: {
         statusAlertsEnabled: parsed.data.enabled,
         statusAlertComponents: parsed.data.components,
+        statusAlertSeverities: parsed.data.severities,
       },
     });
 

@@ -62,27 +62,35 @@ export function DataFilters({
 
   return (
     <div className={cn("space-y-3", className)}>
-      {open === undefined && (
-        <div className="flex items-center gap-3">
-          {title && (
-            <div className="mr-auto">
-              <h3 className="text-base font-semibold tracking-tight">
-                {title}
+      {(open === undefined || filtersOpen) && (
+        <div className="flex flex-wrap items-center gap-3">
+          {(title || filtersOpen) && (
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate text-sm font-semibold tracking-tight">
+                {title ?? resolvedFilterLabel}
               </h3>
 
-              <p className="mt-0.5 text-xs leading-none text-muted-foreground/50">
+              <p className="mt-0.5 text-xs leading-none text-muted-foreground/60">
                 {t("filters.filterAndSearch")}
               </p>
             </div>
           )}
 
-          <FiltersToggleButton
-            open={filtersOpen}
-            hasActiveFilters={hasActiveFilters}
-            activeFiltersCount={activeFiltersCount}
-            label={resolvedFilterLabel}
-            onClick={() => setFiltersOpen(!filtersOpen)}
-          />
+          {open === undefined && (
+            <FiltersToggleButton
+              open={filtersOpen}
+              hasActiveFilters={hasActiveFilters}
+              activeFiltersCount={activeFiltersCount}
+              label={resolvedFilterLabel}
+              onClick={() => setFiltersOpen(!filtersOpen)}
+            />
+          )}
+
+          {open !== undefined && filtersOpen && hasActiveFilters && (
+            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[11px] font-medium tabular-nums text-primary ring-1 ring-primary/20">
+              {activeFiltersCount}
+            </span>
+          )}
         </div>
       )}
 
@@ -99,10 +107,11 @@ export function DataFilters({
           />
         )}
 
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
+        <div className="grid grid-cols-1 gap-2.5 sm:flex sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2.5">
           {filterFields.map((field, index) => (
             <motion.div
               key={field.key}
+              className="min-w-0 max-sm:w-full"
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: index * 0.05 }}
@@ -124,7 +133,7 @@ export function DataFilters({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onClear}
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/30 px-2.5 text-xs font-medium text-muted-foreground/60 transition duration-200 hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:text-foreground"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/30 px-2.5 text-xs font-medium text-muted-foreground/60 transition duration-200 hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:text-foreground max-sm:w-full max-sm:justify-center"
             >
               <Icon icon={X} className="size-3" />
 

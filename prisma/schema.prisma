@@ -22,9 +22,10 @@ model Profile {
   accentColor          String?  @map("accent_color") @db.Text
   categoriesSeeded     Boolean  @default(false) @map("categories_seeded")
   pushPreferences      String[] @default([]) @map("push_preferences")
-  statusAlertsEnabled  Boolean  @default(true) @map("status_alerts_enabled")
+  statusAlertsEnabled   Boolean  @default(true) @map("status_alerts_enabled")
   statusAlertComponents String[] @default([]) @map("status_alert_components")
-  role                 String   @default("user") @db.VarChar(20) // user | admin
+  statusAlertSeverities String[] @default([]) @map("status_alert_severities")
+  role                  String   @default("user") @db.VarChar(20) // user | admin
   createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   categories           Category[]
@@ -43,6 +44,7 @@ model Profile {
   spaceMemberships     SpaceMember[]
   activeSpace          Space?             @relation("ActiveSpace", fields: [activeSpaceId], references: [id], onDelete: SetNull)
   pushSubscriptions    PushSubscription[]
+  pushDeliveries       PushDelivery[]
   alerts               Alert[]
 
   @@map("profiles")
@@ -294,15 +296,43 @@ model PushSubscription {
   endpoint  String   @db.Text
   p256dh    String   @db.Text
   auth      String   @db.Text
-  userAgent String?  @map("user_agent") @db.Text
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  userAgent          String?  @map("user_agent") @db.Text
+  deviceName         String?  @map("device_name") @db.VarChar(80)
+  installationType   String?  @map("installation_type") @db.VarChar(20)
+  lastSeenAt         DateTime? @map("last_seen_at") @db.Timestamptz
+  lastDeliveryAt     DateTime? @map("last_delivery_at") @db.Timestamptz
+  lastDeliveryStatus String?  @map("last_delivery_status") @db.VarChar(20)
+  failureCount       Int      @default(0) @map("failure_count")
+  lastFailureReason  String?  @map("last_failure_reason") @db.Text
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      Profile          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries PushDelivery[]
 
   @@unique([endpoint])
   @@index([userId])
   @@map("push_subscriptions")
+}
+
+model PushDelivery {
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String            @map("user_id") @db.Uuid
+  subscriptionId String?           @map("subscription_id") @db.Uuid
+  type           String            @default("status") @db.VarChar(50)
+  component      String?           @db.VarChar(50)
+  severity       String?           @db.VarChar(20)
+  title          String            @db.Text
+  status         String            @db.VarChar(20) // sent | failed | removed
+  error          String?           @db.Text
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz
+
+  user         Profile          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription PushSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([subscriptionId, createdAt])
+  @@map("push_deliveries")
 }
 
 model Alert {

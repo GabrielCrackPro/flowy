@@ -102,30 +102,35 @@ export function SettingsNav() {
   };
 
   return (
-    <nav aria-label={t("settings.navLabel")} className="lg:sticky lg:top-6">
-      <ul className="mt-1 flex gap-1.5 overflow-x-auto pb-1 lg:mt-0 lg:flex-col lg:gap-1 lg:overflow-visible lg:pb-0">
-        {SECTIONS.map((section) => {
-          const isActive = activeId === section.id;
-          return (
-            <li key={section.id} className="shrink-0 lg:shrink">
-              <button
-                type="button"
-                onClick={() => scrollTo(section.id)}
-                aria-current={isActive ? "true" : undefined}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors lg:w-full lg:rounded-lg lg:border-0 lg:px-3 lg:py-2",
-                  isActive
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-border/40 bg-card/50 text-muted-foreground hover:border-border/70 hover:bg-muted/40 hover:text-foreground",
-                )}
-              >
-                <Icon icon={section.icon} className="size-4 shrink-0" />
-                <span className="truncate">{t(section.labelKey)}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+    <nav
+      aria-label={t("settings.navLabel")}
+      className="min-w-0 lg:sticky lg:top-6"
+    >
+      <div className="-mx-1 overflow-hidden rounded-2xl border border-border/40 bg-muted/20 p-1 lg:mx-0 lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
+        <ul className="flex min-w-max gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:min-w-0 lg:flex-col lg:gap-1 lg:overflow-visible lg:px-0 lg:pb-0">
+          {SECTIONS.map((section) => {
+            const isActive = activeId === section.id;
+            return (
+              <li key={section.id} className="shrink-0 lg:min-w-0">
+                <button
+                  type="button"
+                  onClick={() => scrollTo(section.id)}
+                  aria-current={isActive ? "true" : undefined}
+                  className={cn(
+                    "flex min-h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-3 text-sm font-medium transition-colors lg:w-full lg:justify-start lg:rounded-lg",
+                    isActive
+                      ? "bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20"
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                  )}
+                >
+                  <Icon icon={section.icon} className="size-4 shrink-0" />
+                  <span>{t(section.labelKey)}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </nav>
   );
 }

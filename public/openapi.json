@@ -2780,15 +2780,73 @@
                             ],
                             "description": "User-Agent header at registration time"
                           },
+                          "deviceName": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Private user-defined device name"
+                          },
+                          "installationType": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "pwa",
+                              "browser",
+                              null
+                            ]
+                          },
                           "createdAt": {
                             "type": "string",
                             "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "lastSeenAt": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "format": "date-time"
+                          },
+                          "lastDeliveryAt": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "format": "date-time"
+                          },
+                          "lastDeliveryStatus": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "sent",
+                              "failed",
+                              "removed"
+                            ]
+                          },
+                          "failureCount": {
+                            "type": "integer"
+                          },
+                          "lastFailureReason": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           }
                         },
                         "required": [
                           "id",
                           "endpoint",
-                          "createdAt"
+                          "createdAt",
+                          "updatedAt",
+                          "failureCount"
                         ]
                       }
                     }
@@ -2814,6 +2872,64 @@
           }
         },
         "description": "Returns whether the authenticated user has stored push subscriptions, plus the list of registered devices."
+      },
+      "patch": {
+        "operationId": "pushSubscriptions.rename",
+        "summary": "Rename a push device",
+        "tags": [
+          "Push"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renamed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "deviceName": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "deviceName"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenamePushSubscriptionRequest"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "operationId": "pushSubscriptions.delete",
@@ -2913,7 +3029,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "Sends a test notification to every registered device of the authenticated user so push delivery can be verified.",
+        "description": "Sends a test notification to every registered device, or to one selected device when subscriptionId is provided.",
         "requestBody": {
           "required": true,
           "content": {
@@ -2924,6 +3040,108 @@
             }
           }
         }
+      }
+    },
+    "/api/push-delivery-history": {
+      "get": {
+        "operationId": "pushDeliveries.history",
+        "summary": "List push delivery history",
+        "tags": [
+          "Push"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delivery history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deliveries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "subscriptionId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "format": "uuid"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "component": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "severity": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "sent",
+                              "failed",
+                              "removed"
+                            ]
+                          },
+                          "error": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "status",
+                          "createdAt"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "deliveries"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Returns the authenticated user's recent push delivery attempts, including device status and failure details."
       }
     },
     "/api/push-preferences": {
@@ -2970,7 +3188,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "Returns the user's enabled alert types for OS-level push. An empty list means all types are enabled."
+        "description": "Returns the user's enabled alert types for OS-level push. An empty list means all types are enabled; the __none__ sentinel means all financial alerts are disabled."
       },
       "put": {
         "operationId": "pushPreferences.update",
@@ -3019,7 +3237,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "Sets which alert types are pushed as OS notifications. An empty array enables all types.",
+        "description": "Sets which alert types are pushed as OS notifications. An empty array enables all types; the __none__ sentinel disables all financial alerts.",
         "requestBody": {
           "required": true,
           "content": {
@@ -3067,11 +3285,23 @@
                           "storage"
                         ]
                       }
+                    },
+                    "severities": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "minor",
+                          "major",
+                          "critical"
+                        ]
+                      }
                     }
                   },
                   "required": [
                     "enabled",
-                    "components"
+                    "components",
+                    "severities"
                   ]
                 }
               }
@@ -3119,12 +3349,19 @@
                       "items": {
                         "type": "string"
                       }
+                    },
+                    "severities": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   },
                   "required": [
                     "ok",
                     "enabled",
-                    "components"
+                    "components",
+                    "severities"
                   ]
                 }
               }
@@ -5284,8 +5521,11 @@
             "description": "Component status"
           },
           "latencyMs": {
-            "type": "integer",
-            "description": "Probe latency in milliseconds"
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Probe latency in milliseconds; null when the check has no measurable duration"
           },
           "detail": {
             "type": [
@@ -5316,8 +5556,22 @@
               "down"
             ],
             "description": "Worst status that day, or null when no checks ran"
+          },
+          "checks": {
+            "type": "integer",
+            "description": "Number of checks recorded for this component that day"
+          },
+          "failures": {
+            "type": "integer",
+            "description": "Number of non-operational checks recorded that day"
           }
-        }
+        },
+        "required": [
+          "date",
+          "status",
+          "checks",
+          "failures"
+        ]
       },
       "StatusResponse": {
         "type": "object",
@@ -5376,6 +5630,18 @@
               "description": "Most recent non-ok check within the window, or null"
             },
             "description": "Most recent failure time per component"
+          },
+          "stale": {
+            "type": "boolean",
+            "description": "Whether this response is a cached last-known snapshot"
+          },
+          "lastSuccessfulAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp of the last successful live check"
           },
           "latency": {
             "type": "object",
@@ -6014,6 +6280,20 @@
           "auth": {
             "type": "string",
             "description": "Client auth secret (base64url)"
+          },
+          "deviceName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "description": "Optional private name shown for this device"
+          },
+          "installationType": {
+            "type": "string",
+            "enum": [
+              "pwa",
+              "browser"
+            ],
+            "description": "Whether the subscription belongs to an installed PWA or browser tab"
           }
         },
         "required": [
@@ -6022,17 +6302,60 @@
           "auth"
         ]
       },
+      "RenamePushSubscriptionRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deviceName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "id",
+          "deviceName"
+        ]
+      },
       "DeletePushSubscriptionRequest": {
         "type": "object",
+        "description": "Remove one subscription with endpoint, or every subscription with all=true.",
         "properties": {
           "endpoint": {
             "type": "string",
             "format": "uri",
             "description": "Push endpoint URL to remove"
+          },
+          "all": {
+            "type": "boolean",
+            "const": true,
+            "description": "Remove every push subscription for the current user"
+          },
+          "stale": {
+            "type": "boolean",
+            "const": true,
+            "description": "Remove subscriptions not seen for 30 days"
           }
         },
-        "required": [
-          "endpoint"
+        "oneOf": [
+          {
+            "required": [
+              "endpoint"
+            ]
+          },
+          {
+            "required": [
+              "all"
+            ]
+          },
+          {
+            "required": [
+              "stale"
+            ]
+          }
         ]
       },
       "SendTestPushRequest": {
@@ -6049,6 +6372,11 @@
             "type": "string",
             "maxLength": 160,
             "description": "Optional notification body"
+          },
+          "subscriptionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional device UUID; omit to notify every device"
           }
         },
         "required": [
@@ -6057,7 +6385,7 @@
       },
       "UpdatePushPreferencesRequest": {
         "type": "object",
-        "description": "Enabled alert types for OS-level push. An empty array enables all types.",
+        "description": "Enabled alert types for OS-level push. An empty array enables all types; the __none__ sentinel disables all financial alerts.",
         "properties": {
           "preferences": {
             "type": "array",
@@ -6071,7 +6399,8 @@
                 "goal-deadline",
                 "goal-achieved",
                 "low-savings",
-                "no-budgets"
+                "no-budgets",
+                "__none__"
               ]
             },
             "description": "Alert types to push"
@@ -6100,11 +6429,23 @@
                 "storage"
               ]
             }
+          },
+          "severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "minor",
+                "major",
+                "critical"
+              ]
+            }
           }
         },
         "required": [
           "enabled",
-          "components"
+          "components",
+          "severities"
         ]
       },
       "PushSubscriptionResponse": {

@@ -35,6 +35,10 @@ export async function POST(request: Request) {
 
     const { error: updateError } = await supabase.auth.updateUser({
       password: newPassword,
+      data: {
+        ...(signInData.user.user_metadata ?? {}),
+        password_changed_at: new Date().toISOString(),
+      },
     });
 
     if (updateError) {

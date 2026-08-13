@@ -5,7 +5,7 @@
 // - Immutable hashed build assets, icons and the manifest: cache-first.
 // - API calls (authenticated financial data) are never intercepted.
 
-const CACHE_VERSION = "1.0.0";
+const CACHE_VERSION = "1.0.1";
 const STATIC_CACHE = `flowy-static-${CACHE_VERSION}`;
 const SHELL_CACHE = `flowy-shell-${CACHE_VERSION}`;
 
@@ -95,6 +95,14 @@ self.addEventListener("fetch", (event) => {
   }
 
   // Immutable hashed build assets, icons, the manifest and the offline page.
+  // Never cache Turbopack development assets. A production worker left on
+  // localhost must not serve an older component chunk after a code change.
+  const isLocal =
+    self.location.hostname === "localhost" ||
+    self.location.hostname === "127.0.0.1" ||
+    self.location.hostname === "::1";
+  if (isLocal && url.pathname.startsWith("/_next/")) return;
+
   const isStatic =
     url.pathname.startsWith("/_next/static/") ||
     url.pathname.startsWith("/icons/") ||

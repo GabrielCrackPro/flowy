@@ -16,4 +16,7 @@ export const PUSH_ALERT_TYPES = [
   "no-budgets",
 ] as const satisfies readonly DashboardAlertType[];
 
+/** Stored sentinel for an explicit "disable all" preference. */
+export const PUSH_ALERTS_DISABLED = "__none__" as const;
+
 export type PushAlertType = (typeof PUSH_ALERT_TYPES)[number];

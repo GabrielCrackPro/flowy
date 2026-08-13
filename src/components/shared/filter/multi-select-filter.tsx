@@ -53,7 +53,10 @@ export function MultiSelectFilter({
     >
       <PopoverTrigger
         render={
-          <FilterButton active={isActive}>
+          <FilterButton
+            active={isActive}
+            className="max-sm:w-full max-sm:justify-between"
+          >
             {selected.length > 0 ? (
               <>
                 <span className="flex items-center gap-1">

@@ -254,33 +254,35 @@ export default function CategoriesPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
           >
-            <div className="inline-flex items-center gap-1 rounded-xl border border-border/30 bg-card p-1">
-              {FILTER_TABS.map((tab) => (
-                <Button
-                  key={tab.value}
-                  variant={filter === tab.value ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setFilter(tab.value)}
-                  className={cn(
-                    "gap-1.5",
-                    filter === tab.value
-                      ? "shadow-md shadow-primary/20"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {t(tab.labelKey)}
-                  <span
+            <div className="w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:w-fit">
+              <div className="inline-flex min-w-max items-center gap-1 rounded-xl border border-border/30 bg-card p-1">
+                {FILTER_TABS.map((tab) => (
+                  <Button
+                    key={tab.value}
+                    variant={filter === tab.value ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setFilter(tab.value)}
                     className={cn(
-                      "rounded-full px-1.5 text-xs tabular-nums",
+                      "gap-1.5",
                       filter === tab.value
-                        ? "bg-primary-foreground/20"
-                        : "bg-muted/70",
+                        ? "shadow-md shadow-primary/20"
+                        : "text-muted-foreground hover:text-foreground",
                     )}
                   >
-                    {counts[tab.countKey]}
-                  </span>
-                </Button>
-              ))}
+                    {t(tab.labelKey)}
+                    <span
+                      className={cn(
+                        "rounded-full px-1.5 text-xs tabular-nums",
+                        filter === tab.value
+                          ? "bg-primary-foreground/20"
+                          : "bg-muted/70",
+                      )}
+                    >
+                      {counts[tab.countKey]}
+                    </span>
+                  </Button>
+                ))}
+              </div>
             </div>
           </motion.div>
 

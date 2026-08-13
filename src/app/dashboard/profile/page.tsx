@@ -1,5 +1,6 @@
 "use client";
 
+import { BackHeader } from "@components/dashboard";
 import {
   AccountSecurityActions,
   ProfileForm,
@@ -25,6 +26,8 @@ import {
 import { useChangelog } from "@/context/ChangelogContext";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useSpaces } from "@/hooks/useSpaces";
 import {
   type ChangelogItem,
   type ChangelogSection,
@@ -33,14 +36,18 @@ import {
 import { scopeColor } from "@/lib/changelog/scope";
 import {
   Activity,
+  Bell,
   BookOpen,
   CalendarDays,
+  CheckCircle2,
   Coins,
+  Crown,
   Droplet,
   ExternalLink,
   GitBranch,
   Globe2,
   Info,
+  Palette,
   Pencil,
   Sparkles,
   UserRound,
@@ -72,8 +79,36 @@ function languageName(code: string, locale: string): string {
 
 function SectionIcon({ icon }: { icon: typeof UserRound }) {
   return (
-    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
+    <span className="flex size-6 shrink-0 items-center justify-center text-muted-foreground">
       <Icon icon={icon} className="size-4" />
+    </span>
+  );
+}
+
+function SpaceOverviewAvatar({
+  name,
+  avatarUrl,
+}: {
+  name: string;
+  avatarUrl?: string | null;
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  return (
+    <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-linear-to-br from-violet-500 to-violet-600 text-sm font-semibold text-white shadow-sm shadow-violet-500/20">
+      {avatarUrl && !imageFailed ? (
+        /* biome-ignore lint/performance/noImgElement: Avatars are served from Supabase public storage. */
+        <img
+          src={avatarUrl}
+          alt={name}
+          className="size-full object-cover"
+          onError={() => setImageFailed(true)}
+        />
+      ) : name ? (
+        name.trim().charAt(0).toUpperCase()
+      ) : (
+        <Users className="size-4" />
+      )}
     </span>
   );
 }
@@ -82,22 +117,20 @@ export default function SettingsPage() {
   const { t } = useTranslation();
   const { locale } = useLocaleContext();
   const { profile, loading } = useProfile();
+  const { activeSpace } = useSpaces();
+  const { checked: pushChecked, subscribed } = usePushNotifications();
   const { openChangelog } = useChangelog();
   const [editing, setEditing] = useState(false);
+
+  const hasCustomTheme = Boolean(
+    profile?.primaryColor || profile?.secondaryColor || profile?.accentColor,
+  );
 
   const memberSince = profile?.createdAt
     ? new Intl.DateTimeFormat(locale, {
         month: "long",
         year: "numeric",
       }).format(new Date(profile.createdAt))
-    : "";
-
-  const releaseDate = changelog.entries[0]?.date
-    ? new Intl.DateTimeFormat(locale, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }).format(new Date(changelog.entries[0].date))
     : "";
 
   // Latest release preview — flatten the newest entry's sections into a
@@ -115,20 +148,20 @@ export default function SettingsPage() {
     : [];
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">
-          {t("nav.settings")}
-        </h1>
-        <p className="text-muted-foreground">{t("settings.description")}</p>
+    <div className="mx-auto min-w-0 max-w-6xl space-y-5 sm:space-y-6">
+      <div className="space-y-2">
+        <BackHeader title={t("nav.settings")} href="/dashboard" />
+        <p className="pl-12 text-sm text-muted-foreground sm:pl-14">
+          {t("settings.description")}
+        </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
+      <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start lg:gap-6">
         <SettingsNav />
 
-        <div className="grid gap-6">
+        <div className="grid min-w-0 gap-5">
           <Card id="profile" className="scroll-mt-20">
-            <CardHeader>
+            <CardHeader className="gap-3 border-b border-border/30 pb-4 sm:pb-5">
               <div className="flex items-start gap-3">
                 <SectionIcon icon={UserRound} />
                 <div className="min-w-0">
@@ -139,8 +172,8 @@ export default function SettingsPage() {
                 </div>
               </div>
               {!loading && profile && !editing ? (
-                <CardAction>
-                  <div className="flex items-center gap-1.5">
+                <CardAction className="col-span-full row-start-2 w-full justify-self-stretch sm:col-span-1 sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:w-auto sm:justify-self-end">
+                  <div className="flex justify-end gap-1.5">
                     <ThemeCustomizationSheet label />
                     <Button
                       variant="ghost"
@@ -185,67 +218,152 @@ export default function SettingsPage() {
                       onSuccess={() => setEditing(false)}
                     />
                   ) : (
-                    <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-                      <div className="flex shrink-0 justify-center">
+                    <div className="space-y-5">
+                      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                         <UserAvatar
                           profile={profile}
                           size="xl"
-                          className="ring-4 ring-primary/10"
+                          className="size-16 text-xl ring-4 ring-primary/10 sm:size-20 sm:text-2xl"
                         />
-                      </div>
-
-                      <div className="min-w-0 flex-1 space-y-5">
-                        <div>
-                          <h2 className="text-xl font-semibold tracking-tight">
+                        <div className="min-w-0">
+                          <h2 className="truncate text-xl font-semibold tracking-tight">
                             {profile.name ?? t("profile.user")}
                           </h2>
-                          <p className="mt-0.5 text-sm text-muted-foreground">
+                          <p className="mt-0.5 truncate text-sm text-muted-foreground">
                             {profile.email ?? t("profile.noEmail")}
                           </p>
                         </div>
+                      </div>
 
-                        <div className="grid gap-3 sm:grid-cols-3">
-                          <div className="flex items-center gap-3 rounded-xl border border-border/30 bg-muted/30 px-4 py-3">
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
-                              <Icon icon={Coins} className="size-4" />
-                            </div>
+                      <div className="flex flex-col gap-3 rounded-xl border border-border/40 bg-muted/20 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-3.5">
+                        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <SpaceOverviewAvatar
+                              name={activeSpace?.name ?? ""}
+                              avatarUrl={activeSpace?.avatarUrl}
+                            />
                             <div className="min-w-0">
-                              <p className="text-xs text-muted-foreground">
-                                {t("settings.profile.currencyLabel")}
-                              </p>
-                              <p className="truncate text-sm font-medium">
-                                {profile.currency} ·{" "}
-                                {currencyName(profile.currency, locale)}
-                              </p>
+                              <span className="block text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                                {t("settings.profile.activeSpace")}
+                              </span>
+                              <span className="block max-w-52 truncate text-sm font-semibold text-foreground">
+                                {activeSpace?.name ??
+                                  t("profile.spaces.noSpace")}
+                              </span>
                             </div>
                           </div>
+                          {activeSpace ? (
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                              <span className="inline-flex items-center gap-1.5">
+                                <Users className="size-3.5" />
+                                {t(
+                                  activeSpace.members.length === 1
+                                    ? "profile.spaces.member_one"
+                                    : "profile.spaces.member_other",
+                                  { count: activeSpace.members.length },
+                                )}
+                              </span>
+                              <Badge
+                                variant="outline"
+                                className="h-6 gap-1 border-amber-500/25 px-2 text-[10px] text-amber-600 dark:text-amber-400"
+                              >
+                                <Crown className="size-3" />
+                                {activeSpace.ownerId === profile.id
+                                  ? t("profile.spaces.roleOwner")
+                                  : t("profile.spaces.roleMember")}
+                              </Badge>
+                            </div>
+                          ) : null}
+                        </div>
+                        <Button
+                          asChild
+                          variant="outline"
+                          size="sm"
+                          className="w-full shrink-0 gap-1.5 sm:w-auto"
+                        >
+                          <Link href="#spaces">
+                            <Users className="size-3.5" />
+                            <span>{t("profile.spaces.manageSpaces")}</span>
+                          </Link>
+                        </Button>
+                      </div>
 
-                          <div className="flex items-center gap-3 rounded-xl border border-border/30 bg-muted/30 px-4 py-3">
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
-                              <Icon icon={Globe2} className="size-4" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs text-muted-foreground">
-                                {t("settings.profile.localeLabel")}
-                              </p>
-                              <p className="truncate text-sm font-medium">
-                                {languageName(profile.locale, locale)}
-                              </p>
-                            </div>
+                      <div className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2 xl:grid-cols-3">
+                        <div className="flex items-center gap-3 border-b border-border/30 px-1 py-2.5">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
+                            <Icon icon={Coins} className="size-4" />
                           </div>
+                          <div className="min-w-0">
+                            <p className="text-xs text-muted-foreground">
+                              {t("settings.profile.currencyLabel")}
+                            </p>
+                            <p className="truncate text-sm font-medium">
+                              {profile.currency} ·{" "}
+                              {currencyName(profile.currency, locale)}
+                            </p>
+                          </div>
+                        </div>
 
-                          <div className="flex items-center gap-3 rounded-xl border border-border/30 bg-muted/30 px-4 py-3">
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
-                              <Icon icon={CalendarDays} className="size-4" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs text-muted-foreground">
-                                {t("settings.profile.memberSince")}
-                              </p>
-                              <p className="truncate text-sm font-medium">
-                                {memberSince || "—"}
-                              </p>
-                            </div>
+                        <div className="flex items-center gap-3 border-b border-border/30 px-1 py-2.5">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
+                            <Icon icon={Globe2} className="size-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs text-muted-foreground">
+                              {t("settings.profile.localeLabel")}
+                            </p>
+                            <p className="truncate text-sm font-medium">
+                              {languageName(profile.locale, locale)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 border-b border-border/30 px-1 py-2.5">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
+                            <Icon icon={CalendarDays} className="size-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs text-muted-foreground">
+                              {t("settings.profile.memberSince")}
+                            </p>
+                            <p className="truncate text-sm font-medium">
+                              {memberSince || "—"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 border-b border-border/30 px-1 py-2.5">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-emerald-500/20 to-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            <Icon
+                              icon={subscribed ? CheckCircle2 : Bell}
+                              className="size-4"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs text-muted-foreground">
+                              {t("settings.profile.notificationStatus")}
+                            </p>
+                            <p className="truncate text-sm font-medium">
+                              {pushChecked && subscribed
+                                ? t("settings.notifications.enabled")
+                                : t("settings.notifications.disabled")}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 border-b border-border/30 px-1 py-2.5">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-sky-500/20 to-sky-500/10 text-sky-600 dark:text-sky-400">
+                            <Icon icon={Palette} className="size-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs text-muted-foreground">
+                              {t("settings.profile.themeSummary")}
+                            </p>
+                            <p className="truncate text-sm font-medium">
+                              {hasCustomTheme
+                                ? t("settings.theme.customize")
+                                : t("settings.theme.default")}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -292,8 +410,8 @@ export default function SettingsPage() {
                   </CardDescription>
                 </div>
               </div>
-              <CardAction>
-                <div className="flex flex-wrap gap-2">
+              <CardAction className="col-span-full row-start-2 w-full justify-self-stretch sm:col-span-1 sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:w-auto sm:justify-self-end">
+                <div className="flex flex-wrap justify-end gap-2">
                   <Button
                     asChild
                     variant="outline"
@@ -321,12 +439,11 @@ export default function SettingsPage() {
                 </div>
               </CardAction>
             </CardHeader>
-            <CardContent className="space-y-5">
+            <CardContent className="space-y-4">
               {/* Brand hero */}
-              <div className="flex items-center gap-4">
-                <div className="relative flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/20 sm:size-16">
-                  <Icon icon={Droplet} className="size-7 sm:size-8" />
-                  <span className="pointer-events-none absolute -inset-1 -z-10 rounded-3xl bg-primary/20 blur-xl" />
+              <div className="flex items-center gap-3 border-b border-border/40 pb-4">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Icon icon={Droplet} className="size-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -340,16 +457,12 @@ export default function SettingsPage() {
                   <p className="mt-1 text-sm text-muted-foreground">
                     {t("settings.about.tagline")}
                   </p>
-                  <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground/70">
-                    <Icon icon={CalendarDays} className="size-3.5" />
-                    {t("settings.about.releasedOn")} {releaseDate}
-                  </p>
                 </div>
               </div>
 
               {/* Latest release preview */}
               {latestEntry && (
-                <div className="rounded-2xl border border-border/40 bg-muted/20 p-4">
+                <div className="border-b border-border/40 pb-4">
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-primary">
                       <Sparkles className="size-3.5" />

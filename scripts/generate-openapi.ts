@@ -1069,8 +1069,9 @@ const schemas: Record<string, Json> = {
         description: "Component status",
       },
       latencyMs: {
-        type: "integer",
-        description: "Probe latency in milliseconds",
+        type: ["integer", "null"],
+        description:
+          "Probe latency in milliseconds; null when the check has no measurable duration",
       },
       detail: {
         type: ["string", "null"],
@@ -1092,7 +1093,16 @@ const schemas: Record<string, Json> = {
         enum: ["ok", "degraded", "down"],
         description: "Worst status that day, or null when no checks ran",
       },
+      checks: {
+        type: "integer",
+        description: "Number of checks recorded for this component that day",
+      },
+      failures: {
+        type: "integer",
+        description: "Number of non-operational checks recorded that day",
+      },
     },
+    required: ["date", "status", "checks", "failures"],
   },
   StatusResponse: {
     type: "object",
@@ -1138,6 +1148,15 @@ const schemas: Record<string, Json> = {
           description: "Most recent non-ok check within the window, or null",
         },
         description: "Most recent failure time per component",
+      },
+      stale: {
+        type: "boolean",
+        description: "Whether this response is a cached last-known snapshot",
+      },
+      lastSuccessfulAt: {
+        type: ["string", "null"],
+        format: "date-time",
+        description: "Timestamp of the last successful live check",
       },
       latency: {
         type: "object",
@@ -1567,19 +1586,55 @@ const schemas: Record<string, Json> = {
         description: "Client public key (base64url)",
       },
       auth: { type: "string", description: "Client auth secret (base64url)" },
+      deviceName: {
+        type: "string",
+        minLength: 1,
+        maxLength: 80,
+        description: "Optional private name shown for this device",
+      },
+      installationType: {
+        type: "string",
+        enum: ["pwa", "browser"],
+        description:
+          "Whether the subscription belongs to an installed PWA or browser tab",
+      },
     },
     required: ["endpoint", "p256dh", "auth"],
   },
+  RenamePushSubscriptionRequest: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      deviceName: { type: "string", minLength: 1, maxLength: 80 },
+    },
+    required: ["id", "deviceName"],
+  },
   DeletePushSubscriptionRequest: {
     type: "object",
+    description:
+      "Remove one subscription with endpoint, or every subscription with all=true.",
     properties: {
       endpoint: {
         type: "string",
         format: "uri",
         description: "Push endpoint URL to remove",
       },
+      all: {
+        type: "boolean",
+        const: true,
+        description: "Remove every push subscription for the current user",
+      },
+      stale: {
+        type: "boolean",
+        const: true,
+        description: "Remove subscriptions not seen for 30 days",
+      },
     },
-    required: ["endpoint"],
+    oneOf: [
+      { required: ["endpoint"] },
+      { required: ["all"] },
+      { required: ["stale"] },
+    ],
   },
   SendTestPushRequest: {
     type: "object",
@@ -1596,13 +1651,18 @@ const schemas: Record<string, Json> = {
         maxLength: 160,
         description: "Optional notification body",
       },
+      subscriptionId: {
+        type: "string",
+        format: "uuid",
+        description: "Optional device UUID; omit to notify every device",
+      },
     },
     required: ["title"],
   },
   UpdatePushPreferencesRequest: {
     type: "object",
     description:
-      "Enabled alert types for OS-level push. An empty array enables all types.",
+      "Enabled alert types for OS-level push. An empty array enables all types; the __none__ sentinel disables all financial alerts.",
     properties: {
       preferences: {
         type: "array",
@@ -1617,6 +1677,7 @@ const schemas: Record<string, Json> = {
             "goal-achieved",
             "low-savings",
             "no-budgets",
+            "__none__",
           ],
         },
         description: "Alert types to push",
@@ -1637,8 +1698,15 @@ const schemas: Record<string, Json> = {
           enum: ["api", "database", "auth", "push", "storage"],
         },
       },
+      severities: {
+        type: "array",
+        items: {
+          type: "string",
+          enum: ["minor", "major", "critical"],
+        },
+      },
     },
-    required: ["enabled", "components"],
+    required: ["enabled", "components", "severities"],
   },
   PushSubscriptionResponse: {
     type: "object",
@@ -2672,12 +2740,44 @@ paths["/api/push-subscription"] = {
                         type: ["string", "null"],
                         description: "User-Agent header at registration time",
                       },
+                      deviceName: {
+                        type: ["string", "null"],
+                        description: "Private user-defined device name",
+                      },
+                      installationType: {
+                        type: ["string", "null"],
+                        enum: ["pwa", "browser", null],
+                      },
                       createdAt: {
                         type: "string",
                         format: "date-time",
                       },
+                      updatedAt: {
+                        type: "string",
+                        format: "date-time",
+                      },
+                      lastSeenAt: {
+                        type: ["string", "null"],
+                        format: "date-time",
+                      },
+                      lastDeliveryAt: {
+                        type: ["string", "null"],
+                        format: "date-time",
+                      },
+                      lastDeliveryStatus: {
+                        type: ["string", "null"],
+                        enum: ["sent", "failed", "removed"],
+                      },
+                      failureCount: { type: "integer" },
+                      lastFailureReason: { type: ["string", "null"] },
                     },
-                    required: ["id", "endpoint", "createdAt"],
+                    required: [
+                      "id",
+                      "endpoint",
+                      "createdAt",
+                      "updatedAt",
+                      "failureCount",
+                    ],
                   },
                 },
               },
@@ -2687,6 +2787,32 @@ paths["/api/push-subscription"] = {
         },
       },
     }),
+  }),
+  patch: op({
+    operationId: "pushSubscriptions.rename",
+    summary: "Rename a push device",
+    tags: ["Push"],
+    requestBody: reqBody("RenamePushSubscriptionRequest"),
+    responses: responses(
+      {
+        200: {
+          description: "Renamed",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  ok: { type: "boolean" },
+                  deviceName: { type: "string" },
+                },
+                required: ["ok", "deviceName"],
+              },
+            },
+          },
+        },
+      },
+      { notFound: true },
+    ),
   }),
   delete: op({
     operationId: "pushSubscriptions.delete",
@@ -2715,7 +2841,7 @@ paths["/api/push-subscription/test"] = {
     operationId: "pushSubscriptions.sendTest",
     summary: "Send a test push notification",
     description:
-      "Sends a test notification to every registered device of the authenticated user so push delivery can be verified.",
+      "Sends a test notification to every registered device, or to one selected device when subscriptionId is provided.",
     tags: ["Push"],
     requestBody: reqBody("SendTestPushRequest"),
     responses: responses({
@@ -2741,12 +2867,61 @@ paths["/api/push-subscription/test"] = {
   }),
 };
 
+paths["/api/push-delivery-history"] = {
+  get: op({
+    operationId: "pushDeliveries.history",
+    summary: "List push delivery history",
+    description:
+      "Returns the authenticated user's recent push delivery attempts, including device status and failure details.",
+    tags: ["Push"],
+    responses: responses({
+      200: {
+        description: "Delivery history",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                deliveries: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: { type: "string", format: "uuid" },
+                      subscriptionId: {
+                        type: ["string", "null"],
+                        format: "uuid",
+                      },
+                      type: { type: "string" },
+                      component: { type: ["string", "null"] },
+                      severity: { type: ["string", "null"] },
+                      title: { type: "string" },
+                      status: {
+                        type: "string",
+                        enum: ["sent", "failed", "removed"],
+                      },
+                      error: { type: ["string", "null"] },
+                      createdAt: { type: "string", format: "date-time" },
+                    },
+                    required: ["id", "title", "status", "createdAt"],
+                  },
+                },
+              },
+              required: ["deliveries"],
+            },
+          },
+        },
+      },
+    }),
+  }),
+};
+
 paths["/api/push-preferences"] = {
   get: op({
     operationId: "pushPreferences.get",
     summary: "Get push notification preferences",
     description:
-      "Returns the user's enabled alert types for OS-level push. An empty list means all types are enabled.",
+      "Returns the user's enabled alert types for OS-level push. An empty list means all types are enabled; the __none__ sentinel means all financial alerts are disabled.",
     tags: ["Push"],
     responses: responses({
       200: {
@@ -2772,7 +2947,7 @@ paths["/api/push-preferences"] = {
     operationId: "pushPreferences.update",
     summary: "Update push notification preferences",
     description:
-      "Sets which alert types are pushed as OS notifications. An empty array enables all types.",
+      "Sets which alert types are pushed as OS notifications. An empty array enables all types; the __none__ sentinel disables all financial alerts.",
     tags: ["Push"],
     requestBody: reqBody("UpdatePushPreferencesRequest"),
     responses: responses({
@@ -2821,8 +2996,15 @@ paths["/api/status-preferences"] = {
                     enum: ["api", "database", "auth", "push", "storage"],
                   },
                 },
+                severities: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                    enum: ["minor", "major", "critical"],
+                  },
+                },
               },
-              required: ["enabled", "components"],
+              required: ["enabled", "components", "severities"],
             },
           },
         },
@@ -2850,8 +3032,12 @@ paths["/api/status-preferences"] = {
                   type: "array",
                   items: { type: "string" },
                 },
+                severities: {
+                  type: "array",
+                  items: { type: "string" },
+                },
               },
-              required: ["ok", "enabled", "components"],
+              required: ["ok", "enabled", "components", "severities"],
             },
           },
         },

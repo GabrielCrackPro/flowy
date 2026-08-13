@@ -26,11 +26,44 @@ export function ServiceWorkerRegister() {
     // break dev (e.g. "module factory is not available"). Unregister it so
     // dev always runs with fresh modules.
     if (process.env.NODE_ENV !== "production") {
-      void navigator.serviceWorker.getRegistrations().then((registrations) => {
-        for (const registration of registrations) {
-          void registration.unregister();
-        }
-      });
+      void navigator.serviceWorker
+        .getRegistrations()
+        .then(async (registrations) => {
+          if (registrations.length === 0) {
+            return;
+          }
+          let keepWorker = false;
+          try {
+            keepWorker =
+              sessionStorage.getItem("flowy-push-worker-enabled") === "true";
+          } catch {
+            // Storage may be unavailable in private browsing.
+          }
+          if (!keepWorker) {
+            const subscriptions = await Promise.all(
+              registrations.map((registration) =>
+                registration.pushManager.getSubscription(),
+              ),
+            );
+            keepWorker = subscriptions.some(Boolean);
+          }
+          if (keepWorker) {
+            return;
+          }
+          await Promise.all(
+            registrations.map((registration) => registration.unregister()),
+          );
+          // Unregistering does not immediately detach the current page from an
+          // existing worker. Reload once so dev cannot keep using cached PWA
+          // chunks from a previous production session.
+          const cacheKeys = await caches.keys();
+          await Promise.all(
+            cacheKeys
+              .filter((key) => key.startsWith("flowy-"))
+              .map((key) => caches.delete(key)),
+          );
+          window.location.reload();
+        });
       return;
     }
 

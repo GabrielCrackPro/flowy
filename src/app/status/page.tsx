@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import {
   type ReactNode,
@@ -13,6 +13,8 @@ import { useTranslation } from "react-i18next";
 import {
   Area,
   AreaChart,
+  CartesianGrid,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -37,13 +39,17 @@ import {
   BellRing,
   CalendarClock,
   CheckCircle2,
+  ChevronRight,
   Clock,
   Database,
   Droplet,
   HardDrive,
   Loader2,
+  Minus,
   RefreshCw,
   ShieldCheck,
+  TrendingDown,
+  TrendingUp,
   TriangleAlert,
   XCircle,
 } from "@/lib/icons";
@@ -58,6 +64,7 @@ import type {
   UptimeBar,
   UptimePercentages,
 } from "@/lib/services/status";
+import supabase from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const POLL_INTERVAL_MS = 60_000;
@@ -69,6 +76,8 @@ interface StatusResponse extends StatusSnapshot {
   latency: Record<ComponentId, number[]>;
   incidents: IncidentRecord[];
   maintenance: IncidentRecord[];
+  stale?: boolean;
+  lastSuccessfulAt?: string | null;
 }
 
 const COMPONENT_META: Record<
@@ -104,6 +113,18 @@ const INCIDENT_DOT: Record<IncidentStatus, string> = {
   investigating: "bg-amber-500",
   monitoring: "bg-blue-500",
   resolved: "bg-emerald-500",
+};
+
+const SEVERITY_DOT: Record<IncidentSeverity, string> = {
+  minor: "bg-emerald-500",
+  major: "bg-amber-500",
+  critical: "bg-red-500",
+};
+
+const SEVERITY_ICON: Record<IncidentSeverity, typeof CheckCircle2> = {
+  minor: CheckCircle2,
+  major: TriangleAlert,
+  critical: XCircle,
 };
 
 const SEVERITY_STYLE: Record<IncidentSeverity, string> = {
@@ -151,8 +172,202 @@ function LatencySparkline({
   );
 }
 
+function LatencyUnavailable({
+  label,
+  hint,
+  compact = false,
+}: {
+  label: string;
+  hint: string;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      title={compact ? label : undefined}
+      className={cn(
+        "flex items-center gap-2 rounded-lg bg-muted/25 text-muted-foreground",
+        compact
+          ? "border border-border/30 px-1.5 py-1"
+          : "border-y border-border/40 px-2 py-2",
+      )}
+    >
+      <Activity
+        className={cn(
+          "shrink-0 text-muted-foreground/60",
+          compact ? "size-3" : "size-3.5",
+        )}
+      />
+      {compact ? (
+        <span className="text-[10px] font-semibold tabular-nums text-muted-foreground/50">
+          —
+        </span>
+      ) : (
+        <span className="min-w-0">
+          <span className="block truncate text-[11px] font-medium">
+            {label}
+          </span>
+          <span className="block truncate text-[10px] text-muted-foreground/60">
+            {hint}
+          </span>
+        </span>
+      )}
+    </div>
+  );
+}
+
+function AvailabilityOnly({ label }: { label: string }) {
+  return (
+    <span
+      title={label}
+      className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-border/30 bg-muted/25 px-1.5 py-1 text-muted-foreground/60"
+    >
+      <Activity className="size-3" />
+      <span className="hidden text-[10px] font-medium sm:inline">{label}</span>
+    </span>
+  );
+}
+
 function incidentStatusKey(status: IncidentStatus): string {
   return `status.incidentStatus.${status}`;
+}
+
+function StatusPulse({
+  dot,
+  glow,
+  ring,
+}: {
+  dot: string;
+  glow: string;
+  ring: string;
+}) {
+  const reducedMotion = useReducedMotion();
+  const pulseAnimation = reducedMotion
+    ? { opacity: 0.3, scale: 1 }
+    : { opacity: [0.45, 0, 0.45], scale: [1, 1.8, 1] };
+  const pulseTransition = reducedMotion
+    ? { duration: 0 }
+    : { duration: 1.8, ease: "easeInOut" as const, repeat: Infinity };
+
+  return (
+    <>
+      <motion.span
+        aria-hidden="true"
+        animate={pulseAnimation}
+        transition={pulseTransition}
+        className={cn("absolute inset-0 rounded-full", glow)}
+      />
+      <span
+        aria-hidden="true"
+        className={cn("absolute inset-0 rounded-full ring-4", ring)}
+      />
+      <motion.span
+        aria-hidden="true"
+        animate={
+          reducedMotion
+            ? { scale: 1 }
+            : { scale: [1, 1.12, 1], opacity: [1, 0.75, 1] }
+        }
+        transition={
+          reducedMotion
+            ? { duration: 0 }
+            : { duration: 1.8, ease: "easeInOut" as const, repeat: Infinity }
+        }
+        className={cn("relative size-5 rounded-full", dot)}
+      />
+    </>
+  );
+}
+
+function DetailStat({
+  icon,
+  value,
+  label,
+  tone,
+}: {
+  icon: typeof Activity;
+  value: string | number;
+  label: string;
+  tone: string;
+}) {
+  return (
+    <div className="min-w-0 rounded-xl border border-border/50 bg-muted/15 px-2.5 py-2.5 sm:p-3">
+      <div className="flex min-w-0 items-center gap-2">
+        <span
+          className={cn(
+            "flex size-6 shrink-0 items-center justify-center rounded-md",
+            tone,
+          )}
+        >
+          <Icon icon={icon} className="size-3.5" />
+        </span>
+        <p className="min-w-0 truncate text-base font-bold tabular-nums tracking-tight">
+          {value}
+        </p>
+      </div>
+      <p className="mt-2 truncate text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+type LatencyTrend = "improving" | "stable" | "worsening";
+
+function percentile(values: number[], percentileValue: number): number | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const index = (sorted.length - 1) * percentileValue;
+  const lower = Math.floor(index);
+  const upper = Math.ceil(index);
+  if (lower === upper) return sorted[lower];
+  return sorted[lower] + (sorted[upper] - sorted[lower]) * (index - lower);
+}
+
+function getLatencyTrend(values: number[]): LatencyTrend {
+  if (values.length < 4) return "stable";
+  const midpoint = Math.floor(values.length / 2);
+  const first = values.slice(0, midpoint);
+  const second = values.slice(midpoint);
+  const firstAverage =
+    first.reduce((sum, value) => sum + value, 0) / first.length;
+  const secondAverage =
+    second.reduce((sum, value) => sum + value, 0) / second.length;
+  if (firstAverage === 0) return "stable";
+  const change = (secondAverage - firstAverage) / firstAverage;
+  if (change <= -0.1) return "improving";
+  if (change >= 0.1) return "worsening";
+  return "stable";
+}
+
+function StatusPageSkeleton({ label }: { label: string }) {
+  return (
+    <section aria-busy="true" aria-label={label} className="mt-6 space-y-3">
+      <span className="sr-only">{label}</span>
+      <div className="h-20 animate-pulse rounded-2xl border border-border/30 bg-muted/30" />
+      {(["api", "database", "auth", "push", "storage"] as const).map(
+        (component) => (
+          <div
+            key={component}
+            className="rounded-2xl border border-border/30 bg-background/60 p-4 sm:p-5"
+          >
+            <div className="flex items-center gap-3">
+              <div className="size-9 shrink-0 animate-pulse rounded-lg bg-muted/60" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="h-3 w-28 animate-pulse rounded-full bg-muted/60" />
+                <div className="h-2.5 w-44 max-w-full animate-pulse rounded-full bg-muted/40" />
+              </div>
+              <div className="hidden h-6 w-24 animate-pulse rounded-lg bg-muted/40 sm:block" />
+              <div className="h-6 w-16 animate-pulse rounded-full bg-muted/50" />
+            </div>
+            <div className="mt-4 space-y-2 border-t border-border/20 pt-3">
+              <div className="h-2 w-20 animate-pulse rounded-full bg-muted/40" />
+              <div className="h-2.5 w-full animate-pulse rounded-full bg-muted/40" />
+            </div>
+          </div>
+        ),
+      )}
+    </section>
+  );
 }
 
 const STATUS_DOT: Record<ComponentStatus, string> = {
@@ -168,21 +383,41 @@ const STATUS_CHIP: Record<ComponentStatus, string> = {
   down: "from-red-500/15 to-red-500/5 text-red-600 dark:text-red-400",
 };
 
+const STATUS_EDGE: Record<ComponentStatus, string> = {
+  ok: "before:bg-emerald-500",
+  degraded: "before:bg-amber-500",
+  down: "before:bg-red-500",
+};
+
 const BAR_COLORS: Record<ComponentStatus, string> = {
   ok: "bg-emerald-500",
   degraded: "bg-amber-500",
   down: "bg-red-500",
 };
 
-function UptimeBars({ bars }: { bars: UptimeBar[] }) {
+function UptimeBars({
+  bars,
+  onSelect,
+  selectedDate,
+  checksLabel,
+  noDataLabel,
+}: {
+  bars: UptimeBar[];
+  onSelect?: (bar: UptimeBar) => void;
+  selectedDate?: string | null;
+  checksLabel: string;
+  noDataLabel: string;
+}) {
   return (
     <div className="flex flex-wrap gap-px">
       {bars.map((bar, index) => (
-        <motion.span
+        <motion.button
           key={bar.date}
-          role="img"
-          title={`${bar.date}: ${bar.status ?? "—"}`}
-          aria-label={`${bar.date}: ${bar.status ?? "no data"}`}
+          type="button"
+          disabled={!onSelect}
+          onClick={() => onSelect?.(bar)}
+          title={`${bar.date}: ${bar.status ?? "—"} · ${bar.checks} ${checksLabel}`}
+          aria-label={`${bar.date}: ${bar.status ?? noDataLabel}, ${bar.checks} ${checksLabel}`}
           initial={{ opacity: 0, scale: 0.4 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{
@@ -190,9 +425,12 @@ function UptimeBars({ bars }: { bars: UptimeBar[] }) {
             delay: Math.min(index * 0.004, 0.6),
             ease: "easeOut",
           }}
-          whileHover={{ scale: 1.5 }}
+          whileHover={onSelect ? { scale: 1.5 } : undefined}
           className={cn(
-            "size-2 rounded-[3px] sm:size-2.5",
+            "size-2 rounded-[3px] transition-[box-shadow] sm:size-2.5",
+            onSelect && "cursor-pointer hover:ring-2 hover:ring-foreground/20",
+            selectedDate === bar.date &&
+              "ring-2 ring-primary ring-offset-1 ring-offset-background",
             bar.status ? BAR_COLORS[bar.status] : "bg-border/40",
           )}
         />
@@ -289,6 +527,7 @@ function GetNotifiedCard() {
   const [prefs, setPrefs] = useState<{
     enabled: boolean;
     components: string[];
+    severities: string[];
   } | null>(null);
   const [prefsBusy, setPrefsBusy] = useState(false);
 
@@ -304,7 +543,12 @@ function GetNotifiedCard() {
     pushApi
       .getStatusPreferences()
       .then((result) => {
-        if (!cancelled) setPrefs(result);
+        if (!cancelled)
+          setPrefs({
+            enabled: result.enabled,
+            components: result.components,
+            severities: result.severities,
+          });
       })
       .catch(() => undefined);
     return () => {
@@ -315,6 +559,7 @@ function GetNotifiedCard() {
   const updatePrefs = async (next: {
     enabled: boolean;
     components: string[];
+    severities: string[];
   }) => {
     if (prefsBusy) return;
     setPrefsBusy(true);
@@ -332,9 +577,12 @@ function GetNotifiedCard() {
   if (!supported || !configured) return null;
 
   const allComponents = ["api", "database", "auth", "push", "storage"] as const;
-  // Empty component list = all components (legacy default).
+  const allSeverities = ["minor", "major", "critical"] as const;
+  // Empty lists = all values (legacy default).
   const enabledComponents =
     prefs && prefs.components.length > 0 ? prefs.components : allComponents;
+  const enabledSeverities =
+    prefs && prefs.severities.length > 0 ? prefs.severities : allSeverities;
 
   let body: ReactNode;
   if (!isLoggedIn) {
@@ -374,93 +622,160 @@ function GetNotifiedCard() {
   } else {
     const masterEnabled = prefs ? prefs.enabled : true;
     body = (
-      <div className="space-y-2.5">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted/25 px-2.5 py-2">
           <p
             className={cn(
-              "flex items-center gap-1.5 text-xs font-medium",
+              "flex items-center gap-1.5 text-[11px] font-medium",
               masterEnabled
                 ? "text-emerald-600 dark:text-emerald-400"
                 : "text-muted-foreground",
             )}
           >
             {masterEnabled ? (
-              <CheckCircle2 className="size-4" />
+              <CheckCircle2 className="size-3.5" />
             ) : (
-              <TriangleAlert className="size-4" />
+              <TriangleAlert className="size-3.5" />
             )}
             {masterEnabled ? t("status.notifyActive") : t("status.notifyMuted")}
           </p>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={prefsBusy}
-            onClick={() => setPrefsOpen((open) => !open)}
-            className="h-7 gap-1 text-xs"
-          >
-            <BellRing className="size-3.5" />
-            {prefsOpen
-              ? t("status.notifyHidePrefs")
-              : t("status.notifyCustomize")}
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Switch
+              size="sm"
+              checked={masterEnabled}
+              disabled={prefsBusy}
+              onCheckedChange={(next) =>
+                void updatePrefs({
+                  enabled: Boolean(next),
+                  components: prefs?.components ?? [],
+                  severities: prefs?.severities ?? [],
+                })
+              }
+              aria-label={t("status.notifyPrefsTitle")}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={prefsBusy}
+              onClick={() => setPrefsOpen((open) => !open)}
+              className="h-7 px-2 text-[11px]"
+            >
+              {prefsOpen
+                ? t("status.notifyHidePrefs")
+                : t("status.notifyCustomize")}
+            </Button>
+          </div>
         </div>
 
-        {prefsOpen && (
-          <div className="rounded-xl border border-border/50 bg-background/50 p-3">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs font-medium">
-                {t("status.notifyPrefsTitle")}
-              </span>
-              <Switch
-                size="sm"
-                checked={masterEnabled}
-                disabled={prefsBusy}
-                onCheckedChange={(next) =>
-                  void updatePrefs({
-                    enabled: Boolean(next),
-                    components: prefs?.components ?? [],
-                  })
-                }
-                aria-label={t("status.notifyPrefsTitle")}
-              />
-            </div>
-            {masterEnabled && (
-              <div className="mt-2.5 flex flex-wrap gap-1.5">
-                {allComponents.map((component) => {
-                  const selected = enabledComponents.includes(component);
-                  return (
-                    <button
-                      key={component}
-                      type="button"
-                      aria-pressed={selected}
-                      disabled={prefsBusy}
-                      onClick={() => {
-                        const next = selected
-                          ? enabledComponents.filter((c) => c !== component)
-                          : [...enabledComponents, component];
-                        // If every component is now enabled, store empty (all).
-                        void updatePrefs({
-                          enabled: true,
-                          components:
-                            next.length === allComponents.length ? [] : next,
-                        });
-                      }}
+        {prefsOpen && masterEnabled && (
+          <div className="space-y-2 border-t border-border/40 pt-2">
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+              {allComponents.map((component) => {
+                const selected = enabledComponents.includes(component);
+                const ServiceIcon = COMPONENT_META[component].icon;
+                return (
+                  <div
+                    key={component}
+                    className={cn(
+                      "flex min-w-0 items-center gap-2 rounded-lg border px-2 py-1.5 transition-colors",
+                      selected
+                        ? "border-primary/25 bg-primary/[0.06]"
+                        : "border-border/40 bg-muted/20",
+                    )}
+                  >
+                    <span
                       className={cn(
-                        "rounded-full px-2.5 py-1 text-[11px] font-medium transition",
+                        "flex size-7 shrink-0 items-center justify-center rounded-md",
                         selected
-                          ? "bg-primary/15 text-primary ring-1 ring-primary/30"
-                          : "bg-muted/60 text-muted-foreground ring-1 ring-border/40 hover:text-foreground",
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground",
                       )}
                     >
+                      <Icon icon={ServiceIcon} className="size-3.5" />
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-[11px] font-medium">
                       {t(
                         `status.component${component[0].toUpperCase()}${component.slice(1)}`,
                       )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                    </span>
+                    <Switch
+                      size="sm"
+                      checked={selected}
+                      disabled={prefsBusy}
+                      onCheckedChange={(next) => {
+                        const current = selected
+                          ? enabledComponents.filter((c) => c !== component)
+                          : [...enabledComponents, component];
+                        const components = next
+                          ? current.length === allComponents.length
+                            ? []
+                            : current
+                          : current.filter((c) => c !== component);
+                        void updatePrefs({
+                          enabled: true,
+                          components,
+                          severities: prefs?.severities ?? [],
+                        });
+                      }}
+                      aria-label={t(
+                        `status.component${component[0].toUpperCase()}${component.slice(1)}`,
+                      )}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <div className="grid grid-cols-1 gap-1.5 border-t border-border/30 pt-2 sm:grid-cols-3">
+              {allSeverities.map((severity) => {
+                const selected = enabledSeverities.includes(severity);
+                const SeverityIcon = SEVERITY_ICON[severity];
+                return (
+                  <div
+                    key={severity}
+                    className={cn(
+                      "flex min-w-0 items-center gap-2 rounded-lg border px-2.5 py-2 transition-colors",
+                      selected
+                        ? SEVERITY_STYLE[severity]
+                        : "border-border/40 bg-muted/20 text-muted-foreground",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "flex size-7 shrink-0 items-center justify-center rounded-md",
+                        selected ? "bg-background/70" : "bg-muted",
+                      )}
+                    >
+                      <SeverityIcon className="size-3.5" />
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-[11px] font-medium">
+                      {t(`status.incidents.severity.${severity}`)}
+                    </span>
+                    <Switch
+                      size="sm"
+                      checked={selected}
+                      disabled={prefsBusy}
+                      onCheckedChange={(next) => {
+                        const nextSeverities = next
+                          ? [...enabledSeverities, severity]
+                          : enabledSeverities.filter(
+                              (value) => value !== severity,
+                            );
+                        void updatePrefs({
+                          enabled: true,
+                          components: prefs?.components ?? [],
+                          severities:
+                            nextSeverities.length === allSeverities.length
+                              ? []
+                              : nextSeverities,
+                        });
+                      }}
+                      aria-label={t(`status.incidents.severity.${severity}`)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
@@ -468,15 +783,21 @@ function GetNotifiedCard() {
   }
 
   return (
-    <section className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 sm:p-5">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-        <BellRing className="size-5" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <h2 className="text-sm font-semibold tracking-tight">
-          {t("status.notifyTitle")}
-        </h2>
-        {body}
+    <section className="relative mt-6 overflow-hidden rounded-xl border border-primary/20 bg-primary/[0.04] p-3 sm:p-4">
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent"
+      />
+      <div className="flex items-start gap-3">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+          <BellRing className="size-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm font-semibold tracking-tight">
+            {t("status.notifyTitle")}
+          </h2>
+          <div className="mt-1.5">{body}</div>
+        </div>
       </div>
     </section>
   );
@@ -493,6 +814,7 @@ function ComponentDetailSheet({
   const { t, i18n } = useTranslation();
   const [checks, setChecks] = useState<ComponentCheckRecord[] | null>(null);
   const [error, setError] = useState(false);
+  const [reloadNonce, setReloadNonce] = useState(0);
 
   useEffect(() => {
     if (!component) {
@@ -503,7 +825,10 @@ function ComponentDetailSheet({
     let cancelled = false;
     setChecks(null);
     setError(false);
-    fetch(`/api/status/component/${component}`, { cache: "no-store" })
+    const retryQuery = reloadNonce > 0 ? `?retry=${reloadNonce}` : "";
+    fetch(`/api/status/component/${component}${retryQuery}`, {
+      cache: "no-store",
+    })
       .then((response) => {
         if (!response.ok) throw new Error("component failed");
         return response.json();
@@ -517,14 +842,16 @@ function ComponentDetailSheet({
     return () => {
       cancelled = true;
     };
-  }, [component]);
+  }, [component, reloadNonce]);
 
   const name = component
     ? t(`status.component${component[0].toUpperCase()}${component.slice(1)}`)
     : "";
   const failures = checks?.filter((c) => c.status !== "ok") ?? [];
+  const latestCheck = checks?.[checks.length - 1] ?? null;
+  const currentStatus = latestCheck?.status ?? null;
   const chartData = checks
-    ?.filter((c) => c.latencyMs != null)
+    ?.filter((c) => c.latencyMs != null && c.latencyMs > 0)
     .map((c, index) => ({
       index,
       ms: c.latencyMs as number,
@@ -533,6 +860,35 @@ function ComponentDetailSheet({
         minute: "2-digit",
       }),
     }));
+  const averageLatency = chartData?.length
+    ? Math.round(
+        chartData.reduce((sum, point) => sum + point.ms, 0) / chartData.length,
+      )
+    : null;
+  const latestLatency = chartData?.[chartData.length - 1]?.ms ?? null;
+  const latencySamples = chartData?.map((point) => point.ms) ?? [];
+  const latencyMonitored = component !== "api" && component !== "push";
+  const p50Latency = percentile(latencySamples, 0.5);
+  const p95Latency = percentile(latencySamples, 0.95);
+  const minLatency = latencySamples.length ? Math.min(...latencySamples) : null;
+  const maxLatency = latencySamples.length ? Math.max(...latencySamples) : null;
+  const trend =
+    latencyMonitored && latencySamples.length >= 4
+      ? getLatencyTrend(latencySamples)
+      : null;
+  const trendIcon =
+    trend === "improving"
+      ? TrendingDown
+      : trend === "worsening"
+        ? TrendingUp
+        : Minus;
+  const trendTone =
+    trend === "improving"
+      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+      : trend === "worsening"
+        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+        : "bg-muted text-muted-foreground";
+  const latencyFillId = `latency-fill-${component ?? "unknown"}`;
 
   return (
     <SheetLayout
@@ -542,124 +898,301 @@ function ComponentDetailSheet({
       description={
         component ? t("status.componentDetail", { component: name }) : undefined
       }
-      icon={Activity}
+      icon={component ? COMPONENT_META[component].icon : Activity}
       iconGradient="from-primary/20 to-primary/10"
       iconColor="text-primary"
       maxWidth="sm:max-w-lg"
     >
       {error ? (
-        <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
-          {t("status.componentDetailError")}
-        </p>
+        <div className="flex flex-col items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="flex items-center gap-2 text-sm text-destructive">
+            <XCircle className="size-4 shrink-0" />
+            {t("status.componentDetailError")}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setReloadNonce((value) => value + 1)}
+            className="h-8 gap-1.5"
+          >
+            <RefreshCw className="size-3.5" />
+            {t("status.refresh")}
+          </Button>
+        </div>
       ) : !checks ? (
-        <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
-          {t("common.loading")}
+        <div aria-busy="true" className="space-y-4">
+          <span className="sr-only">{t("common.loading")}</span>
+          <div className="h-16 animate-pulse rounded-xl bg-muted/40" />
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {["one", "two", "three"].map((item) => (
+              <div
+                key={item}
+                className="h-16 animate-pulse rounded-xl bg-muted/30"
+              />
+            ))}
+          </div>
+          <div className="h-36 animate-pulse rounded-xl bg-muted/30" />
         </div>
       ) : (
-        <div className="space-y-5">
-          {/* Stats row */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-xl border border-border/50 bg-muted/20 p-3 text-center">
-              <p className="text-lg font-bold tabular-nums">{checks.length}</p>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
-                {t("status.checks")}
-              </p>
+        <div className="space-y-6">
+          {latestCheck && currentStatus && (
+            <div
+              className={cn(
+                "relative overflow-hidden rounded-xl border px-3.5 py-3",
+                currentStatus === "ok"
+                  ? "border-emerald-500/20 bg-emerald-500/[0.04]"
+                  : currentStatus === "degraded"
+                    ? "border-amber-500/20 bg-amber-500/[0.04]"
+                    : "border-red-500/20 bg-red-500/[0.04]",
+              )}
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "absolute inset-y-0 left-0 w-0.5",
+                  STATUS_DOT[currentStatus],
+                )}
+              />
+              <div className="flex items-center justify-between gap-3 pl-1">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  {component && (
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background/70 text-muted-foreground ring-1 ring-border/30">
+                      <Icon
+                        icon={COMPONENT_META[component].icon}
+                        className="size-4"
+                      />
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-semibold">
+                      {t(statusKey(currentStatus))}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground/70">
+                      {t("status.lastChecked")}
+                    </p>
+                  </div>
+                </div>
+                <span className="inline-flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground/60">
+                  <Clock className="size-3" />
+                  <RelativeTime
+                    date={latestCheck.checkedAt}
+                    locale={i18n.language}
+                  />
+                </span>
+              </div>
             </div>
-            <div className="rounded-xl border border-border/50 bg-muted/20 p-3 text-center">
-              <p className="text-lg font-bold tabular-nums">
-                {failures.length}
-              </p>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
-                {t("status.failures")}
-              </p>
+          )}
+          {checks.length === 0 && (
+            <div className="flex items-center gap-2 rounded-xl border border-border/40 bg-muted/20 px-3.5 py-3 text-xs text-muted-foreground">
+              <TriangleAlert className="size-4 shrink-0 text-muted-foreground/60" />
+              {t("status.noData")}
             </div>
-            <div className="rounded-xl border border-border/50 bg-muted/20 p-3 text-center">
-              <p className="text-lg font-bold tabular-nums">
-                {chartData && chartData.length > 0
-                  ? `${Math.round(
-                      chartData.reduce((sum, d) => sum + d.ms, 0) /
-                        chartData.length,
-                    )}ms`
-                  : "—"}
-              </p>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
-                {t("status.avgLatency")}
-              </p>
-            </div>
+          )}
+
+          {/* Availability summary */}
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <DetailStat
+              icon={CheckCircle2}
+              value={checks.length}
+              label={t("status.checks")}
+              tone="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+            />
+            <DetailStat
+              icon={failures.length > 0 ? TriangleAlert : CheckCircle2}
+              value={failures.length}
+              label={t("status.failures")}
+              tone={
+                failures.length > 0
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              }
+            />
+            {latencyMonitored && trend && (
+              <DetailStat
+                icon={trendIcon}
+                value={t(
+                  `status.trend${trend[0].toUpperCase()}${trend.slice(1)}`,
+                )}
+                label={t("status.trend")}
+                tone={trendTone}
+              />
+            )}
           </div>
 
-          {/* Latency chart */}
-          {chartData && chartData.length > 1 ? (
-            <div className="rounded-xl border border-border/50 p-3">
-              <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
-                {t("status.latencyHistory")}
-              </p>
-              <ResponsiveContainer width="100%" height={140}>
-                <AreaChart data={chartData} margin={{ left: -18, right: 4 }}>
-                  <defs>
-                    <linearGradient
-                      id="latencyFill"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
+          {latencyMonitored ? (
+            <>
+              {/* Latency metrics */}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+                <DetailStat
+                  icon={Activity}
+                  value={averageLatency !== null ? `${averageLatency}ms` : "—"}
+                  label={t("status.avgLatency")}
+                  tone="bg-primary/10 text-primary"
+                />
+                <DetailStat
+                  icon={Activity}
+                  value={
+                    p50Latency !== null ? `${Math.round(p50Latency)}ms` : "—"
+                  }
+                  label={t("status.p50Latency")}
+                  tone="bg-primary/10 text-primary"
+                />
+                <DetailStat
+                  icon={Activity}
+                  value={
+                    p95Latency !== null ? `${Math.round(p95Latency)}ms` : "—"
+                  }
+                  label={t("status.p95Latency")}
+                  tone="bg-primary/10 text-primary"
+                />
+                <DetailStat
+                  icon={TrendingDown}
+                  value={minLatency !== null ? `${minLatency}ms` : "—"}
+                  label={t("status.minLatency")}
+                  tone="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                />
+                <DetailStat
+                  icon={TrendingUp}
+                  value={maxLatency !== null ? `${maxLatency}ms` : "—"}
+                  label={t("status.maxLatency")}
+                  tone="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                />
+              </div>
+
+              {/* Latency chart */}
+              {chartData && chartData.length > 1 ? (
+                <div className="min-w-0 overflow-hidden rounded-xl border border-border/40 bg-muted/[0.08] px-2 py-2.5 sm:px-3">
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 px-0.5">
+                    <p className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
+                      <Activity className="size-3" />
+                      {t("status.latencyHistory")}
+                    </p>
+                    <span className="inline-flex items-center gap-2 text-[10px] tabular-nums text-muted-foreground/50">
+                      <span>
+                        {chartData.length} {t("status.checks")}
+                      </span>
+                      {latestLatency !== null && (
+                        <span className="font-semibold text-foreground/60">
+                          {t("status.latency")}: {latestLatency}ms
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <ResponsiveContainer width="100%" height={150}>
+                    <AreaChart
+                      data={chartData}
+                      margin={{ left: -18, right: 4 }}
                     >
-                      <stop
-                        offset="5%"
-                        stopColor="var(--color-primary)"
-                        stopOpacity={0.3}
+                      <defs>
+                        <linearGradient
+                          id={latencyFillId}
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="var(--color-primary)"
+                            stopOpacity={0.3}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="var(--color-primary)"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <XAxis
+                        dataKey="time"
+                        tick={{
+                          fontSize: 9,
+                          fill: "var(--color-muted-foreground)",
+                        }}
+                        tickLine={false}
+                        axisLine={false}
+                        interval="preserveStartEnd"
+                        minTickGap={24}
                       />
-                      <stop
-                        offset="95%"
-                        stopColor="var(--color-primary)"
-                        stopOpacity={0}
+                      <CartesianGrid
+                        vertical={false}
+                        stroke="var(--color-border)"
+                        strokeDasharray="3 3"
+                        opacity={0.45}
                       />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="time"
-                    tick={{
-                      fontSize: 9,
-                      fill: "var(--color-muted-foreground)",
-                    }}
-                    tickLine={false}
-                    axisLine={false}
-                    interval="preserveStartEnd"
-                    minTickGap={24}
-                  />
-                  <YAxis
-                    tick={{
-                      fontSize: 9,
-                      fill: "var(--color-muted-foreground)",
-                    }}
-                    tickLine={false}
-                    axisLine={false}
-                    width={44}
-                  />
-                  <Tooltip
-                    formatter={(value) => [`${value}ms`, t("status.latency")]}
-                    labelFormatter={(label) => String(label)}
-                    contentStyle={{
-                      fontSize: 12,
-                      borderRadius: 10,
-                      border: "1px solid var(--color-border)",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="ms"
-                    stroke="var(--color-primary)"
-                    strokeWidth={2}
-                    fill="url(#latencyFill)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+                      <YAxis
+                        tick={{
+                          fontSize: 9,
+                          fill: "var(--color-muted-foreground)",
+                        }}
+                        tickLine={false}
+                        axisLine={false}
+                        width={44}
+                      />
+                      <Tooltip
+                        formatter={(value) => [
+                          `${value}ms`,
+                          t("status.latency"),
+                        ]}
+                        labelFormatter={(label) => String(label)}
+                        contentStyle={{
+                          fontSize: 11,
+                          borderRadius: 10,
+                          border: "1px solid var(--color-border)",
+                          backgroundColor: "var(--color-popover)",
+                          color: "var(--color-popover-foreground)",
+                          boxShadow: "0 8px 24px rgb(0 0 0 / 0.12)",
+                        }}
+                      />
+                      {p95Latency !== null && (
+                        <ReferenceLine
+                          y={p95Latency}
+                          stroke="var(--color-amber-500)"
+                          strokeDasharray="4 4"
+                          strokeOpacity={0.75}
+                        />
+                      )}
+                      <Area
+                        type="monotone"
+                        dataKey="ms"
+                        stroke="var(--color-primary)"
+                        strokeWidth={2}
+                        fill={`url(#${latencyFillId})`}
+                        dot={{
+                          r: 2,
+                          fill: "var(--color-primary)",
+                          strokeWidth: 0,
+                        }}
+                        activeDot={{
+                          r: 4,
+                          fill: "var(--color-primary)",
+                          stroke: "var(--color-background)",
+                          strokeWidth: 2,
+                        }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <LatencyUnavailable
+                  label={t("status.latencyUnavailable")}
+                  hint={t("status.latencyUnavailableHint")}
+                />
+              )}
+            </>
           ) : (
-            <p className="rounded-xl border border-dashed border-border/60 px-4 py-6 text-center text-sm text-muted-foreground">
-              {t("status.noLatencyData")}
-            </p>
+            <div className="flex items-center gap-3 rounded-lg border-y border-border/40 px-2 py-2.5">
+              <Activity className="size-4 shrink-0 text-muted-foreground/60" />
+              <div className="min-w-0">
+                <p className="text-xs font-medium">
+                  {t("status.availabilityMonitored")}
+                </p>
+                <p className="text-[10px] text-muted-foreground/60">
+                  {t("status.availabilityMonitoredHint")}
+                </p>
+              </div>
+            </div>
           )}
 
           {/* Failures */}
@@ -713,6 +1246,78 @@ function ComponentDetailSheet({
   );
 }
 
+function DaySummarySheet({
+  component,
+  bar,
+  onOpenChange,
+}: {
+  component: ComponentId | null;
+  bar: UptimeBar | null;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const name = component
+    ? t(`status.component${component[0].toUpperCase()}${component.slice(1)}`)
+    : "";
+  const dateLabel = bar
+    ? new Date(`${bar.date}T12:00:00Z`).toLocaleDateString(i18n.language, {
+        dateStyle: "long",
+      })
+    : "";
+  const statusLabel =
+    !bar || bar.checks === 0
+      ? t("status.noData")
+      : bar.status
+        ? t(statusKey(bar.status))
+        : t("status.noData");
+
+  return (
+    <SheetLayout
+      open={bar !== null && component !== null}
+      onOpenChange={onOpenChange}
+      title={dateLabel}
+      description={name}
+      icon={CalendarClock}
+      iconGradient="from-primary/20 to-primary/10"
+      iconColor="text-primary"
+      maxWidth="sm:max-w-sm"
+    >
+      {bar && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-muted/15 px-3 py-2.5">
+            <span className="text-xs font-medium">{statusLabel}</span>
+            <span
+              className={cn(
+                "size-2.5 rounded-full",
+                bar.status ? BAR_COLORS[bar.status] : "bg-border/60",
+              )}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <DetailStat
+              icon={CheckCircle2}
+              value={bar.checks}
+              label={t("status.checks")}
+              tone="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+            />
+            <DetailStat
+              icon={TriangleAlert}
+              value={bar.failures}
+              label={t("status.failures")}
+              tone="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+            />
+          </div>
+          {bar.checks === 0 && (
+            <p className="rounded-lg border-y border-border/40 px-2 py-2 text-xs text-muted-foreground">
+              {t("status.noData")}
+            </p>
+          )}
+        </div>
+      )}
+    </SheetLayout>
+  );
+}
+
 export default function StatusPage() {
   const { t, i18n } = useTranslation();
   const { profile, loading: profileLoading } = useProfile();
@@ -724,6 +1329,10 @@ export default function StatusPage() {
   const [detailComponent, setDetailComponent] = useState<ComponentId | null>(
     null,
   );
+  const [selectedDay, setSelectedDay] = useState<{
+    component: ComponentId;
+    bar: UptimeBar;
+  } | null>(null);
 
   const fetchStatus = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -748,6 +1357,41 @@ export default function StatusPage() {
       void fetchStatus(true);
     }, POLL_INTERVAL_MS);
     return () => window.clearInterval(interval);
+  }, [fetchStatus]);
+
+  // Incident and maintenance changes are public status events. Refetch the
+  // complete snapshot so active/resolved filtering and countdown data stay
+  // consistent. Service-check rows are intentionally not subscribed here:
+  // /api/status records a check on every request, which would create a loop.
+  useEffect(() => {
+    let timer: number | null = null;
+    const scheduleRefresh = () => {
+      if (timer !== null) return;
+      timer = window.setTimeout(() => {
+        timer = null;
+        setRefreshing(true);
+        void fetchStatus(true);
+      }, 300);
+    };
+
+    const channel = supabase
+      .channel("public-status-incidents")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "incidents" },
+        scheduleRefresh,
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "incident_updates" },
+        scheduleRefresh,
+      )
+      .subscribe();
+
+    return () => {
+      if (timer !== null) window.clearTimeout(timer);
+      void supabase.removeChannel(channel);
+    };
   }, [fetchStatus]);
 
   const overall = data?.overall ?? null;
@@ -845,23 +1489,11 @@ export default function StatusPage() {
                 aria-hidden
               />
             ) : (
-              <>
-                <span
-                  className={cn(
-                    "absolute inset-0 animate-ping rounded-full opacity-30",
-                    banner.glow,
-                  )}
-                />
-                <span
-                  className={cn(
-                    "absolute inset-0 rounded-full ring-4",
-                    banner.ring,
-                  )}
-                />
-                <span
-                  className={cn("relative size-5 rounded-full", banner.dot)}
-                />
-              </>
+              <StatusPulse
+                dot={banner.dot}
+                glow={banner.glow}
+                ring={banner.ring}
+              />
             )}
           </span>
 
@@ -933,8 +1565,24 @@ export default function StatusPage() {
           )}
         </div>
       </motion.div>
-      {/* Get notified — push alerts for status changes */}
-      <GetNotifiedCard />
+      {isInitialLoading ? (
+        <StatusPageSkeleton label={t("common.loading")} />
+      ) : (
+        <>
+          {/* Get notified — push alerts for status changes */}
+          <GetNotifiedCard />
+        </>
+      )}
+      {data?.stale && data.lastSuccessfulAt && (
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2.5 text-xs text-amber-700 dark:text-amber-400">
+          <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
+          <span>
+            {t("status.staleData", {
+              time: new Date(data.lastSuccessfulAt).toLocaleTimeString(),
+            })}
+          </span>
+        </div>
+      )}
       {/* Error state */}
       <AnimatePresence>
         {error && !data && (
@@ -962,6 +1610,13 @@ export default function StatusPage() {
               {incidents.length}
             </span>
           </h2>
+          {incidents.length > 1 && (
+            <p className="mb-3 text-xs text-muted-foreground">
+              {t("status.incidentBanner.titleCount", {
+                count: incidents.length,
+              })}
+            </p>
+          )}
           <div className="space-y-3">
             {incidents.map((incident, index) => (
               <motion.article
@@ -997,7 +1652,11 @@ export default function StatusPage() {
                     {t(`status.incidents.severity.${incident.severity}`)}
                   </span>
                   {incident.component && (
-                    <span className="rounded-full bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/5 px-2 py-0.5 text-[10px] font-medium text-primary ring-1 ring-primary/15">
+                      <Icon
+                        icon={COMPONENT_META[incident.component].icon}
+                        className="size-3"
+                      />
                       {t(
                         `status.component${incident.component[0].toUpperCase()}${incident.component.slice(1)}`,
                       )}
@@ -1025,7 +1684,12 @@ export default function StatusPage() {
                   <ol className="mt-4 space-y-2.5 border-l border-border/50 pl-4">
                     {incident.updates.slice(1).map((update) => (
                       <li key={update.id} className="relative">
-                        <span className="absolute -left-[21px] top-1.5 size-2 rounded-full border border-border bg-background" />
+                        <span
+                          className={cn(
+                            "absolute -left-[21px] top-1.5 size-2 rounded-full border-2 border-background",
+                            SEVERITY_DOT[incident.severity],
+                          )}
+                        />
                         <p className="text-xs text-muted-foreground/60">
                           {t(incidentStatusKey(update.status))} ·{" "}
                           <RelativeTime
@@ -1067,145 +1731,200 @@ export default function StatusPage() {
           </div>
         </section>
       )}
-      {/* Component rows */}
-      <div className="mt-6 space-y-3">
-        {data?.components.map((component, index) => {
-          const meta = COMPONENT_META[component.id];
-          const bars = data.history[component.id] ?? [];
-          const percent = data.uptime[component.id] ?? null;
-          const spark = data.latency[component.id] ?? [];
-          const linkedIncident = incidents.find(
-            (i) => i.component === component.id,
-          );
-          return (
-            <motion.button
-              key={component.id}
-              type="button"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: 0.05 * index }}
-              onClick={() => setDetailComponent(component.id)}
-              className={cn(
-                "group cursor-pointer rounded-2xl border border-border/40 bg-background/60 p-4 text-left shadow-sm transition-colors hover:border-border/70 hover:bg-background/90 sm:p-5",
-                linkedIncident && "border-amber-500/30 bg-amber-500/[0.03]",
-              )}
-            >
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                <span
+      {isInitialLoading ? null : (
+        <>
+          {/* Component rows */}
+          <div className="mt-6 space-y-3">
+            {data?.components.map((component, index) => {
+              const meta = COMPONENT_META[component.id];
+              const bars = data.history[component.id] ?? [];
+              const percent = data.uptime[component.id] ?? null;
+              const spark = data.latency[component.id] ?? [];
+              const latencyValues = spark.filter((value) => value > 0);
+              const latencyMonitored =
+                component.id !== "api" && component.id !== "push";
+              const linkedIncident = incidents.find(
+                (i) => i.component === component.id,
+              );
+              const componentName = t(
+                `status.component${component.id[0].toUpperCase()}${component.id.slice(1)}`,
+              );
+              return (
+                <motion.div
+                  key={component.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: 0.05 * index }}
                   className={cn(
-                    "flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ring-1 ring-border/20 transition-transform group-hover:scale-105",
-                    STATUS_CHIP[component.status],
+                    "group relative overflow-hidden rounded-2xl border border-border/40 bg-background/60 p-4 pl-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-border/70 hover:bg-background/90 hover:shadow-md sm:p-5 sm:pl-5 before:absolute before:inset-y-0 before:left-0 before:w-0.5",
+                    STATUS_EDGE[component.status],
+                    linkedIncident && "border-amber-500/30 bg-amber-500/[0.03]",
                   )}
                 >
-                  <Icon icon={meta.icon} className="size-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-foreground">
-                    {t(
-                      `status.component${component.id[0].toUpperCase()}${component.id.slice(1)}`,
-                    )}
-                  </p>
-                  <p className="text-xs text-muted-foreground/60">
-                    {component.latencyMs > 0
-                      ? `${t("status.latency")}: ${component.latencyMs}ms`
-                      : t("status.checkedJustNow")}
-                    {percent !== null && (
-                      <span className="sm:hidden"> · {percent}%</span>
-                    )}
-                    {component.status === "ok" && lastFailure[component.id] && (
-                      <span className="ml-1.5 inline-flex items-center gap-1 text-amber-600/80 dark:text-amber-400/80">
-                        ·
-                        <TriangleAlert className="size-3" />
-                        {t("status.lastFailure")}:{" "}
-                        <RelativeTime
-                          date={lastFailure[component.id]}
-                          locale={i18n.language}
-                        />
+                  <button
+                    type="button"
+                    aria-label={t("status.componentDetail", {
+                      component: componentName,
+                    })}
+                    onClick={() => setDetailComponent(component.id)}
+                    className="w-full rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  >
+                    <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+                      <span
+                        className={cn(
+                          "flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ring-1 ring-border/20 transition-transform group-hover:scale-105",
+                          STATUS_CHIP[component.status],
+                        )}
+                      >
+                        <Icon icon={meta.icon} className="size-4" />
                       </span>
-                    )}
-                  </p>
-                  {linkedIncident && (
-                    <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-700 ring-1 ring-amber-500/20 dark:text-amber-400">
-                      <TriangleAlert className="size-3" />
-                      {t("status.relatedIncident")}: {linkedIncident.title}
-                    </span>
-                  )}
-                </div>
-                {spark.length >= 2 && (
-                  <LatencySparkline
-                    values={spark}
-                    color={
-                      component.status === "ok"
-                        ? "var(--color-emerald-500)"
-                        : component.status === "degraded"
-                          ? "var(--color-amber-500)"
-                          : "var(--color-red-500)"
-                    }
-                  />
-                )}
-                {percent !== null && (
-                  <AnimatedNumber
-                    value={percent}
-                    duration={700}
-                    formatter={(v) => `${v.toFixed(1)}%`}
-                    className="hidden shrink-0 text-sm font-semibold tabular-nums text-muted-foreground sm:inline"
-                  />
-                )}
-                <motion.span
-                  layout
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 transition-colors",
-                    STATUS_PILL[component.status],
-                  )}
-                >
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={component.status}
-                      initial={{ scale: 0, rotate: -90 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      exit={{ scale: 0 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      className={cn(
-                        "size-1.5 rounded-full",
-                        STATUS_DOT[component.status],
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-foreground">
+                          {componentName}
+                        </p>
+                        <p className="text-xs text-muted-foreground/60">
+                          {component.latencyMs != null &&
+                          component.latencyMs > 0
+                            ? `${t("status.latency")}: ${component.latencyMs}ms`
+                            : t("status.checkedJustNow")}
+                          {percent !== null && (
+                            <span className="sm:hidden"> · {percent}%</span>
+                          )}
+                          {component.status === "ok" &&
+                            lastFailure[component.id] && (
+                              <span className="ml-1.5 inline-flex items-center gap-1 text-amber-600/80 dark:text-amber-400/80">
+                                ·
+                                <TriangleAlert className="size-3" />
+                                {t("status.lastFailure")}:{" "}
+                                <RelativeTime
+                                  date={lastFailure[component.id]}
+                                  locale={i18n.language}
+                                />
+                              </span>
+                            )}
+                        </p>
+                        {linkedIncident && (
+                          <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-700 ring-1 ring-amber-500/20 dark:text-amber-400">
+                            <TriangleAlert className="size-3" />
+                            {t("status.relatedIncident")}:{" "}
+                            {linkedIncident.title}
+                          </span>
+                        )}
+                      </div>
+                      {!latencyMonitored ? (
+                        <AvailabilityOnly
+                          label={t("status.availabilityMonitored")}
+                        />
+                      ) : latencyValues.length >= 2 ? (
+                        <span className="flex shrink-0 items-center px-1">
+                          <LatencySparkline
+                            values={latencyValues}
+                            color={
+                              component.status === "ok"
+                                ? "var(--color-emerald-500)"
+                                : component.status === "degraded"
+                                  ? "var(--color-amber-500)"
+                                  : "var(--color-red-500)"
+                            }
+                          />
+                        </span>
+                      ) : (
+                        <LatencyUnavailable
+                          compact
+                          label={t("status.latencyUnavailable")}
+                          hint={t("status.latencyUnavailableHint")}
+                        />
                       )}
-                    />
-                  </AnimatePresence>
-                  {t(statusKey(component.status))}
-                </motion.span>
-              </div>
+                      {percent !== null && (
+                        <AnimatedNumber
+                          value={percent}
+                          duration={700}
+                          formatter={(v) => `${v.toFixed(1)}%`}
+                          className="hidden shrink-0 text-sm font-semibold tabular-nums text-muted-foreground sm:inline"
+                        />
+                      )}
+                      <motion.span
+                        layout
+                        className={cn(
+                          "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 transition-colors",
+                          STATUS_PILL[component.status],
+                        )}
+                      >
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.span
+                            key={component.status}
+                            initial={{ scale: 0, rotate: -90 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            exit={{ scale: 0 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className={cn(
+                              "size-1.5 rounded-full",
+                              STATUS_DOT[component.status],
+                            )}
+                          />
+                        </AnimatePresence>
+                        {t(statusKey(component.status))}
+                      </motion.span>
+                      <Icon
+                        icon={ChevronRight}
+                        aria-hidden="true"
+                        className="mt-1 size-4 shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground"
+                      />
+                    </div>
+                  </button>
 
-              {/* Uptime bars */}
-              {bars.length > 0 && (
-                <div className="mt-4 border-t border-border/30 pt-3">
-                  <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                    <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/50">
-                      {t("status.uptime90")}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground/50">
-                      {t("status.today")}
-                    </span>
-                  </div>
-                  <UptimeBars bars={bars} />
-                  {!hasAnyHistory && (
-                    <p className="mt-2.5 flex items-center gap-1.5 text-xs text-muted-foreground/60">
-                      <Icon icon={TriangleAlert} className="size-3.5" />
-                      {t("status.collecting")}
-                    </p>
+                  {/* Uptime bars */}
+                  {bars.length > 0 && (
+                    <div className="mt-4 border-t border-border/30 pt-3">
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                        <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/50">
+                          {t("status.uptime90")}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/50">
+                          {t("status.today")}
+                        </span>
+                      </div>
+                      <UptimeBars
+                        bars={bars}
+                        onSelect={(bar) =>
+                          setSelectedDay({ component: component.id, bar })
+                        }
+                        selectedDate={
+                          selectedDay?.component === component.id
+                            ? selectedDay.bar.date
+                            : null
+                        }
+                        checksLabel={t("status.checks")}
+                        noDataLabel={t("status.noData")}
+                      />
+                      {!hasAnyHistory && (
+                        <p className="mt-2.5 flex items-center gap-1.5 text-xs text-muted-foreground/60">
+                          <Icon icon={TriangleAlert} className="size-3.5" />
+                          {t("status.collecting")}
+                        </p>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
-            </motion.button>
-          );
-        })}
-      </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </>
+      )}
       {/* Admin incident management — lives on the public status page so
           incidents can be reported even when the app itself is down. */}
-      {isAdmin && <IncidentAdminPanel />}
+      {!isInitialLoading && isAdmin && <IncidentAdminPanel />}
       <ComponentDetailSheet
         component={detailComponent}
         onOpenChange={(open) => {
           if (!open) setDetailComponent(null);
+        }}
+      />
+      <DaySummarySheet
+        component={selectedDay?.component ?? null}
+        bar={selectedDay?.bar ?? null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedDay(null);
         }}
       />
       <motion.div

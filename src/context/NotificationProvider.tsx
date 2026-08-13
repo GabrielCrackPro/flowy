@@ -111,7 +111,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
           const current =
             queryClient.getQueryData<NotificationsResponse>(queryKey);
-          if (!current) return;
+          if (!current) {
+            void queryClient.invalidateQueries({ queryKey });
+            return;
+          }
 
           const exists = current.alerts.some((item) => item.id === row.id);
           if (exists) return;
@@ -154,16 +157,22 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
           const current =
             queryClient.getQueryData<NotificationsResponse>(queryKey);
-          if (!current) return;
+          if (!current) {
+            void queryClient.invalidateQueries({ queryKey });
+            return;
+          }
 
           const alert = toInboxAlert(row);
 
           // Only process alerts for the current space
           if (alert.spaceId !== activeSpaceId) return;
 
-          const alerts = current.alerts.map((item) =>
-            item.id === alert.id ? alert : item,
-          );
+          const exists = current.alerts.some((item) => item.id === alert.id);
+          const alerts = exists
+            ? current.alerts.map((item) =>
+                item.id === alert.id ? alert : item,
+              )
+            : sortByCreatedAtDesc([alert, ...current.alerts]);
           const unreadCount = alerts.filter(
             (item) => !item.readAt && !item.resolvedAt,
           ).length;
@@ -176,6 +185,35 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           if (alert.readAt || alert.resolvedAt) {
             toast.dismiss(alert.id);
           }
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "alerts",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const row = payload.old as RealtimeAlertRow;
+          if (!row || row.space_id !== activeSpaceId) return;
+
+          const current =
+            queryClient.getQueryData<NotificationsResponse>(queryKey);
+          if (!current) {
+            void queryClient.invalidateQueries({ queryKey });
+            return;
+          }
+
+          queryClient.setQueryData<NotificationsResponse>(queryKey, {
+            alerts: current.alerts.filter((alert) => alert.id !== row.id),
+            unreadCount: current.alerts.filter(
+              (alert) =>
+                alert.id !== row.id && !alert.readAt && !alert.resolvedAt,
+            ).length,
+          });
+          toast.dismiss(row.id);
         },
       )
       .subscribe();

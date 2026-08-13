@@ -12,6 +12,7 @@ import { useReactForm } from "@/hooks/useReactForm";
 import { changePassword } from "@/lib/api/account";
 import { Eye, EyeOff, KeyRound, Loader2, Lock } from "@/lib/icons";
 import { createChangePasswordSchema } from "@/lib/schemas/auth";
+import supabase from "@/lib/supabase/client";
 
 const WRONG_CURRENT_PASSWORD = "La contraseña actual es incorrecta";
 
@@ -39,6 +40,7 @@ export function ChangePasswordSheet({
     onSubmit: async (values) => {
       try {
         await changePassword(values.currentPassword, values.newPassword);
+        await supabase.auth.refreshSession();
         toast.success(t("settings.security.changePasswordSuccess"));
         onOpenChange(false);
         form.reset();

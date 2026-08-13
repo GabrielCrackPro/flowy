@@ -211,7 +211,7 @@ export function SpaceManager() {
       </div>
 
       <div>
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-semibold">
             {t("profile.spaces.mySpaces")}
           </h3>
@@ -225,7 +225,7 @@ export function SpaceManager() {
             {[0, 1].map((i) => (
               <div
                 key={i}
-                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-muted/20 p-4"
+                className="flex min-w-0 items-center gap-4 rounded-2xl border border-border/40 bg-muted/20 p-4"
               >
                 <div className="size-11">
                   <Skeleton variant="rounded" />

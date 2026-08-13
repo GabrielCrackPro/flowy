@@ -132,8 +132,8 @@ export function Header() {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="sticky top-0 z-40 border-b border-border/40 backdrop-blur-xl"
       >
-        <div className="flex h-16 items-center gap-4 px-4 lg:px-8">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="flex h-16 items-center gap-1.5 px-2 sm:gap-4 sm:px-4 lg:px-8">
+          <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-3">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="ghost"
@@ -186,7 +186,7 @@ export function Header() {
                     ) : (
                       <Link
                         href={crumb.href}
-                        className="flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1 text-muted-foreground transition hover:bg-muted/40 hover:text-foreground"
+                        className="hidden shrink-0 items-center gap-1.5 rounded-lg px-2 py-1 text-muted-foreground transition hover:bg-muted/40 hover:text-foreground sm:flex"
                       >
                         {IconComponent && (
                           <Icon icon={IconComponent} className="size-4" />
@@ -208,11 +208,11 @@ export function Header() {
                 isStandalone ? "block" : "hidden md:block",
               )}
             >
-              <SpaceSwitcherPill />
+              <SpaceSwitcherPill className="max-[420px]:max-w-28" />
             </motion.div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-2">
             <div className="hidden sm:block">
               <Search onOpenDialog={() => setSearchOpen(true)} />
             </div>
@@ -234,7 +234,9 @@ export function Header() {
             <InstallAppButton />
 
             <div className="flex items-center gap-0.5 rounded-xl border border-border/30 bg-card/50 p-0.5 shadow-sm">
-              <LanguageSwitcher />
+              <span className="max-[420px]:hidden">
+                <LanguageSwitcher />
+              </span>
               <ThemeToggle className="rounded-lg hover:bg-accent" />
             </div>
 
