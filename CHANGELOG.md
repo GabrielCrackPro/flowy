@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.34](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.33...flowy-v0.1.34) (2026-08-13)
+
+
+### Features
+
+* **auth:** in-app admin management, complete account lifecycle, responsive banners ([#173](https://github.com/GabrielCrackPro/flowy/issues/173)) ([2fe56ee](https://github.com/GabrielCrackPro/flowy/commit/2fe56eeb109455e8adef109f6bbd7961bec9a951))
+
 ## [0.1.33](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.32...flowy-v0.1.33) (2026-08-13)
 
 
