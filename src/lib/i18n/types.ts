@@ -1275,6 +1275,37 @@ export type AppTranslationMessages = {
         resolved: string;
       };
     };
+    admin: {
+      promoteTitle: string;
+      promoteDescription: string;
+      emailLabel: string;
+      emailPlaceholder: string;
+      promote: string;
+      promoting: string;
+      success: string;
+      alreadyAdmin: string;
+      notFound: string;
+      error: string;
+      claimTitle: string;
+      claimDescription: string;
+      secretLabel: string;
+      secretPlaceholder: string;
+      claim: string;
+      claiming: string;
+      claimed: string;
+      invalidSecret: string;
+      alreadyExists: string;
+      claimError: string;
+      you: string;
+      adminRole: string;
+      demote: string;
+      demoting: string;
+      demoted: string;
+      demoteError: string;
+      lastAdmin: string;
+      demoteConfirmTitle: string;
+      demoteConfirmDesc: string;
+    };
   };
   validation: {
     amountPositive: string;

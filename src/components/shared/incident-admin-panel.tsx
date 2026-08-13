@@ -8,6 +8,7 @@ import { z } from "zod";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Icon } from "@/components/shared/icon";
 import { toast } from "@/components/shared/toast";
+import { PromoteAdminCard } from "@/components/status/promote-admin-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
@@ -856,6 +857,11 @@ export function IncidentAdminPanel() {
           })}
         </div>
       )}
+
+      {/* Admin tooling — promote another account to admin. Only rendered for
+          admins (this whole panel is admin-only) and the API it calls is
+          requireAdmin() guarded. */}
+      <PromoteAdminCard />
 
       <ConfirmDialog
         open={deleteTarget !== null}

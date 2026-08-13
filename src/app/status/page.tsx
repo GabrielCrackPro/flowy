@@ -28,6 +28,7 @@ import {
   ThemeToggle,
 } from "@/components/shared";
 import { toast } from "@/components/shared/toast";
+import { ClaimAdminAccessCard } from "@/components/status/claim-admin-access-card";
 import { Button } from "@/components/ui/button";
 import { SheetLayout } from "@/components/ui/sheet-layout";
 import { Switch } from "@/components/ui/switch";
@@ -1911,6 +1912,10 @@ export default function StatusPage() {
           </div>
         </>
       )}
+      {/* First-admin bootstrap — shows only when no admin exists yet.
+          Once an admin is claimed, this card disappears and the admin
+          panel (below) takes over. */}
+      {!isInitialLoading && <ClaimAdminAccessCard />}
       {/* Admin incident management — lives on the public status page so
           incidents can be reported even when the app itself is down. */}
       {!isInitialLoading && isAdmin && <IncidentAdminPanel />}
