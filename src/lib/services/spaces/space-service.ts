@@ -278,6 +278,10 @@ export const SpaceService = {
 
     if (isOwner) {
       await prisma.space.delete({ where: { id: spaceId } });
+      // Best-effort cleanup of the space image so storage doesn't leak.
+      if (space.avatarUrl) {
+        await deleteSpaceAvatar(space.avatarUrl).catch(() => undefined);
+      }
     } else {
       await prisma.spaceMember.delete({ where: { id: membership.id } });
     }
@@ -339,7 +343,13 @@ export const SpaceService = {
       throw new Error("Debes conservar al menos un espacio");
     }
 
+    const avatarUrl = space.avatarUrl;
     await prisma.space.delete({ where: { id: spaceId } });
+
+    // Best-effort cleanup of the space image so storage doesn't leak.
+    if (avatarUrl) {
+      await deleteSpaceAvatar(avatarUrl).catch(() => undefined);
+    }
 
     return { success: true };
   },

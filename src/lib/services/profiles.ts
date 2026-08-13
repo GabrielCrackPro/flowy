@@ -35,6 +35,8 @@ async function cleanupSpacesForAccountDeletion(userId: string) {
     },
   });
 
+  const deletedSpaceAvatarUrls: string[] = [];
+
   for (const space of spaces) {
     const isOwner = space.ownerId === userId;
     const otherMembers = space.members.filter((m) => m.userId !== userId);
@@ -47,8 +49,15 @@ async function cleanupSpacesForAccountDeletion(userId: string) {
         where: { id: space.id },
         data: { ownerId: otherMembers[0].userId },
       });
+    } else if (space.avatarUrl) {
+      // The space (personal, or shared with no other members) will be
+      // cascade-deleted with the profile. Capture its avatar now so the
+      // route can remove the storage file after the DB deletion succeeds.
+      deletedSpaceAvatarUrls.push(space.avatarUrl);
     }
   }
+
+  return deletedSpaceAvatarUrls;
 }
 
 export const ProfileService = {
@@ -78,7 +87,21 @@ export const ProfileService = {
         // common path — `created` stays false here). The latch makes this
         // a no-op after the first successful seed.
         await CategoryService.seedDefaults(existing.id);
-        return { profile: existing, created: false };
+
+        // Every user must own a personal space that is active. The signup
+        // trigger (migration 031) creates it atomically for new accounts;
+        // this backfills accounts that predate it or where it failed.
+        const personalSpace = await SpaceService.ensurePersonalSpace(
+          existing.id,
+        );
+        const profile = existing.activeSpaceId
+          ? existing
+          : await prisma.profile.update({
+              where: { id: existing.id },
+              data: { activeSpaceId: personalSpace.id },
+            });
+
+        return { profile, created: false };
       }
 
       const profile = await prisma.profile.create({
@@ -169,10 +192,10 @@ export const ProfileService = {
     });
 
     if (!profile) {
-      return { avatarUrl: null, receiptUrls: [] };
+      return { avatarUrl: null, receiptUrls: [], spaceAvatarUrls: [] };
     }
 
-    await cleanupSpacesForAccountDeletion(userId);
+    const spaceAvatarUrls = await cleanupSpacesForAccountDeletion(userId);
 
     const receipts = await prisma.transaction.findMany({
       where: { userId },
@@ -187,6 +210,7 @@ export const ProfileService = {
       receiptUrls: receipts.flatMap((transaction) =>
         transaction.receiptUrl ? [transaction.receiptUrl] : [],
       ),
+      spaceAvatarUrls,
     };
   },
 };

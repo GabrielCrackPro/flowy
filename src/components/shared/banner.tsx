@@ -132,11 +132,11 @@ function BannerBody({
       </span>
 
       <span className="min-w-0">
-        <span className="block truncate text-sm font-semibold tracking-tight text-foreground">
+        <span className="block text-sm font-semibold tracking-tight text-foreground">
           {title}
         </span>
         {description && (
-          <span className="mt-0.5 line-clamp-2 block text-xs leading-relaxed text-muted-foreground">
+          <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
             {description}
           </span>
         )}
@@ -172,8 +172,18 @@ function StripBanner({
   const ActionIcon = actionIcon;
 
   return (
-    <div className={cn("w-full border-b px-4 py-2", style.bar)}>
-      <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-2.5 gap-y-1">
+    <div
+      className={cn("relative w-full border-b px-3 py-2 sm:px-4", style.bar)}
+    >
+      <div
+        className={cn(
+          "mx-auto flex w-full max-w-7xl items-center gap-2.5",
+          // Right padding reserves space for the dismiss button, which is
+          // absolutely positioned (so it never wraps to its own row on
+          // narrow screens) and keeps the action button clear of it.
+          onDismiss && "pr-7",
+        )}
+      >
         {pulse ? (
           <span
             className={cn(
@@ -191,12 +201,14 @@ function StripBanner({
           <Icon aria-hidden className={cn("size-4 shrink-0", style.icon)} />
         )}
 
-        <div className="min-w-0 flex-1 basis-40">
-          <p className={cn("truncate text-sm font-semibold", style.title)}>
+        <div className="min-w-0 flex-1">
+          <p className={cn("text-sm font-semibold sm:truncate", style.title)}>
             {title}
           </p>
           {description && (
-            <p className={cn("truncate text-xs", style.sub)}>{description}</p>
+            <p className={cn("text-xs sm:truncate", style.sub)}>
+              {description}
+            </p>
           )}
         </div>
 
@@ -213,18 +225,18 @@ function StripBanner({
             {actionLabel}
           </Button>
         )}
-
-        {onDismiss && (
-          <button
-            type="button"
-            onClick={onDismiss}
-            aria-label={dismissLabel}
-            className="shrink-0 rounded-md p-1 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground"
-          >
-            <X className="size-4" />
-          </button>
-        )}
       </div>
+
+      {onDismiss && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label={dismissLabel}
+          className="absolute top-1/2 right-2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground"
+        >
+          <X className="size-4" />
+        </button>
+      )}
     </div>
   );
 }
@@ -270,10 +282,12 @@ export function Banner({
     );
   }
 
+  const showActions = Boolean(actionLabel && onAction) || Boolean(onDismiss);
+
   return (
     <div
       className={cn(
-        "pointer-events-auto relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border p-3.5 shadow-[0_6px_20px_rgba(0,0,0,0.08)]",
+        "pointer-events-auto relative w-full overflow-hidden rounded-2xl border p-3 shadow-[0_6px_20px_rgba(0,0,0,0.08)] sm:p-3.5",
         style.container,
         className,
       )}
@@ -285,59 +299,70 @@ export function Banner({
         )}
       />
 
-      {onBodyClick ? (
-        <Button
-          variant="ghost"
-          onClick={onBodyClick}
-          className={cn(
-            "flex min-w-0 flex-1 items-center gap-3 rounded-lg text-left",
-            "cursor-pointer hover:opacity-90",
-          )}
-        >
-          <BannerBody
-            Icon={Icon}
-            title={title}
-            description={description}
-            iconClass={style.icon}
-          />
-        </Button>
-      ) : (
-        <div className="flex min-w-0 flex-1 items-center gap-3 rounded-lg text-left">
-          <BannerBody
-            Icon={Icon}
-            title={title}
-            description={description}
-            iconClass={style.icon}
-          />
-        </div>
-      )}
+      <div
+        className={cn(
+          "flex w-full items-center gap-3",
+          showActions && "flex-wrap sm:flex-nowrap",
+        )}
+      >
+        {onBodyClick ? (
+          <Button
+            variant="ghost"
+            onClick={onBodyClick}
+            className={cn(
+              "flex min-w-0 flex-1 items-center gap-3 rounded-lg text-left",
+              "cursor-pointer hover:opacity-90",
+            )}
+          >
+            <BannerBody
+              Icon={Icon}
+              title={title}
+              description={description}
+              iconClass={style.icon}
+            />
+          </Button>
+        ) : (
+          <div className="flex min-w-0 flex-1 items-center gap-3 rounded-lg text-left">
+            <BannerBody
+              Icon={Icon}
+              title={title}
+              description={description}
+              iconClass={style.icon}
+            />
+          </div>
+        )}
 
-      {actionLabel && onAction && (
-        <Button
-          size="sm"
-          onClick={onAction}
-          className={cn(
-            "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ring-1 ring-inset",
-            "bg-none hover:bg-none",
-            style.button,
-          )}
-        >
-          {actionLabel}
-          <ArrowRight className="size-3.5" />
-        </Button>
-      )}
+        {showActions && (
+          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+            {actionLabel && onAction && (
+              <Button
+                size="sm"
+                onClick={onAction}
+                className={cn(
+                  "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ring-1 ring-inset",
+                  "bg-none hover:bg-none",
+                  style.button,
+                )}
+              >
+                {actionLabel}
+                <ArrowRight className="size-3.5" />
+              </Button>
+            )}
 
-      {onDismiss && (
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={dismissLabel}
-          onClick={onDismiss}
-          className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-none hover:bg-muted/60 hover:text-foreground"
-        >
-          <X className="size-3.5" />
-        </Button>
-      )}
+            {onDismiss && (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={dismissLabel}
+                onClick={onDismiss}
+                className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-none hover:bg-muted/60 hover:text-foreground"
+              >
+                <X className="size-3.5" />
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

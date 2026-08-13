@@ -122,6 +122,24 @@ export const DEFAULT_RATE_LIMITS: Record<string, RateLimitConfig> = {
     window: getEnvNumber("RATE_LIMIT_STATUS_INCIDENT_WINDOW", 120 * 1000),
   },
 
+  // Admin-only operations (e.g. promoting a user to admin)
+  adminPromote: {
+    requests: getEnvNumber("RATE_LIMIT_ADMIN_PROMOTE_REQUESTS", 10),
+    window: getEnvNumber("RATE_LIMIT_ADMIN_PROMOTE_WINDOW", 120 * 1000),
+  },
+
+  // First-admin bootstrap — secret-gated, very strict (brute-force guard)
+  adminBootstrap: {
+    requests: getEnvNumber("RATE_LIMIT_ADMIN_BOOTSTRAP_REQUESTS", 5),
+    window: getEnvNumber("RATE_LIMIT_ADMIN_BOOTSTRAP_WINDOW", 120 * 1000),
+  },
+
+  // Demoting an admin — sensitive, strict
+  adminDemote: {
+    requests: getEnvNumber("RATE_LIMIT_ADMIN_DEMOTE_REQUESTS", 10),
+    window: getEnvNumber("RATE_LIMIT_ADMIN_DEMOTE_WINDOW", 120 * 1000),
+  },
+
   // Per-component check history (detail view)
   statusComponent: {
     requests: getEnvNumber("RATE_LIMIT_STATUS_COMPONENT_REQUESTS", 60),
