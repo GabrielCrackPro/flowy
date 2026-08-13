@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.33](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.32...flowy-v0.1.33) (2026-08-13)
+
+
+### Features
+
+* **auth:** gate OAuth behind Vercel Flags and add MFA banner ([#169](https://github.com/GabrielCrackPro/flowy/issues/169)) ([e81d7c2](https://github.com/GabrielCrackPro/flowy/commit/e81d7c2516cde9446b03a61b58a94cef224ec522))
+
 ## [0.1.32](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.31...flowy-v0.1.32) (2026-08-13)
 
 
