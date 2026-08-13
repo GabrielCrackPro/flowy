@@ -332,6 +332,9 @@ export type AppTranslationMessages = {
       mfaChallengeChecking: string;
       mfaChallengeAbort: string;
       mfaChallengeBackToLogin: string;
+      mfaBannerText: string;
+      mfaBannerHint: string;
+      mfaBannerAction: string;
     };
     theme: {
       title: string;

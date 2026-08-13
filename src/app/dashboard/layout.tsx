@@ -1,5 +1,6 @@
 import { Header, Sidebar } from "@components/dashboard";
 import { IncidentBanner } from "@components/shared/incident-banner";
+import { MfaSetupBanner } from "@components/shared/mfa-setup-banner";
 import { OfflineBanner } from "@components/shared/offline-banner";
 import { PageTransition } from "@components/shared/page-transition";
 import { PullToRefresh } from "@components/shared/pull-to-refresh";
@@ -33,6 +34,9 @@ export default function DashboardLayout({
         </Suspense>
         <Suspense fallback={null}>
           <PushNotificationsBanner />
+        </Suspense>
+        <Suspense fallback={null}>
+          <MfaSetupBanner />
         </Suspense>
         <Suspense fallback={null}>
           <IncidentBanner />
