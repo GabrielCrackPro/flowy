@@ -61,7 +61,11 @@ function getInitialState(): PushState {
   };
 }
 
-export function usePushNotifications() {
+export function usePushNotifications({
+  checkRemoteSubscription = true,
+}: {
+  checkRemoteSubscription?: boolean;
+} = {}) {
   const { t } = useTranslation();
   const [state, setState] = useState<PushState>(getInitialState);
 
@@ -89,12 +93,15 @@ export function usePushNotifications() {
       // without a matching DB row (e.g. an expired endpoint after the service
       // worker was unregistered) cannot receive pushes, so treat it as
       // disabled until it is re-registered.
-      let stored = false;
-      try {
-        const result = await pushApi.status();
-        stored = Boolean(result.subscribed);
-      } catch {
+      let stored = true;
+      if (checkRemoteSubscription) {
         stored = false;
+        try {
+          const result = await pushApi.status();
+          stored = Boolean(result.subscribed);
+        } catch {
+          stored = false;
+        }
       }
       setState((prev) => ({
         ...prev,
@@ -104,7 +111,7 @@ export function usePushNotifications() {
     } catch {
       setState((prev) => ({ ...prev, subscribed: false }));
     }
-  }, [state.supported]);
+  }, [checkRemoteSubscription, state.supported]);
 
   useEffect(() => {
     void refresh();

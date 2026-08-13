@@ -20,7 +20,9 @@ const DISMISS_KEY = "flowy-push-banner-dismissed";
 export function PushNotificationsBanner() {
   const { t } = useTranslation();
   const pathname = usePathname();
-  const { checked, supported, configured, permission } = usePushNotifications();
+  const { checked, supported, configured, permission } = usePushNotifications({
+    checkRemoteSubscription: false,
+  });
   const [dismissed, setDismissed] = useState(() => {
     if (typeof window === "undefined") return false;
     try {

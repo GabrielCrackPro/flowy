@@ -26,6 +26,7 @@ interface EntityApiConfig<T, F, C, U> {
   /** i18n key for the entity label used in success/error toasts (e.g. "common.transaction"). */
   entityName?: string;
   filters?: F;
+  enabled?: boolean;
   invalidateDependentQueries?: boolean;
 }
 
@@ -54,6 +55,7 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
   deleteApi,
   entityName,
   filters,
+  enabled = true,
   invalidateDependentQueries = true,
 }: EntityApiConfig<T, F, C, U>) {
   const queryClient = useQueryClient();
@@ -87,6 +89,7 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
   const query = useQuery({
     queryKey: [queryKey, activeSpaceId, filters],
     queryFn: () => listApi(filters),
+    enabled,
     staleTime: 10000, // Cache data for 10 seconds to avoid unnecessary refetches
     refetchOnReconnect: true, // Refresh data when the connection comes back
     refetchInterval: 60000, // Poll in the background to catch realtime misses

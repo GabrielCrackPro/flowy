@@ -119,7 +119,7 @@ export function ChangePasswordSheet({
       }
     >
       <form onSubmit={(e) => form.handleSubmit(e)} className="space-y-6">
-        <div className="space-y-4 rounded-2xl border border-border/60 bg-gradient-to-br from-background to-muted/20 p-4 shadow-sm">
+        <div className="space-y-4 rounded-2xl bg-muted/25 p-4">
           <FormField
             label={t("settings.security.currentPasswordLabel")}
             error={form.errors.currentPassword}
@@ -173,7 +173,7 @@ export function ChangePasswordSheet({
         </div>
 
         {form.error ? (
-          <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+          <div className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
             {form.error}
           </div>
         ) : null}

@@ -6,6 +6,7 @@ import {
   withRateLimit,
 } from "@/lib/api/route-utils";
 import { ProfileService } from "@/lib/services/profiles";
+import { deleteAvatar, deleteReceipt } from "@/lib/services/storage";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function DELETE() {
@@ -15,23 +16,36 @@ export async function DELETE() {
     return auth;
   }
 
-  // Apply rate limiting
   const rateLimitResponse = await withRateLimit(auth.id, "account");
   if (rateLimitResponse) {
     return rateLimitResponse;
   }
 
   try {
-    await ProfileService.deleteAccount(auth.id);
+    const cleanup = await ProfileService.deleteAccount(auth.id);
 
     const supabase = createAdminClient();
     const { error } = await supabase.auth.admin.deleteUser(auth.id);
 
     if (error) {
-      return NextResponse.json({ message: error.message }, { status: 400 });
+      // Do not expose GoTrue's provider error to the client. The profile was
+      // intentionally retained so the user can retry without data loss.
+      return NextResponse.json(
+        { message: "Could not delete account" },
+        { status: 502 },
+      );
     }
 
-    const response = NextResponse.json({ message: "Cuenta eliminada" });
+    const cleanups: Promise<unknown>[] = [];
+    if (cleanup.avatarUrl) {
+      cleanups.push(deleteAvatar(cleanup.avatarUrl).catch(() => undefined));
+    }
+    for (const receiptUrl of cleanup.receiptUrls) {
+      cleanups.push(deleteReceipt(receiptUrl).catch(() => undefined));
+    }
+    await Promise.all(cleanups);
+
+    const response = NextResponse.json({ message: "Account deleted" });
     return applyRateLimitHeaders(response, auth.id, "account");
   } catch (error) {
     console.error(error);

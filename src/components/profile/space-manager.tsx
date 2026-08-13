@@ -105,10 +105,8 @@ export function SpaceManager() {
       <div className="grid gap-4 md:grid-cols-2">
         <form
           onSubmit={handleCreate}
-          className="relative overflow-hidden rounded-2xl border border-border/40 bg-muted/20 p-4 transition-colors focus-within:border-primary/40 sm:p-5"
+          className="relative overflow-hidden rounded-2xl bg-muted/25 p-4 transition-colors focus-within:bg-muted/35 sm:p-5"
         >
-          <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-primary/40 via-primary/20 to-transparent" />
-
           <div className="mb-4 flex items-center gap-3">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
               <Icon icon={Plus} className="size-4" />
@@ -165,10 +163,8 @@ export function SpaceManager() {
 
         <form
           onSubmit={handleJoin}
-          className="relative overflow-hidden rounded-2xl border border-border/40 bg-muted/20 p-4 transition-colors focus-within:border-primary/40 sm:p-5"
+          className="relative overflow-hidden rounded-2xl bg-muted/25 p-4 transition-colors focus-within:bg-muted/35 sm:p-5"
         >
-          <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-indigo-500/40 via-indigo-500/20 to-transparent" />
-
           <div className="mb-4 flex items-center gap-3">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
               <Icon icon={KeyRound} className="size-4" />
@@ -225,7 +221,7 @@ export function SpaceManager() {
             {[0, 1].map((i) => (
               <div
                 key={i}
-                className="flex min-w-0 items-center gap-4 rounded-2xl border border-border/40 bg-muted/20 p-4"
+                className="flex min-w-0 items-center gap-4 rounded-2xl bg-muted/25 p-4"
               >
                 <div className="size-11">
                   <Skeleton variant="rounded" />
@@ -245,7 +241,7 @@ export function SpaceManager() {
             ))}
           </div>
         ) : spaces.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border/50 bg-muted/10 px-6 py-10 text-center">
+          <div className="rounded-2xl bg-muted/20 px-6 py-10 text-center">
             <p className="text-sm font-medium">
               {t("profile.spaces.noSpaces")}
             </p>

@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useReactForm } from "@/hooks/useReactForm";
-import { AtSign, Languages, Loader2, UserRound } from "@/lib/icons";
+import { AtSign, Check, Languages, Loader2, UserRound, X } from "@/lib/icons";
 import {
   CURRENCIES,
   currencyName,
@@ -168,7 +168,7 @@ export function ProfileForm({
           </FormField>
         </div>
 
-        <div className="rounded-xl border border-border/50 bg-muted/20 p-4">
+        <div className="rounded-xl bg-muted/25 p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -207,6 +207,7 @@ export function ProfileForm({
           }}
           disabled={form.busy}
         >
+          <Icon icon={X} className="size-4" />
           {t("common.cancel")}
         </Button>
         <Button
@@ -220,7 +221,10 @@ export function ProfileForm({
               {t("settings.profile.saving")}
             </>
           ) : (
-            t("settings.profile.save")
+            <>
+              <Icon icon={Check} className="size-4" />
+              {t("settings.profile.save")}
+            </>
           )}
         </Button>
       </div>

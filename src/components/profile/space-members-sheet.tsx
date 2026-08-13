@@ -10,7 +10,7 @@ import { SheetClose } from "@/components/ui/sheet";
 import { SheetLayout } from "@/components/ui/sheet-layout";
 import { useProfile } from "@/hooks/useProfile";
 import type { SpaceSummary } from "@/lib/api/space";
-import { CalendarDays, Crown, Loader2, UserMinus, Users } from "@/lib/icons";
+import { CalendarDays, Crown, Loader2, UserMinus, Users, X } from "@/lib/icons";
 
 interface SpaceMembersSheetProps {
   space: SpaceSummary | null;
@@ -73,6 +73,7 @@ export function SpaceMembersSheet({
         footerRight={
           <SheetClose>
             <Button variant="outline" className="h-10">
+              <X className="size-4" />
               {t("profile.spaces.close")}
             </Button>
           </SheetClose>

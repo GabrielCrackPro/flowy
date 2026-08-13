@@ -30,7 +30,7 @@ export default function TransactionDetailPage() {
   const { profile } = useProfile();
   const locale = profile?.locale ?? "es-ES";
   const activeSpaceId = profile?.activeSpaceId ?? null;
-  const { update, remove } = useTransactionApi();
+  const { update, remove } = useTransactionApi(undefined, { enabled: false });
 
   const {
     data: transaction,

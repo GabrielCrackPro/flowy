@@ -44,6 +44,12 @@ export type AuthTranslationMessages = {
     formDescription: string;
     statusEmailSent: string;
     createAccountLink: string;
+    oauthTitle: string;
+    google: string;
+    apple: string;
+    github: string;
+    oauthError: string;
+    callbackError: string;
   };
   register: {
     formTitle: string;
@@ -78,10 +84,30 @@ export type AuthTranslationMessages = {
     successMessage: string;
     successMessagePart2: string;
   };
+  resetPassword: {
+    title: string;
+    description: string;
+    newPasswordLabel: string;
+    confirmPasswordLabel: string;
+    submitButton: string;
+    submittingButton: string;
+    successMessage: string;
+    errorMessage: string;
+    backToLogin: string;
+  };
+  errors: {
+    generic: string;
+    invalidCredentials: string;
+    emailNotConfirmed: string;
+    rateLimited: string;
+    providerDisabled: string;
+    userAlreadyRegistered: string;
+  };
   pageTitles: {
     login: string;
     register: string;
     forgotPassword: string;
+    resetPassword: string;
   };
 };
 
@@ -235,6 +261,7 @@ export type AppTranslationMessages = {
       changePasswordSuccess: string;
       changePasswordError: string;
       deleteAccount: string;
+      deletingAccount: string;
       deleteAccountHint: string;
       deleteAccountConfirmTitle: string;
       deleteAccountConfirmDescription: string;
@@ -250,6 +277,61 @@ export type AppTranslationMessages = {
       signOutAllConfirmDescription: string;
       signingOutAll: string;
       signOutAllError: string;
+      mfaTitle: string;
+      mfaDescription: string;
+      mfaEnabled: string;
+      mfaEnabledHint: string;
+      mfaEnable: string;
+      mfaAddBackup: string;
+      mfaEnrolling: string;
+      mfaNameLabel: string;
+      mfaNamePlaceholder: string;
+      mfaNameHint: string;
+      mfaNameRequired: string;
+      mfaRename: string;
+      mfaRenameSuccess: string;
+      mfaContinue: string;
+      mfaSetupTitle: string;
+      mfaSetupPreparing: string;
+      mfaSetupDescription: string;
+      mfaScanHint: string;
+      mfaManualSecret: string;
+      mfaManualSecretLabel: string;
+      mfaCopySecret: string;
+      mfaSecretCopied: string;
+      mfaCodeLabel: string;
+      mfaVerify: string;
+      mfaVerifying: string;
+      mfaDisable: string;
+      mfaDisabling: string;
+      mfaDisableConfirmTitle: string;
+      mfaDisableVerificationDescription: string;
+      mfaAuthenticator: string;
+      mfaBackupWarning: string;
+      mfaLoading: string;
+      mfaError: string;
+      mfaErrors: {
+        invalidCode: string;
+        challengeExpired: string;
+        factorNameConflict: string;
+        sessionRefresh: string;
+        tooManyAttempts: string;
+      };
+      mfaSuccess: string;
+      mfaDisabled: string;
+      mfaQrAlt: string;
+      mfaChallengeTitle: string;
+      mfaChallengeDescription: string;
+      mfaChallengeCodeLabel: string;
+      mfaSelectAuthenticator: string;
+      mfaAuthenticatorNumber: string;
+      mfaChallengeVerify: string;
+      mfaChallengeVerifying: string;
+      mfaChallengeError: string;
+      mfaChallengeNoFactor: string;
+      mfaChallengeChecking: string;
+      mfaChallengeAbort: string;
+      mfaChallengeBackToLogin: string;
     };
     theme: {
       title: string;

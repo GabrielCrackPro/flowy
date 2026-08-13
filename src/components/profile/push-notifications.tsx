@@ -219,6 +219,7 @@ function UnavailableState({
           onClick={action.onClick}
           disabled={action.disabled}
         >
+          <RefreshCw className="size-3.5" />
           {action.label}
         </Button>
       ) : null}
@@ -547,7 +548,7 @@ export function PushNotificationsCard() {
   }
 
   const header = (
-    <CardHeader className="gap-3 border-b border-border/30 pb-4">
+    <CardHeader className="gap-3 pb-4">
       <div className="flex items-start gap-2.5">
         <span className="flex size-6 shrink-0 items-center justify-center text-muted-foreground">
           <Icon icon={Bell} className="size-4" />
@@ -625,7 +626,7 @@ export function PushNotificationsCard() {
       <CardContent>
         <div className="flex flex-col gap-4">
           {/* Master toggle */}
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/15 bg-linear-to-r from-primary/[0.07] via-muted/20 to-transparent px-3 py-2.5">
+          <div className="flex items-center justify-between gap-3 rounded-lg bg-linear-to-r from-primary/[0.07] via-muted/20 to-transparent px-3 py-2.5">
             <div className="flex min-w-0 items-start gap-2.5">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                 <Icon icon={BellRing} className="size-4" />
@@ -662,7 +663,7 @@ export function PushNotificationsCard() {
           </div>
 
           {permission === "denied" && (
-            <div className="flex flex-col gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-start gap-2.5">
                 <Icon icon={TriangleAlert} className="mt-0.5 size-4 shrink-0" />
                 <p>{t("settings.notifications.deniedHint")}</p>
@@ -675,6 +676,7 @@ export function PushNotificationsCard() {
                 onClick={() => void enable()}
                 disabled={busy}
               >
+                <BellRing className="size-3.5" />
                 {t("settings.notifications.bannerAction")}
               </Button>
             </div>
@@ -704,7 +706,7 @@ export function PushNotificationsCard() {
           {subscribed && (
             <>
               {/* Finance alert preferences */}
-              <div className="space-y-3 rounded-xl border border-border/40 bg-linear-to-br from-muted/35 via-muted/[0.12] to-transparent p-3 sm:p-3.5">
+              <div className="space-y-3 rounded-xl bg-muted/25 p-3 sm:p-3.5">
                 <div className="flex items-center justify-between gap-3">
                   <SectionLabel icon={ListChecks}>
                     {t("settings.notifications.prefsTitle")}
@@ -728,6 +730,7 @@ export function PushNotificationsCard() {
                         }
                         onClick={() => void updateAllPreferences(true)}
                       >
+                        <CheckCircle2 className="size-3.5" />
                         {t("settings.notifications.enableAll")}
                       </Button>
                       <Button
@@ -738,6 +741,7 @@ export function PushNotificationsCard() {
                         disabled={prefsBusy || enabledPrefs.length === 0}
                         onClick={() => void updateAllPreferences(false)}
                       >
+                        <Bell className="size-3.5" />
                         {t("settings.notifications.disableAll")}
                       </Button>
                     </div>
@@ -792,7 +796,7 @@ export function PushNotificationsCard() {
 
               {/* Status alert preferences */}
               {statusPrefs && (
-                <div className="space-y-2.5 rounded-xl border border-border/40 bg-linear-to-br from-muted/25 via-muted/[0.08] to-transparent p-3 sm:p-3.5">
+                <div className="space-y-2.5 rounded-xl bg-muted/20 p-3 sm:p-3.5">
                   <SectionLabel icon={Activity}>
                     {t("status.notifyPrefsTitle")}
                   </SectionLabel>
@@ -983,7 +987,7 @@ export function PushNotificationsCard() {
 
               {/* Devices */}
               {devices.length > 0 && (
-                <div className="space-y-3 rounded-xl border border-border/40 bg-muted/[0.08] p-3">
+                <div className="space-y-3 rounded-xl bg-muted/20 p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <SectionLabel icon={Smartphone}>
                       {t("settings.notifications.devicesTitle")}
@@ -1101,7 +1105,7 @@ export function PushNotificationsCard() {
                         return (
                           <li
                             key={device.id}
-                            className="rounded-xl border border-border/40 bg-card/60 p-3"
+                            className="rounded-xl bg-card/60 p-3"
                           >
                             <div className="flex min-w-0 flex-wrap items-start gap-3">
                               <span
@@ -1142,6 +1146,7 @@ export function PushNotificationsCard() {
                                       onClick={() => void renameDevice(device)}
                                       disabled={devicesBusy}
                                     >
+                                      <CheckCircle2 className="size-3.5" />
                                       {t("settings.notifications.saveName")}
                                     </Button>
                                   </div>
@@ -1320,7 +1325,7 @@ export function PushNotificationsCard() {
 
               {/* Delivery history */}
               {deliveryHistory.length > 0 && (
-                <div className="space-y-2.5 rounded-xl border border-border/40 bg-linear-to-br from-muted/25 via-muted/[0.08] to-transparent p-3 sm:p-3.5">
+                <div className="space-y-2.5 rounded-xl bg-muted/20 p-3 sm:p-3.5">
                   <SectionLabel icon={Clock}>
                     {t("settings.notifications.deliveryHistoryTitle")}
                   </SectionLabel>
@@ -1332,7 +1337,7 @@ export function PushNotificationsCard() {
                       return (
                         <li
                           key={delivery.id}
-                          className="flex items-center gap-2 rounded-lg border border-border/40 bg-card/60 px-3 py-2"
+                          className="flex items-center gap-2 rounded-lg bg-card/60 px-3 py-2"
                         >
                           {delivery.status === "sent" ? (
                             <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />
@@ -1377,7 +1382,7 @@ export function PushNotificationsCard() {
               )}
 
               {/* Test */}
-              <div className="space-y-2.5 rounded-xl border border-border/40 bg-linear-to-br from-muted/25 via-muted/[0.08] to-transparent p-3 sm:p-3.5">
+              <div className="space-y-2.5 rounded-xl bg-muted/20 p-3 sm:p-3.5">
                 <SectionLabel icon={Send}>
                   {t("settings.notifications.testSection")}
                 </SectionLabel>

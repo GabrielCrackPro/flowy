@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
+import { signOutAndClear } from "@/hooks/useSignOut";
 import { deleteAccount } from "@/lib/api/account";
 import {
   Clock,
@@ -24,9 +25,8 @@ import {
   ShieldAlert,
   Trash2,
 } from "@/lib/icons";
-import { signOut } from "@/lib/supabase";
-import supabase from "@/lib/supabase/client";
 import { ChangePasswordSheet } from "./change-password-sheet";
+import { MfaSettings } from "./mfa-settings";
 
 export function AccountSecurityActions() {
   const { t, i18n } = useTranslation();
@@ -35,6 +35,7 @@ export function AccountSecurityActions() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [signOutAllOpen, setSignOutAllOpen] = useState(false);
   const [signingOutAll, setSigningOutAll] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const formatDate = (value: string | null | undefined) => {
     if (!value) return t("settings.security.noDate");
@@ -51,42 +52,38 @@ export function AccountSecurityActions() {
   const handleSignOutAll = async () => {
     if (signingOutAll) return;
     setSigningOutAll(true);
-    try {
-      const { error } = await supabase.auth.signOut({ scope: "global" });
-      if (error) throw error;
-      window.location.assign("/auth/login");
-    } catch {
+    const error = await signOutAndClear("global");
+    if (error) {
+      // Even if the server cannot revoke every session, always terminate this
+      // browser so the user is not left in an authenticated UI.
+      await signOutAndClear("local");
       toast.error(t("settings.security.signOutAllError"));
-      setSigningOutAll(false);
     }
+    window.location.replace("/auth/login");
   };
 
   const handleDeleteAccount = async () => {
+    if (deletingAccount) return;
+    setDeletingAccount(true);
+
     try {
       await deleteAccount();
 
-      try {
-        await signOut();
-      } catch {
-        // La sesión puede no existir ya tras eliminar la cuenta en el servidor.
-      }
-
+      // The account was removed server-side. A local-scoped sign-out clears
+      // this browser even when Supabase can no longer revoke the deleted user.
+      await signOutAndClear("local");
       localStorage.clear();
       sessionStorage.clear();
-
-      window.location.assign("/auth/login");
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : t("settings.security.deleteAccountError"),
-      );
+      window.location.replace("/auth/login");
+    } catch {
+      setDeletingAccount(false);
+      toast.error(t("settings.security.deleteAccountError"));
     }
   };
 
   return (
     <>
-      <Card className="border-border/60">
+      <Card>
         <CardHeader>
           <div className="flex items-start gap-3">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
@@ -101,7 +98,7 @@ export function AccountSecurityActions() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="rounded-xl border border-border/50 bg-muted/20 p-3 sm:p-4">
+          <div className="rounded-xl bg-muted/25 p-3 sm:p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
@@ -148,7 +145,9 @@ export function AccountSecurityActions() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 rounded-xl border border-border/50 bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <MfaSettings />
+
+          <div className="flex flex-col gap-3 rounded-xl bg-muted/25 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
                 <Icon icon={Lock} className="size-4" />
@@ -172,7 +171,7 @@ export function AccountSecurityActions() {
             </Button>
           </div>
 
-          <div className="flex flex-col gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 rounded-xl bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
                 <Icon icon={ShieldAlert} className="size-4" />
@@ -221,9 +220,13 @@ export function AccountSecurityActions() {
         onOpenChange={setDeleteOpen}
         title={t("settings.security.deleteAccountConfirmTitle")}
         description={t("settings.security.deleteAccountConfirmDescription")}
-        confirmLabel={t("settings.security.deleteAccount")}
+        confirmLabel={
+          deletingAccount
+            ? t("settings.security.deletingAccount")
+            : t("settings.security.deleteAccount")
+        }
         cancelLabel={t("common.cancel")}
-        onConfirm={handleDeleteAccount}
+        onConfirm={() => void handleDeleteAccount()}
         icon={<Icon icon={ShieldAlert} className="size-6 text-destructive" />}
         variant="destructive"
       />

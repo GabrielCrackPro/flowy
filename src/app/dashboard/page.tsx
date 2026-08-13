@@ -25,6 +25,7 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { MfaGate } from "@/components/auth/mfa-gate";
 import { useDashboardCards } from "@/hooks/useDashboardCards";
 import { cn } from "@/lib/utils";
 
@@ -141,136 +142,140 @@ export default function DashboardPage() {
   const showAnalysis = showCharts || showMainColumn || showAside;
 
   return (
-    <div className="space-y-6 lg:space-y-8">
-      <DashboardHeader month={month} year={year} />
-      <DashboardAlerts month={month} year={year} />
+    <MfaGate>
+      <div className="space-y-6 lg:space-y-8">
+        <DashboardHeader month={month} year={year} />
+        <DashboardAlerts month={month} year={year} />
 
-      <section className="space-y-5">
-        <SectionHeading
-          title={t("dashboard.financialSummary")}
-          description={t("dashboard.financialSummaryDesc")}
-          action={
-            <div className="flex flex-wrap items-center gap-2">
-              <MonthPicker
-                month={month}
-                year={year}
-                onChange={handleMonthChange}
-              />
-            </div>
-          }
-        />
-        {showStats && (
-          <ErrorBoundary>
-            <StatsCardGroup month={month} year={year} />
-          </ErrorBoundary>
-        )}
-        {showInsights && (
-          <ErrorBoundary>
-            <InsightsCard month={month} year={year} />
-          </ErrorBoundary>
-        )}
-      </section>
-
-      {showAnalysis && (
         <section className="space-y-5">
           <SectionHeading
-            title={t("dashboard.analysis")}
-            description={t("dashboard.analysisDesc")}
+            title={t("dashboard.financialSummary")}
+            description={t("dashboard.financialSummaryDesc")}
+            action={
+              <div className="flex flex-wrap items-center gap-2">
+                <MonthPicker
+                  month={month}
+                  year={year}
+                  onChange={handleMonthChange}
+                />
+              </div>
+            }
           />
-
-          {showCharts && (
-            <div
-              className={cn(
-                "grid grid-cols-1 gap-4 sm:gap-6",
-                showCashFlow && showExpenseDistribution && "xl:grid-cols-3",
-              )}
-            >
-              {showCashFlow && (
-                <div className={cn(showExpenseDistribution && "xl:col-span-2")}>
-                  <ErrorBoundary>
-                    <Suspense fallback={<ChartCardSkeleton />}>
-                      <CashFlowChart month={month} year={year} />
-                    </Suspense>
-                  </ErrorBoundary>
-                </div>
-              )}
-              {showExpenseDistribution && (
-                <div>
-                  <ErrorBoundary>
-                    <Suspense fallback={<ChartCardSkeleton />}>
-                      <ExpenseDistributionChart month={month} year={year} />
-                    </Suspense>
-                  </ErrorBoundary>
-                </div>
-              )}
-            </div>
+          {showStats && (
+            <ErrorBoundary>
+              <StatsCardGroup month={month} year={year} />
+            </ErrorBoundary>
           )}
-
-          {(showMainColumn || showAside) && (
-            <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-3">
-              {showMainColumn && (
-                <div
-                  className={cn(
-                    "flex flex-col gap-4 sm:gap-6",
-                    showAside ? "xl:col-span-2" : "xl:col-span-3",
-                  )}
-                >
-                  {showDistribution && (
-                    <ErrorBoundary>
-                      <DistributionCard month={month} year={year} />
-                    </ErrorBoundary>
-                  )}
-                  {showRecentTransactions && (
-                    <ErrorBoundary>
-                      <RecentTransactionsCard month={month} year={year} />
-                    </ErrorBoundary>
-                  )}
-                  {(showBudgetProgress || showGoalProgress) && (
-                    <div
-                      className={cn(
-                        "grid grid-cols-1 gap-4 sm:gap-6",
-                        showBudgetProgress &&
-                          showGoalProgress &&
-                          "md:grid-cols-2",
-                      )}
-                    >
-                      {showBudgetProgress && (
-                        <ErrorBoundary>
-                          <BudgetProgressCard month={month} year={year} />
-                        </ErrorBoundary>
-                      )}
-                      {showGoalProgress && (
-                        <ErrorBoundary>
-                          <GoalProgressCard month={month} year={year} />
-                        </ErrorBoundary>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-              {showAside && (
-                <aside
-                  className={cn(
-                    "flex flex-col gap-4 sm:gap-6",
-                    !showMainColumn && "xl:col-span-3",
-                  )}
-                >
-                  {showSubscriptions && (
-                    <ErrorBoundary>
-                      <SubscriptionCardList />
-                    </ErrorBoundary>
-                  )}
-                  {showActivity && (
-                    <ErrorBoundary>
-                      <ActivityFeedCard month={month} year={year} />
-                    </ErrorBoundary>
-                  )}
-                </aside>
-              )}
-            </div>
+          {showInsights && (
+            <ErrorBoundary>
+              <InsightsCard month={month} year={year} />
+            </ErrorBoundary>
           )}
         </section>
-      )}
-    </div>
+
+        {showAnalysis && (
+          <section className="space-y-5">
+            <SectionHeading
+              title={t("dashboard.analysis")}
+              description={t("dashboard.analysisDesc")}
+            />
+
+            {showCharts && (
+              <div
+                className={cn(
+                  "grid grid-cols-1 gap-4 sm:gap-6",
+                  showCashFlow && showExpenseDistribution && "xl:grid-cols-3",
+                )}
+              >
+                {showCashFlow && (
+                  <div
+                    className={cn(showExpenseDistribution && "xl:col-span-2")}
+                  >
+                    <ErrorBoundary>
+                      <Suspense fallback={<ChartCardSkeleton />}>
+                        <CashFlowChart month={month} year={year} />
+                      </Suspense>
+                    </ErrorBoundary>
+                  </div>
+                )}
+                {showExpenseDistribution && (
+                  <div>
+                    <ErrorBoundary>
+                      <Suspense fallback={<ChartCardSkeleton />}>
+                        <ExpenseDistributionChart month={month} year={year} />
+                      </Suspense>
+                    </ErrorBoundary>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {(showMainColumn || showAside) && (
+              <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-3">
+                {showMainColumn && (
+                  <div
+                    className={cn(
+                      "flex flex-col gap-4 sm:gap-6",
+                      showAside ? "xl:col-span-2" : "xl:col-span-3",
+                    )}
+                  >
+                    {showDistribution && (
+                      <ErrorBoundary>
+                        <DistributionCard month={month} year={year} />
+                      </ErrorBoundary>
+                    )}
+                    {showRecentTransactions && (
+                      <ErrorBoundary>
+                        <RecentTransactionsCard month={month} year={year} />
+                      </ErrorBoundary>
+                    )}
+                    {(showBudgetProgress || showGoalProgress) && (
+                      <div
+                        className={cn(
+                          "grid grid-cols-1 gap-4 sm:gap-6",
+                          showBudgetProgress &&
+                            showGoalProgress &&
+                            "md:grid-cols-2",
+                        )}
+                      >
+                        {showBudgetProgress && (
+                          <ErrorBoundary>
+                            <BudgetProgressCard month={month} year={year} />
+                          </ErrorBoundary>
+                        )}
+                        {showGoalProgress && (
+                          <ErrorBoundary>
+                            <GoalProgressCard month={month} year={year} />
+                          </ErrorBoundary>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {showAside && (
+                  <aside
+                    className={cn(
+                      "flex flex-col gap-4 sm:gap-6",
+                      !showMainColumn && "xl:col-span-3",
+                    )}
+                  >
+                    {showSubscriptions && (
+                      <ErrorBoundary>
+                        <SubscriptionCardList />
+                      </ErrorBoundary>
+                    )}
+                    {showActivity && (
+                      <ErrorBoundary>
+                        <ActivityFeedCard month={month} year={year} />
+                      </ErrorBoundary>
+                    )}
+                  </aside>
+                )}
+              </div>
+            )}
+          </section>
+        )}
+      </div>
+    </MfaGate>
   );
 }

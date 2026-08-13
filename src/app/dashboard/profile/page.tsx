@@ -161,7 +161,7 @@ export default function SettingsPage() {
 
         <div className="grid min-w-0 gap-5">
           <Card id="profile" className="scroll-mt-20">
-            <CardHeader className="gap-3 border-b border-border/30 pb-4 sm:pb-5">
+            <CardHeader className="gap-3 pb-4 sm:pb-5">
               <div className="flex items-start gap-3">
                 <SectionIcon icon={UserRound} />
                 <div className="min-w-0">
@@ -235,7 +235,7 @@ export default function SettingsPage() {
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-3 rounded-xl border border-border/40 bg-muted/20 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-3.5">
+                      <div className="flex flex-col gap-3 rounded-xl bg-muted/25 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-3.5">
                         <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
                           <div className="flex min-w-0 items-center gap-2">
                             <SpaceOverviewAvatar
@@ -289,7 +289,7 @@ export default function SettingsPage() {
                       </div>
 
                       <div className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2 xl:grid-cols-3">
-                        <div className="flex items-center gap-3 border-b border-border/30 px-1 py-2.5">
+                        <div className="flex items-center gap-3 px-1 py-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
                             <Icon icon={Coins} className="size-4" />
                           </div>
@@ -304,7 +304,7 @@ export default function SettingsPage() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 border-b border-border/30 px-1 py-2.5">
+                        <div className="flex items-center gap-3 px-1 py-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
                             <Icon icon={Globe2} className="size-4" />
                           </div>
@@ -318,7 +318,7 @@ export default function SettingsPage() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 border-b border-border/30 px-1 py-2.5">
+                        <div className="flex items-center gap-3 px-1 py-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
                             <Icon icon={CalendarDays} className="size-4" />
                           </div>
@@ -332,7 +332,7 @@ export default function SettingsPage() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 border-b border-border/30 px-1 py-2.5">
+                        <div className="flex items-center gap-3 px-1 py-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-emerald-500/20 to-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                             <Icon
                               icon={subscribed ? CheckCircle2 : Bell}
@@ -351,7 +351,7 @@ export default function SettingsPage() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 border-b border-border/30 px-1 py-2.5">
+                        <div className="flex items-center gap-3 px-1 py-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-sky-500/20 to-sky-500/10 text-sky-600 dark:text-sky-400">
                             <Icon icon={Palette} className="size-4" />
                           </div>

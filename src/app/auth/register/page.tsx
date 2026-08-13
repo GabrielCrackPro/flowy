@@ -26,8 +26,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import { Icon } from "@/components/shared";
 import { updateProfile } from "@/lib/api/profile";
+import { translateAuthError } from "@/lib/auth/errors";
 import { getLocaleCookie, getLocaleStorage, normalizeLocale } from "@/lib/i18n";
 import {
   ArrowRight,
@@ -84,7 +86,7 @@ export default function RegisterPage() {
       );
 
       if (error) {
-        form.setError(error.message);
+        form.setError(translateAuthError(error, t));
         return;
       }
 
@@ -463,6 +465,8 @@ export default function RegisterPage() {
           </motion.div>
         </form>
       </Form>
+
+      <OAuthButtons />
 
       <motion.div
         initial={{ opacity: 0 }}

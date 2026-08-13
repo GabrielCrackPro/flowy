@@ -7,7 +7,6 @@ import type {
 } from "@/lib/schemas/profile";
 import { CategoryService } from "./categories";
 import { SpaceService } from "./spaces/space-service";
-import { deleteAvatar, deleteReceipt } from "./storage";
 
 function profileNameFromUser(user: User) {
   const metadata = user.user_metadata as { full_name?: string } | undefined;
@@ -40,19 +39,14 @@ async function cleanupSpacesForAccountDeletion(userId: string) {
     const isOwner = space.ownerId === userId;
     const otherMembers = space.members.filter((m) => m.userId !== userId);
 
-    if (isOwner) {
-      if (space.isPersonal || otherMembers.length === 0) {
-        await prisma.space.delete({ where: { id: space.id } });
-      } else {
-        await prisma.space.update({
-          where: { id: space.id },
-          data: { ownerId: otherMembers[0].userId },
-        });
-      }
-    } else if (otherMembers.length === 0) {
-      // Shared space whose only member is the deleted account: remove it so
-      // it doesn't linger without members.
-      await prisma.space.delete({ where: { id: space.id } });
+    if (isOwner && !space.isPersonal && otherMembers.length > 0) {
+      // Transfer shared spaces before auth.admin.deleteUser cascades the
+      // deleted profile. Personal or empty spaces are intentionally left for
+      // the database cascade after the auth deletion succeeds.
+      await prisma.space.update({
+        where: { id: space.id },
+        data: { ownerId: otherMembers[0].userId },
+      });
     }
   }
 }
@@ -175,7 +169,7 @@ export const ProfileService = {
     });
 
     if (!profile) {
-      return;
+      return { avatarUrl: null, receiptUrls: [] };
     }
 
     await cleanupSpacesForAccountDeletion(userId);
@@ -185,22 +179,14 @@ export const ProfileService = {
       select: { receiptUrl: true },
     });
 
-    await prisma.profile.delete({
-      where: { id: userId },
-    });
-
-    const cleanups: Promise<unknown>[] = [];
-
-    if (profile.avatarUrl) {
-      cleanups.push(deleteAvatar(profile.avatarUrl).catch(() => {}));
-    }
-
-    for (const transaction of receipts) {
-      if (transaction.receiptUrl) {
-        cleanups.push(deleteReceipt(transaction.receiptUrl).catch(() => {}));
-      }
-    }
-
-    await Promise.all(cleanups);
+    // Keep all application rows until auth.admin.deleteUser succeeds. The
+    // auth.users/profile foreign keys cascade the application data, while
+    // retaining the profile makes a failed auth deletion fully retryable.
+    return {
+      avatarUrl: profile.avatarUrl,
+      receiptUrls: receipts.flatMap((transaction) =>
+        transaction.receiptUrl ? [transaction.receiptUrl] : [],
+      ),
+    };
   },
 };
