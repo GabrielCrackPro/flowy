@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.31](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.30...flowy-v0.1.31) (2026-08-13)
+
+
+### Features
+
+* **status:** ship status and settings improvements ([#161](https://github.com/GabrielCrackPro/flowy/issues/161)) ([1904fe0](https://github.com/GabrielCrackPro/flowy/commit/1904fe07d41622c33289a8f2f82893bd22a16f47))
+
 ## [0.1.30](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.29...flowy-v0.1.30) (2026-08-12)
 
 
