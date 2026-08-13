@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const API_DIR = join(ROOT, "src", "app", "api");
 const SPEC_FILE = join(ROOT, "public", "openapi.json");
-const EXCLUDED_DIRS = new Set(["docs"]);
+const EXCLUDED_DIRS = new Set(["docs", "admin"]);
 
 const HTTP_METHODS = ["get", "post", "put", "patch", "delete"];
 const HANDLER_RE = /export\s+async\s+function\s+(GET|POST|PUT|PATCH|DELETE)\b/g;
