@@ -6,7 +6,11 @@ import {
   withRateLimit,
 } from "@/lib/api/route-utils";
 import { ProfileService } from "@/lib/services/profiles";
-import { deleteAvatar, deleteReceipt } from "@/lib/services/storage";
+import {
+  deleteAvatar,
+  deleteReceipt,
+  deleteSpaceAvatar,
+} from "@/lib/services/storage";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function DELETE() {
@@ -42,6 +46,9 @@ export async function DELETE() {
     }
     for (const receiptUrl of cleanup.receiptUrls) {
       cleanups.push(deleteReceipt(receiptUrl).catch(() => undefined));
+    }
+    for (const spaceAvatarUrl of cleanup.spaceAvatarUrls) {
+      cleanups.push(deleteSpaceAvatar(spaceAvatarUrl).catch(() => undefined));
     }
     await Promise.all(cleanups);
 
