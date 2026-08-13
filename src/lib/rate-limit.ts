@@ -93,6 +93,10 @@ export const DEFAULT_RATE_LIMITS: Record<string, RateLimitConfig> = {
     requests: getEnvNumber("RATE_LIMIT_PUSH_PREFERENCES_REQUESTS", 20),
     window: getEnvNumber("RATE_LIMIT_PUSH_PREFERENCES_WINDOW", 120 * 1000),
   },
+  pushSubscription: {
+    requests: getEnvNumber("RATE_LIMIT_PUSH_SUBSCRIPTION_REQUESTS", 30),
+    window: getEnvNumber("RATE_LIMIT_PUSH_SUBSCRIPTION_WINDOW", 120 * 1000),
+  },
 
   // File uploads are heavier payloads — stricter than plain writes
   upload: {
@@ -128,6 +132,12 @@ export const DEFAULT_RATE_LIMITS: Record<string, RateLimitConfig> = {
   statusPreferences: {
     requests: getEnvNumber("RATE_LIMIT_STATUS_PREFERENCES_REQUESTS", 20),
     window: getEnvNumber("RATE_LIMIT_STATUS_PREFERENCES_WINDOW", 120 * 1000),
+  },
+
+  // Push delivery history — read-only per-user notification audit
+  pushDeliveryHistory: {
+    requests: getEnvNumber("RATE_LIMIT_PUSH_DELIVERY_HISTORY_REQUESTS", 60),
+    window: getEnvNumber("RATE_LIMIT_PUSH_DELIVERY_HISTORY_WINDOW", 120 * 1000),
   },
 
   // Default limit for unconfigured routes

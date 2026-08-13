@@ -11,6 +11,7 @@ import { cn } from "@lib/utils";
 import type { DatePreset } from "@utils/date-range";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { useDateRangeFilter } from "@/hooks/filter";
 import { CalendarIcon, Check, ChevronLeft, X } from "@/lib/icons";
 import type { FilterField } from "@/types/ui";
@@ -30,6 +31,16 @@ export function DateRangeFilter({
   onChange,
   t,
 }: DateRangeFilterProps) {
+  const [compact, setCompact] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 639px)");
+    const update = () => setCompact(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
   const {
     open,
     setOpen,
@@ -57,7 +68,10 @@ export function DateRangeFilter({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={
-          <FilterButton active={isActive}>
+          <FilterButton
+            active={isActive}
+            className="max-sm:w-full max-sm:justify-between"
+          >
             <Icon icon={CalendarIcon} className="size-4 shrink-0" />
 
             <span className="max-w-36 truncate">{currentLabel}</span>
@@ -81,7 +95,7 @@ export function DateRangeFilter({
 
       <PopoverContent
         align="start"
-        className="min-w-52 w-auto p-2 border-border/30 shadow-xl rounded-xl"
+        className="w-auto max-w-[calc(100vw-2rem)] min-w-52 overflow-x-auto rounded-xl border-border/30 p-2 shadow-xl"
         sideOffset={8}
       >
         {view === "presets" ? (
@@ -159,7 +173,7 @@ export function DateRangeFilter({
                   range?.to ? format(range.to, "yyyy-MM-dd") : undefined,
                 );
               }}
-              numberOfMonths={2}
+              numberOfMonths={compact ? 1 : 2}
               className="rounded-lg"
             />
           </div>

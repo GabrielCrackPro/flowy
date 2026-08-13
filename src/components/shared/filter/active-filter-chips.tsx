@@ -38,8 +38,8 @@ export function ActiveFilterChips({
       const to = filters.dateTo;
       chips.push({
         key: "date",
-        label: "Fecha",
-        value: to ? `${value} - ${to}` : `Desde ${value}`,
+        label: t("filters.date"),
+        value: to ? `${value} - ${to}` : `${t("filters.from")} ${value}`,
       });
       continue;
     }
@@ -47,8 +47,8 @@ export function ActiveFilterChips({
       if (filters.dateFrom) continue;
       chips.push({
         key: "date",
-        label: "Fecha",
-        value: `Hasta ${value}`,
+        label: t("filters.date"),
+        value: `${t("filters.until")} ${value}`,
       });
       continue;
     }
@@ -111,10 +111,14 @@ export function ActiveFilterChips({
               duration: 0.2,
               ease: "easeOut",
             }}
-            className="group inline-flex items-center gap-2 rounded-xl border border-border/30 bg-gradient-to-r from-primary/8 via-primary/5 to-primary/[0.02] px-3 py-1.5 text-[11px] font-medium text-foreground/90 shadow-sm hover:shadow-md hover:border-primary/30 transition"
+            className="group inline-flex max-w-full items-center gap-2 rounded-xl border border-border/30 bg-gradient-to-r from-primary/8 via-primary/5 to-primary/[0.02] px-3 py-1.5 text-[11px] font-medium text-foreground/90 shadow-sm transition hover:border-primary/30 hover:shadow-md"
           >
-            <span className="text-muted-foreground/60">{chip.label}:</span>
-            <span className="font-medium">{chip.value}</span>
+            <span className="shrink-0 text-muted-foreground/60">
+              {chip.label}:
+            </span>
+            <span className="min-w-0 max-w-full break-words font-medium">
+              {chip.value}
+            </span>
             <motion.button
               type="button"
               whileHover={{ scale: 1.15, rotate: 90 }}

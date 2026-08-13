@@ -139,7 +139,7 @@ export function EntityListView<T>({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.25 }}
-        className="flex items-center gap-3"
+        className="flex items-center gap-3 max-[420px]:flex-col max-[420px]:items-stretch"
       >
         <SearchInput
           value={searchQuery}
@@ -147,7 +147,11 @@ export function EntityListView<T>({
           placeholder={searchPlaceholder}
           className="min-w-0 flex-1"
         />
-        <ViewToggle value={view} onChange={onViewChange} className="shrink-0" />
+        <ViewToggle
+          value={view}
+          onChange={onViewChange}
+          className="shrink-0 max-[420px]:self-end"
+        />
       </motion.div>
 
       <motion.div

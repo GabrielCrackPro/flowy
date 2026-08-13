@@ -14,3 +14,23 @@ export const DEPENDENT_QUERY_KEYS: Record<string, string[]> = {
   subscriptions: ["dashboard", "notifications"],
   categories: ["transactions", "budgets", "dashboard"],
 };
+
+// Realtime uses the same dependency graph as local and offline mutations. Keep
+// non-entity views here too so a remote write refreshes every affected screen.
+export const REALTIME_QUERY_KEYS: Record<string, string[]> = {
+  transactions: [
+    "transactions",
+    SINGULAR_QUERY_KEYS.transactions,
+    ...DEPENDENT_QUERY_KEYS.transactions,
+  ],
+  budgets: ["budgets", ...DEPENDENT_QUERY_KEYS.budgets],
+  goals: ["goals", ...DEPENDENT_QUERY_KEYS.goals],
+  subscriptions: ["subscriptions", ...DEPENDENT_QUERY_KEYS.subscriptions],
+  categories: ["categories", ...DEPENDENT_QUERY_KEYS.categories],
+  comments: ["comments"],
+  activities: ["activities"],
+  profiles: ["profile", "push-preferences", "status-preferences"],
+  push_subscriptions: ["push-subscriptions"],
+  push_deliveries: ["push-delivery-history", "push-subscriptions"],
+  space_members: ["spaces", "profile"],
+};

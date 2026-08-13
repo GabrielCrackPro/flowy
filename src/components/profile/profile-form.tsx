@@ -196,10 +196,11 @@ export function ProfileForm({
         </div>
       )}
 
-      <div className="flex justify-end gap-3">
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
         <Button
           type="button"
           variant="ghost"
+          className="w-full sm:w-auto"
           onClick={() => {
             form.reset();
             onCancel?.();
@@ -208,7 +209,11 @@ export function ProfileForm({
         >
           {t("common.cancel")}
         </Button>
-        <Button type="submit" disabled={form.busy} className="gap-1.5">
+        <Button
+          type="submit"
+          disabled={form.busy}
+          className="w-full gap-1.5 sm:w-auto"
+        >
           {form.busy ? (
             <>
               <Icon icon={Loader2} className="size-4 animate-spin" />

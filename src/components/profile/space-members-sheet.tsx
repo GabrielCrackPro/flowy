@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { UserAvatar } from "@/components/shared";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SheetClose } from "@/components/ui/sheet";
 import { SheetLayout } from "@/components/ui/sheet-layout";
@@ -79,16 +80,26 @@ export function SpaceMembersSheet({
       >
         <div className="space-y-4">
           {owner && (
-            <div className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/20 p-4">
-              <div className="flex items-center gap-3">
-                <UserAvatar profile={owner.user} size="sm" />
-                <div>
-                  <p className="font-medium">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-border/40 bg-muted/20 p-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <UserAvatar
+                  key={owner.user.avatarUrl ?? "owner-avatar"}
+                  profile={owner.user}
+                  size="sm"
+                />
+                <div className="min-w-0">
+                  <p className="truncate font-medium">
                     {owner.user.name ?? owner.user.email ?? t("profile.user")}
                   </p>
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                     <Crown className="size-3 text-amber-500" />
                     {t("profile.spaces.owner")}
+                    <Badge
+                      variant="outline"
+                      className="h-5 px-1.5 text-[10px] text-amber-600 dark:text-amber-400"
+                    >
+                      {t("profile.spaces.roleOwner")}
+                    </Badge>
                   </div>
                 </div>
               </div>
@@ -103,25 +114,39 @@ export function SpaceMembersSheet({
               {regularMembers.map((member) => (
                 <div
                   key={member.id}
-                  className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/20 p-4"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border/40 bg-muted/20 p-4"
                 >
-                  <div className="flex items-center gap-3">
-                    <UserAvatar profile={member.user} size="sm" />
-                    <div>
-                      <p className="font-medium">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <UserAvatar
+                      key={member.user.avatarUrl ?? member.user.id}
+                      profile={member.user}
+                      size="sm"
+                    />
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">
                         {member.user.name ??
                           member.user.email ??
                           t("profile.user")}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="truncate text-xs text-muted-foreground">
                         {member.user.email ?? t("profile.noEmail")}
                       </p>
-                      <p className="inline-flex items-center gap-1 text-xs text-muted-foreground/70">
-                        <CalendarDays className="size-3" />
-                        {t("profile.spaces.joinedOn", {
-                          date: formatDate(member.joinedAt, i18n.language),
-                        })}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="inline-flex items-center gap-1 text-xs text-muted-foreground/70">
+                          <CalendarDays className="size-3" />
+                          {t("profile.spaces.joinedOn", {
+                            date: formatDate(member.joinedAt, i18n.language),
+                          })}
+                        </p>
+                        <Badge
+                          variant="outline"
+                          className="h-5 px-1.5 text-[10px] text-muted-foreground"
+                        >
+                          {member.role === "owner"
+                            ? t("profile.spaces.roleOwner")
+                            : t("profile.spaces.roleMember")}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                   {isOwner && (

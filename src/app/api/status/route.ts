@@ -2,6 +2,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/api/route-utils";
 import { StatusService } from "@/lib/services/status";
 
+let lastSuccessfulStatus: {
+  body: Record<string, unknown>;
+  at: string;
+} | null = null;
+
 /**
  * Public status endpoint backing the GitHub-style status page.
  *
@@ -33,7 +38,7 @@ export async function GET(request: NextRequest) {
         StatusService.listMaintenance(),
       ]);
 
-    return NextResponse.json({
+    const body = {
       ...snapshot,
       history: bars,
       uptime,
@@ -41,12 +46,26 @@ export async function GET(request: NextRequest) {
       latency,
       incidents,
       maintenance,
-    });
+      stale: false,
+      lastSuccessfulAt: snapshot.generatedAt,
+    };
+    lastSuccessfulStatus = { body, at: snapshot.generatedAt };
+    return NextResponse.json(body);
   } catch (error) {
     console.error("Status check failed:", error);
+    if (lastSuccessfulStatus) {
+      return NextResponse.json(
+        {
+          ...lastSuccessfulStatus.body,
+          stale: true,
+          lastSuccessfulAt: lastSuccessfulStatus.at,
+        },
+        { headers: { "X-Status-Stale": "true" } },
+      );
+    }
     return NextResponse.json(
       {
-        status: "down",
+        overall: "down",
         components: [],
         generatedAt: new Date().toISOString(),
         history: {},
@@ -55,6 +74,8 @@ export async function GET(request: NextRequest) {
         latency: {},
         incidents: [],
         maintenance: [],
+        stale: false,
+        lastSuccessfulAt: null,
       },
       { status: 503 },
     );

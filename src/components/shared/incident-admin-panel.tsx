@@ -431,6 +431,9 @@ export function IncidentAdminPanel() {
   const [deleteTarget, setDeleteTarget] = useState<IncidentRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [updateTarget, setUpdateTarget] = useState<IncidentRecord | null>(null);
+  const [previewTarget, setPreviewTarget] = useState<IncidentRecord | null>(
+    null,
+  );
   const [publishingId, setPublishingId] = useState<string | null>(null);
   // All incidents start expanded; clicking the header toggles them.
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
@@ -616,28 +619,28 @@ export function IncidentAdminPanel() {
   return (
     <section
       aria-label={t("status.incidents.title")}
-      className="mt-8 rounded-2xl border border-border/40 bg-muted/10 p-5"
+      className="mt-8 border-t border-border/30 pt-5"
     >
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Icon icon={Activity} className="size-4" />
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Icon icon={Activity} className="size-3.5" />
           </span>
-          <div>
+          <div className="min-w-0">
             <h2 className="text-sm font-semibold tracking-tight">
               {t("status.incidents.title")}
             </h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="truncate text-[11px] text-muted-foreground">
               {t("status.incidents.description")}
             </p>
           </div>
         </div>
         <Button
           size="sm"
-          className="gap-1.5"
+          className="h-8 shrink-0 gap-1.5 px-2.5"
           onClick={() => setCreateOpen(true)}
         >
-          <Plus className="size-4" />
+          <Plus className="size-3.5" />
           {t("status.incidents.create")}
         </Button>
       </div>
@@ -648,9 +651,11 @@ export function IncidentAdminPanel() {
           {t("common.loading")}
         </div>
       ) : incidents.length === 0 ? (
-        <div className="flex items-center gap-2 rounded-xl border border-dashed border-border/60 px-4 py-6 text-sm text-muted-foreground">
-          <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
-          {t("status.incidents.none")} — {t("status.incidents.noneHint")}
+        <div className="flex items-center gap-2 rounded-lg bg-muted/25 px-3 py-2.5 text-xs text-muted-foreground">
+          <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />
+          <span>
+            {t("status.incidents.none")} — {t("status.incidents.noneHint")}
+          </span>
         </div>
       ) : (
         <div className="space-y-2.5">
@@ -783,7 +788,7 @@ export function IncidentAdminPanel() {
                         size="sm"
                         className="gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
                         disabled={publishingId === incident.id}
-                        onClick={() => publishDraft(incident)}
+                        onClick={() => setPreviewTarget(incident)}
                       >
                         {publishingId === incident.id ? (
                           <Loader2 className="size-3.5 animate-spin" />
@@ -872,6 +877,83 @@ export function IncidentAdminPanel() {
         }
         onConfirm={() => void confirmDelete()}
       />
+
+      {/* Draft preview before publishing publicly */}
+      <SheetLayout
+        open={previewTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setPreviewTarget(null);
+        }}
+        title={t("status.incidents.preview")}
+        description={t("status.incidents.previewHint")}
+        icon={Send}
+        iconGradient="from-primary/20 to-primary/10"
+        iconColor="text-primary"
+        maxWidth="sm:max-w-[500px]"
+        footerRight={
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setPreviewTarget(null)}
+              disabled={publishingId !== null}
+              className="h-10"
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                if (!previewTarget) return;
+                void publishDraft(previewTarget).then(() =>
+                  setPreviewTarget(null),
+                );
+              }}
+              disabled={publishingId !== null}
+              className="h-10 gap-1.5"
+            >
+              {publishingId !== null ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Send className="size-4" />
+              )}
+              {t("status.incidents.publish")}
+            </Button>
+          </>
+        }
+      >
+        {previewTarget && (
+          <article className="space-y-3 rounded-xl border border-border/50 bg-background/60 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge
+                variant="outline"
+                className={cn("border", STATUS_STYLES[previewTarget.status])}
+              >
+                {t(`status.incidents.status.${previewTarget.status}`)}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={cn("border", SEVERITY_BADGE[previewTarget.severity])}
+              >
+                {t(`status.incidents.severity.${previewTarget.severity}`)}
+              </Badge>
+              {previewTarget.component && (
+                <Badge variant="outline">
+                  {t(
+                    `status.component${previewTarget.component[0].toUpperCase()}${previewTarget.component.slice(1)}`,
+                  )}
+                </Badge>
+              )}
+            </div>
+            <h3 className="text-base font-semibold">{previewTarget.title}</h3>
+            {previewTarget.message && (
+              <p className="text-sm text-muted-foreground">
+                {previewTarget.message}
+              </p>
+            )}
+          </article>
+        )}
+      </SheetLayout>
 
       {/* Post an update to an existing incident */}
       <SheetLayout

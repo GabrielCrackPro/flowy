@@ -125,11 +125,22 @@ function MemberStack({ space }: { space: SpaceSummary }) {
                 },
               )}`}
               className={cn(
-                "flex size-6 items-center justify-center rounded-full text-[0.6rem] font-semibold ring-2 ring-background",
+                "relative flex size-6 items-center justify-center overflow-hidden rounded-full text-[0.6rem] font-semibold ring-2 ring-background",
                 avatarColor(user.id),
               )}
             >
               {initial}
+              {user.avatarUrl ? (
+                /* biome-ignore lint/performance/noImgElement: Avatars are served from Supabase public storage. */
+                <img
+                  src={user.avatarUrl}
+                  alt={user.name ?? user.email ?? t("profile.user")}
+                  className="absolute inset-0 size-full rounded-full object-cover"
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+              ) : null}
             </span>
           );
         })}
@@ -240,6 +251,23 @@ export function SpaceCard({
                 {t("profile.spaces.shared")}
               </Badge>
             )}
+
+            <Badge
+              variant="outline"
+              className={cn(
+                "gap-1 border-border/50 text-[10px]",
+                isOwner
+                  ? "text-amber-600 dark:text-amber-400"
+                  : "text-muted-foreground",
+              )}
+            >
+              <Icon icon={isOwner ? Crown : Users} className="size-3" />
+              {t(
+                isOwner
+                  ? "profile.spaces.roleOwner"
+                  : "profile.spaces.roleMember",
+              )}
+            </Badge>
           </div>
 
           <p className="mt-1 text-sm text-muted-foreground">
@@ -267,7 +295,7 @@ export function SpaceCard({
         </div>
       </div>
 
-      <div className="relative flex flex-wrap items-center justify-between gap-3 border-t border-border/40 px-5 py-3.5">
+      <div className="relative flex flex-col gap-3 border-t border-border/40 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <MemberStack space={space} />
 
@@ -297,7 +325,7 @@ export function SpaceCard({
           ) : null}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {isOwner && !space.isPersonal ? (
             <Button
               variant="outline"

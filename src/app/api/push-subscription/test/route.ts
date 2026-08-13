@@ -2,15 +2,18 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import {
+  applyRateLimitHeaders,
   handleApiError,
   isAuthResponse,
   requireAuth,
+  withRateLimit,
 } from "@/lib/api/route-utils";
 import { PushService } from "@/lib/services/push";
 
 const testSchema = z.object({
   title: z.string().min(1).max(80),
   description: z.string().max(160).optional(),
+  subscriptionId: z.string().uuid().optional(),
 });
 
 /**
@@ -22,6 +25,8 @@ export async function POST(request: NextRequest) {
   if (isAuthResponse(auth)) {
     return auth;
   }
+  const rateLimitResponse = await withRateLimit(auth.id, "pushSubscription");
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     const body = await request.json().catch(() => null);
@@ -30,13 +35,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Datos inválidos" }, { status: 400 });
     }
 
-    const delivery = await PushService.sendTestToUser(auth.id, {
-      title: parsed.data.title,
-      description: parsed.data.description,
-      url: "/dashboard",
-    });
+    const delivery = await PushService.sendTestToUser(
+      auth.id,
+      {
+        title: parsed.data.title,
+        description: parsed.data.description,
+        url: "/dashboard",
+      },
+      parsed.data.subscriptionId,
+    );
 
-    return NextResponse.json({ ok: true, sent: delivery.sent });
+    const response = NextResponse.json({ ok: true, sent: delivery.sent });
+    return applyRateLimitHeaders(response, auth.id, "pushSubscription");
   } catch (error) {
     return handleApiError(error, "Failed to send test notification");
   }

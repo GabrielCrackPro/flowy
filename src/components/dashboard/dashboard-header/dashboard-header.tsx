@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocaleContext } from "@/context/LocaleContext";
+import { usePwa } from "@/hooks/usePwa";
 import { classifyError, RateLimitError } from "@/lib/errors/error-types";
 import {
   Calendar,
@@ -49,6 +50,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
   const handleRefresh = () => refetch();
   const { t } = useTranslation();
   const { locale } = useLocaleContext();
+  const { isStandalone } = usePwa();
   const profileLoading = !profile;
   const GreetingIcon = getGreetingIcon(locale);
   const greetingGradient = getGreetingGradient();
@@ -151,22 +153,26 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
                   className="min-w-0 truncate text-xs sm:text-sm"
                 />
               )}
-              <span aria-hidden className="h-4 w-px bg-border/70" />
-              <motion.button
-                type="button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleRefresh}
-                disabled={isFetching}
-                aria-label={t("dashboard.refresh")}
-                aria-busy={isFetching}
-                className="flex h-7 shrink-0 cursor-pointer items-center justify-center rounded-full px-1.5 text-xs font-medium text-muted-foreground/70 transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 sm:px-2"
-              >
-                <Icon
-                  icon={RefreshCcw}
-                  className={cn("size-3.5", isFetching && "animate-spin")}
-                />
-              </motion.button>
+              {!isStandalone && (
+                <>
+                  <span aria-hidden className="h-4 w-px bg-border/70" />
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleRefresh}
+                    disabled={isFetching}
+                    aria-label={t("dashboard.refresh")}
+                    aria-busy={isFetching}
+                    className="flex h-7 shrink-0 cursor-pointer items-center justify-center rounded-full px-1.5 text-xs font-medium text-muted-foreground/70 transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 sm:px-2"
+                  >
+                    <Icon
+                      icon={RefreshCcw}
+                      className={cn("size-3.5", isFetching && "animate-spin")}
+                    />
+                  </motion.button>
+                </>
+              )}
             </motion.div>
             <DashboardCustomize compact />
           </div>

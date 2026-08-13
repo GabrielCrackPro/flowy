@@ -8,6 +8,7 @@ import { pushApi } from "@/lib/api/push";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const SERVICE_WORKER_PATH = "/sw.js";
+const KEEP_PUSH_WORKER_KEY = "flowy-push-worker-enabled";
 
 function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -117,6 +118,10 @@ export function usePushNotifications() {
     if (!state.supported || !state.configured) return;
     setState((prev) => ({ ...prev, busy: true }));
     try {
+      // Development cleanup normally removes leftover service workers. Keep
+      // it alive while push setup is in progress so it cannot race with the
+      // subscription flow and force the user to subscribe again.
+      sessionStorage.setItem(KEEP_PUSH_WORKER_KEY, "true");
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
         setState((prev) => ({ ...prev, permission, busy: false }));
@@ -142,10 +147,19 @@ export function usePushNotifications() {
         });
       }
 
+      const installationType =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        ("standalone" in navigator &&
+          Boolean(
+            (navigator as Navigator & { standalone?: boolean }).standalone,
+          ))
+          ? "pwa"
+          : "browser";
       await pushApi.subscribe({
         endpoint: subscription.endpoint,
         p256dh: arrayBufferToBase64Url(subscription.getKey("p256dh")),
         auth: arrayBufferToBase64Url(subscription.getKey("auth")),
+        installationType,
       });
 
       setState((prev) => ({
@@ -154,6 +168,11 @@ export function usePushNotifications() {
         subscribed: true,
       }));
     } catch (error) {
+      try {
+        sessionStorage.removeItem(KEEP_PUSH_WORKER_KEY);
+      } catch {
+        // Storage may be unavailable in private browsing.
+      }
       console.error("Could not enable push notifications", error);
       toast.error(t("settings.notifications.enableError"));
     } finally {
@@ -170,6 +189,11 @@ export function usePushNotifications() {
       if (subscription) {
         await pushApi.unsubscribe(subscription.endpoint).catch(() => undefined);
         await subscription.unsubscribe();
+      }
+      try {
+        sessionStorage.removeItem(KEEP_PUSH_WORKER_KEY);
+      } catch {
+        // Storage may be unavailable in private browsing.
       }
       setState((prev) => ({ ...prev, subscribed: false }));
     } catch (error) {

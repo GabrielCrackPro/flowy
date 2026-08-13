@@ -1,6 +1,6 @@
 import webpush from "web-push";
-
 import { prisma } from "@/lib/prisma/client";
+import { PUSH_ALERTS_DISABLED } from "@/lib/push-preferences";
 
 export interface PushAlertPayload {
   title: string;
@@ -11,10 +11,71 @@ export interface PushAlertPayload {
   type?: string;
   /** Status component, used to honor per-component status alert preferences. */
   component?: string;
+  /** Alert severity, used to honor per-severity status preferences. */
+  severity?: string;
 }
 
 const NOTIFICATION_ICON = "/icons/icon-192.png";
 const NOTIFICATION_TTL_SECONDS = 60 * 60 * 24; // 24h
+
+type DeliveryStatus = "sent" | "failed" | "removed";
+
+function summarizeDeliveryError(error: unknown): string {
+  const statusCode = (error as { statusCode?: number }).statusCode;
+  if (statusCode === 404 || statusCode === 410) {
+    return "subscription_expired";
+  }
+  if (typeof statusCode === "number") {
+    return `provider_http_${statusCode}`;
+  }
+  return "provider_rejected_delivery";
+}
+
+async function recordDelivery({
+  userId,
+  subscriptionId,
+  alert,
+  status,
+  error,
+}: {
+  userId: string;
+  subscriptionId: string;
+  alert: PushAlertPayload;
+  status: DeliveryStatus;
+  error?: string;
+}): Promise<void> {
+  try {
+    const now = new Date();
+    await prisma.pushDelivery.create({
+      data: {
+        userId,
+        subscriptionId,
+        type: alert.type ?? "status",
+        component: alert.component ?? null,
+        severity: alert.severity ?? null,
+        title: alert.title,
+        status,
+        error: error?.slice(0, 1000) ?? null,
+      },
+    });
+    await prisma.pushSubscription.update({
+      where: { id: subscriptionId },
+      data: {
+        lastSeenAt: now,
+        lastDeliveryAt: now,
+        lastDeliveryStatus: status,
+        ...(status === "failed"
+          ? {
+              failureCount: { increment: 1 },
+              lastFailureReason: error?.slice(0, 200) ?? null,
+            }
+          : { failureCount: 0, lastFailureReason: null }),
+      },
+    });
+  } catch (recordError) {
+    console.error("Push delivery history failed:", recordError);
+  }
+}
 
 function getWebPushClient(): typeof webpush | null {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -49,18 +110,28 @@ export const PushService = {
   async sendTestToUser(
     userId: string,
     test: PushAlertPayload,
+    subscriptionId?: string,
   ): Promise<{ sent: number; removed: number }> {
     // A unique tag per test keeps each send a fresh toast: reusing the same
     // tag makes the OS silently *update* the previous toast instead of
     // popping a new one, which reads as "notifications stopped working".
-    return this.sendAlertsToUser(userId, [
-      { ...test, tag: test.tag ?? `flowy-test-${Date.now()}` },
-    ]);
+    return this.sendAlertsToUser(
+      userId,
+      [
+        {
+          ...test,
+          type: test.type ?? "test",
+          tag: test.tag ?? `flowy-test-${Date.now()}`,
+        },
+      ],
+      subscriptionId,
+    );
   },
 
   async sendAlertsToUser(
     userId: string,
     alerts: PushAlertPayload[],
+    subscriptionId?: string,
   ): Promise<{ sent: number; removed: number }> {
     const client = getWebPushClient();
     if (!client || alerts.length === 0) {
@@ -68,23 +139,32 @@ export const PushService = {
     }
 
     // Honor per-alert-type push preferences. An empty stored list means all
-    // types are enabled (legacy default); alerts without a type (test pushes)
+    // types are enabled (legacy default), while the explicit sentinel means
+    // all financial alerts are disabled. Alerts without a type (test pushes)
     // always go through.
     const profile = await prisma.profile.findUnique({
       where: { id: userId },
       select: { pushPreferences: true },
     });
     const prefs = profile?.pushPreferences ?? [];
-    const enabled = prefs.length === 0 ? null : new Set(prefs);
+    const enabled = prefs.includes(PUSH_ALERTS_DISABLED)
+      ? new Set<string>()
+      : prefs.length === 0
+        ? null
+        : new Set(prefs);
     const toSend = alerts.filter(
-      (alert) => !alert.type || !enabled || enabled.has(alert.type),
+      (alert) =>
+        alert.type === "test" ||
+        !alert.type ||
+        !enabled ||
+        enabled.has(alert.type),
     );
     if (toSend.length === 0) {
       return { sent: 0, removed: 0 };
     }
 
     const subscriptions = await prisma.pushSubscription.findMany({
-      where: { userId },
+      where: { userId, ...(subscriptionId ? { id: subscriptionId } : {}) },
     });
 
     let sent = 0;
@@ -114,9 +194,24 @@ export const PushService = {
             { TTL: NOTIFICATION_TTL_SECONDS },
           );
           sent += 1;
+          await recordDelivery({
+            userId,
+            subscriptionId: subscription.id,
+            alert,
+            status: "sent",
+          });
         } catch (error) {
           const statusCode = (error as { statusCode?: number }).statusCode;
-          if (statusCode === 404 || statusCode === 410) {
+          const deliveryStatus: DeliveryStatus =
+            statusCode === 404 || statusCode === 410 ? "removed" : "failed";
+          await recordDelivery({
+            userId,
+            subscriptionId: subscription.id,
+            alert,
+            status: deliveryStatus,
+            error: summarizeDeliveryError(error),
+          });
+          if (deliveryStatus === "removed") {
             await prisma.pushSubscription.deleteMany({
               where: { id: subscription.id },
             });
@@ -163,6 +258,7 @@ export const PushService = {
         id: true,
         statusAlertsEnabled: true,
         statusAlertComponents: true,
+        statusAlertSeverities: true,
       },
     });
     const prefsByUser = new Map(
@@ -171,6 +267,7 @@ export const PushService = {
         {
           enabled: p.statusAlertsEnabled,
           components: p.statusAlertComponents,
+          severities: p.statusAlertSeverities,
         },
       ]),
     );
@@ -184,13 +281,17 @@ export const PushService = {
       const enabled = prefs ? prefs.enabled : true;
       if (!enabled) continue;
       const allowedComponents = prefs ? prefs.components : [];
+      const allowedSeverities = prefs ? prefs.severities : [];
 
       for (const alert of alerts) {
-        // Empty component list = all components (legacy default).
+        // Empty component/severity lists = all values (legacy default).
         if (
-          alert.component &&
-          allowedComponents.length > 0 &&
-          !allowedComponents.includes(alert.component)
+          (alert.component &&
+            allowedComponents.length > 0 &&
+            !allowedComponents.includes(alert.component)) ||
+          (alert.severity &&
+            allowedSeverities.length > 0 &&
+            !allowedSeverities.includes(alert.severity))
         ) {
           continue;
         }
@@ -214,9 +315,24 @@ export const PushService = {
             { TTL: NOTIFICATION_TTL_SECONDS },
           );
           sent += 1;
+          await recordDelivery({
+            userId: subscription.userId,
+            subscriptionId: subscription.id,
+            alert,
+            status: "sent",
+          });
         } catch (error) {
           const statusCode = (error as { statusCode?: number }).statusCode;
-          if (statusCode === 404 || statusCode === 410) {
+          const deliveryStatus: DeliveryStatus =
+            statusCode === 404 || statusCode === 410 ? "removed" : "failed";
+          await recordDelivery({
+            userId: subscription.userId,
+            subscriptionId: subscription.id,
+            alert,
+            status: deliveryStatus,
+            error: summarizeDeliveryError(error),
+          });
+          if (deliveryStatus === "removed") {
             await prisma.pushSubscription.deleteMany({
               where: { id: subscription.id },
             });
