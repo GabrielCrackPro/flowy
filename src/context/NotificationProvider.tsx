@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   createContext,
   type ReactNode,
+  Suspense,
   useContext,
   useEffect,
   useMemo,
@@ -71,10 +72,24 @@ function sortByCreatedAtDesc(alerts: InboxAlert[]): InboxAlert[] {
   );
 }
 
-export function NotificationProvider({ children }: { children: ReactNode }) {
+function NotificationGate({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  return (
+    <NotificationProviderImpl pathname={pathname}>
+      {children}
+    </NotificationProviderImpl>
+  );
+}
+
+function NotificationProviderImpl({
+  children,
+  pathname,
+}: {
+  children: ReactNode;
+  pathname: string;
+}) {
   const { user } = useAuth();
   const { profile } = useProfile();
-  const pathname = usePathname();
   const queryClient = useQueryClient();
   const isDashboardHome = pathname === "/dashboard";
 
@@ -254,6 +269,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       {children}
       <Toaster />
     </AlertInboxContext.Provider>
+  );
+}
+
+export function NotificationProvider({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <NotificationGate>{children}</NotificationGate>
+    </Suspense>
   );
 }
 
