@@ -2,6 +2,21 @@
   "currentVersion": "0.1.31",
   "entries": [
     {
+      "version": "0.1.31",
+      "date": "2026-08-13",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "ship status and settings improvements (#161)",
+              "scope": "status"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.30",
       "date": "2026-08-12",
       "sections": [
