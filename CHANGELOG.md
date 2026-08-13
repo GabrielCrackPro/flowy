@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.32](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.31...flowy-v0.1.32) (2026-08-13)
+
+
+### Features
+
+* **auth:** ship MFA, OTP input, and auth flow polish ([#165](https://github.com/GabrielCrackPro/flowy/issues/165)) ([3f1d837](https://github.com/GabrielCrackPro/flowy/commit/3f1d837d06fc8f306851e7a641aae7e14134c00f))
+
 ## [0.1.31](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.30...flowy-v0.1.31) (2026-08-13)
 
 
