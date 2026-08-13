@@ -49,5 +49,8 @@ supabase/.temp
 # Freebuff agent workspace
 .freebuff/
 
+# one-time database/storage prune scripts (kept locally for future resets)
+/scripts/prune/
+
 .vercel
 .env*

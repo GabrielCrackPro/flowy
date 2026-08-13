@@ -91,8 +91,8 @@ export function MfaSetupBanner() {
           transition={{ duration: 0.2, ease: "easeInOut" }}
           className="overflow-hidden"
         >
-          <div className="px-4 py-2">
-            <div className="mx-auto w-full max-w-7xl">
+          <div className="py-2">
+            <div className="mx-auto w-full max-w-7xl px-3 sm:px-4">
               <Banner
                 severity="info"
                 icon={ShieldCheck}
