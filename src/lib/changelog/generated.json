@@ -2,6 +2,21 @@
   "currentVersion": "0.1.34",
   "entries": [
     {
+      "version": "0.1.34",
+      "date": "2026-08-13",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "in-app admin management, complete account lifecycle, responsive banners (#173)",
+              "scope": "auth"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.33",
       "date": "2026-08-13",
       "sections": [
