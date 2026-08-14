@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.35](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.34...flowy-v0.1.35) (2026-08-14)
+
+
+### Features
+
+* **ui:** unify mobile chrome for browsers and installed PWAs ([#177](https://github.com/GabrielCrackPro/flowy/issues/177)) ([c29e6c1](https://github.com/GabrielCrackPro/flowy/commit/c29e6c11a9cce495c011390354602f6e1eb2c69f))
+
 ## [0.1.34](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.33...flowy-v0.1.34) (2026-08-13)
 
 
