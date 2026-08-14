@@ -57,11 +57,16 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+  // Mobile-first: the action spans the full card width on its own row below
+  // the title. From `sm` it moves to the top-right column spanning both rows.
+  // (Kept as plain classes rather than `col-span-full`-style overrides from
+  // consumers: Tailwind orders `col-start-*` after `col-span-*`, so a base
+  // `col-start-2` would silently win and squeeze the title on mobile.)
   return (
     <div
       data-slot="card-action"
       className={cn(
-        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+        "col-span-full row-start-2 w-full justify-self-stretch self-start sm:col-span-1 sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:w-auto sm:justify-self-end",
         className,
       )}
       {...props}

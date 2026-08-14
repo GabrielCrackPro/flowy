@@ -46,19 +46,22 @@ export default function DashboardLayout({
           className="flex-1 overflow-y-auto"
           data-scroll-container
         >
-          <Suspense
-            fallback={
-              <div className="mx-auto w-full max-w-7xl p-4">{children}</div>
-            }
-          >
-            <PageTransition>
-              <PullToRefresh>
-                <PwaShell>
+          {/* Keep the mobile shell (bottom nav + FAB) OUTSIDE the page
+              transition and Suspense so it stays mounted across route
+              changes — otherwise the active pill snaps instead of gliding. */}
+          <PwaShell>
+            <Suspense
+              fallback={
+                <div className="mx-auto w-full max-w-7xl p-4">{children}</div>
+              }
+            >
+              <PageTransition>
+                <PullToRefresh>
                   <div className="mx-auto w-full max-w-7xl p-4">{children}</div>
-                </PwaShell>
-              </PullToRefresh>
-            </PageTransition>
-          </Suspense>
+                </PullToRefresh>
+              </PageTransition>
+            </Suspense>
+          </PwaShell>
         </main>
       </div>
     </div>

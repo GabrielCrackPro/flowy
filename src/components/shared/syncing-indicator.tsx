@@ -20,7 +20,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui";
 import { useOfflineStatus } from "@/context/OfflineProvider";
-import { usePwa } from "@/hooks/usePwa";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { Activity, Clock, Info, Loader2, Wifi, WifiOff } from "@/lib/icons";
 import type { OverallStatus } from "@/lib/services/status";
 import { cn } from "@/lib/utils";
@@ -147,7 +147,7 @@ function SystemStatusIndicator({ status }: { status: OverallStatus | null }) {
 
 export function SyncingIndicator({ className }: { className?: string }) {
   const { t, i18n } = useTranslation();
-  const { isStandalone } = usePwa();
+  const isMobile = useIsMobile();
   const {
     isOnline,
     pendingCount,
@@ -160,15 +160,6 @@ export function SyncingIndicator({ className }: { className?: string }) {
   const prevPathnameRef = useRef(pathname);
   const [open, setOpen] = useState(false);
   const [settled, setSettled] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 639px)");
-    const update = () => setIsMobile(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
 
   // Pulse the green dot once whenever a flush successfully syncs changes.
   // `lastSyncEventId` is a monotonic counter, so it also keys the animation
@@ -254,7 +245,7 @@ export function SyncingIndicator({ className }: { className?: string }) {
       : syncing
         ? t("dashboard.syncing")
         : t("dashboard.synced");
-  const useDialog = isStandalone || isMobile;
+  const useDialog = isMobile;
 
   if (useDialog) {
     return (
