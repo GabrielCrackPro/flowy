@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useHaptic } from "@/hooks/useHaptic";
-import { usePwa } from "@/hooks/usePwa";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { queryClient } from "@/lib/react-query/client";
 
 const PULL_THRESHOLD = 80; // px before refresh triggers on release
@@ -46,20 +46,19 @@ function Spinner() {
 type Phase = "idle" | "pulling" | "threshold-reached" | "refreshing";
 
 /**
- * Pull-to-refresh gesture for installed PWAs.
+ * Pull-to-refresh gesture for mobile viewports — browsers and installed PWAs
+ * alike, so both behave identically.
  *
  * When the user overscrolls at the very top of the scroll container (touch only),
  * a subtle indicator appears. Pull past 80 px, release, and every active TanStack
  * Query query is refetched — no full page reload.
- *
- * Only enables itself when the app is running in `display-mode: standalone`.
  */
 export function PullToRefresh({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
   const controls = useAnimation();
   const haptic = useHaptic();
-  const { isStandalone } = usePwa();
+  const isMobile = useIsMobile();
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [distance, setDistance] = useState(0);
@@ -67,7 +66,7 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
   const refreshing = useRef(false);
-  const enabled = isStandalone;
+  const enabled = isMobile;
 
   // ── Touch handlers ──────────────────────────────────────────────
   const onTouchStart = useCallback(
@@ -158,7 +157,7 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
     }
   }, [phase, distance, controls]);
 
-  // Don't render the touch wrapper at all when not in standalone mode
+  // Don't render the touch wrapper at all on desktop
   if (!enabled) return <>{children}</>;
 
   // ── Label ───────────────────────────────────────────────────────

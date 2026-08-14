@@ -33,7 +33,7 @@ export function TransactionDetailSkeleton() {
             <Skeleton className="mb-2 h-3 w-24" />
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <Skeleton className="h-11 w-64 sm:w-72" />
+                <Skeleton className="h-11 w-full max-w-64 sm:max-w-72" />
                 <Skeleton className="mt-3 h-4 w-40" />
               </div>
               <Skeleton variant="rounded" className="size-12 rounded-2xl" />

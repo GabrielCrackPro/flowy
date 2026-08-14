@@ -282,7 +282,8 @@ export function Banner({
     );
   }
 
-  const showActions = Boolean(actionLabel && onAction) || Boolean(onDismiss);
+  const hasAction = Boolean(actionLabel && onAction);
+  const showActions = hasAction || Boolean(onDismiss);
 
   return (
     <div
@@ -299,47 +300,67 @@ export function Banner({
         )}
       />
 
-      <div
-        className={cn(
-          "flex w-full items-center gap-3",
-          showActions && "flex-wrap sm:flex-nowrap",
-        )}
-      >
-        {onBodyClick ? (
-          <Button
-            variant="ghost"
-            onClick={onBodyClick}
-            className={cn(
-              "flex min-w-0 flex-1 items-center gap-3 rounded-lg text-left",
-              "cursor-pointer hover:opacity-90",
-            )}
-          >
-            <BannerBody
-              Icon={Icon}
-              title={title}
-              description={description}
-              iconClass={style.icon}
-            />
-          </Button>
-        ) : (
-          <div className="flex min-w-0 flex-1 items-center gap-3 rounded-lg text-left">
-            <BannerBody
-              Icon={Icon}
-              title={title}
-              description={description}
-              iconClass={style.icon}
-            />
-          </div>
-        )}
+      {/* Stacks on mobile (icon + text with dismiss top-right, action
+          full-width below); single row with actions right-aligned on sm+. */}
+      <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
+        <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
+          {onBodyClick ? (
+            <Button
+              variant="ghost"
+              onClick={onBodyClick}
+              className={cn(
+                "flex min-w-0 flex-1 items-start gap-3 rounded-lg text-left sm:items-center",
+                "cursor-pointer hover:opacity-90",
+              )}
+            >
+              <BannerBody
+                Icon={Icon}
+                title={title}
+                description={description}
+                iconClass={style.icon}
+              />
+            </Button>
+          ) : (
+            <div className="flex min-w-0 flex-1 items-start gap-3 rounded-lg text-left sm:items-center">
+              <BannerBody
+                Icon={Icon}
+                title={title}
+                description={description}
+                iconClass={style.icon}
+              />
+            </div>
+          )}
+
+          {/* Dismiss on mobile — pinned top-right so it never cramps the text. */}
+          {onDismiss && (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={dismissLabel}
+              onClick={onDismiss}
+              className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-none hover:bg-muted/60 hover:text-foreground sm:hidden"
+            >
+              <X className="size-3.5" />
+            </Button>
+          )}
+        </div>
 
         {showActions && (
-          <div className="ml-auto flex shrink-0 items-center gap-1.5">
-            {actionLabel && onAction && (
+          <div
+            className={cn(
+              "flex w-full shrink-0 items-center gap-1.5 sm:ml-auto sm:w-auto",
+              // With no action button the actions row only carries the desktop
+              // dismiss (the mobile one lives top-right), so hide it on mobile
+              // to avoid an empty row creating a phantom gap.
+              !hasAction && "hidden sm:flex",
+            )}
+          >
+            {hasAction && (
               <Button
                 size="sm"
                 onClick={onAction}
                 className={cn(
-                  "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ring-1 ring-inset",
+                  "flex w-full shrink-0 items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ring-1 ring-inset sm:w-auto",
                   "bg-none hover:bg-none",
                   style.button,
                 )}
@@ -355,7 +376,7 @@ export function Banner({
                 size="icon"
                 aria-label={dismissLabel}
                 onClick={onDismiss}
-                className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-none hover:bg-muted/60 hover:text-foreground"
+                className="hidden size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-none hover:bg-muted/60 hover:text-foreground sm:flex"
               >
                 <X className="size-3.5" />
               </Button>

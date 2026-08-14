@@ -5,22 +5,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared/icon";
-import { usePwa } from "@/hooks/usePwa";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { Plus } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 /**
  * Floating action button for quick transaction entry.
  *
- * Only renders in PWA standalone mode on the dashboard overview page
- * (where it's most useful for capturing a quick expense on the go).
+ * Renders on mobile viewports (browser and installed PWA alike) on the
+ * dashboard overview page — where it's most useful for capturing a quick
+ * expense on the go. Hidden on desktop.
  */
 export function PwaFab() {
-  const { isStandalone } = usePwa();
+  const isMobile = useIsMobile();
   const pathname = usePathname();
   const { t } = useTranslation();
 
-  if (!isStandalone) return null;
+  if (!isMobile) return null;
   if (pathname !== "/dashboard") return null;
 
   return (

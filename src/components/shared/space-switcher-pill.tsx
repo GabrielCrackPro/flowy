@@ -80,6 +80,7 @@ export function SpaceSwitcherPill({ className }: { className?: string }) {
       <DropdownMenuTrigger
         className={cn(
           "group inline-flex max-w-44 items-center gap-1.5 rounded-full border border-primary/20 bg-gradient-to-r from-primary/10 to-primary/5 py-1 pl-1.5 pr-2.5 text-xs font-medium text-primary shadow-[0_1px_2px_rgba(0,0,0,0.03)] outline-none transition hover:border-primary/40 hover:shadow-[0_2px_6px_rgba(0,0,0,0.05)] data-open:border-primary/40",
+          "max-sm:gap-1 max-sm:py-0.5 max-sm:pl-1 max-sm:pr-1.5",
           className,
         )}
       >
@@ -90,10 +91,10 @@ export function SpaceSwitcherPill({ className }: { className?: string }) {
           avatarUrl={activeSpace?.avatarUrl}
           className="size-5 text-[0.6rem]"
         />
-        <span className="truncate">{displayName}</span>
+        <span className="min-w-0 truncate">{displayName}</span>
         <Icon
           icon={ChevronsUpDown}
-          className="size-3 shrink-0 opacity-50 transition group-hover:opacity-100"
+          className="hidden size-3 shrink-0 opacity-50 transition group-hover:opacity-100 sm:block"
         />
       </DropdownMenuTrigger>
 

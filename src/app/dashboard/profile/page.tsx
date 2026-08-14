@@ -172,7 +172,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               {!loading && profile && !editing ? (
-                <CardAction className="col-span-full row-start-2 w-full justify-self-stretch sm:col-span-1 sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:w-auto sm:justify-self-end">
+                <CardAction>
                   <div className="flex justify-end gap-1.5">
                     <ThemeCustomizationSheet label />
                     <Button
@@ -410,7 +410,7 @@ export default function SettingsPage() {
                   </CardDescription>
                 </div>
               </div>
-              <CardAction className="col-span-full row-start-2 w-full justify-self-stretch sm:col-span-1 sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:w-auto sm:justify-self-end">
+              <CardAction>
                 <div className="flex flex-wrap justify-end gap-2">
                   <Button
                     asChild
