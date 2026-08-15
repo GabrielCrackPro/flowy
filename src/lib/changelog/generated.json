@@ -2,6 +2,21 @@
   "currentVersion": "0.1.37",
   "entries": [
     {
+      "version": "0.1.37",
+      "date": "2026-08-15",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "inline space management, banner stack and PWA sheet polish (#184)",
+              "scope": "ui"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.36",
       "date": "2026-08-15",
       "sections": [
