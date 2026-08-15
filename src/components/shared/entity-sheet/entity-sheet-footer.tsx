@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Sparkles, X } from "@/lib/icons";
-import { cn } from "@/lib/utils";
 import { Icon } from "../icon";
+import { SheetActionFooter } from "./sheet-action-footer";
 
 interface EntitySheetFooterProps {
   onCancel: () => void;
@@ -30,42 +30,43 @@ export function EntitySheetFooter({
   const { t } = useTranslation();
 
   return (
-    <div
-      className={cn(
-        "border-t border-border/50 bg-gradient-to-r from-muted/30 to-transparent px-6 py-4 flex-col-reverse items-stretch gap-2 shrink-0 sm:flex-row sm:items-center sm:justify-between",
-        className,
-      )}
-    >
-      <Button
-        variant="ghost"
-        onClick={onCancel}
-        disabled={isSubmitting}
-        className="h-10 w-full sm:w-auto"
-      >
-        <X className="size-4 mr-2" />
-        {t("common.cancel")}
-      </Button>
-      <Button
-        onClick={onSubmit}
-        disabled={!canSubmit}
-        className="h-10 w-full gap-1.5 shadow-sm sm:w-auto"
-      >
-        {isSubmitting ? (
-          <>
-            <motion.div
-              className="size-4 rounded-full border-2 border-current border-t-transparent"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            />
-            {t("common.saving")}
-          </>
-        ) : (
-          <>
-            {submitLabel}
-            <Icon icon={submitIcon} className="size-4" />
-          </>
-        )}
-      </Button>
-    </div>
+    <SheetActionFooter
+      className={className}
+      start={
+        <Button
+          variant="ghost"
+          onClick={onCancel}
+          disabled={isSubmitting}
+          className="h-10 w-full rounded-xl text-muted-foreground hover:text-foreground sm:w-auto sm:px-3"
+        >
+          <X className="mr-2 size-4" />
+          {t("common.cancel")}
+        </Button>
+      }
+      end={
+        <Button
+          onClick={onSubmit}
+          disabled={!canSubmit}
+          aria-busy={isSubmitting}
+          className="h-12 w-full gap-2 rounded-xl font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 sm:h-10 sm:w-auto sm:min-w-28"
+        >
+          {isSubmitting ? (
+            <>
+              <motion.div
+                className="size-4 rounded-full border-2 border-current border-t-transparent"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
+              {t("common.saving")}
+            </>
+          ) : (
+            <>
+              {submitLabel}
+              <Icon icon={submitIcon} className="size-4" />
+            </>
+          )}
+        </Button>
+      }
+    />
   );
 }

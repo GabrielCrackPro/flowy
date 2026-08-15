@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { X } from "@/lib/icons";
 import type { FilterField } from "@/types/ui";
 import { Icon } from "../icon";
+import { PaymentMethodIcon } from "../payment-method-icon";
 import { FilterOptionIcon } from "./filter-option-icon";
 
 interface ActiveFilterChipsProps {
@@ -60,7 +61,9 @@ export function ActiveFilterChips({
       value.split(",").includes(option.value),
     );
     const hasRichOptions =
-      selectedOptions?.some((option) => option.icon || option.color) ?? false;
+      selectedOptions?.some(
+        (option) => option.icon || option.color || option.paymentMethod,
+      ) ?? false;
 
     if (hasRichOptions) {
       chips.push({
@@ -81,7 +84,14 @@ export function ActiveFilterChips({
                     : undefined
                 }
               >
-                <FilterOptionIcon option={option} size="xs" />
+                {option.paymentMethod ? (
+                  <PaymentMethodIcon
+                    method={option.paymentMethod}
+                    className="size-3 text-muted-foreground"
+                  />
+                ) : (
+                  <FilterOptionIcon option={option} size="xs" />
+                )}
                 {option.label}
               </span>
             ))}
@@ -124,7 +134,9 @@ export function ActiveFilterChips({
               whileHover={{ scale: 1.15, rotate: 90 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => onRemove(chip.key)}
-              className="ml-0.5 flex size-4.5 items-center justify-center rounded-lg text-muted-foreground/40 transition-colors hover:bg-primary/20 hover:text-primary"
+              aria-label={`${t("filters.removeFilter")}: ${chip.label}`}
+              title={`${t("filters.removeFilter")}: ${chip.label}`}
+              className="ml-0.5 flex size-4.5 items-center justify-center rounded-lg text-muted-foreground/40 transition-colors hover:bg-primary/20 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               <Icon icon={X} className="size-3.5" />
             </motion.button>

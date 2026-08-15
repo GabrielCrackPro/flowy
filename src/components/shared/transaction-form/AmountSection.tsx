@@ -70,7 +70,19 @@ export function AmountSection({
           embedded={embedded}
         />
 
-        <div className="mt-5 flex items-baseline gap-2">
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <label
+            htmlFor="transaction-amount"
+            className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+          >
+            {t("transaction.amount")}
+          </label>
+          <span className="text-xs font-medium text-muted-foreground/60">
+            {currency}
+          </span>
+        </div>
+
+        <div className="mt-1 flex items-baseline gap-2">
           {symbolPosition === "before" && (
             <motion.span
               animate={{ scale: [1, 1.05, 1] }}
@@ -84,6 +96,7 @@ export function AmountSection({
             </motion.span>
           )}
           <input
+            id="transaction-amount"
             ref={amountRef}
             value={amountInput.rawAmount}
             onChange={amountInput.handleAmountChange}
@@ -92,6 +105,12 @@ export function AmountSection({
             placeholder="0.00"
             autoComplete="off"
             inputMode="decimal"
+            aria-invalid={amountTouched && amountError ? true : undefined}
+            aria-describedby={
+              amountTouched && amountError
+                ? "transaction-amount-error"
+                : undefined
+            }
             className={cn(
               "w-full min-w-0 bg-transparent font-bold tabular-nums tracking-tight outline-none placeholder:text-muted-foreground/30",
               embedded ? "text-4xl" : "text-4xl sm:text-5xl",
@@ -131,6 +150,7 @@ export function AmountSection({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => amountInput.setAmount(quickAmount)}
+                aria-pressed={parseFloat(amountInput.rawAmount) === quickAmount}
                 className={cn(
                   "rounded-full px-3 py-1 text-xs font-medium tabular-nums transition",
                   parseFloat(amountInput.rawAmount) === quickAmount
@@ -173,6 +193,7 @@ export function AmountSection({
           <motion.p
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
+            id="transaction-amount-error"
             className="mt-2 text-xs text-rose-600 dark:text-rose-400"
           >
             {amountError}

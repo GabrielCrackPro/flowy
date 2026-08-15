@@ -6,7 +6,9 @@ import { useProfile } from "@hooks/useProfile";
 import { buildDashboardCards } from "@utils/dashboard";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 import type { DashboardData } from "@/types/Dashboard";
+import { CARD_BG_GRADIENT, CARD_SHELL, CARD_TOP_ACCENT } from "./card-tokens";
 import { Skeleton } from "./skeleton";
 import { StatsCard, type StatsCardProps } from "./stats-card";
 
@@ -18,16 +20,28 @@ interface StatsCardGroupProps {
 const SKELETON_KEYS = Array.from({ length: 6 }, (_, i) => `stats-sk-${i}`);
 
 const GRID_CLASSES =
-  "grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6";
+  "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6";
 
 function StatsCardSkeleton() {
   return (
-    <Card className="relative h-full gap-0 overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 py-0 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+    <Card
+      className={cn(
+        CARD_SHELL,
+        "relative h-full gap-0 py-0 hover:translate-y-0",
+      )}
+    >
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-primary/[0.03] to-transparent opacity-50" />
+      <div
+        className={cn(
+          CARD_BG_GRADIENT,
+          "from-primary/8 via-primary/[0.03] to-transparent",
+        )}
+      />
 
       {/* Top gradient border */}
-      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-primary via-primary to-primary" />
+      <div
+        className={cn(CARD_TOP_ACCENT, "from-primary via-primary to-primary")}
+      />
 
       <CardHeader className="relative flex flex-row items-center justify-between px-5 pb-3 pt-5">
         <div className="h-3 w-24">

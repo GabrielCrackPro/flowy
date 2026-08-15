@@ -25,6 +25,8 @@ import { Skeleton } from "../skeleton";
 
 export interface Column<T> {
   header: ReactNode;
+  /** Accessible label for sortable columns whose visual header is intentionally hidden. */
+  sortLabel?: string;
   cell: (item: T) => ReactNode;
   className?: string;
   sortable?: boolean;
@@ -178,23 +180,34 @@ export function DataTable<T>({
         className,
       )}
     >
-      <TableRow className="border-b border-border/30 bg-gradient-to-r from-muted/10 to-muted/5">
+      <TableRow className="border-b border-border/30 bg-muted/10 md:bg-gradient-to-r md:from-muted/10 md:to-muted/5">
         {columnMeta.map(({ key, column: col }, index) => (
           <TableHead
             key={key}
+            aria-sort={
+              col.sortable && sortColumn === index
+                ? sortDirection === "asc"
+                  ? "ascending"
+                  : "descending"
+                : "none"
+            }
             className={cn(
-              "h-14 px-4 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70",
+              "h-10 px-2.5 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70 md:h-14 md:px-4 md:py-0 md:text-[11px] md:tracking-widest",
               col.className,
-              col.sortable &&
-                "cursor-pointer select-none transition duration-200 hover:text-foreground/90 hover:bg-muted/30",
             )}
-            onClick={col.sortable ? () => handleSort(index) : undefined}
           >
-            <span className="inline-flex items-center gap-1.5">
-              {col.header}
-              {col.sortable && (
-                <span className="flex flex-col -space-y-1">
-                  <motion.div
+            {col.sortable ? (
+              <button
+                type="button"
+                onClick={() => handleSort(index)}
+                aria-label={
+                  typeof col.header === "string" ? col.header : col.sortLabel
+                }
+                className="inline-flex min-h-8 items-center gap-1 rounded-md text-left transition-colors hover:text-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 md:min-h-10 md:gap-1.5"
+              >
+                {col.header}
+                <span className="hidden flex-col -space-y-1 md:flex">
+                  <motion.span
                     animate={{
                       opacity:
                         sortColumn === index && sortDirection === "asc"
@@ -212,8 +225,8 @@ export function DataTable<T>({
                           : "text-muted-foreground/30",
                       )}
                     />
-                  </motion.div>
-                  <motion.div
+                  </motion.span>
+                  <motion.span
                     animate={{
                       opacity:
                         sortColumn === index && sortDirection === "desc"
@@ -231,10 +244,27 @@ export function DataTable<T>({
                           : "text-muted-foreground/30",
                       )}
                     />
-                  </motion.div>
+                  </motion.span>
                 </span>
-              )}
-            </span>
+                <Icon
+                  icon={
+                    sortColumn === index && sortDirection === "desc"
+                      ? ChevronDown
+                      : ChevronUp
+                  }
+                  className={cn(
+                    "size-3 md:hidden",
+                    sortColumn === index
+                      ? "text-primary"
+                      : "text-muted-foreground/30",
+                  )}
+                />
+              </button>
+            ) : (
+              <span className="inline-flex items-center gap-1.5">
+                {col.header}
+              </span>
+            )}
           </TableHead>
         ))}
       </TableRow>
@@ -320,18 +350,33 @@ export function DataTable<T>({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2, delay: index * 0.02 }}
+                      tabIndex={onRowClick ? 0 : undefined}
+                      aria-label={
+                        onRowClick ? t("common.openDetails") : undefined
+                      }
                       className={cn(
-                        "group transition duration-200 border-b border-border/20 last:border-b-0",
-                        onRowClick && "cursor-pointer hover:bg-primary/5",
+                        "group border-b border-border/20 transition duration-200 last:border-b-0",
+                        onRowClick &&
+                          "cursor-pointer hover:bg-primary/5 focus-visible:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40",
                       )}
                       onClick={onRowClick ? () => onRowClick(item) : undefined}
+                      onKeyDown={
+                        onRowClick
+                          ? (event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                onRowClick(item);
+                              }
+                            }
+                          : undefined
+                      }
                     >
                       {columnMeta.map(({ key, column: col }) => (
                         <TableCell
                           key={key}
                           className={cn(
                             col.className,
-                            "px-4 py-4 group-hover:bg-primary/[0.02] transition-colors",
+                            "px-2.5 py-3 group-hover:bg-primary/[0.02] transition-colors md:px-4 md:py-4",
                           )}
                         >
                           {col.cell(item)}
@@ -380,6 +425,7 @@ export function DataTable<T>({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setPageSizeOpen(!pageSizeOpen)}
+                aria-label={t("pagination.pageSize")}
                 className="flex h-8 items-center gap-1.5 rounded-lg border border-border/30 bg-card pl-2.5 pr-2 text-xs font-medium text-muted-foreground/80 transition duration-200 hover:border-border/50 hover:bg-muted/30 hover:text-foreground focus:border-ring focus:ring-2 focus:ring-primary/20 shadow-sm"
               >
                 {pageSize}
@@ -439,6 +485,7 @@ export function DataTable<T>({
               whileHover={{ scale: page > 1 ? 1.05 : 1 }}
               whileTap={{ scale: page > 1 ? 0.95 : 1 }}
               onClick={() => setPage((p) => p - 1)}
+              aria-label={t("pagination.previousPage")}
               className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition duration-200 hover:bg-muted/30 hover:text-foreground disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-transparent"
             >
               <Icon icon={ChevronLeft} className="size-4" />
@@ -452,6 +499,7 @@ export function DataTable<T>({
               whileHover={{ scale: page < totalPages ? 1.05 : 1 }}
               whileTap={{ scale: page < totalPages ? 0.95 : 1 }}
               onClick={() => setPage((p) => p + 1)}
+              aria-label={t("pagination.nextPage")}
               className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition duration-200 hover:bg-muted/30 hover:text-foreground disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-transparent"
             >
               <Icon icon={ChevronRight} className="size-4" />

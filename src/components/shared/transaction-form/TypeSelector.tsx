@@ -22,7 +22,10 @@ export function TypeSelector({
   const layoutKey = useId();
 
   return (
-    <div className="grid grid-cols-2 gap-1 rounded-2xl bg-background/80 p-1 shadow-inner">
+    <fieldset
+      aria-label={`${expenseLabel} / ${incomeLabel}`}
+      className="m-0 grid grid-cols-2 gap-1 rounded-2xl border-0 bg-background/80 p-1 shadow-inner"
+    >
       {(["EXPENSE", "INCOME"] as const).map((type) => {
         const active = value === type;
         const isExpenseType = type === "EXPENSE";
@@ -32,6 +35,7 @@ export function TypeSelector({
             key={type}
             type="button"
             onClick={() => onChange(type)}
+            aria-pressed={active}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={cn(
@@ -61,6 +65,6 @@ export function TypeSelector({
           </motion.button>
         );
       })}
-    </div>
+    </fieldset>
   );
 }

@@ -2,6 +2,7 @@
 
 import {
   Button,
+  Checkbox,
   Input,
   Select,
   SelectContent,
@@ -421,15 +422,22 @@ export default function RegisterPage() {
           >
             <RHFFormField
               name="acceptedTerms"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormControl>
-                    <label className="flex items-start gap-3 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                      <input
-                        type="checkbox"
+                    <label
+                      htmlFor="accepted-terms"
+                      className="flex items-start gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      <Checkbox
+                        id="accepted-terms"
+                        name={field.name}
                         checked={field.value}
-                        onChange={field.onChange}
-                        className="mt-0.5 size-4 rounded border-border"
+                        onCheckedChange={(checked) =>
+                          field.onChange(checked === true)
+                        }
+                        aria-invalid={fieldState.invalid || undefined}
+                        className="mt-0.5"
                       />
                       <span>{t("common.acceptTerms")}</span>
                     </label>

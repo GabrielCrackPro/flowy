@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
+import { CARD_SHELL } from "./card-tokens";
 
 export function DetailCard({
   children,
@@ -19,7 +20,7 @@ export function DetailCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay }}
       className={cn(
-        "rounded-2xl bg-card shadow-sm ring-1 ring-foreground/5",
+        cn(CARD_SHELL, "rounded-xl hover:translate-y-0"),
         className,
       )}
     >
@@ -40,7 +41,7 @@ export function DetailRow({
   iconClass?: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-muted/30 rounded-lg">
+    <div className="flex items-center justify-between gap-4 rounded-lg px-5 py-3.5 transition-colors hover:bg-muted/40 sm:px-6">
       <div className="flex items-center gap-3 min-w-0">
         <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-muted/50 to-muted/30 text-muted-foreground/60">
           <span
@@ -49,11 +50,11 @@ export function DetailRow({
             {icon}
           </span>
         </div>
-        <span className="text-xs text-muted-foreground/70 truncate font-medium">
+        <span className="truncate text-xs font-medium text-muted-foreground">
           {label}
         </span>
       </div>
-      <span className="text-sm font-medium text-foreground/90 text-right shrink-0">
+      <span className="shrink-0 text-right text-sm font-medium text-foreground">
         {value}
       </span>
     </div>

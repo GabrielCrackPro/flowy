@@ -6,7 +6,31 @@ import {
   withRateLimit,
 } from "@/lib/api/route-utils";
 import { ValidationError } from "@/lib/errors/error-types";
-import { uploadReceipt } from "@/lib/services/storage";
+import { deleteReceiptForUser, uploadReceipt } from "@/lib/services/storage";
+
+export async function DELETE(request: Request) {
+  const auth = await requireAuth();
+  if (isAuthResponse(auth)) return auth;
+
+  const rateLimitResponse = await withRateLimit(auth.id, "upload");
+  if (rateLimitResponse) return rateLimitResponse;
+
+  try {
+    const body = (await request.json()) as { url?: unknown };
+    if (typeof body.url !== "string" || body.url.length === 0) {
+      return NextResponse.json({ error: "invalid_url" }, { status: 400 });
+    }
+
+    await deleteReceiptForUser(auth.id, body.url);
+    return applyRateLimitHeaders(
+      NextResponse.json({ success: true }),
+      auth.id,
+      "upload",
+    );
+  } catch {
+    return NextResponse.json({ error: "delete_failed" }, { status: 400 });
+  }
+}
 
 export async function POST(request: Request) {
   const auth = await requireAuth();

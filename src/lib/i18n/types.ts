@@ -10,6 +10,7 @@ export type AuthTranslationMessages = {
     budgetControlDesc: string;
     securePrivateTitle: string;
     securePrivateDesc: string;
+    tagline: string;
     securityNote: string;
     statusPage: string;
   };
@@ -124,10 +125,12 @@ export type AppTranslationMessages = {
     settings: string;
     personalFinances: string;
     newTransaction: string;
+    addNew: string;
     expandSidebar: string;
     collapseSidebar: string;
     openMenu: string;
     closeMenu: string;
+    more: string;
     mainAriaLabel: string;
   };
   profile: {
@@ -135,8 +138,11 @@ export type AppTranslationMessages = {
     noEmail: string;
     actions: string;
     myProfile: string;
+    longPressHint: string;
     preferences: string;
     signOut: string;
+    signOutConfirmTitle: string;
+    signOutConfirmDescription: string;
     noMerchant: string;
     active: string;
     inactive: string;
@@ -691,6 +697,7 @@ export type AppTranslationMessages = {
     noDeadline: string;
     totalTarget: string;
     totalSaved: string;
+    progress: string;
     completed: string;
     noGoals: string;
     noGoalsDescription: string;
@@ -837,6 +844,7 @@ export type AppTranslationMessages = {
   };
   transaction: {
     pageTitle: string;
+    formHint: string;
     detailTitle: string;
     descriptionField: string;
     descriptionPlaceholder: string;
@@ -879,6 +887,7 @@ export type AppTranslationMessages = {
     deletePermanently: string;
     dateTime: string;
     uploadReceipt: string;
+    viewReceipt: string;
     uploadTooLarge: string;
     dragDropHint: string;
     createdBy: string;
@@ -986,6 +995,7 @@ export type AppTranslationMessages = {
     emptyTitle: string;
     emptyDesc: string;
     emptyAction: string;
+    totalBudget: string;
     income: string;
     expenses: string;
     remaining: string;
@@ -1062,6 +1072,7 @@ export type AppTranslationMessages = {
     typeHint: string;
     noResults: string;
     noResultsDesc: string;
+    tryInstead: string;
     searching: string;
     filterEmpty: string;
     recent: string;
@@ -1079,9 +1090,13 @@ export type AppTranslationMessages = {
   };
   filters: {
     title: string;
+    activeCount: string;
+    removeFilter: string;
     filterAndSearch: string;
     clearAll: string;
     clearFilters: string;
+    clearSelection: string;
+    applyFilters: string;
     noOptions: string;
     selected_one: string;
     selected_other: string;
@@ -1093,6 +1108,9 @@ export type AppTranslationMessages = {
   };
   pagination: {
     of: string;
+    pageSize: string;
+    previousPage: string;
+    nextPage: string;
     closePageSizeMenu: string;
   };
   pwa: {
@@ -1316,6 +1334,7 @@ export type AppTranslationMessages = {
   };
   common: {
     skipToContent: string;
+    language: string;
     cancel: string;
     create: string;
     save: string;
@@ -1346,6 +1365,12 @@ export type AppTranslationMessages = {
     darkMode: string;
     toggleTheme: string;
     noResults: string;
+    openDetails: string;
+    dateActions: {
+      today: string;
+      tomorrow: string;
+      nextWeek: string;
+    };
   };
 };
 

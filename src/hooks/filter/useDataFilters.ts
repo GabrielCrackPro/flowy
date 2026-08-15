@@ -55,13 +55,18 @@ export function useDataFilters({
     }
   }, [debouncedSearch, searchField, values, onChange]);
 
-  const activeFiltersCount = Object.values(values).filter(
-    (value) => value !== undefined && value !== "",
-  ).length;
+  const filterFields = fields.filter((field) => field.type !== "search");
+  const activeFiltersCount = filterFields.reduce((count, field) => {
+    if (field.type === "date-range") {
+      return (
+        count + (values[`${field.key}From`] || values[`${field.key}To`] ? 1 : 0)
+      );
+    }
+
+    return count + (values[field.key] ? 1 : 0);
+  }, 0);
 
   const hasActiveFilters = activeFiltersCount > 0;
-
-  const filterFields = fields.filter((field) => field.type !== "search");
 
   const searchPlaceholder =
     searchField?.placeholder ?? searchField?.label ?? "Buscar";

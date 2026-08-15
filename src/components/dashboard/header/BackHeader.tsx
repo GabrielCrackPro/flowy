@@ -4,6 +4,7 @@ import { Button } from "@components/ui";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared/icon";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { ArrowLeft } from "@/lib/icons";
 
 interface BackHeaderProps {
@@ -17,6 +18,13 @@ interface BackHeaderProps {
 export function BackHeader({ title, href, actions }: BackHeaderProps) {
   const router = useRouter();
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return actions ? (
+      <div className="flex justify-end gap-1">{actions}</div>
+    ) : null;
+  }
 
   return (
     <div className="flex items-center justify-between gap-3">

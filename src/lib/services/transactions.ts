@@ -9,6 +9,7 @@ import type {
 } from "@/types/Transaction";
 import { ActivityService } from "./activities";
 import { SpaceService } from "./spaces/space-service";
+import { deleteReceiptIfUnreferenced } from "./storage";
 import { ensureUserCategory } from "./validators";
 
 type JoinTags<T> = T extends Array<{ category: infer C }> ? C : never;
@@ -19,6 +20,19 @@ const profileIdentity = {
   email: true,
   avatarUrl: true,
 } satisfies Prisma.ProfileSelect;
+
+async function cleanupReceipt(url: string | null | undefined) {
+  if (!url) return;
+
+  try {
+    await deleteReceiptIfUnreferenced(url);
+  } catch (error) {
+    // The database mutation has already succeeded; retain the URL cleanup
+    // failure in logs rather than turning a successful transaction action into
+    // a misleading error response.
+    console.error("Failed to clean up transaction receipt:", error);
+  }
+}
 
 function withTags<
   T extends { tags: Array<{ category: unknown }>; budgetId?: string | null },
@@ -59,7 +73,12 @@ export const TransactionService = {
     }
 
     if (filters?.paymentMethod) {
-      where.paymentMethod = filters.paymentMethod;
+      const paymentMethods = Array.isArray(filters.paymentMethod)
+        ? filters.paymentMethod
+        : [filters.paymentMethod];
+
+      where.paymentMethod =
+        paymentMethods.length > 1 ? { in: paymentMethods } : paymentMethods[0];
     }
 
     if (filters?.isRecurring !== undefined) {
@@ -274,6 +293,7 @@ export const TransactionService = {
       }
     }
 
+    const previousReceiptUrl = existing.receiptUrl;
     const transaction = await prisma.transaction.update({
       where: {
         id,
@@ -322,6 +342,14 @@ export const TransactionService = {
       },
     });
 
+    if (
+      previousReceiptUrl &&
+      data.receiptUrl !== undefined &&
+      data.receiptUrl !== previousReceiptUrl
+    ) {
+      await cleanupReceipt(previousReceiptUrl);
+    }
+
     await ActivityService.record({
       userId,
       type: "transaction.updated",
@@ -349,6 +377,8 @@ export const TransactionService = {
         id,
       },
     });
+
+    await cleanupReceipt(transaction.receiptUrl);
 
     await ActivityService.replaceEntityHistoryWithDeletion({
       userId,
@@ -392,6 +422,15 @@ export const TransactionService = {
         spaceId: activeSpace?.id ?? null,
       },
     });
+
+    const receiptUrls = [
+      ...new Set(
+        transactions.flatMap((transaction) =>
+          transaction.receiptUrl ? [transaction.receiptUrl] : [],
+        ),
+      ),
+    ];
+    await Promise.all(receiptUrls.map((url) => cleanupReceipt(url)));
 
     // Record activity for each deleted transaction
     for (const transaction of transactions) {

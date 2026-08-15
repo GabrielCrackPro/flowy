@@ -20,7 +20,7 @@ import { setI18nLocale } from "@/lib/i18n/client";
 
 export interface LocaleContextValue {
   locale: string;
-  setLocale: (locale: string) => void;
+  setLocale: (locale: string) => Promise<void>;
 }
 
 const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
@@ -28,7 +28,7 @@ const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const { profile, update: updateProfile } = useProfile();
 
-  const [storedLocale] = useState(
+  const [storedLocale, setStoredLocale] = useState(
     () => getLocaleStorage() ?? getLocaleCookie() ?? null,
   );
 
@@ -41,6 +41,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setI18nLocale(locale);
+    document.documentElement.lang = locale;
   }, [locale]);
 
   const setLocale = useCallback(
@@ -48,6 +49,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
       const normalized = normalizeLocale(newLocale);
       setLocaleStorage(normalized);
       setLocaleCookie(normalized);
+      setStoredLocale(normalized);
       if (profile) {
         try {
           await updateProfile({ locale: normalized });
@@ -69,7 +71,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
 export function useLocaleContext() {
   const context = useContext(LocaleContext);
   if (!context) {
-    return { locale: "es", setLocale: () => {} };
+    return { locale: "es", setLocale: async () => {} };
   }
   return context;
 }

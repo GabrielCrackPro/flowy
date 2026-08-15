@@ -173,13 +173,20 @@ export function BudgetFormSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex h-full w-full flex-col p-0 sm:max-w-xl"
+        className="flex w-full flex-col p-0 h-full sm:max-w-xl"
       >
         <EntitySheetHeader
           icon={<BudgetIcon size="lg" />}
           iconGradient="from-primary/20 to-primary/10"
           iconColor="text-primary"
           title={budget ? t("budgets.edit") : t("budgets.new")}
+          subtitle={t("budgets.description")}
+          metadata={
+            <span className="inline-flex items-center gap-1">
+              <Icon icon={Calendar} className="size-3" />
+              {periodLabel}
+            </span>
+          }
         />
 
         <div className="flex-1 overflow-y-auto">

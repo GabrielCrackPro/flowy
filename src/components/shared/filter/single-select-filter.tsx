@@ -8,9 +8,10 @@ import {
   SelectValue,
 } from "@components/ui";
 import { cn } from "@lib/utils";
-import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { PaymentMethodIcon } from "@/components/shared/payment-method-icon";
 import type { FilterField } from "@/types/ui";
+import { FilterFieldIcon } from "./filter-field-icon";
 import { FilterOptionIcon } from "./filter-option-icon";
 
 interface SingleSelectFilterProps {
@@ -30,41 +31,62 @@ export function SingleSelectFilter({
     (option) => option.value === value,
   );
   const hasRichOptions =
-    field.options?.some((option) => option.icon || option.color) ?? false;
+    field.options?.some(
+      (option) => option.icon || option.iconComponent || option.color,
+    ) ?? false;
 
   return (
     <Select
       value={value ?? null}
       onValueChange={(val) => onChange(val || undefined)}
     >
-      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+      <div>
         <SelectTrigger
+          size="sm"
           className={cn(
-            "h-9 min-w-40 gap-2 rounded-xl border px-3.5 text-xs font-medium transition duration-200 shadow-sm max-sm:w-full max-sm:min-w-0 [&>svg]:size-4",
+            "h-11 min-w-40 text-xs max-sm:w-full max-sm:min-w-0 [&>svg]:size-4 sm:h-9",
             active
-              ? "border-primary/40 bg-gradient-to-r from-primary/12 to-primary/6 text-foreground hover:from-primary/16 hover:to-primary/8 shadow-md"
-              : "border-border/30 bg-card text-muted-foreground hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:text-foreground",
+              ? "border-primary/40 bg-primary/8 text-foreground hover:bg-primary/12"
+              : "border-border/40 bg-background/70 text-muted-foreground hover:border-border/70 hover:bg-muted/40 hover:text-foreground",
           )}
+          aria-label={field.label}
         >
-          {hasRichOptions && selectedOption && (
-            <FilterOptionIcon option={selectedOption} size="xs" />
+          <FilterFieldIcon field={field} active={active} />
+          {selectedOption?.paymentMethod ? (
+            <PaymentMethodIcon
+              method={selectedOption.paymentMethod}
+              className="size-3.5 text-muted-foreground"
+            />
+          ) : (
+            hasRichOptions &&
+            selectedOption && (
+              <FilterOptionIcon option={selectedOption} size="xs" />
+            )
           )}
           <SelectValue
             placeholder={field.placeholder ?? t("filters.all")}
             options={field.options}
           />
         </SelectTrigger>
-      </motion.div>
+      </div>
 
-      <SelectContent className="border-border/30 shadow-xl rounded-xl">
+      <SelectContent className="rounded-xl border-border/50 shadow-lg">
         <SelectItem value="">
-          {field.placeholder ?? t("filters.all")}
+          <FilterFieldIcon field={field} />
+          <span>{field.placeholder ?? t("filters.all")}</span>
         </SelectItem>
 
         {field.options?.map((opt) => (
           <SelectItem key={opt.value} value={opt.value}>
-            {hasRichOptions && <FilterOptionIcon option={opt} size="xs" />}
-            {opt.label}
+            {opt.paymentMethod ? (
+              <PaymentMethodIcon
+                method={opt.paymentMethod}
+                className="size-3.5 text-muted-foreground"
+              />
+            ) : (
+              hasRichOptions && <FilterOptionIcon option={opt} size="xs" />
+            )}
+            <span>{opt.label}</span>
           </SelectItem>
         ))}
       </SelectContent>

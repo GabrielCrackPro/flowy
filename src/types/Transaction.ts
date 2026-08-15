@@ -50,7 +50,7 @@ export interface UpdateTransactionInput
 export interface TransactionFilters {
   type?: TransactionType;
   categoryId?: string;
-  paymentMethod?: PaymentMethod;
+  paymentMethod?: PaymentMethod | PaymentMethod[];
   from?: string;
   to?: string;
   isRecurring?: boolean;

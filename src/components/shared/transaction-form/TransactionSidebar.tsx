@@ -13,6 +13,7 @@ import type { Budget } from "@/types/Budget";
 import type { Category } from "@/types/Category";
 import type { PaymentMethod } from "@/types/Transaction";
 import { Icon } from "../icon";
+import { PaymentMethodIcon } from "../payment-method-icon";
 import { CategorySelector } from "./CategorySelector";
 import { DateSelector } from "./DateSelector";
 import { TransactionDetailsRow } from "./TransactionDetailsRow";
@@ -59,9 +60,8 @@ export function TransactionSidebar({
       initial={{ opacity: 0, x: 10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.2 }}
-      className="relative overflow-hidden divide-y divide-border/30 rounded-2xl border border-border/30 bg-card bg-linear-to-br from-primary/5 via-primary/[0.02] to-transparent shadow-[0_2px_8px_rgba(0,0,0,0.04)] py-1"
+      className="divide-y divide-border/40 overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-primary via-primary/50 to-primary" />
       <TransactionDetailsRow
         icon={<Icon icon={CalendarIcon} className="size-4" />}
         label={t("transaction.date")}
@@ -100,7 +100,21 @@ export function TransactionSidebar({
             value={paymentMethod ?? null}
             onValueChange={(val) => onPaymentMethodChange(val ?? undefined)}
           >
-            <SelectTrigger className="w-full border-0 bg-transparent text-right text-sm text-muted-foreground/90 shadow-none focus:ring-0">
+            <SelectTrigger
+              size="sm"
+              className="h-10 w-full rounded-lg border-border/40 bg-background/60 text-right text-sm text-muted-foreground/90 shadow-sm focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/15 [&_[data-slot=select-value]]:justify-end"
+            >
+              {paymentMethod ? (
+                <PaymentMethodIcon
+                  method={paymentMethod}
+                  className="size-4 text-muted-foreground"
+                />
+              ) : (
+                <Icon
+                  icon={CreditCard}
+                  className="size-4 text-muted-foreground"
+                />
+              )}
               <SelectValue
                 placeholder={t("transaction.selectPaymentMethod")}
                 options={getPaymentMethodOptions()}
@@ -109,7 +123,11 @@ export function TransactionSidebar({
             <SelectContent>
               {getPaymentMethodOptions().map((method) => (
                 <SelectItem key={method.value} value={method.value}>
-                  {method.label}
+                  <PaymentMethodIcon
+                    method={method.value}
+                    className="size-4 text-muted-foreground"
+                  />
+                  <span>{method.label}</span>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -125,29 +143,41 @@ export function TransactionSidebar({
         <Switch checked={isRecurring} onCheckedChange={onRecurringChange} />
       </TransactionDetailsRow>
 
-      <TransactionDetailsRow
-        icon={<Icon icon={Wallet} className="size-4" />}
-        label={t("transaction.assignToBudget")}
-        hint={t("transaction.assignToBudgetHint")}
-      >
-        <div className="min-w-0 flex-1">
-          <Select
-            value={budgetId ?? ""}
-            onValueChange={(val) => onBudgetChange(val || undefined)}
-          >
-            <SelectTrigger className="w-full border-0 bg-transparent text-right text-sm text-muted-foreground/90 shadow-none focus:ring-0">
-              <SelectValue placeholder={t("transaction.selectBudget")} />
-            </SelectTrigger>
-            <SelectContent>
-              {budgets.map((budget) => (
-                <SelectItem key={budget.id} value={budget.id}>
-                  {budget.category?.name || `Budget ${budget.id}`}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </TransactionDetailsRow>
+      {budgets.length > 0 && (
+        <TransactionDetailsRow
+          icon={<Icon icon={Wallet} className="size-4" />}
+          label={t("transaction.assignToBudget")}
+          hint={t("transaction.assignToBudgetHint")}
+        >
+          <div className="min-w-0 flex-1">
+            <Select
+              value={budgetId ?? ""}
+              onValueChange={(val) => onBudgetChange(val || undefined)}
+            >
+              <SelectTrigger
+                size="sm"
+                className="h-10 w-full text-right text-sm text-muted-foreground/90 [&_[data-slot=select-value]]:justify-end"
+              >
+                <Icon icon={Wallet} className="size-4 text-muted-foreground" />
+                <SelectValue placeholder={t("transaction.selectBudget")} />
+              </SelectTrigger>
+              <SelectContent>
+                {budgets.map((budget) => (
+                  <SelectItem key={budget.id} value={budget.id}>
+                    <Icon
+                      icon={Wallet}
+                      className="size-4 text-muted-foreground"
+                    />
+                    <span>
+                      {budget.category?.name || `Budget ${budget.id}`}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </TransactionDetailsRow>
+      )}
     </motion.div>
   );
 }

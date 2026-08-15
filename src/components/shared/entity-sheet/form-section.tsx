@@ -23,17 +23,33 @@ export function FormSection({
   className,
   children,
 }: FormSectionProps) {
+  const labelContent = (
+    <>
+      {icon && <Icon icon={icon} className="size-4 text-muted-foreground" />}
+      {label}
+    </>
+  );
+
   return (
     <section className={cn("space-y-2", className)}>
-      <label
-        htmlFor={htmlFor}
-        className="flex items-center gap-2 text-sm font-medium"
-      >
-        {icon && <Icon icon={icon} className="size-4" />}
-        {label}
-      </label>
+      {htmlFor ? (
+        <label
+          htmlFor={htmlFor}
+          className="flex items-center gap-2 text-sm font-medium text-foreground"
+        >
+          {labelContent}
+        </label>
+      ) : (
+        <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+          {labelContent}
+        </div>
+      )}
       {children}
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
       {hint}
     </section>
   );

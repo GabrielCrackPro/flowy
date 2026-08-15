@@ -43,6 +43,7 @@ function buildExportConfig(
   t: Translate,
   locale: string,
   currency: string,
+  logoDataUrl?: string | null,
 ): ExportConfig<Transaction> {
   const income = transactions
     .filter((transaction) => transaction.type === "INCOME")
@@ -54,6 +55,8 @@ function buildExportConfig(
   return {
     title: t("transactions.title"),
     subtitle: t("transactions.description"),
+    summaryLabel: t("dashboard.financialSummary"),
+    logoDataUrl,
     filename: `transactions-${new Date().toISOString().slice(0, 10)}`,
     locale,
     date: new Intl.DateTimeFormat(locale, {
@@ -137,11 +140,14 @@ export function exportCSV(
   downloadCSV(buildExportConfig(transactions, t, locale, currency));
 }
 
-export function exportPDF(
+export async function exportPDF(
   transactions: Transaction[],
   t: Translate,
   locale: string,
   currency: string,
+  logoDataUrl?: string | null,
 ) {
-  downloadPDF(buildExportConfig(transactions, t, locale, currency));
+  await downloadPDF(
+    buildExportConfig(transactions, t, locale, currency, logoDataUrl),
+  );
 }

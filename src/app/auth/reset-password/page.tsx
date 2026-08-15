@@ -69,10 +69,13 @@ export default function ResetPasswordPage() {
         >
           <FormField
             label={t("resetPassword.newPasswordLabel")}
+            htmlFor="reset-new-password"
             error={form.errors.newPassword}
             required
           >
             <Input
+              id="reset-new-password"
+              name="newPassword"
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
               value={form.values.newPassword}
@@ -100,10 +103,13 @@ export default function ResetPasswordPage() {
 
           <FormField
             label={t("resetPassword.confirmPasswordLabel")}
+            htmlFor="reset-confirm-password"
             error={form.errors.confirmPassword}
             required
           >
             <Input
+              id="reset-confirm-password"
+              name="confirmPassword"
               type={showConfirm ? "text" : "password"}
               autoComplete="new-password"
               value={form.values.confirmPassword}

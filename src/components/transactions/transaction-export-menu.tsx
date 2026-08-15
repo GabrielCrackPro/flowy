@@ -1,16 +1,9 @@
 "use client";
 
-import { Icon, toast } from "@components/shared";
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@components/ui";
+import { ResponsiveExportSelector, toast } from "@components/shared";
 import { exportCSV, exportPDF } from "@lib/export-transactions";
 import { useCallback, useRef, useState } from "react";
-import { Download, FileText, Loader2 } from "@/lib/icons";
+import { loadFlowyLogoDataUrl } from "@/lib/export-documents";
 import type { Transaction } from "@/types/Transaction";
 
 type ExportFormat = "csv" | "pdf";
@@ -26,10 +19,9 @@ interface TransactionExportMenuProps {
 
 /**
  * Shared export dropdown (CSV / PDF) for the transactions surface.
- * CSV/PDF generation is synchronous, so the click defers the export one
- * frame to let the pending spinner paint, disables re-entry while running,
- * and reports success/error via toast — no more silent "nothing happened"
- * clicks or double-exports.
+ * Export generation defers one frame so the pending spinner paints before
+ * document work begins, disables re-entry while running, and reports
+ * success/error via toast — no more silent clicks or double-exports.
  */
 export function TransactionExportMenu({
   transactions,
@@ -48,12 +40,14 @@ export function TransactionExportMenu({
 
       // Yield to the browser so the pending state paints before the
       // synchronous CSV/PDF generation blocks the main thread.
-      window.setTimeout(() => {
+      window.setTimeout(async () => {
         try {
+          const logoDataUrl =
+            format === "pdf" ? await loadFlowyLogoDataUrl() : null;
           if (format === "csv") {
             exportCSV(transactions, t, locale, currency);
           } else {
-            exportPDF(transactions, t, locale, currency);
+            await exportPDF(transactions, t, locale, currency, logoDataUrl);
           }
           toast.success(t("transactions.exportSuccess"));
         } catch {
@@ -67,35 +61,17 @@ export function TransactionExportMenu({
     [transactions, locale, currency, t],
   );
 
+  const label = t("transactions.export");
+  const csvLabel = t("transactions.exportCSV");
+  const pdfLabel = t("transactions.exportPDF");
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            disabled={isBusy}
-            aria-busy={isBusy}
-            aria-label={t("transactions.export")}
-            className="size-7 rounded-lg text-muted-foreground/40 hover:bg-muted/60 hover:text-foreground"
-          >
-            <Icon
-              icon={isBusy ? Loader2 : Download}
-              className={`size-3.5 ${isBusy ? "animate-spin" : ""}`}
-            />
-          </Button>
-        }
-      />
-      <DropdownMenuContent align="end" sideOffset={4} className="min-w-40">
-        <DropdownMenuItem disabled={isBusy} onClick={() => handleExport("csv")}>
-          <Icon icon={Download} className="size-3.5" />
-          {t("transactions.exportCSV")}
-        </DropdownMenuItem>
-        <DropdownMenuItem disabled={isBusy} onClick={() => handleExport("pdf")}>
-          <Icon icon={FileText} className="size-3.5" />
-          {t("transactions.exportPDF")}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <ResponsiveExportSelector
+      label={label}
+      csvLabel={csvLabel}
+      pdfLabel={pdfLabel}
+      busy={isBusy}
+      onSelect={handleExport}
+    />
   );
 }

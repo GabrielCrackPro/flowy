@@ -11,7 +11,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 600px)");
+    const mq = window.matchMedia("(max-width: 767px)");
     const update = () => setIsMobile(mq.matches);
     update();
     mq.addEventListener("change", update);
@@ -22,10 +22,18 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <SonnerToaster
       theme={theme as ToasterProps["theme"]}
       position={isMobile ? "bottom-right" : "top-right"}
-      offset={{ top: 76, right: 16 }}
-      mobileOffset={{ top: 76, right: 12, bottom: 16 }}
-      gap={12}
-      visibleToasts={5}
+      offset={{
+        top: 76,
+        right: 16,
+        bottom: "calc(4rem + env(safe-area-inset-bottom, 0px) + 1rem)",
+      }}
+      mobileOffset={{
+        top: 76,
+        right: 12,
+        bottom: "calc(4rem + env(safe-area-inset-bottom, 0px) + 1rem)",
+      }}
+      gap={isMobile ? 8 : 12}
+      visibleToasts={isMobile ? 3 : 5}
       duration={4000}
       toastOptions={{
         unstyled: true,

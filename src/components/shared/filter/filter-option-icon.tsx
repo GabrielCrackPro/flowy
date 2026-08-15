@@ -15,7 +15,8 @@ export function FilterOptionIcon({
   size = "sm",
   className,
 }: FilterOptionIconProps) {
-  const IconComponent = resolveCategoryIcon(option.icon);
+  const IconComponent =
+    option.iconComponent ?? resolveCategoryIcon(option.icon);
 
   const sizeClass = {
     xs: "size-3.5 rounded-[6px]",

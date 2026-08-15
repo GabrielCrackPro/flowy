@@ -2,6 +2,7 @@
 
 import { Button, Input } from "@components/ui";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Search, X } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { Icon } from "./icon";
@@ -21,6 +22,8 @@ export function SearchInput({
   className,
   inputClassName,
 }: SearchInputProps) {
+  const { t } = useTranslation();
+
   return (
     <div className={cn("relative", className)}>
       <Icon
@@ -28,11 +31,15 @@ export function SearchInput({
         className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground/50"
       />
       <Input
+        type="search"
+        name="search"
+        aria-label={placeholder}
+        autoComplete="off"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={cn(
-          "h-10 rounded-xl border-border/30 bg-muted/20 pl-9 pr-9 text-sm placeholder:text-muted-foreground/40 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 transition-shadow",
+          "h-10 appearance-none rounded-xl border-border/30 bg-muted/20 pl-9 pr-9 text-sm placeholder:text-muted-foreground/40 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 transition-shadow [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
           inputClassName,
         )}
       />
@@ -49,6 +56,8 @@ export function SearchInput({
               variant="ghost"
               size="icon-xs"
               onClick={() => onChange("")}
+              aria-label={t("search.clearSearch")}
+              title={t("search.clearSearch")}
               className="size-7 text-muted-foreground/40 hover:bg-muted/60 hover:text-foreground"
             >
               <Icon icon={X} className="size-3.5" />

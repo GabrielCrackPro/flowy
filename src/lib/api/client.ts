@@ -31,28 +31,132 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export type UploadProgressHandler = (percent: number) => void;
+
+type AuthenticatedRequestInit = RequestInit & {
+  retryCount?: number;
+  onUploadProgress?: UploadProgressHandler;
+};
+
+async function requestWithUploadProgress<T>(
+  url: string,
+  init: RequestInit,
+  headers: Record<string, string>,
+  onUploadProgress: UploadProgressHandler,
+  retryCount: number,
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(init.method ?? "POST", url, true);
+
+    Object.entries(headers).forEach(([key, value]) => {
+      xhr.setRequestHeader(key, value);
+    });
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        onUploadProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error("Network error while uploading"));
+    xhr.onabort = () => reject(new Error("Upload cancelled"));
+    xhr.onload = async () => {
+      const body = xhr.responseText
+        ? (() => {
+            try {
+              return JSON.parse(xhr.responseText) as {
+                error?: string;
+                message?: string;
+                retryAfter?: number;
+                url?: string;
+              };
+            } catch {
+              return null;
+            }
+          })()
+        : null;
+
+      if (xhr.status === 429) {
+        const headerRetryAfter = xhr.getResponseHeader("Retry-After");
+        const retryAfterSeconds = headerRetryAfter
+          ? parseInt(headerRetryAfter, 10)
+          : 5;
+        const finalRetryAfter = body?.retryAfter ?? retryAfterSeconds;
+
+        if (retryCount < 3) {
+          await sleep(finalRetryAfter * 1000 + Math.random() * 1000);
+          try {
+            resolve(
+              await requestWithUploadProgress(
+                url,
+                init,
+                headers,
+                onUploadProgress,
+                retryCount + 1,
+              ),
+            );
+          } catch (error) {
+            reject(error);
+          }
+          return;
+        }
+
+        const error = new Error(
+          body?.message ?? "Too many requests. Please try again later.",
+        ) as RateLimitError;
+        error.retryAfter = finalRetryAfter;
+        error.isRateLimit = true;
+        reject(error);
+        return;
+      }
+
+      if (xhr.status < 200 || xhr.status >= 300) {
+        reject(
+          new Error(body?.message ?? body?.error ?? "Ha ocurrido un error"),
+        );
+        return;
+      }
+
+      resolve((xhr.status === 204 ? undefined : body) as T);
+    };
+
+    xhr.send(init.body as FormData);
+  });
+}
+
 export async function authenticatedRequest<T>(
   url: string,
-  init?: RequestInit & { retryCount?: number },
+  init?: AuthenticatedRequestInit,
 ): Promise<T> {
   const maxRetries = 3; // Number of retry attempts before showing rate limit error
-  const retryCount = init?.retryCount ?? 0;
+  const { retryCount = 0, onUploadProgress, ...requestInit } = init ?? {};
   const accessToken = await getAccessToken();
 
   // Multipart uploads need the browser to set the Content-Type (it includes
   // the boundary); forcing application/json would break them.
-  const isFormData = init?.body instanceof FormData;
+  const isFormData = requestInit.body instanceof FormData;
   const headers: Record<string, string> = {
     ...(isFormData ? {} : { "Content-Type": "application/json" }),
-    ...(init?.headers as Record<string, string> | undefined),
+    ...(requestInit.headers as Record<string, string> | undefined),
   };
 
   if (accessToken) {
     headers.Authorization = `Bearer ${accessToken}`;
   }
 
+  if (onUploadProgress && isFormData) {
+    return requestWithUploadProgress(
+      url,
+      requestInit,
+      headers,
+      onUploadProgress,
+      retryCount,
+    );
+  }
+
   const response = await fetch(url, {
-    ...init,
+    ...requestInit,
     headers,
   });
 
@@ -75,7 +179,7 @@ export async function authenticatedRequest<T>(
 
         // Retry the request with incremented retry count
         return authenticatedRequest<T>(url, {
-          ...init,
+          ...requestInit,
           retryCount: retryCount + 1,
         });
       }

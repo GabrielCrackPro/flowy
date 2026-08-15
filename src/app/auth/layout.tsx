@@ -2,6 +2,7 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { AuthPageTransition } from "@/components/auth/auth-page-transition";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { FlagsProvider } from "@/context/FlagsProvider";
 import { oauthEnabled } from "@/lib/flags";
 import { getServerT, LOCALE_COOKIE, normalizeLocale } from "@/lib/i18n";
@@ -30,7 +31,10 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 transition-colors dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 md:p-7">
-      <ThemeToggle className="fixed right-4 top-4 z-50" />
+      <div className="fixed right-4 top-4 z-50 flex items-center gap-1 rounded-xl border border-slate-200/60 bg-white/75 p-1 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/75">
+        <LanguageSwitcher />
+        <ThemeToggle />
+      </div>
 
       <div className="mx-auto grid min-h-[90vh] max-w-7xl overflow-hidden rounded-3xl border border-slate-200/50 bg-white/80 backdrop-blur-xl shadow-2xl transition-colors dark:border-slate-800/50 dark:bg-slate-900/80 lg:grid-cols-[48%_52%]">
         <aside className="hidden flex-col justify-between bg-gradient-to-br from-primary via-primary/90 to-blue-600 px-12 py-10 text-white lg:flex relative overflow-hidden">
@@ -51,7 +55,9 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
               </div>
               <div className="flex items-center gap-1 text-white/60">
                 <Icon icon={Sparkles} className="size-4" />
-                <span className="text-sm font-medium">Finance Simplified</span>
+                <span className="text-sm font-medium">
+                  {t("layout.tagline")}
+                </span>
               </div>
             </div>
 
@@ -126,7 +132,7 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
               </span>
             </div>
 
-            <div className="flex min-h-[540px] w-full items-center">
+            <div className="flex min-h-0 w-full items-center lg:min-h-[540px]">
               <AuthPageTransition>
                 <FlagsProvider flags={{ oauthEnabled: oauth }}>
                   {children}
@@ -161,11 +167,7 @@ export default function AuthLayout({
 }) {
   return (
     <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          Loading...
-        </div>
-      }
+      fallback={<div className="min-h-screen bg-background" aria-busy="true" />}
     >
       <AuthContent>{children}</AuthContent>
     </Suspense>

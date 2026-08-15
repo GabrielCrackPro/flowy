@@ -159,7 +159,7 @@ export function StatsCard({
         className={cn(
           CARD_SHELL,
           "relative h-full gap-0 overflow-hidden py-0",
-          "hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_rgba(2,6,23,0.3)] dark:hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.7)]",
+          "hover:-translate-y-1",
         )}
       >
         {/* Background gradient */}
@@ -222,7 +222,7 @@ export function StatsCard({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.35, delay: 0.16 }}
-              className="mt-2 text-[13px] leading-snug text-muted-foreground/60"
+              className="mt-2 text-[13px] leading-snug text-muted-foreground"
             >
               {description}
             </Animated.p>
@@ -277,7 +277,7 @@ export function StatsCard({
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3, delay: 0.2 }}
-                      className="text-[11px] leading-none text-muted-foreground/60"
+                      className="text-[11px] leading-none text-muted-foreground"
                     >
                       {trend.label}
                     </Animated.span>

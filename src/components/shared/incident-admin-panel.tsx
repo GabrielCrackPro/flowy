@@ -1,17 +1,16 @@
 "use client";
 
-import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { DatePicker } from "@/components/shared/date-picker";
 import { Icon } from "@/components/shared/icon";
 import { toast } from "@/components/shared/toast";
 import { PromoteAdminCard } from "@/components/status/promote-admin-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import { FormField } from "@/components/ui/form/FormField";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,7 +26,6 @@ import { authenticatedRequest } from "@/lib/api/client";
 import {
   Activity,
   BellRing,
-  Calendar,
   CalendarClock,
   CheckCircle2,
   ChevronDown,
@@ -384,28 +382,16 @@ function ScheduleDateTimeField({
   return (
     <FormField label={label} error={error}>
       <div className="flex items-center gap-2">
-        <Popover>
-          <PopoverTrigger
-            disabled={disabled}
-            className={cn(
-              "flex h-11 min-w-0 flex-1 items-center justify-between gap-2 rounded-xl border border-border/70 bg-background/80 px-3 text-sm shadow-sm transition outline-none",
-              "hover:border-border hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-primary/30",
-              !date && "text-muted-foreground",
-            )}
-          >
-            {date
-              ? format(date, "d MMM yyyy", { locale: dateLocale })
-              : t("status.incidents.pickDate")}
-            <Calendar className="size-4 shrink-0 text-muted-foreground" />
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-auto border-border/30 p-0">
-            <CalendarPicker
-              mode="single"
-              selected={date}
-              onSelect={handleDateSelect}
-            />
-          </PopoverContent>
-        </Popover>
+        <DatePicker
+          date={date}
+          onSelect={handleDateSelect}
+          placeholder={t("status.incidents.pickDate")}
+          locale={dateLocale}
+          disabled={disabled}
+          size="default"
+          align="start"
+          className="min-w-0 flex-1"
+        />
         <TimePicker
           date={date}
           onChange={(next) => onChange(toLocalInput(next))}

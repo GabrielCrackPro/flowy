@@ -4,22 +4,24 @@ import { CategoryIconBadge } from "@components/categories/category-icon";
 import { BackHeader } from "@components/dashboard";
 import {
   ActionsColumn,
+  buildFinanceListActionBar,
   type Column,
   ConfirmDialog,
   CustomColumn,
+  DataExportMenu,
   EmptyState,
   EntityListView,
-  ErrorBoundary,
+  FinancePageShell,
   GradientButton,
   Icon,
   NumberColumn,
-  PageTransition,
   TextColumn,
   type ViewMode,
 } from "@components/shared";
 import { Badge, Button } from "@components/ui";
 import { useCategoryApi } from "@hooks/api/useCategoryApi";
 import { useTransactionApi } from "@hooks/api/useTransactionApi";
+import { useProfile } from "@hooks/useProfile";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
@@ -30,7 +32,7 @@ import {
   CategoryCardSkeleton,
   CategoryFormSheet,
 } from "@/components";
-import { useEntityFormModal } from "@/hooks";
+import { useCreateEntityFromQuery, useEntityFormModal } from "@/hooks";
 import { Pencil, Tags, Trash2, X } from "@/lib/icons";
 import type {
   Category,
@@ -52,6 +54,8 @@ const FILTER_TABS: {
 
 export default function CategoriesPage() {
   const { t } = useTranslation();
+  const { profile } = useProfile();
+  const locale = profile?.locale ?? "es-ES";
 
   const {
     categories,
@@ -59,6 +63,7 @@ export default function CategoriesPage() {
     create,
     update,
     remove,
+    refresh,
     isCreating,
     isUpdating,
   } = useCategoryApi();
@@ -130,6 +135,8 @@ export default function CategoriesPage() {
     isUpdating,
   });
 
+  useCreateEntityFromQuery(openCreate);
+
   const counts = useMemo(
     () => ({
       all: categories.length,
@@ -167,6 +174,89 @@ export default function CategoriesPage() {
     return filtered;
   }, [categories, filter, searchQuery]);
 
+  const exportTotals = useMemo(() => {
+    const income = visible.filter(
+      (category) => category.type === "INCOME",
+    ).length;
+    const expense = visible.filter(
+      (category) => category.type === "EXPENSE",
+    ).length;
+
+    return [
+      {
+        label: t("categories.all"),
+        value: new Intl.NumberFormat(locale).format(visible.length),
+      },
+      {
+        label: t("transactions.income"),
+        value: new Intl.NumberFormat(locale).format(income),
+      },
+      {
+        label: t("transactions.expenses"),
+        value: new Intl.NumberFormat(locale).format(expense),
+      },
+    ];
+  }, [locale, t, visible]);
+
+  const exportColumns = useMemo(
+    () => [
+      {
+        key: "name",
+        header: t("categories.nameLabel"),
+        render: (category: Category) => category.name,
+      },
+      {
+        key: "type",
+        header: t("categories.typeLabel"),
+        render: (category: Category) =>
+          category.type === "INCOME"
+            ? t("transactions.income")
+            : t("transactions.expenses"),
+      },
+      {
+        key: "color",
+        header: t("categories.colorLabel"),
+        render: (category: Category) => category.color ?? "—",
+      },
+    ],
+    [t],
+  );
+
+  const filterAction = (
+    <div className="w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:w-fit">
+      <div className="inline-flex min-w-max items-center gap-1 rounded-xl border border-border/60 bg-card p-1">
+        {FILTER_TABS.map((tab) => (
+          <Button
+            key={tab.value}
+            variant={filter === tab.value ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setFilter(tab.value)}
+            aria-pressed={filter === tab.value}
+            className={cn(
+              "min-h-10 gap-1.5 rounded-lg px-3",
+
+              filter === tab.value
+                ? "shadow-md shadow-primary/20"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {t(tab.labelKey)}
+            <span
+              className={cn(
+                "rounded-full px-1.5 text-xs tabular-nums",
+                filter === tab.value
+                  ? "bg-primary-foreground/20"
+                  : "bg-muted/70",
+              )}
+            >
+              {counts[tab.countKey]}
+            </span>
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+
   const columns: Column<Category>[] = useMemo(
     () => [
       TextColumn({
@@ -181,7 +271,7 @@ export default function CategoriesPage() {
 
       CustomColumn({
         header: t("categories.typeLabel"),
-        className: "hidden sm:table-cell",
+        className: "hidden md:table-cell",
         sortable: true,
         sortValue: (category) => category.type ?? "",
         cell: (category) =>
@@ -212,6 +302,7 @@ export default function CategoriesPage() {
       }),
 
       ActionsColumn({
+        ariaLabel: t("profile.actions"),
         actions: (category) => [
           {
             label: t("categories.edit"),
@@ -232,140 +323,111 @@ export default function CategoriesPage() {
   );
 
   return (
-    <PageTransition>
-      <ErrorBoundary>
-        <div className="space-y-6">
-          <BackHeader
-            title={t("categories.title")}
-            href="/dashboard"
-            actions={
-              <GradientButton onClick={openCreate} fullWidth={false}>
-                <span className="hidden sm:inline">{t("categories.new")}</span>
-              </GradientButton>
+    <FinancePageShell>
+      <BackHeader title={t("categories.title")} href="/dashboard" />
+
+      <p className="text-sm text-muted-foreground">
+        {t("categories.description")}
+      </p>
+
+      <EntityListView
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        searchPlaceholder={t("categories.searchPlaceholder")}
+        view={view}
+        onViewChange={setView}
+        loading={loading}
+        columns={columns}
+        data={visible}
+        keyExtractor={(category) => category.id}
+        gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        emptyState={
+          <EmptyState
+            icon={
+              filter === "ALL" ? (
+                <Icon icon={Tags} className="size-5" />
+              ) : (
+                <Icon icon={X} className="size-5" />
+              )
+            }
+            title={
+              filter === "ALL"
+                ? t("categories.emptyTitle")
+                : t("categories.emptyFilterTitle")
+            }
+            description={
+              filter === "ALL"
+                ? t("categories.emptyDesc")
+                : t("categories.emptyFilterDesc")
+            }
+            action={
+              filter === "ALL" ? (
+                <GradientButton onClick={openCreate} size="sm">
+                  {t("categories.emptyAction")}
+                </GradientButton>
+              ) : undefined
             }
           />
-
-          <p className="text-sm text-muted-foreground">
-            {t("categories.description")}
-          </p>
-
+        }
+        actionBar={buildFinanceListActionBar({
+          filterAction,
+          create: { label: t("categories.new"), onClick: openCreate },
+          exportAction:
+            visible.length > 0 ? (
+              <DataExportMenu
+                data={visible}
+                columns={exportColumns}
+                totals={exportTotals}
+                summaryLabel={t("dashboard.financialSummary")}
+                title={t("categories.title")}
+                subtitle={t("categories.description")}
+                filenamePrefix="categories"
+                locale={locale}
+              />
+            ) : undefined,
+          refresh: {
+            onRefresh: refresh,
+            refreshing: loading,
+            label: t("dashboard.refresh"),
+          },
+        })}
+        renderCard={(category, index) => (
           <motion.div
+            key={category.id}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
+            transition={{ duration: 0.2, delay: index * 0.03 }}
           >
-            <div className="w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:w-fit">
-              <div className="inline-flex min-w-max items-center gap-1 rounded-xl border border-border/30 bg-card p-1">
-                {FILTER_TABS.map((tab) => (
-                  <Button
-                    key={tab.value}
-                    variant={filter === tab.value ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setFilter(tab.value)}
-                    className={cn(
-                      "gap-1.5",
-                      filter === tab.value
-                        ? "shadow-md shadow-primary/20"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {t(tab.labelKey)}
-                    <span
-                      className={cn(
-                        "rounded-full px-1.5 text-xs tabular-nums",
-                        filter === tab.value
-                          ? "bg-primary-foreground/20"
-                          : "bg-muted/70",
-                      )}
-                    >
-                      {counts[tab.countKey]}
-                    </span>
-                  </Button>
-                ))}
-              </div>
-            </div>
+            <CategoryCard
+              category={category}
+              onEdit={openEdit}
+              onDelete={setDeleting}
+              transactionCount={categoryTransactionCounts[category.id] || 0}
+            />
           </motion.div>
+        )}
+        renderSkeletonCard={(index) => <CategoryCardSkeleton index={index} />}
+      />
 
-          <EntityListView
-            searchQuery={searchQuery}
-            onSearchQueryChange={setSearchQuery}
-            searchPlaceholder={t("categories.searchPlaceholder")}
-            view={view}
-            onViewChange={setView}
-            loading={loading}
-            columns={columns}
-            data={visible}
-            keyExtractor={(category) => category.id}
-            gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            emptyState={
-              <EmptyState
-                icon={
-                  filter === "ALL" ? (
-                    <Icon icon={Tags} className="size-5" />
-                  ) : (
-                    <Icon icon={X} className="size-5" />
-                  )
-                }
-                title={
-                  filter === "ALL"
-                    ? t("categories.emptyTitle")
-                    : t("categories.emptyFilterTitle")
-                }
-                description={
-                  filter === "ALL"
-                    ? t("categories.emptyDesc")
-                    : t("categories.emptyFilterDesc")
-                }
-                action={
-                  filter === "ALL" ? (
-                    <GradientButton onClick={openCreate} size="sm">
-                      {t("categories.emptyAction")}
-                    </GradientButton>
-                  ) : undefined
-                }
-              />
-            }
-            renderCard={(category, index) => (
-              <motion.div
-                key={category.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, delay: index * 0.03 }}
-              >
-                <CategoryCard
-                  category={category}
-                  onEdit={openEdit}
-                  onDelete={setDeleting}
-                  transactionCount={categoryTransactionCounts[category.id] || 0}
-                />
-              </motion.div>
-            )}
-            renderSkeletonCard={(index) => (
-              <CategoryCardSkeleton index={index} />
-            )}
-          />
+      <CategoryFormSheet
+        open={formOpen}
+        onOpenChange={closeForm}
+        category={editing}
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+      />
 
-          <CategoryFormSheet
-            open={formOpen}
-            onOpenChange={closeForm}
-            category={editing}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-          />
-
-          <ConfirmDialog
-            open={!!deleting}
-            onOpenChange={(open) => {
-              if (!open) setDeleting(null);
-            }}
-            title={t("categories.delete")}
-            description={t("categories.deleteConfirm")}
-            confirmLabel={t("categories.delete")}
-            cancelLabel={t("transaction.cancel")}
-            onConfirm={handleDelete}
-          />
-        </div>
-      </ErrorBoundary>
-    </PageTransition>
+      <ConfirmDialog
+        open={!!deleting}
+        onOpenChange={(open) => {
+          if (!open) setDeleting(null);
+        }}
+        title={t("categories.delete")}
+        description={t("categories.deleteConfirm")}
+        confirmLabel={t("categories.delete")}
+        cancelLabel={t("transaction.cancel")}
+        onConfirm={handleDelete}
+      />
+    </FinancePageShell>
   );
 }

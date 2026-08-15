@@ -89,7 +89,7 @@ export function CashFlowToolbar({
       />
 
       {/* Inline layers multi-toggle — matches ChartToggle style */}
-      <div className="inline-flex items-center gap-1 rounded-xl border border-border/30 bg-card p-1 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      <div className="inline-flex items-center gap-1 rounded-xl border border-border/60 bg-card p-1 shadow-[var(--shadow-card)]">
         <motion.button
           type="button"
           onClick={() => onToggleGroup("layers")}
@@ -167,7 +167,7 @@ export function CashFlowToolbar({
           "flex h-8 items-center gap-1.5 rounded-xl border px-3 text-xs font-medium transition-colors duration-200",
           showOverlays
             ? "border-primary/40 bg-primary/10 text-primary"
-            : "border-border/30 bg-card text-muted-foreground shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-primary/30 hover:text-foreground",
+            : "border-border/60 bg-card text-muted-foreground shadow-[var(--shadow-card)] hover:border-primary/30 hover:text-foreground",
         )}
       >
         <AnimatePresence>

@@ -44,6 +44,10 @@ function getGreetingGradient() {
   return "from-indigo-500/20 to-indigo-500/10 text-indigo-600 dark:from-indigo-500/30 dark:to-indigo-500/20 dark:text-indigo-400";
 }
 
+function getFirstName(name?: string | null) {
+  return name?.trim().split(/\s+/)[0] || null;
+}
+
 export function DashboardHeader({ month, year }: DashboardHeaderProps) {
   const { profile } = useProfile();
   const { error, isLoading, isFetching, dataUpdatedAt, refetch } =
@@ -53,6 +57,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
   const { locale } = useLocaleContext();
   const isMobile = useIsMobile();
   const profileLoading = !profile;
+  const profileFirstName = getFirstName(profile?.name);
   const GreetingIcon = getGreetingIcon(locale);
   const greetingGradient = getGreetingGradient();
 
@@ -108,7 +113,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
                 {getGreetingMessage(locale)}
                 {profile && (
                   <span className="text-muted-foreground/80">
-                    , {profile.name ?? profile.email ?? t("profile.user")}
+                    , {profileFirstName ?? t("profile.user")}
                   </span>
                 )}
               </span>
@@ -172,7 +177,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
                 className={cn(
-                  "flex min-w-0 items-center gap-2 rounded-full border py-1.5 pl-2 pr-1.5 text-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)] backdrop-blur-sm transition-colors",
+                  "flex min-w-0 items-center gap-2 rounded-full border py-1.5 pl-2 pr-1.5 text-sm shadow-[var(--shadow-card)] backdrop-blur-sm transition-colors",
                   isFetching
                     ? "border-primary/30 bg-primary/[0.04]"
                     : "border-border/30 bg-card/70",
@@ -235,7 +240,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
         }
       />
 
-      <div className="h-px bg-gradient-to-r from-primary/30 via-border/50 to-transparent" />
+      <div className="h-px bg-gradient-to-r from-primary/30 via-border/70 to-transparent" />
     </motion.section>
   );
 }

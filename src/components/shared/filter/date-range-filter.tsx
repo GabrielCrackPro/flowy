@@ -10,13 +10,20 @@ import {
 import { cn } from "@lib/utils";
 import type { DatePreset } from "@utils/date-range";
 import { format } from "date-fns";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  OPTION_ROW_BASE,
+  OPTION_ROW_INTERACTION,
+  OPTION_ROW_SELECTED,
+} from "@/components/ui/control-styles";
 import { useDateRangeFilter } from "@/hooks/filter";
-import { CalendarIcon, Check, ChevronLeft, X } from "@/lib/icons";
+import { useDateLocale } from "@/hooks/useDateLocale";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { Check, ChevronDown, ChevronLeft, X } from "@/lib/icons";
 import type { FilterField } from "@/types/ui";
 import { Icon } from "../icon";
 import { FilterButton } from "./filter-button";
+import { FilterFieldIcon } from "./filter-field-icon";
 
 interface DateRangeFilterProps {
   field: FilterField;
@@ -31,15 +38,9 @@ export function DateRangeFilter({
   onChange,
   t,
 }: DateRangeFilterProps) {
-  const [compact, setCompact] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 639px)");
-    const update = () => setCompact(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
+  const { i18n } = useTranslation();
+  const dateLocale = useDateLocale(i18n.language);
+  const compact = useIsMobile();
 
   const {
     open,
@@ -66,95 +67,124 @@ export function DateRangeFilter({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <FilterButton
-            active={isActive}
-            className="max-sm:w-full max-sm:justify-between"
+      <div className="flex min-w-0 items-center gap-1 max-sm:w-full">
+        <PopoverTrigger
+          render={
+            <FilterButton
+              active={isActive}
+              className="min-w-0 flex-1 max-sm:justify-start"
+              aria-label={field.label}
+            >
+              <FilterFieldIcon field={field} active={isActive} />
+
+              <span className="min-w-0 flex-1 whitespace-nowrap text-left">
+                {currentLabel}
+              </span>
+              <Icon icon={ChevronDown} className="ml-auto size-3 shrink-0" />
+            </FilterButton>
+          }
+        />
+
+        {isActive && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={clear}
+            aria-label={t("filters.clearSelection")}
+            title={t("filters.clearSelection")}
+            className="size-10 shrink-0 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground sm:size-8"
           >
-            <Icon icon={CalendarIcon} className="size-4 shrink-0" />
-
-            <span className="max-w-36 truncate">{currentLabel}</span>
-
-            {isActive && (
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  clear();
-                }}
-                className="ml-1"
-              >
-                <Icon icon={X} className="size-3.5" />
-              </Button>
-            )}
-          </FilterButton>
-        }
-      />
+            <Icon icon={X} className="size-3.5" />
+          </Button>
+        )}
+      </div>
 
       <PopoverContent
         align="start"
-        className="w-auto max-w-[calc(100vw-2rem)] min-w-52 overflow-x-auto rounded-xl border-border/30 p-2 shadow-xl"
+        className={cn(
+          "rounded-xl border-border/50 shadow-lg",
+          view === "presets"
+            ? "w-[min(20rem,calc(100vw-2rem))] p-2.5"
+            : "w-auto max-w-[calc(100vw-2rem)] overflow-x-auto p-1.5",
+        )}
         sideOffset={8}
       >
         {view === "presets" ? (
           <div className="flex flex-col gap-1">
-            <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-              {t("transactions.datePresets.presets")}
+            <div className="mb-1 flex items-center justify-between gap-3 border-b border-border/40 px-1 pb-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="truncate text-xs font-semibold text-foreground">
+                  {field.label}
+                </span>
+                {isActive && (
+                  <span className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary ring-1 ring-primary/20">
+                    1
+                  </span>
+                )}
+              </div>
+              {isActive && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="xs"
+                  onClick={clear}
+                  className="h-8 shrink-0 rounded-lg px-2 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  {t("filters.clearSelection")}
+                </Button>
+              )}
             </div>
 
             {(
               ["today", "currentMonth", "last3months", "custom"] as DatePreset[]
-            ).map((preset, index) => (
-              <motion.div
-                key={preset}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.2, delay: index * 0.05 }}
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
+            ).map((preset) => {
+              const isSelected = currentPreset === preset;
+
+              return (
+                <button
+                  key={preset}
+                  type="button"
                   onClick={() => applyPreset(preset)}
+                  aria-pressed={isSelected}
                   className={cn(
-                    "w-full justify-start gap-3 text-xs",
-                    currentPreset === preset
-                      ? "bg-gradient-to-r from-primary/12 to-primary/6 text-primary font-medium shadow-sm"
-                      : "text-muted-foreground hover:bg-gradient-to-r hover:from-muted/60 hover:to-muted/40 hover:text-foreground",
+                    OPTION_ROW_BASE,
+                    "min-h-11 cursor-pointer justify-start gap-3 px-3",
+                    OPTION_ROW_INTERACTION,
+                    isSelected ? OPTION_ROW_SELECTED : "text-muted-foreground",
+                    "focus-visible:ring-2 focus-visible:ring-primary/30",
                   )}
                 >
-                  <div className="flex size-4.5 shrink-0 items-center justify-center">
-                    {currentPreset === preset && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Icon icon={Check} className="size-3.5" />
-                      </motion.div>
+                  <span
+                    className={cn(
+                      "flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors",
+                      isSelected
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                        : "border-border/60 bg-background",
                     )}
-                  </div>
-
-                  <span>{t(`transactions.datePresets.${preset}`)}</span>
-                </Button>
-              </motion.div>
-            ))}
+                  >
+                    {isSelected && <Icon icon={Check} className="size-3" />}
+                  </span>
+                  <span className="min-w-0 flex-1 text-left font-medium">
+                    {t(`transactions.datePresets.${preset}`)}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         ) : (
           <div>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setView("presets")}
-                className="mb-2 gap-2 text-xs text-muted-foreground hover:bg-gradient-to-r hover:from-muted/60 hover:to-muted/40 hover:text-foreground"
-              >
-                <Icon icon={ChevronLeft} className="size-3.5" />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setView("presets")}
+              className="mb-1 h-9 gap-2 rounded-lg px-2.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <Icon icon={ChevronLeft} className="size-3.5" />
 
-                <span>{t("transactions.datePresets.presets")}</span>
-              </Button>
-            </motion.div>
+              <span>{t("transactions.datePresets.presets")}</span>
+            </Button>
 
             <Calendar
               mode="range"
@@ -174,6 +204,7 @@ export function DateRangeFilter({
                 );
               }}
               numberOfMonths={compact ? 1 : 2}
+              locale={dateLocale}
               className="rounded-lg"
             />
           </div>

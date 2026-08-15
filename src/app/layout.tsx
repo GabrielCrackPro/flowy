@@ -47,7 +47,7 @@ export default function RootLayout({
           <SkipLink />
           <Favicon />
           <ServiceWorkerRegister />
-          <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.16),transparent_42%)]">
+          <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.08),transparent_38%)] dark:bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.12),transparent_38%)]">
             {children}
           </div>
         </Providers>

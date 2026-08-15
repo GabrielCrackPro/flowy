@@ -3,16 +3,20 @@
 import { useCategoryApi, useTransactionApi } from "@hooks/api";
 import { useProfile } from "@hooks/useProfile";
 import { filtersToQueryParams } from "@lib/filters";
-import {
-  EXPENSE_TYPE_KEY,
-  getOptions,
-  PAYMENT_METHOD_KEY,
-} from "@utils/constants";
+import { EXPENSE_TYPE_KEY, PAYMENT_METHOD_KEY } from "@utils/constants";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { bulkDeleteTransactions } from "@/lib/api/transaction";
 import { parseDateOnly } from "@/lib/date-only";
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  ArrowUpDown,
+  CalendarIcon,
+  CreditCard,
+  Tags,
+} from "@/lib/icons";
 import type { TransactionFilters } from "@/types/Transaction";
 import type { FilterField } from "@/types/ui";
 import { useFilterState } from "./useFilterState";
@@ -221,7 +225,10 @@ export function useTransactionsPage() {
           .join(", ");
       }
       if (key === "paymentMethod") {
-        return t(PAYMENT_METHOD_KEY[value] ?? value);
+        return value
+          .split(",")
+          .map((method) => t(PAYMENT_METHOD_KEY[method] ?? method))
+          .join(", ");
       }
       return undefined;
     },
@@ -252,28 +259,47 @@ export function useTransactionsPage() {
         key: "date",
         type: "date-range",
         label: t("transactions.dateRange"),
+        icon: CalendarIcon,
         placeholder: t("transactions.dateRange"),
       },
       {
         key: "type",
         type: "select",
         label: t("transactions.type"),
+        icon: ArrowUpDown,
         placeholder: t("transactions.all"),
-        options: getOptions(EXPENSE_TYPE_KEY, t),
+        options: [
+          {
+            value: "INCOME",
+            label: t(EXPENSE_TYPE_KEY.INCOME),
+            iconComponent: ArrowUpCircle,
+          },
+          {
+            value: "EXPENSE",
+            label: t(EXPENSE_TYPE_KEY.EXPENSE),
+            iconComponent: ArrowDownCircle,
+          },
+        ],
       },
       {
         key: "categoryId",
         type: "multi-select",
         label: t("transactions.category"),
+        icon: Tags,
         placeholder: t("transactions.allCategories"),
         options: categoryOptions,
       },
       {
         key: "paymentMethod",
-        type: "select",
+        type: "multi-select",
         label: t("transactions.paymentMethod"),
+        icon: CreditCard,
         placeholder: t("transactions.allMethods"),
-        options: getOptions(PAYMENT_METHOD_KEY, t),
+        options: Object.entries(PAYMENT_METHOD_KEY).map(([value, key]) => ({
+          value,
+          label: t(key),
+          paymentMethod: value,
+        })),
       },
     ],
     [t, categoryOptions],

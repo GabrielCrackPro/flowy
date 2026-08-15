@@ -1,44 +1,47 @@
 "use client";
 
 import { Button } from "@components/ui";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@components/ui/sheet";
+import { Sheet, SheetContent } from "@components/ui/sheet";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon, TransactionForm, TransactionIcon } from "@/components/shared";
+import {
+  EntitySheetHeader,
+  getDefaultTransactionValues,
+  Icon,
+  TransactionForm,
+  TransactionIcon,
+} from "@/components/shared";
 import { useTransactionApi } from "@/hooks/api";
-import { Plus, X } from "@/lib/icons";
+import { Plus } from "@/lib/icons";
 import type { CreateTransactionSchema } from "@/lib/schemas";
 
 interface NewTransactionProps {
   size?: "sm" | "default";
   openInSheet?: boolean;
+  compactMobile?: boolean;
+  controlledOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 }
-
-const DEFAULT_VALUES: CreateTransactionSchema = {
-  type: "EXPENSE",
-  amount: 0,
-  description: "",
-  date: new Date(),
-  categoryIds: [],
-  isRecurring: false,
-  budgetId: undefined,
-};
 
 export function NewTransaction({
   size = "default",
   openInSheet,
+  compactMobile = false,
+  controlledOpen,
+  onOpenChange,
+  hideTrigger = false,
 }: NewTransactionProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = (next: boolean) => {
+    if (controlledOpen === undefined) setInternalOpen(next);
+    onOpenChange?.(next);
+  };
   const { create } = useTransactionApi(undefined, { enabled: false });
 
   const isSmall = size === "sm";
@@ -47,12 +50,13 @@ export function NewTransaction({
     "gap-2 transition duration-300",
 
     isSmall
-      ? "h-9 rounded-lg px-3 shadow-md"
+      ? "h-10 rounded-xl px-3 shadow-sm sm:h-9"
       : "h-12 w-full rounded-xl shadow-lg",
 
     "bg-linear-to-r from-primary to-primary/90",
     "hover:from-primary/95 hover:to-primary/90",
     "shadow-primary/20 hover:shadow-xl hover:shadow-primary/30",
+    compactMobile && "max-sm:size-10 max-sm:gap-0 max-sm:px-0",
   );
 
   const onSubmit = async (values: CreateTransactionSchema) => {
@@ -70,15 +74,24 @@ export function NewTransaction({
           "flex items-center justify-center rounded-lg bg-linear-to-br from-primary-foreground/20 to-primary-foreground/10 transition duration-300 shadow-sm",
 
           isSmall ? "size-5" : "size-6",
+          compactMobile &&
+            "max-sm:size-6 max-sm:rounded-none max-sm:bg-transparent max-sm:shadow-none",
         )}
       >
-        <Icon icon={Plus} className={cn(isSmall ? "size-3" : "size-3.5")} />
+        <Icon
+          icon={Plus}
+          className={cn(
+            isSmall ? "size-3" : "size-3.5",
+            compactMobile && "max-sm:text-white",
+          )}
+        />
       </motion.span>
 
       <span
         className={cn(
           "font-semibold tracking-tight",
           isSmall ? "text-sm" : "text-[0.9rem]",
+          compactMobile && "max-sm:hidden",
         )}
       >
         {t("nav.newTransaction")}
@@ -89,33 +102,37 @@ export function NewTransaction({
   if (openInSheet) {
     return (
       <Sheet open={open} onOpenChange={setOpen}>
-        <Button className={triggerClassName} onClick={() => setOpen(true)}>
-          {content}
-        </Button>
+        {!hideTrigger && (
+          <Button
+            type="button"
+            className={triggerClassName}
+            onClick={() => setOpen(true)}
+          >
+            {content}
+          </Button>
+        )}
         <SheetContent
           side="right"
-          className="flex h-full w-full flex-col p-0 sm:max-w-lg"
+          aria-labelledby="new-transaction-title"
+          className="flex w-full min-w-0 flex-col overflow-hidden p-0 h-full sm:max-w-xl"
         >
-          <SheetHeader className="border-b border-border/50 px-6 py-5 text-left bg-gradient-to-r from-muted/30 to-transparent">
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 text-indigo-600 dark:from-indigo-500/30 dark:to-indigo-500/20 dark:text-indigo-400">
-                <TransactionIcon size="lg" />
-              </div>
-              <div className="flex-1">
-                <SheetTitle className="text-lg">
-                  {t("nav.newTransaction")}
-                </SheetTitle>
-              </div>
-              <SheetClose className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground/40 transition hover:bg-muted/50 hover:text-foreground">
-                <Icon icon={X} className="size-4" />
-                <span className="sr-only">Close</span>
-              </SheetClose>
-            </div>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto">
+          <EntitySheetHeader
+            icon={<TransactionIcon size="md" />}
+            iconGradient="from-primary/20 to-primary/10"
+            iconColor="text-primary"
+            title={t("nav.newTransaction")}
+            subtitle={t("transaction.formHint")}
+            metadata={
+              <span className="truncate">
+                {t("transaction.expense")} · {t("transaction.income")}
+              </span>
+            }
+            titleId="new-transaction-title"
+          />
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <TransactionForm
               mode="create"
-              initialValues={DEFAULT_VALUES}
+              initialValues={getDefaultTransactionValues()}
               onSubmit={onSubmit}
               onSuccess={() => setOpen(false)}
               onCancel={() => setOpen(false)}

@@ -3,10 +3,17 @@
 import { cn } from "@lib/utils";
 import { motion, type Variants } from "framer-motion";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import { Search } from "@/lib/icons";
+import { ActionBar, type FinanceListActionBar } from "./action-bar";
+import { EmptyState } from "./empty-state";
+import { Icon } from "./icon";
 import { SearchInput } from "./search-input";
 import { Skeleton } from "./skeleton";
 import { type Column, DataTable } from "./table/data-table";
 import { type ViewMode, ViewToggle } from "./view-toggle";
+
+export type EntityListActionBar = FinanceListActionBar;
 
 interface EntityListViewProps<T> {
   searchQuery: string;
@@ -25,6 +32,8 @@ interface EntityListViewProps<T> {
   skeletonCount?: number;
   /** Custom grid skeleton card that mirrors this entity's real card shape. */
   renderSkeletonCard?: (index: number) => ReactNode;
+  /** Optional page actions rendered in the shared responsive action bar. */
+  actionBar?: EntityListActionBar;
 }
 
 const SKELETON_KEYS = Array.from(
@@ -132,26 +141,46 @@ export function EntityListView<T>({
   skeletonVariant = "card",
   skeletonCount = 6,
   renderSkeletonCard,
+  actionBar,
 }: EntityListViewProps<T>) {
+  const { t } = useTranslation();
+
+  const noResultsState = (
+    <EmptyState
+      icon={<Icon icon={Search} className="size-5" />}
+      title={t("common.noResults")}
+      description={t("search.noResultsDesc")}
+    />
+  );
+
   return (
     <>
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.25 }}
-        className="flex items-center gap-3 max-[420px]:flex-col max-[420px]:items-stretch"
+        className="max-[420px]:-mx-1"
       >
-        <SearchInput
-          value={searchQuery}
-          onChange={onSearchQueryChange}
-          placeholder={searchPlaceholder}
-          className="min-w-0 flex-1"
-        />
-        <ViewToggle
-          value={view}
-          onChange={onViewChange}
-          className="shrink-0 max-[420px]:self-end"
-        />
+        <ActionBar
+          ariaLabel={t("profile.actions")}
+          search={
+            <SearchInput
+              value={searchQuery}
+              onChange={onSearchQueryChange}
+              placeholder={searchPlaceholder}
+              className="min-w-0"
+            />
+          }
+          filterAction={actionBar?.filterAction}
+          exportAction={actionBar?.exportAction}
+          refreshAction={actionBar?.refreshAction}
+          onRefresh={actionBar?.onRefresh}
+          refreshing={actionBar?.refreshing}
+          refreshLabel={actionBar?.refreshLabel}
+          createAction={actionBar?.createAction}
+        >
+          <ViewToggle value={view} onChange={onViewChange} />
+        </ActionBar>
       </motion.div>
 
       <motion.div
@@ -191,7 +220,11 @@ export function EntityListView<T>({
             />
           )
         ) : data.length === 0 ? (
-          emptyState
+          searchQuery.trim() ? (
+            noResultsState
+          ) : (
+            emptyState
+          )
         ) : view === "grid" ? (
           <div
             className={cn(

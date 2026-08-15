@@ -102,13 +102,34 @@ export function CategoryFormSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex h-full w-full flex-col p-0 sm:max-w-xl"
+        className="flex w-full flex-col p-0 h-full sm:max-w-xl"
       >
         <EntitySheetHeader
           icon={<CategoryIcon size="lg" />}
           iconGradient="from-primary/20 to-primary/10"
           iconColor="text-primary"
           title={category ? t("categories.edit") : t("categories.new")}
+          subtitle={t("categories.description")}
+          metadata={
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 font-medium",
+                values.type === "INCOME"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-rose-600 dark:text-rose-400",
+              )}
+            >
+              <Icon
+                icon={
+                  values.type === "INCOME" ? ArrowUpCircle : ArrowDownCircle
+                }
+                className="size-3"
+              />
+              {values.type === "INCOME"
+                ? t("transactions.income")
+                : t("transactions.expenses")}
+            </span>
+          }
         />
 
         <div className="flex-1 overflow-y-auto">

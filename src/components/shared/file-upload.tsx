@@ -5,11 +5,15 @@ import {
   type ChangeEvent,
   type DragEvent,
   useCallback,
+  useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
 } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { authenticatedRequest } from "@/lib/api/client";
+import { deleteUploadedReceipt } from "@/lib/api/upload";
 import {
   AlertCircle,
   Download,
@@ -24,6 +28,7 @@ import { Icon } from "./icon";
 
 interface FileUploadLabels {
   uploadLabel?: string;
+  viewLabel?: string;
   dragHint?: string;
   fileTypesHint?: string;
   changeLabel?: string;
@@ -42,11 +47,14 @@ interface FileUploadProps {
   maxSize?: number;
   labels?: FileUploadLabels;
   disabled?: boolean;
+  /** Uses a compact preview suitable for embedded sheets. */
+  compact?: boolean;
   className?: string;
 }
 
 const DEFAULT_LABELS: FileUploadLabels = {
   uploadLabel: "Upload receipt",
+  viewLabel: "View receipt",
   dragHint: "Drop a file or click to upload",
   fileTypesHint: "PNG, JPG, WebP, PDF \u2022 Max 10 MB",
   changeLabel: "Change",
@@ -74,11 +82,40 @@ export function FileUpload({
   maxSize = 10 * 1024 * 1024,
   labels: userLabels,
   disabled = false,
+  compact = false,
   className,
 }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
   const [state, setState] = useState<UploadState>({ status: "idle" });
-  const [_previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const mountedRef = useRef(true);
+  const uploadRequestRef = useRef(0);
+  const pendingUploadedUrlsRef = useRef(new Set<string>());
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    return () => {
+      mountedRef.current = false;
+      // Invalidate in-flight uploads. If one resolves after the component has
+      // unmounted, uploadFile will remove the object instead of losing its URL.
+      uploadRequestRef.current += 1;
+      const pendingUrls = Array.from(pendingUploadedUrlsRef.current);
+      pendingUploadedUrlsRef.current.clear();
+      for (const url of pendingUrls) {
+        void deleteUploadedReceipt(url).catch(() => undefined);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   const labels = useMemo(
     () => ({ ...DEFAULT_LABELS, ...userLabels }),
@@ -88,7 +125,13 @@ export function FileUpload({
 
   const uploadFile = useCallback(
     async (file: File) => {
+      const requestId = uploadRequestRef.current + 1;
+      uploadRequestRef.current = requestId;
+      const isCurrentRequest = () =>
+        mountedRef.current && uploadRequestRef.current === requestId;
+
       if (file.size > maxSize) {
+        setUploadProgress(null);
         setState({
           status: "error",
           message: (
@@ -100,18 +143,17 @@ export function FileUpload({
         return;
       }
 
+      setUploadProgress(0);
       setState({ status: "uploading" });
 
-      // Images are downscaled client-side so receipts upload fast and stay
-      // small in storage; PDFs pass through untouched.
-      const payload = file.type.startsWith("image/")
-        ? await resizeImage(file, 1600)
-        : file;
-
-      const formData = new FormData();
-      formData.append("file", payload);
-
       try {
+        // Images are downscaled client-side so receipts upload fast and stay
+        // small in storage; PDFs pass through untouched.
+        const payload = file.type.startsWith("image/")
+          ? await resizeImage(file, 1600)
+          : file;
+        const formData = new FormData();
+        formData.append("file", payload);
         // Goes through authenticatedRequest so uploads get the auth token,
         // rate-limit retries, and typed errors like the rest of the app.
         const data = await authenticatedRequest<{ url?: string }>(
@@ -119,13 +161,37 @@ export function FileUpload({
           {
             method: "POST",
             body: formData,
+            onUploadProgress: setUploadProgress,
           },
         );
         if (!data?.url) throw new Error("upload_failed");
-        onChange(data.url);
+
+        // A sheet can close while the request is still in flight, or a user
+        // can choose another file before this request finishes. Never hand an
+        // orphaned result to a dead/stale form; remove it immediately instead.
+        if (!isCurrentRequest()) {
+          await deleteUploadedReceipt(data.url).catch(() => undefined);
+          return;
+        }
+
+        pendingUploadedUrlsRef.current.add(data.url);
+        try {
+          onChange(data.url);
+        } catch (error) {
+          await deleteUploadedReceipt(data.url).catch(() => undefined);
+          throw error;
+        } finally {
+          pendingUploadedUrlsRef.current.delete(data.url);
+        }
+
+        setPreviewUrl(null);
+        setUploadProgress(null);
         setState({ status: "idle" });
       } catch {
-        // Show the localized label, never raw server text.
+        // Show the localized label, never raw server text. A stale request
+        // must not overwrite the state of a newer upload or an unmounted form.
+        if (!isCurrentRequest()) return;
+        setUploadProgress(null);
         setState({
           status: "error",
           message: labels.errorLabel ?? DEFAULT_LABELS.errorLabel ?? "",
@@ -177,6 +243,9 @@ export function FileUpload({
   }, []);
 
   const handleRemove = useCallback(() => {
+    // Any response from the previous upload is now stale. If it finishes
+    // later, uploadFile will delete its object rather than attach it again.
+    uploadRequestRef.current += 1;
     onChange(null);
     setPreviewUrl(null);
     setState({ status: "idle" });
@@ -188,22 +257,52 @@ export function FileUpload({
   }, []);
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div
+      className={cn("w-full space-y-3", className)}
+      aria-busy={state.status === "uploading"}
+    >
       {hasFile && state.status !== "uploading" ? (
-        <div className="overflow-hidden rounded-2xl border border-border/30 bg-linear-to-br from-muted/20 to-muted/10 shadow-md">
+        <div
+          className={cn(
+            "overflow-hidden border border-border/30",
+            compact
+              ? "rounded-xl bg-muted/20 shadow-none"
+              : "rounded-2xl bg-linear-to-br from-muted/20 to-muted/10 shadow-md",
+          )}
+        >
           {value && isImageUrl(value) ? (
-            <div className="relative m-3 overflow-hidden rounded-xl bg-muted/30 ring-1 ring-border/20 shadow-sm">
-              {/* biome-ignore lint/performance/noImgElement: dynamic remote receipt URLs with unknown dimensions — next/image would require remotePatterns config and fixed sizing */}
-              <img
-                src={value}
-                alt="Receipt"
-                className="aspect-3/4 h-full w-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-              <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/25 via-transparent to-black/10" />
-              <div className="absolute top-2 right-2 flex items-center gap-1.5">
+            <div
+              className={cn(
+                "relative overflow-hidden bg-muted/30 ring-1 ring-border/20 shadow-sm",
+                compact ? "m-2 h-28 rounded-lg sm:h-32" : "m-3 rounded-xl",
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(true)}
+                aria-label={labels.viewLabel}
+                className="absolute inset-0 z-0 cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+              >
+                {/* biome-ignore lint/performance/noImgElement: dynamic remote receipt URLs with unknown dimensions — next/image would require remotePatterns config and fixed sizing */}
+                <img
+                  src={value}
+                  alt={labels.viewLabel}
+                  className={cn(
+                    "h-full w-full object-cover",
+                    !compact && "aspect-3/4",
+                  )}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              </button>
+              <div className="pointer-events-none absolute inset-0 z-[1] bg-linear-to-b from-black/25 via-transparent to-black/10" />
+              <div
+                className={cn(
+                  "absolute right-2 top-2 z-10 flex items-center gap-1.5",
+                  compact && "gap-1",
+                )}
+              >
                 <motion.button
                   type="button"
                   disabled={disabled}
@@ -212,9 +311,15 @@ export function FileUpload({
                   onClick={() => inputRef.current?.click()}
                   title={labels.changeLabel}
                   aria-label={labels.changeLabel}
-                  className="flex size-9 items-center justify-center rounded-full bg-linear-to-br from-black/45 to-black/35 text-white backdrop-blur-sm transition hover:from-black/65 hover:to-black/55 disabled:opacity-50 shadow-lg"
+                  className={cn(
+                    "flex items-center justify-center rounded-full bg-linear-to-br from-black/45 to-black/35 text-white backdrop-blur-sm transition hover:from-black/65 hover:to-black/55 disabled:opacity-50 shadow-lg",
+                    compact ? "size-7" : "size-9",
+                  )}
                 >
-                  <Icon icon={Upload} className="size-4" />
+                  <Icon
+                    icon={Upload}
+                    className={compact ? "size-3.5" : "size-4"}
+                  />
                 </motion.button>
                 <motion.button
                   type="button"
@@ -224,16 +329,37 @@ export function FileUpload({
                   onClick={handleRemove}
                   title={labels.removeLabel}
                   aria-label={labels.removeLabel}
-                  className="flex size-9 items-center justify-center rounded-full bg-linear-to-br from-destructive/60 to-destructive/50 text-white backdrop-blur-sm transition hover:from-destructive/80 hover:to-destructive/70 disabled:opacity-50 shadow-lg shadow-destructive/20"
+                  className={cn(
+                    "flex items-center justify-center rounded-full bg-linear-to-br from-destructive/60 to-destructive/50 text-white backdrop-blur-sm transition hover:from-destructive/80 hover:to-destructive/70 disabled:opacity-50 shadow-lg shadow-destructive/20",
+                    compact ? "size-7" : "size-9",
+                  )}
                 >
-                  <Icon icon={Trash2} className="size-4" />
+                  <Icon
+                    icon={Trash2}
+                    className={compact ? "size-3.5" : "size-4"}
+                  />
                 </motion.button>
               </div>
             </div>
           ) : value ? (
-            <div className="m-3 flex items-center gap-3 rounded-xl bg-linear-to-br from-background/60 to-background/40 p-3 ring-1 ring-border/20 shadow-sm">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-primary/10 text-primary shadow-md">
-                <Icon icon={FileText} className="size-5" />
+            <div
+              className={cn(
+                "flex items-center gap-3 ring-1 ring-border/20",
+                compact
+                  ? "m-2 rounded-lg bg-background/70 p-2"
+                  : "m-3 rounded-xl bg-linear-to-br from-background/60 to-background/40 p-3 shadow-sm",
+              )}
+            >
+              <div
+                className={cn(
+                  "flex shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-primary/10 text-primary",
+                  compact ? "size-9" : "size-11 shadow-md",
+                )}
+              >
+                <Icon
+                  icon={FileText}
+                  className={compact ? "size-4" : "size-5"}
+                />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-foreground/90">
@@ -249,9 +375,15 @@ export function FileUpload({
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Download"
-                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-linear-to-br hover:from-muted/50 hover:to-muted/30 hover:text-foreground"
+                  className={cn(
+                    "flex items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-linear-to-br hover:from-muted/50 hover:to-muted/30 hover:text-foreground",
+                    compact ? "size-7" : "size-8",
+                  )}
                 >
-                  <Icon icon={Download} className="size-4" />
+                  <Icon
+                    icon={Download}
+                    className={compact ? "size-3.5" : "size-4"}
+                  />
                 </motion.a>
                 <motion.button
                   type="button"
@@ -261,9 +393,15 @@ export function FileUpload({
                   onClick={() => inputRef.current?.click()}
                   title={labels.changeLabel}
                   aria-label={labels.changeLabel}
-                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-linear-to-br hover:from-muted/50 hover:to-muted/30 hover:text-primary"
+                  className={cn(
+                    "flex items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-linear-to-br hover:from-muted/50 hover:to-muted/30 hover:text-primary",
+                    compact ? "size-7" : "size-8",
+                  )}
                 >
-                  <Icon icon={Upload} className="size-4" />
+                  <Icon
+                    icon={Upload}
+                    className={compact ? "size-3.5" : "size-4"}
+                  />
                 </motion.button>
                 <motion.button
                   type="button"
@@ -273,33 +411,130 @@ export function FileUpload({
                   onClick={handleRemove}
                   title={labels.removeLabel}
                   aria-label={labels.removeLabel}
-                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-linear-to-br hover:from-destructive/50 hover:to-destructive/30 hover:text-destructive"
+                  className={cn(
+                    "flex items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-linear-to-br hover:from-destructive/50 hover:to-destructive/30 hover:text-destructive",
+                    compact ? "size-7" : "size-8",
+                  )}
                 >
-                  <Icon icon={Trash2} className="size-4" />
+                  <Icon
+                    icon={Trash2}
+                    className={compact ? "size-3.5" : "size-4"}
+                  />
                 </motion.button>
               </div>
             </div>
           ) : null}
         </div>
       ) : state.status === "uploading" ? (
-        <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-linear-to-br from-primary/2 to-primary/1 p-6 text-center shadow-md">
-          <div className="relative mx-auto mb-3 size-11">
-            <div className="absolute inset-0 rounded-full border-2 border-primary/15" />
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary"
-            />
-          </div>
-          <p className="text-sm font-medium text-foreground/70">
-            {labels.uploadingLabel}
-          </p>
-        </div>
+        <output
+          aria-live="polite"
+          className={cn(
+            "border border-primary/25 bg-primary/[0.03]",
+            compact
+              ? "rounded-xl p-2 shadow-none"
+              : "rounded-2xl p-3 shadow-sm",
+          )}
+        >
+          {previewUrl ? (
+            <div
+              className={cn(
+                "relative overflow-hidden rounded-lg bg-muted/30",
+                compact ? "h-20" : "h-28",
+              )}
+            >
+              {/* biome-ignore lint/performance/noImgElement: local object URL preview with dynamic dimensions */}
+              <img
+                src={previewUrl}
+                alt={labels.uploadLabel}
+                className="h-full w-full object-cover opacity-70"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-background/35 backdrop-blur-[1px]">
+                <div className="relative size-9">
+                  <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-3 py-3">
+              <div className="relative size-8">
+                <div className="absolute inset-0 rounded-full border-2 border-primary/15" />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary"
+                />
+              </div>
+              <p className="text-sm font-medium text-foreground/70">
+                {labels.uploadingLabel}
+              </p>
+            </div>
+          )}
+          {previewUrl ? (
+            <p className="mt-2 text-center text-xs font-medium text-primary">
+              {labels.uploadingLabel}
+            </p>
+          ) : null}
+          {uploadProgress !== null ? (
+            <div className="mt-2 flex items-center gap-2">
+              <div
+                role="progressbar"
+                aria-label={labels.uploadingLabel}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={uploadProgress}
+                className="h-1.5 flex-1 overflow-hidden rounded-full bg-primary/10"
+              >
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.max(uploadProgress, 4)}%` }}
+                  className="h-full rounded-full bg-primary"
+                />
+              </div>
+              <span className="min-w-8 text-right text-[11px] font-medium tabular-nums text-primary">
+                {uploadProgress}%
+              </span>
+            </div>
+          ) : null}
+        </output>
       ) : state.status === "error" ? (
-        <div className="rounded-2xl border-2 border-dashed border-destructive/30 bg-linear-to-br from-destructive/2 to-destructive/1 p-6 text-center shadow-md">
-          <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-linear-to-br from-destructive/20 to-destructive/10 ring-1 ring-destructive/20 shadow-md shadow-destructive/20">
-            <Icon icon={AlertCircle} className="size-5 text-destructive" />
-          </div>
+        <div
+          role="alert"
+          aria-live="assertive"
+          className={cn(
+            "border-2 border-dashed border-destructive/30 bg-linear-to-br from-destructive/2 to-destructive/1 text-center",
+            compact
+              ? "rounded-xl p-4 shadow-none"
+              : "rounded-2xl p-6 shadow-md",
+          )}
+        >
+          {previewUrl ? (
+            <div
+              className={cn(
+                "mx-auto mb-3 overflow-hidden rounded-xl opacity-75",
+                compact ? "h-20 w-28" : "h-28 w-40",
+              )}
+            >
+              {/* biome-ignore lint/performance/noImgElement: local object URL preview with dynamic dimensions */}
+              <img
+                src={previewUrl}
+                alt={labels.uploadLabel}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-linear-to-br from-destructive/20 to-destructive/10 ring-1 ring-destructive/20 shadow-md shadow-destructive/20">
+              <Icon icon={AlertCircle} className="size-5 text-destructive" />
+            </div>
+          )}
           <p className="mx-auto max-w-56 text-sm font-medium text-destructive/90">
             {state.message}
           </p>
@@ -326,15 +561,18 @@ export function FileUpload({
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => inputRef.current?.click()}
+          aria-label={labels.uploadLabel}
+          aria-controls={inputId}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           className={cn(
-            "group relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed p-6 text-center transition duration-300 select-none",
+            "group relative w-full cursor-pointer overflow-hidden border-2 border-dashed text-center transition duration-300 select-none",
+            compact ? "rounded-xl p-4" : "rounded-2xl p-6",
             "focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:outline-none",
             state.status === "dragging"
               ? "scale-[0.99] border-primary bg-linear-to-br from-primary/10 to-primary/5 shadow-lg shadow-primary/20"
-              : "border-border/30 bg-linear-to-brr from-muted/20 to-muted/10 hover:border-primary/40 hover:from-primary/5 hover:to-primary/2 shadow-md",
+              : "border-border/30 bg-muted/20 hover:border-primary/40 hover:bg-primary/5 shadow-sm",
             disabled && "pointer-events-none opacity-50",
           )}
         >
@@ -351,7 +589,8 @@ export function FileUpload({
           <div className="relative">
             <motion.div
               className={cn(
-                "mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-linear-to-br from-muted-foreground/10 to-muted-foreground/5 ring-1 ring-border/20 transition-transform duration-300 shadow-sm",
+                "mx-auto mb-3 flex items-center justify-center rounded-2xl bg-linear-to-br from-muted-foreground/10 to-muted-foreground/5 ring-1 ring-border/20 transition-transform duration-300 shadow-sm",
+                compact ? "size-10" : "size-12",
                 state.status === "dragging"
                   ? "scale-110 bg-linear-to-br from-primary/20 to-primary/10 text-primary ring-primary/30"
                   : "group-hover:-translate-y-0.5 group-hover:scale-105",
@@ -380,7 +619,24 @@ export function FileUpload({
         </motion.button>
       )}
 
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="max-w-[min(96vw,1200px)] border-0 bg-black/90 p-2 shadow-2xl sm:rounded-2xl sm:p-3">
+          <DialogTitle className="sr-only">{labels.viewLabel}</DialogTitle>
+          <div className="flex max-h-[calc(100dvh-2rem)] min-h-[min(40vh,320px)] items-center justify-center overflow-hidden rounded-xl bg-black/40">
+            {value ? (
+              /* biome-ignore lint/performance/noImgElement: dynamic remote receipt URLs with unknown dimensions — next/image would require remotePatterns config and fixed sizing */
+              <img
+                src={value}
+                alt={labels.viewLabel}
+                className="max-h-[calc(100dvh-3rem)] max-w-full object-contain"
+              />
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <input
+        id={inputId}
         ref={inputRef}
         type="file"
         accept={accept}

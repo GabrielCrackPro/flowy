@@ -2,6 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
+import { useBottomSheetSwipe } from "@/hooks/useBottomSheetSwipe";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { cn } from "@/lib/utils";
 
 interface SheetContextValue {
@@ -95,12 +97,31 @@ export function SheetContent({
   side = "right",
   className,
   children,
+  ...props
 }: {
   side?: "left" | "right" | "top" | "bottom";
   className?: string;
   children: React.ReactNode;
+  id?: string;
+  "aria-labelledby"?: string;
+  "aria-describedby"?: string;
 }) {
   const { open, setOpen } = useSheet();
+  const isMobile = useIsMobile();
+  const { offset, swipeHandlers } = useBottomSheetSwipe({
+    onDismiss: () => setOpen(false),
+  });
+
+  // On mobile every sheet becomes a bottom sheet for consistent UX. Desktop
+  // keeps the caller-provided side. `useIsMobile` starts false during SSR, so
+  // nothing renders until the viewport is known to avoid a flash of the
+  // desktop side before the mobile re-render.
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const effectiveSide = !mounted || !isMobile ? side : "bottom";
 
   React.useEffect(() => {
     if (!open) return;
@@ -127,9 +148,16 @@ export function SheetContent({
     bottom: { y: "100%" },
   };
 
+  const bottomPosition = "inset-x-0 bottom-0 max-h-[92dvh] w-full border-t";
+
+  // Mobile sheets take their own height; drop the full-height constraint
+  // that right-side sheets use so `max-h-[92dvh]` wins.
+  const responsiveClassName =
+    effectiveSide === "bottom" ? className?.replace(/h-full/g, "") : className;
+
   return (
     <AnimatePresence>
-      {open && (
+      {open && mounted && (
         <>
           <motion.div
             key="sheet-overlay"
@@ -147,16 +175,32 @@ export function SheetContent({
             data-slot="sheet-content"
             role="dialog"
             aria-modal="true"
-            initial={hiddenTransform[side]}
-            animate={{ x: 0, y: 0 }}
-            exit={hiddenTransform[side]}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            initial={hiddenTransform[effectiveSide]}
+            animate={{ x: 0, y: effectiveSide === "bottom" ? offset : 0 }}
+            exit={hiddenTransform[effectiveSide]}
+            transition={
+              effectiveSide === "bottom" && offset > 0
+                ? { duration: 0 }
+                : { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
+            }
             className={cn(
-              "fixed z-50 bg-background shadow-2xl outline-none",
-              sidePosition[side],
-              className,
+              "fixed z-50 bg-background outline-none",
+              effectiveSide === "bottom"
+                ? cn(bottomPosition, "rounded-t-3xl border-x-0")
+                : sidePosition[effectiveSide],
+              responsiveClassName,
             )}
+            {...props}
           >
+            {effectiveSide === "bottom" && (
+              <div
+                {...swipeHandlers}
+                aria-hidden="true"
+                className="flex h-7 shrink-0 touch-none items-center justify-center"
+              >
+                <span className="h-1 w-10 rounded-full bg-muted-foreground/25" />
+              </div>
+            )}
             {children}
           </motion.div>
         </>

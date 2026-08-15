@@ -23,11 +23,13 @@ interface ActionItem {
 }
 
 interface ActionsColumnOptions<T> {
+  ariaLabel: string;
   className?: string;
   actions: (row: T) => ActionItem[];
 }
 
 export function ActionsColumn<T>({
+  ariaLabel,
   actions,
   className = "w-12",
 }: ActionsColumnOptions<T>): Column<T> {
@@ -50,6 +52,8 @@ export function ActionsColumn<T>({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label={ariaLabel}
+                title={ariaLabel}
                 className="size-8 text-muted-foreground/40 hover:bg-muted/70 hover:text-foreground"
                 onClick={(e) => e.stopPropagation()}
               >

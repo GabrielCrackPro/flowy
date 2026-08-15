@@ -143,11 +143,11 @@ export default function DashboardPage() {
 
   return (
     <MfaGate>
-      <div className="space-y-6 lg:space-y-8">
+      <div className="space-y-8 lg:space-y-10">
         <DashboardHeader month={month} year={year} />
         <DashboardAlerts month={month} year={year} />
 
-        <section className="space-y-5">
+        <section className="space-y-6">
           <SectionHeading
             title={t("dashboard.financialSummary")}
             description={t("dashboard.financialSummaryDesc")}
@@ -174,7 +174,7 @@ export default function DashboardPage() {
         </section>
 
         {showAnalysis && (
-          <section className="space-y-5">
+          <section className="space-y-6">
             <SectionHeading
               title={t("dashboard.analysis")}
               description={t("dashboard.analysisDesc")}
@@ -183,7 +183,7 @@ export default function DashboardPage() {
             {showCharts && (
               <div
                 className={cn(
-                  "grid grid-cols-1 gap-4 sm:gap-6",
+                  "grid grid-cols-1 gap-5 sm:gap-6",
                   showCashFlow && showExpenseDistribution && "xl:grid-cols-3",
                 )}
               >
@@ -215,7 +215,7 @@ export default function DashboardPage() {
                 {showMainColumn && (
                   <div
                     className={cn(
-                      "flex flex-col gap-4 sm:gap-6",
+                      "flex flex-col gap-5 sm:gap-6",
                       showAside ? "xl:col-span-2" : "xl:col-span-3",
                     )}
                   >
@@ -232,7 +232,7 @@ export default function DashboardPage() {
                     {(showBudgetProgress || showGoalProgress) && (
                       <div
                         className={cn(
-                          "grid grid-cols-1 gap-4 sm:gap-6",
+                          "grid grid-cols-1 gap-5 sm:gap-6",
                           showBudgetProgress &&
                             showGoalProgress &&
                             "md:grid-cols-2",
@@ -255,7 +255,7 @@ export default function DashboardPage() {
                 {showAside && (
                   <aside
                     className={cn(
-                      "flex flex-col gap-4 sm:gap-6",
+                      "flex flex-col gap-5 sm:gap-6",
                       !showMainColumn && "xl:col-span-3",
                     )}
                   >

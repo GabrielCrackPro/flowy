@@ -71,7 +71,9 @@ export function OAuthButtons() {
       </div>
 
       {error ? (
-        <p className="text-center text-sm text-destructive">{error}</p>
+        <p role="alert" className="text-center text-sm text-destructive">
+          {error}
+        </p>
       ) : null}
     </div>
   );

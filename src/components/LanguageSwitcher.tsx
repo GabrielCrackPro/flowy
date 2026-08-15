@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
@@ -9,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui";
 export function LanguageSwitcher() {
   const { locale, setLocale } = useLocaleContext();
   const { profile } = useProfile();
+  const { t } = useTranslation();
+  const router = useRouter();
 
   if (profile?.showLanguageSelector === false) {
     return null;
@@ -17,9 +21,17 @@ export function LanguageSwitcher() {
   return (
     <Select
       value={locale}
-      onValueChange={(value) => setLocale(value as "es" | "en")}
+      onValueChange={(value) => {
+        void (async () => {
+          await setLocale(value as "es" | "en");
+          router.refresh();
+        })();
+      }}
     >
-      <SelectTrigger className="h-8 w-auto gap-1.5 rounded-lg border-0 bg-none px-2 shadow-none hover:bg-accent focus:ring-0">
+      <SelectTrigger
+        aria-label={t("common.language")}
+        className="h-8 w-auto gap-1.5 rounded-lg border-0 bg-none px-2 shadow-none hover:bg-accent focus:ring-0"
+      >
         <Icon icon={Languages} className="size-4" />
         <span className="hidden text-xs font-semibold uppercase tracking-wider sm:inline">
           {locale.toUpperCase()}

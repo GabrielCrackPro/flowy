@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AppLogo,
   CommandPalette,
   Icon,
   type IconProps,
@@ -123,13 +124,18 @@ export function Header() {
       initial={{ y: -10, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="sticky top-0 z-40 border-b border-border/40 backdrop-blur-xl"
+      className="sticky top-0 z-40 border-b border-border/70 bg-card"
     >
-      <div className="flex h-16 items-center gap-1.5 px-2 sm:gap-4 sm:px-4 lg:px-8">
+      <div className="flex min-h-14 items-center gap-1.5 px-2 sm:h-16 sm:gap-4 sm:px-4 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-3">
+          <div className="flex min-w-0 items-center gap-1.5 md:hidden">
+            <AppLogo compact showName={false} />
+            <SpaceSwitcherPill compactMobile className="max-w-[7rem]" />
+          </div>
+
           <nav
             aria-label={t("header.breadcrumb")}
-            className="hidden min-w-0 items-center gap-1 text-sm sm:flex"
+            className="hidden min-w-0 items-center gap-1 text-sm md:flex"
           >
             {crumbs.map((crumb, i) => {
               const isLast = i === crumbs.length - 1;
@@ -181,14 +187,14 @@ export function Header() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.2, delay: 0.15 }}
-            className="min-w-0"
+            className="hidden min-w-0 md:block"
           >
             <SpaceSwitcherPill />
           </motion.div>
         </div>
 
         <div className="flex shrink-0 items-center gap-0.5 sm:gap-2">
-          <div className="hidden sm:block">
+          <div className="hidden md:block">
             <Search onOpenDialog={() => setSearchOpen(true)} />
           </div>
 
@@ -197,25 +203,25 @@ export function Header() {
               variant="ghost"
               size="icon"
               aria-label={t("search.open")}
-              className="rounded-xl hover:bg-muted/40 sm:hidden"
+              className="rounded-xl text-muted-foreground/80 hover:bg-muted/60 hover:text-foreground md:hidden"
               onClick={() => setSearchOpen(true)}
             >
               <Icon icon={SearchIcon} className="size-4" />
             </Button>
           </motion.div>
 
-          <SyncingIndicator />
+          <SyncingIndicator className="max-md:text-muted-foreground/80 max-md:hover:bg-muted/60 max-md:hover:text-foreground" />
 
-          <InstallAppButton />
+          <InstallAppButton className="max-md:text-muted-foreground/80 max-md:hover:bg-muted/60 max-md:hover:text-foreground" />
 
-          <div className="flex items-center gap-0.5 rounded-xl border border-border/30 bg-card/50 p-0.5 shadow-sm">
-            <span className="hidden sm:block">
-              <LanguageSwitcher />
-            </span>
-            <ThemeToggle className="rounded-lg hover:bg-accent" />
+          <span className="hidden md:block">
+            <LanguageSwitcher />
+          </span>
+          <ThemeToggle className="size-9 rounded-xl text-muted-foreground/80 hover:bg-muted/60 hover:text-foreground max-md:size-10" />
+
+          <div className="hidden md:block">
+            <UserMenu />
           </div>
-
-          <UserMenu />
         </div>
       </div>
 

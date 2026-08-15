@@ -8,6 +8,13 @@ import { resizeImage } from "@/lib/image-utils";
  * failure; `authenticatedRequest` surfaces the code (or a generic failure)
  * so callers can show a localized message instead of raw server text.
  */
+export async function deleteUploadedReceipt(url: string): Promise<void> {
+  await authenticatedRequest("/api/upload", {
+    method: "DELETE",
+    body: JSON.stringify({ url }),
+  });
+}
+
 export async function uploadImage(
   endpoint: string,
   file: File,

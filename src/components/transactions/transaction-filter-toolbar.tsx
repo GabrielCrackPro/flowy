@@ -1,16 +1,16 @@
 "use client";
 
 import {
+  ActionBar,
   ActiveFilterChips,
   DataFilters,
   Icon,
   RelativeTime,
   SearchInput,
 } from "@components/shared";
-import { Button } from "@components/ui";
 import { cn } from "@lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { Filter, FilterX, RefreshCw } from "@/lib/icons";
+import { motion } from "framer-motion";
+import { ChevronDown, Filter } from "@/lib/icons";
 import type { Transaction } from "@/types/Transaction";
 import type { FilterField } from "@/types/ui";
 import { NewTransaction } from "../dashboard/new-transaction/new-transaction";
@@ -19,9 +19,8 @@ import { TransactionExportMenu } from "./transaction-export-menu";
 interface TransactionFilterToolbarProps {
   filters: Record<string, string | undefined>;
   filterOpen: boolean;
-  hasFilters: boolean;
   filterFields: FilterField[];
-  t: (key: string) => string;
+  t: (key: string, options?: Record<string, unknown>) => string;
   transactionCount: number;
   transactions: Transaction[];
   loading: boolean;
@@ -39,7 +38,6 @@ interface TransactionFilterToolbarProps {
 export function TransactionFilterToolbar({
   filters,
   filterOpen,
-  hasFilters,
   filterFields,
   t,
   transactionCount,
@@ -55,180 +53,120 @@ export function TransactionFilterToolbar({
   formatFilterValue,
   onRemoveChip,
 }: TransactionFilterToolbarProps) {
+  const activeFilterCount = filterFields.reduce((count, field) => {
+    if (field.type === "search") return count;
+    if (field.type === "date-range") {
+      return (
+        count +
+        (filters[`${field.key}From`] || filters[`${field.key}To`] ? 1 : 0)
+      );
+    }
+    return count + (filters[field.key] ? 1 : 0);
+  }, 0);
+
+  const filterAction = (
+    <motion.button
+      type="button"
+      onClick={() => onFilterOpenChange(!filterOpen)}
+      aria-expanded={filterOpen}
+      aria-controls="transaction-filters"
+      aria-label={t("transactions.filterBtn")}
+      title={t("transactions.filterBtn")}
+      className={cn(
+        "relative inline-flex h-10 min-w-0 shrink-0 items-center justify-start gap-2 rounded-xl border px-3 text-xs font-medium touch-manipulation transition duration-200 sm:h-9 sm:justify-center",
+        "max-sm:flex-1",
+        filterOpen
+          ? "border-primary/50 bg-primary/10 text-primary shadow-sm"
+          : activeFilterCount > 0
+            ? "border-primary/30 bg-primary/5 text-foreground hover:border-primary/40 hover:bg-primary/10"
+            : "border-border/60 text-muted-foreground hover:border-border hover:bg-muted/40 hover:text-foreground",
+      )}
+    >
+      <Icon icon={Filter} className="size-4" />
+      <span>{t("transactions.filterBtn")}</span>
+      <motion.span
+        animate={{ rotate: filterOpen ? 180 : 0 }}
+        transition={{ duration: 0.2 }}
+        className="hidden sm:flex"
+      >
+        <Icon icon={ChevronDown} className="size-3.5" />
+      </motion.span>
+      {activeFilterCount > 0 && (
+        <span
+          title={t("filters.activeCount", { count: activeFilterCount })}
+          className="inline-flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground"
+        >
+          {activeFilterCount}
+        </span>
+      )}
+    </motion.button>
+  );
+
   return (
     <>
-      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <div className="min-w-0 sm:mr-auto">
-          <h3 className="text-sm font-semibold tracking-tight">
-            {t("transactions.title")}
-          </h3>
-          <p className="text-[11px] text-muted-foreground/50 leading-none mt-1">
-            {t("transactions.description")}
-          </p>
-        </div>
-
-        {/* Search */}
-        <SearchInput
-          value={filters.search ?? ""}
-          onChange={(value) => onFilterChange("search", value || undefined)}
-          placeholder={t("transactions.searchPlaceholder")}
-          className="w-full min-w-0 sm:w-auto sm:flex-1 sm:max-w-64"
-          inputClassName="h-9 text-xs"
-        />
-
-        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
-          {/* Filter toggle */}
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onFilterOpenChange(!filterOpen)}
-            className={cn(
-              "relative inline-flex h-9 shrink-0 items-center gap-2 rounded-xl border px-4 text-xs font-medium transition duration-200 shadow-sm",
-              filterOpen
-                ? "border-primary/50 bg-linear-to-r from-primary/15 to-primary/8 text-primary shadow-md"
-                : hasFilters
-                  ? "border-primary/30 bg-linear-to-r from-primary/8 to-primary/4 text-foreground hover:border-primary/40 hover:from-primary/12 hover:to-primary/6"
-                  : "border-border/30 text-muted-foreground hover:border-border/50 hover:bg-muted/30 hover:text-foreground",
-            )}
-          >
-            <AnimatePresence mode="wait">
-              {filterOpen ? (
-                <motion.span
-                  key="filter-x"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex"
-                >
-                  <Icon icon={FilterX} className="size-4" />
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="filter"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex"
-                >
-                  <Icon icon={Filter} className="size-4" />
-                </motion.span>
-              )}
-            </AnimatePresence>
-            <AnimatePresence mode="wait">
-              {filterOpen ? (
-                <motion.span
-                  key="clear-label"
-                  initial={{ opacity: 0, x: -4 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 4 }}
-                  transition={{ duration: 0.12 }}
-                >
-                  {t("common.close")}
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="filter-label"
-                  initial={{ opacity: 0, x: -4 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 4 }}
-                  transition={{ duration: 0.12 }}
-                >
-                  {t("transactions.filterBtn")}
-                </motion.span>
-              )}
-            </AnimatePresence>
-            {hasFilters && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="inline-flex size-5 items-center justify-center rounded-full bg-linear-to-r from-primary to-primary/80 text-[10px] font-bold text-primary-foreground shadow-sm"
-              >
-                {
-                  Object.values(filters).filter(
-                    (v) => v !== undefined && v !== "",
-                  ).length
-                }
-              </motion.span>
-            )}
-            {filterOpen && (
-              <motion.span
-                layoutId="filter-underline"
-                className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-linear-to-r from-primary via-primary/60 to-primary"
-                transition={{
-                  type: "spring",
-                  stiffness: 500,
-                  damping: 30,
-                }}
-              />
-            )}
-          </motion.button>
-
-          {/* Count pill */}
-          <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-border/30 bg-card/60 px-2.5 text-xs font-medium tabular-nums text-muted-foreground/70 shadow-sm">
-            {loading
-              ? "—"
-              : new Intl.NumberFormat(locale).format(transactionCount)}
-          </span>
-
-          {/* Export */}
-          {transactionCount > 0 && (
+      <ActionBar
+        ariaLabel={t("profile.actions")}
+        surface="plain"
+        className="gap-2.5 sm:gap-3"
+        actionsClassName="w-full sm:w-auto sm:gap-1.5"
+        search={
+          <SearchInput
+            value={filters.search ?? ""}
+            onChange={(value) => onFilterChange("search", value || undefined)}
+            placeholder={t("transactions.searchPlaceholder")}
+            className="w-full min-w-0"
+            inputClassName="h-10 text-xs sm:h-9"
+          />
+        }
+        filterAction={filterAction}
+        exportAction={
+          transactionCount > 0 ? (
             <TransactionExportMenu
               transactions={transactions}
               locale={locale}
               currency={currency}
               t={t}
             />
-          )}
-
-          {/* Refresh */}
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={onRefresh}
-            disabled={loading}
-            className="size-7 rounded-lg text-muted-foreground/40 hover:bg-muted/60 hover:text-foreground"
-          >
-            <Icon
-              icon={RefreshCw}
-              className={`size-3.5 ${loading ? "animate-spin" : ""}`}
-            />
-          </Button>
-
-          {/* Last refreshed */}
-          {lastRefreshedAt && (
-            <RelativeTime
-              date={lastRefreshedAt}
-              locale={locale}
-              prefix="·"
-              className="text-[11px] text-muted-foreground/40 hidden sm:inline"
-            />
-          )}
-
-          <div className="max-[420px]:basis-full max-[420px]:[&>button]:w-full">
-            <NewTransaction size="sm" openInSheet={true} />
+          ) : undefined
+        }
+        onRefresh={onRefresh}
+        refreshing={loading}
+        refreshLabel={t("dashboard.refresh")}
+        createAction={
+          <div className="w-auto sm:w-auto">
+            <NewTransaction size="sm" openInSheet={true} compactMobile />
           </div>
-        </div>
+        }
+      >
+        {lastRefreshedAt && (
+          <RelativeTime
+            date={lastRefreshedAt}
+            locale={locale}
+            prefix="·"
+            className="hidden text-[11px] text-muted-foreground/60 sm:inline"
+          />
+        )}
+      </ActionBar>
+
+      <div id="transaction-filters">
+        <DataFilters
+          fields={filterFields.filter((field) => field.type !== "search")}
+          values={filters}
+          onChange={onFilterChange}
+          onClear={onClearFilters}
+          open={filterOpen}
+          onOpenChange={onFilterOpenChange}
+          className="mt-4"
+        />
+        <ActiveFilterChips
+          filters={filters}
+          fields={filterFields}
+          formatValue={formatFilterValue}
+          onRemove={onRemoveChip}
+          onClearAll={onClearFilters}
+          className="mt-4"
+        />
       </div>
-      <DataFilters
-        fields={filterFields.filter((f) => f.type !== "search")}
-        values={filters}
-        onChange={onFilterChange}
-        onClear={onClearFilters}
-        open={filterOpen}
-        onOpenChange={onFilterOpenChange}
-        className="mt-4"
-      />
-      <ActiveFilterChips
-        filters={filters}
-        fields={filterFields}
-        formatValue={formatFilterValue}
-        onRemove={onRemoveChip}
-        onClearAll={onClearFilters}
-        className="mt-4"
-      />
     </>
   );
 }

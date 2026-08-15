@@ -37,12 +37,12 @@ export function SectionCard({
       <div className={cn(CARD_BG_GRADIENT, backgroundClassName)} />
       <div className={cn(CARD_TOP_ACCENT, accentClassName)} />
 
-      <div className="relative flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 pt-5 pb-4 sm:px-6 sm:pt-6">
+      <div className="relative flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-5 pt-5 pb-4 sm:px-6 sm:pt-6">
         <div className="flex min-w-0 items-center gap-3">
           {icon && (
             <div
               className={cn(
-                "flex size-10 shrink-0 items-center justify-center rounded-xl",
+                "flex size-9 shrink-0 items-center justify-center rounded-lg",
                 iconClassName ?? CARD_ICON_TILE,
               )}
             >
@@ -52,14 +52,14 @@ export function SectionCard({
           <div className="min-w-0">
             <h2
               className={cn(
-                "font-semibold tracking-tight",
-                icon ? "text-base" : "text-lg",
+                "font-semibold leading-snug tracking-tight",
+                icon ? "text-[15px]" : "text-lg",
               )}
             >
               {title}
             </h2>
             {description && (
-              <p className="mt-0.5 text-sm text-muted-foreground">
+              <p className="mt-1 text-[13px] leading-snug text-muted-foreground">
                 {description}
               </p>
             )}
