@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.36](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.35...flowy-v0.1.36) (2026-08-15)
+
+
+### Features
+
+* **ui:** overhaul design system, mobile sheets and PWA chrome ([#180](https://github.com/GabrielCrackPro/flowy/issues/180)) ([83e5f6d](https://github.com/GabrielCrackPro/flowy/commit/83e5f6db5f79aecfdbed5b11c4f362e54e993255))
+
 ## [0.1.35](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.34...flowy-v0.1.35) (2026-08-14)
 
 
