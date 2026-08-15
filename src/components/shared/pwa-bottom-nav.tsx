@@ -3,19 +3,16 @@
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Icon } from "@/components/shared/icon";
-import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { useRouteProgress } from "@/components/shared/route-progress";
 import { UserAvatar } from "@/components/shared/user-avatar";
-import {
-  AlertDialogMedia,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui";
+import { AlertDialogMedia } from "@/components/ui";
 import { useHaptic } from "@/hooks/useHaptic";
+import { useHideOnScroll } from "@/hooks/useHideOnScroll";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePressAndHold } from "@/hooks/usePressAndHold";
 import { useProfile } from "@/hooks/useProfile";
@@ -27,7 +24,6 @@ import {
   Loader2,
   LogOut,
   MoreHorizontal,
-  Palette,
   Repeat2,
   Settings2,
   Tag,
@@ -43,6 +39,11 @@ interface NavItem {
   label: string;
   icon: typeof Home;
 }
+
+// The long-press indicator completes at 550ms (see usePressAndHold duration
+// below). Start the actions sheet's slide this many ms earlier so it is
+// already rising the instant the underline finishes — a brief peek preview.
+const LONG_PRESS_PREVIEW_MS = 450;
 
 /**
  * Bottom navigation bar for mobile viewports — shown identically for mobile
@@ -61,18 +62,15 @@ export function PwaBottomNav() {
   const handleSignOut = useSignOut();
   const haptic = useHaptic();
   const prefersReducedMotion = useReducedMotion();
+  const { isNavigating } = useRouteProgress();
   const [moreOpen, setMoreOpen] = useState(false);
-  const [navHidden, setNavHidden] = useState(false);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [profileActionsOpen, setProfileActionsOpen] = useState(false);
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
-  const profileMenuStartY = useRef<number | null>(null);
-  const profileMenuOffsetRef = useRef(0);
-  const profileMenuSuppressClick = useRef(false);
-  const profileLongPressRef = useRef(false);
-  const lastScrollTop = useRef(0);
-  const [profileMenuOffset, setProfileMenuOffset] = useState(0);
-  const [profileMenuDragging, setProfileMenuDragging] = useState(false);
+  const { hidden: navHidden, reset: resetNavHidden } = useHideOnScroll({
+    enabled: isMobile,
+    suppress: moreOpen || profileActionsOpen,
+  });
 
   const items: NavItem[] = [
     { path: "/dashboard", label: t("nav.overview"), icon: Home },
@@ -104,123 +102,46 @@ export function PwaBottomNav() {
       : pathname === path || pathname.startsWith(`${path}/`);
 
   const moreActive = moreItems.some((item) => isPathActive(item.path));
+  const morePending = moreItems.some((item) => pendingPath === item.path);
   const profileActive =
     pathname === "/dashboard/profile" ||
     pathname.startsWith("/dashboard/profile/");
   const profileVisualActive = profileActive || profileActionsOpen;
-  const closeProfileActions = () => {
-    profileLongPressRef.current = false;
-    setProfileActionsOpen(false);
-  };
+  const closeProfileActions = () => setProfileActionsOpen(false);
   const { isPressing: profilePressing, pressHandlers: profilePressHandlers } =
     usePressAndHold({
       onTap: () => {
         closeProfileActions();
+        setPendingPath("/dashboard/profile");
         router.push("/dashboard/profile");
       },
       onLongPress: () => {
-        profileLongPressRef.current = true;
         haptic("light");
         setProfileActionsOpen(true);
       },
     });
 
-  const resetProfileMenuSwipe = () => {
-    profileMenuStartY.current = null;
-    profileMenuOffsetRef.current = 0;
-    setProfileMenuOffset(0);
-    setProfileMenuDragging(false);
-  };
-
-  const handleProfileMenuOpenChange = (open: boolean) => {
-    // PopoverTrigger can request an open during a normal press. Only the
-    // long-press handler is allowed to open this controlled menu.
-    if (open && !profileLongPressRef.current) return;
-
-    if (open) {
-      setProfileActionsOpen(true);
-      return;
-    }
-
-    closeProfileActions();
-    resetProfileMenuSwipe();
-  };
-
-  const handleProfileMenuPointerDown = (
-    event: React.PointerEvent<HTMLDivElement>,
-  ) => {
-    if (event.pointerType === "mouse") return;
-    profileMenuStartY.current = event.clientY;
-    profileMenuOffsetRef.current = 0;
-    profileMenuSuppressClick.current = false;
-    setProfileMenuDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-
-  const handleProfileMenuPointerMove = (
-    event: React.PointerEvent<HTMLDivElement>,
-  ) => {
-    if (profileMenuStartY.current === null) return;
-    const nextOffset = Math.max(0, event.clientY - profileMenuStartY.current);
-    if (nextOffset > 8) profileMenuSuppressClick.current = true;
-    profileMenuOffsetRef.current = nextOffset;
-    setProfileMenuOffset(nextOffset);
-  };
-
-  const finishProfileMenuSwipe = (
-    event: React.PointerEvent<HTMLDivElement>,
-  ) => {
-    if (profileMenuStartY.current === null) return;
-    const shouldDismiss = profileMenuOffsetRef.current >= 64;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-    profileMenuStartY.current = null;
-    profileMenuOffsetRef.current = 0;
-    setProfileMenuOffset(0);
-    setProfileMenuDragging(false);
-    if (shouldDismiss) handleProfileMenuOpenChange(false);
-  };
+  // Brief preview: while the press indicator is still completing, start the
+  // actions sheet's slide so it is already rising exactly when the underline
+  // finishes. Releasing before the preview fires cancels the timer (normal
+  // taps still navigate); a navigation while the sheet previewed closes it via
+  // the pathname reset.
+  useEffect(() => {
+    if (!profilePressing) return;
+    const previewTimer = window.setTimeout(
+      () => setProfileActionsOpen(true),
+      LONG_PRESS_PREVIEW_MS,
+    );
+    return () => window.clearTimeout(previewTimer);
+  }, [profilePressing]);
 
   useEffect(() => {
     if (!pathname) return;
     setPendingPath(null);
-    setNavHidden(false);
+    resetNavHidden();
+    setMoreOpen(false);
     setProfileActionsOpen(false);
-    setProfileMenuOffset(0);
-    setProfileMenuDragging(false);
-    profileMenuStartY.current = null;
-    profileMenuOffsetRef.current = 0;
-    profileMenuSuppressClick.current = false;
-    profileLongPressRef.current = false;
-  }, [pathname]);
-
-  // Hide the bar while reading and reveal it as soon as the user scrolls up.
-  // The dashboard scrolls inside main[data-scroll-container], not the window.
-  useEffect(() => {
-    if (!isMobile) return;
-    const scrollContainer = document.querySelector<HTMLElement>(
-      "[data-scroll-container]",
-    );
-    if (!scrollContainer) return;
-
-    lastScrollTop.current = scrollContainer.scrollTop;
-    const handleScroll = () => {
-      const currentTop = scrollContainer.scrollTop;
-      const delta = currentTop - lastScrollTop.current;
-      if (Math.abs(delta) < 8) return;
-
-      if (currentTop <= 8 || delta < 0) {
-        setNavHidden(false);
-      } else if (!moreOpen && !profileActionsOpen && delta > 0) {
-        setNavHidden(true);
-      }
-      lastScrollTop.current = currentTop;
-    };
-
-    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
-    return () => scrollContainer.removeEventListener("scroll", handleScroll);
-  }, [isMobile, moreOpen, profileActionsOpen]);
+  }, [pathname, resetNavHidden]);
 
   if (!isMobile) return null;
 
@@ -234,25 +155,37 @@ export function PwaBottomNav() {
         : "text-muted-foreground/70 hover:text-foreground/80",
     );
 
-  const tabIconClass = (active: boolean) =>
-    cn("size-[19px] transition-transform duration-200", active && "scale-105");
-
-  const tabIconSlot = (active: boolean) =>
+  const tabIconClass = (active: boolean, pending = false) =>
     cn(
-      "relative z-10 flex size-10 items-center justify-center rounded-2xl transition-colors duration-200",
+      "size-[19px] transition-transform duration-200",
+      active && "scale-105",
+      pending && "motion-safe:animate-pulse",
+    );
+
+  const tabIconSlot = (active: boolean, pending = false) =>
+    cn(
+      "relative z-10 flex size-10 items-center justify-center rounded-2xl transition-[background-color,opacity] duration-200",
       active
         ? "bg-primary/12 text-primary shadow-sm shadow-primary/10"
         : "text-muted-foreground/80 hover:bg-muted/60",
+      // In-flight navigation: the tapped tab stays lit and pulses; every
+      // other tab dims so the tap reads as registered before the swap.
+      pending && "bg-primary/20 text-primary",
+      isNavigating && !pending && "opacity-40",
     );
 
+  const profilePending = pendingPath === "/dashboard/profile";
   const profileIconSlot = cn(
-    "relative z-10 flex size-10 items-center justify-center rounded-2xl border transition-[background-color,border-color,box-shadow,transform] duration-200",
+    "relative z-10 flex size-10 items-center justify-center rounded-2xl border transition-[background-color,border-color,box-shadow,transform,opacity] duration-200",
     profileVisualActive
       ? "border-primary/20 bg-primary/10 text-primary shadow-sm shadow-primary/10"
       : "border-transparent text-muted-foreground/80 group-hover/profile:bg-muted/60",
     profileActionsOpen &&
       "border-primary/30 bg-primary/15 shadow-md shadow-primary/10",
     profilePressing && "scale-[0.97]",
+    profilePending &&
+      "border-primary/30 bg-primary/15 motion-safe:animate-pulse",
+    isNavigating && !profilePending && "opacity-40",
   );
 
   return (
@@ -266,7 +199,7 @@ export function PwaBottomNav() {
           ? { duration: 0 }
           : { type: "spring", stiffness: 420, damping: 38 }
       }
-      onFocusCapture={() => setNavHidden(false)}
+      onFocusCapture={resetNavHidden}
       className={cn(
         "fixed inset-x-0 bottom-0 z-40",
         "border-t border-border/70 bg-card pb-[env(safe-area-inset-bottom,0px)]",
@@ -284,179 +217,161 @@ export function PwaBottomNav() {
               title={item.label}
               aria-label={item.label}
               aria-current={active ? "page" : undefined}
+              onClick={(event) => {
+                // A transition is already in flight — ignore taps on other
+                // tabs so rapid taps can't stack navigations.
+                if (isNavigating && !active) {
+                  event.preventDefault();
+                  return;
+                }
+                if (!active) setPendingPath(item.path);
+              }}
+              aria-busy={pendingPath === item.path || undefined}
               className={tabClass(active)}
             >
-              <span className={tabIconSlot(active)}>
-                <Icon icon={item.icon} className={tabIconClass(active)} />
+              <span className={tabIconSlot(active, pendingPath === item.path)}>
+                <Icon
+                  icon={item.icon}
+                  className={tabIconClass(active, pendingPath === item.path)}
+                />
               </span>
             </Link>
           );
-        })}
+        })}{" "}
+        <button
+          type="button"
+          aria-label={t("nav.more")}
+          title={t("nav.more")}
+          aria-haspopup="dialog"
+          aria-expanded={moreOpen}
+          aria-busy={morePending || undefined}
+          onClick={() => setMoreOpen(true)}
+          className={tabClass(moreActive)}
+        >
+          <span className={tabIconSlot(moreActive, morePending)}>
+            <Icon
+              icon={MoreHorizontal}
+              className={tabIconClass(moreActive, morePending)}
+            />
+          </span>
+        </button>
+        <BottomSheet
+          open={moreOpen}
+          onOpenChange={setMoreOpen}
+          title={t("nav.more")}
+          description={t("nav.moreHint")}
+          icon={<Icon icon={MoreHorizontal} className="size-5" />}
+          contentClassName="p-3"
+        >
+          <div className="space-y-1" role="menu" aria-label={t("nav.more")}>
+            {moreItems.map((item) => {
+              const active = isPathActive(item.path);
 
-        <Popover open={moreOpen} onOpenChange={setMoreOpen}>
-          <PopoverTrigger
-            aria-label={t("nav.more")}
-            title={t("nav.more")}
-            className={tabClass(moreActive)}
-          >
-            <span className={tabIconSlot(moreActive)}>
-              <Icon
-                icon={MoreHorizontal}
-                className={tabIconClass(moreActive)}
-              />
-            </span>
-          </PopoverTrigger>
-          <PopoverContent
-            side="top"
-            align="center"
-            sideOffset={10}
-            className={cn(
-              "w-52 max-w-[calc(100vw-1rem)] rounded-2xl border-border/50 p-2 shadow-xl",
-              prefersReducedMotion
-                ? "data-open:animate-none data-closed:animate-none"
-                : "data-open:slide-in-from-bottom-2 data-open:duration-150",
-            )}
-          >
-            <div className="mb-2 border-b border-border/40 px-1 pb-2">
-              <span className="text-xs font-semibold text-foreground">
-                {t("nav.more")}
-              </span>
-            </div>
-            <div className="space-y-1" role="menu" aria-label={t("nav.more")}>
-              {moreItems.map((item) => {
-                const active = isPathActive(item.path);
-                return (
-                  <Link
-                    key={item.path}
-                    href={item.path}
-                    role="menuitem"
-                    title={item.label}
-                    aria-current={active ? "page" : undefined}
-                    onClick={() => {
-                      if (!active) {
-                        setPendingPath(item.path);
-                        setMoreOpen(false);
-                      }
-                    }}
-                    aria-busy={pendingPath === item.path || undefined}
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  role="menuitem"
+                  title={item.label}
+                  aria-current={active ? "page" : undefined}
+                  onClick={() => {
+                    if (!active && !isNavigating) {
+                      setPendingPath(item.path);
+                    }
+                    setMoreOpen(false);
+                  }}
+                  aria-busy={pendingPath === item.path || undefined}
+                  className={cn(
+                    "flex min-h-11 touch-manipulation items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/30",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                  )}
+                >
+                  <span
                     className={cn(
-                      "flex min-h-11 touch-manipulation items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/30",
+                      "flex size-7 shrink-0 items-center justify-center rounded-lg",
                       active
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                        ? "bg-primary/15 text-primary"
+                        : "bg-muted/60 text-muted-foreground",
                     )}
                   >
-                    <span
-                      className={cn(
-                        "flex size-7 shrink-0 items-center justify-center rounded-lg",
-                        active
-                          ? "bg-primary/15 text-primary"
-                          : "bg-muted/60 text-muted-foreground",
-                      )}
-                    >
-                      <Icon icon={item.icon} className="size-4" />
-                    </span>
-                    <span className="min-w-0 flex-1">{item.label}</span>
-                    {pendingPath === item.path ? (
-                      <Icon
-                        icon={Loader2}
-                        className="size-4 motion-reduce:animate-none animate-spin"
-                      />
-                    ) : active ? (
-                      <Icon icon={Check} className="size-4" />
-                    ) : null}
-                  </Link>
-                );
-              })}
-            </div>
-          </PopoverContent>
-        </Popover>
-
-        {/* Profile tab: a long press reveals the mobile sign-out action. */}
-        <Popover
-          open={profileActionsOpen}
-          onOpenChange={handleProfileMenuOpenChange}
-        >
-          <PopoverTrigger
-            type="button"
-            aria-current={profileActive ? "page" : undefined}
-            title={`${t("profile.myProfile")} · ${t("profile.longPressHint")}`}
-            aria-label={`${t("profile.myProfile")}. ${t("profile.longPressHint")}`}
-            aria-haspopup="menu"
-            aria-expanded={profileActionsOpen}
-            className={cn(
-              tabClass(profileVisualActive),
-              "group/profile",
-              profilePressing && "text-primary",
-            )}
-            {...profilePressHandlers}
-            onPointerDown={(event) => {
-              profileLongPressRef.current = false;
-              profilePressHandlers.onPointerDown(event);
-            }}
-          >
-            {profilePressing ? (
-              <motion.span
-                aria-hidden="true"
-                initial={{ scaleX: 0, opacity: 0.5 }}
-                animate={{ scaleX: 1, opacity: 1 }}
-                transition={{ duration: 0.55, ease: "linear" }}
-                className="pointer-events-none absolute bottom-1 h-0.5 w-6 origin-left rounded-full bg-primary"
-              />
-            ) : null}
-            <span className={profileIconSlot}>
-              {profile ? (
-                <span className="relative flex items-center justify-center">
-                  <UserAvatar
-                    profile={profile}
-                    size="md"
-                    className={cn(
-                      "size-7 transition-[transform,box-shadow] duration-200",
-                      profileVisualActive &&
-                        "scale-105 ring-2 ring-primary/50 ring-offset-1 ring-offset-background",
-                    )}
-                  />
-                  {profileVisualActive ? (
-                    <span
-                      aria-hidden="true"
-                      className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-primary ring-2 ring-background"
+                    <Icon icon={item.icon} className="size-4" />
+                  </span>
+                  <span className="min-w-0 flex-1">{item.label}</span>
+                  {pendingPath === item.path ? (
+                    <Icon
+                      icon={Loader2}
+                      className="size-4 motion-reduce:animate-none animate-spin"
                     />
+                  ) : active ? (
+                    <Icon icon={Check} className="size-4" />
                   ) : null}
-                </span>
-              ) : (
-                <Icon
-                  icon={UserRound}
-                  className={tabIconClass(profileVisualActive)}
+                </Link>
+              );
+            })}
+          </div>
+        </BottomSheet>
+        {/* Profile tab: a long press opens the quick-actions sheet; a tap
+            navigates to the profile page. */}
+        <button
+          type="button"
+          aria-current={profileActive ? "page" : undefined}
+          title={`${t("profile.myProfile")} · ${t("profile.longPressHint")}`}
+          aria-label={`${t("profile.myProfile")}. ${t("profile.longPressHint")}`}
+          aria-haspopup="dialog"
+          aria-expanded={profileActionsOpen}
+          className={cn(
+            tabClass(profileVisualActive),
+            "group/profile",
+            profilePressing && "text-primary",
+          )}
+          {...profilePressHandlers}
+        >
+          {profilePressing ? (
+            <motion.span
+              aria-hidden="true"
+              initial={{ scaleX: 0, opacity: 0.5 }}
+              animate={{ scaleX: 1, opacity: 1 }}
+              transition={{ duration: 0.55, ease: "linear" }}
+              className="pointer-events-none absolute bottom-1 h-0.5 w-6 origin-left rounded-full bg-primary"
+            />
+          ) : null}
+          <span className={profileIconSlot}>
+            {profile ? (
+              <span className="relative flex items-center justify-center">
+                <UserAvatar
+                  profile={profile}
+                  size="md"
+                  className={cn(
+                    "size-7 transition-[transform,box-shadow] duration-200",
+                    profileVisualActive &&
+                      "scale-105 ring-2 ring-primary/50 ring-offset-1 ring-offset-background",
+                  )}
                 />
-              )}
-            </span>
-          </PopoverTrigger>
-          <PopoverContent
-            side="top"
-            align="end"
-            sideOffset={10}
-            role="menu"
-            aria-label={t("profile.actions")}
-            onPointerDown={handleProfileMenuPointerDown}
-            onPointerMove={handleProfileMenuPointerMove}
-            onPointerUp={finishProfileMenuSwipe}
-            onPointerCancel={finishProfileMenuSwipe}
-            onClickCapture={(event) => {
-              if (profileMenuSuppressClick.current) {
-                event.preventDefault();
-                event.stopPropagation();
-                profileMenuSuppressClick.current = false;
-              }
-            }}
-            style={{
-              translate: `0 ${profileMenuOffset}px`,
-              transition:
-                profileMenuDragging || prefersReducedMotion
-                  ? "none"
-                  : "translate 180ms cubic-bezier(0.22, 1, 0.36, 1)",
-            }}
-            className="w-52 rounded-2xl border-border/50 p-2 shadow-xl"
-          >
+                {profileVisualActive ? (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-primary ring-2 ring-background"
+                  />
+                ) : null}
+              </span>
+            ) : (
+              <Icon
+                icon={UserRound}
+                className={tabIconClass(profileVisualActive)}
+              />
+            )}
+          </span>
+        </button>
+        <BottomSheet
+          open={profileActionsOpen}
+          onOpenChange={setProfileActionsOpen}
+          title={t("profile.myProfile")}
+          icon={<Icon icon={UserRound} className="size-5" />}
+          contentClassName="p-3"
+        >
+          <div role="menu" aria-label={t("profile.actions")}>
             <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
@@ -471,21 +386,21 @@ export function PwaBottomNav() {
                 href="/dashboard/profile"
                 onClick={closeProfileActions}
                 aria-label={t("profile.myProfile")}
-                className="flex min-w-0 items-center gap-2 rounded-xl bg-primary/[0.06] px-2 py-1.5 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                className="flex min-w-0 items-center gap-3 rounded-xl bg-primary/[0.06] px-3 py-2.5 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               >
                 {profile ? (
-                  <UserAvatar profile={profile} size="sm" className="size-8" />
+                  <UserAvatar profile={profile} size="sm" className="size-9" />
                 ) : (
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Icon icon={UserRound} className="size-4" />
                   </span>
                 )}
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-xs font-semibold leading-tight text-foreground">
+                  <span className="block truncate text-sm font-semibold leading-tight text-foreground">
                     {profile?.name ?? t("profile.user")}
                   </span>
                   {profile?.email ? (
-                    <span className="mt-0.5 block truncate text-[10px] leading-tight text-muted-foreground">
+                    <span className="mt-0.5 block truncate text-xs leading-tight text-muted-foreground">
                       {profile.email}
                     </span>
                   ) : null}
@@ -517,26 +432,6 @@ export function PwaBottomNav() {
                   </span>
                 </Link>
               </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={
-                  prefersReducedMotion
-                    ? { duration: 0 }
-                    : { duration: 0.16, delay: 0.06, ease: "easeOut" }
-                }
-              >
-                <div className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-foreground">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted/70 text-muted-foreground">
-                    <Icon icon={Palette} className="size-4" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    {t("common.toggleTheme")}
-                  </span>
-                  <ThemeToggle className="size-8 shrink-0 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground" />
-                </div>
-              </motion.div>
             </div>
 
             <div className="my-1 border-t border-border/50" />
@@ -565,9 +460,8 @@ export function PwaBottomNav() {
                 <span className="min-w-0 flex-1">{t("profile.signOut")}</span>
               </button>
             </motion.div>
-          </PopoverContent>
-        </Popover>
-
+          </div>
+        </BottomSheet>
         <ConfirmDialog
           open={signOutConfirmOpen}
           onOpenChange={setSignOutConfirmOpen}

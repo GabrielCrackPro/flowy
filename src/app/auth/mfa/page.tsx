@@ -5,11 +5,11 @@ import { FormAlert, FormField } from "@components/ui/form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Icon } from "@/components/shared";
 import {
   OTP_CODE_LENGTH,
-  OtpCodeInput,
-} from "@/components/auth/otp-code-input";
-import { Icon } from "@/components/shared";
+  SegmentedCodeInput,
+} from "@/components/shared/segmented-code-input";
 import { translateMfaError } from "@/lib/auth/errors";
 import { ArrowLeft, Loader2, ShieldCheck, Smartphone } from "@/lib/icons";
 import { getSession, signOut } from "@/lib/supabase/auth";
@@ -258,7 +258,7 @@ export default function MfaChallengePage() {
             label={t("settings.security.mfaChallengeCodeLabel")}
             required
           >
-            <OtpCodeInput
+            <SegmentedCodeInput
               value={code}
               onChange={(nextCode) => {
                 setCode(nextCode);

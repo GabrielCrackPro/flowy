@@ -139,6 +139,7 @@ export const app: AppTranslationMessages = {
     openMenu: "Open menu",
     closeMenu: "Close menu",
     more: "More",
+    moreHint: "More finance tools",
     mainAriaLabel: "Main navigation",
   },
   profile: {
@@ -200,6 +201,7 @@ export const app: AppTranslationMessages = {
       removeMemberDescription:
         "The user will lose access to this space and won't be able to see its transactions, budgets, or goals. They can rejoin with the invitation code.",
       copyCode: "Copy invitation code",
+      inviteCode: "Invitation code",
       codeCopied: "Code copied to clipboard",
       codeWithOwner: "Code with owner",
       rename: "Rename space",
@@ -487,6 +489,7 @@ export const app: AppTranslationMessages = {
       bannerText:
         "Get alerts about budgets, subscriptions and goals — even when Flowy is closed",
       bannerAction: "Enable",
+      bannerEnabling: "Enabling…",
       devicesTitle: "Devices",
       devicesHint:
         "Each browser or installed app has its own push subscription. Device names stay on your account.",
@@ -651,6 +654,13 @@ export const app: AppTranslationMessages = {
     refresh: "Refresh",
     syncing: "Syncing…",
     synced: "Synced",
+    loading: {
+      auth: "Checking your session…",
+      data: "Loading your finances…",
+      charts: "Preparing your charts…",
+      transactions: "Fetching transactions…",
+      final: "Almost there…",
+    },
     syncInfo: {
       title: "Live sync",
       body: "Your data updates automatically in real time. Changes you or other members make appear instantly across devices.",
@@ -1096,11 +1106,19 @@ export const app: AppTranslationMessages = {
     createdBy: "Created by",
     updatedBy: "Modified by",
   },
+  notFound: {
+    title: "This page doesn't exist",
+    description:
+      "The page you're looking for is no longer here. The link may be broken, the page may have moved, or the URL is incorrect.",
+    goHome: "Go to dashboard",
+    goBack: "Go back",
+  },
   errors: {
     title: "Something went wrong",
     retry: "Try again",
     somethingWentWrong: "Something went wrong",
     failedToLoad: "Failed to load",
+    technicalDetails: "Technical details",
     network: {
       message:
         "Unable to connect to the server. Please check your internet connection.",

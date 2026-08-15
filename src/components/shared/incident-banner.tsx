@@ -1,10 +1,14 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Banner, type BannerSeverity } from "@/components/shared/banner";
+import {
+  BannerStripMotion,
+  useBannerStackItem,
+} from "@/components/shared/banner-stack";
 import { Activity, TriangleAlert } from "@/lib/icons";
 import type {
   IncidentRecord,
@@ -108,16 +112,15 @@ export function IncidentBanner() {
     ? `status.incidentStatus.${latest.status}`
     : "status.incidentStatus.investigating";
 
+  const { ownDismissHidden, staggerDelay } = useBannerStackItem({
+    visible: Boolean(latest),
+    onDismiss: latest ? () => dismiss(latest.id) : () => {},
+  });
+
   return (
     <AnimatePresence initial={false}>
       {latest && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.2, ease: "easeInOut" }}
-          className="overflow-hidden"
-        >
+        <BannerStripMotion delay={staggerDelay}>
           <Banner
             variant="strip"
             severity={SEVERITY_BY_STATUS[latest.status]}
@@ -140,10 +143,10 @@ export function IncidentBanner() {
             actionLabel={t("status.incidentBanner.action")}
             actionIcon={Activity}
             onAction={() => router.push("/status")}
-            onDismiss={() => dismiss(latest.id)}
+            onDismiss={ownDismissHidden ? undefined : () => dismiss(latest.id)}
             dismissLabel={t("common.close")}
           />
-        </motion.div>
+        </BannerStripMotion>
       )}
     </AnimatePresence>
   );

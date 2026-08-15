@@ -11,49 +11,55 @@ import {
 } from "react";
 import { cn } from "@/lib/utils";
 
+/** Length of the MFA / verification codes (digits). */
 export const OTP_CODE_LENGTH = 6;
 
-const OTP_SLOT_KEYS = [
-  "first",
-  "second",
-  "third",
-  "fourth",
-  "fifth",
-  "sixth",
-] as const;
+/** Length of space invitation codes (A–Z, 0–9). */
+export const JOIN_CODE_LENGTH = 6;
 
-export function OtpCodeInput({
+interface SegmentedCodeInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  onComplete?: (value: string) => void;
+  disabled?: boolean;
+  /** Accessible name for the field (rendered as a visually-hidden legend). */
+  label: string;
+  /** Number of slots. Defaults to `OTP_CODE_LENGTH`. */
+  length?: number;
+  /** Allow letters + digits (normalized to uppercase) instead of digits only. */
+  alphanumeric?: boolean;
+  autoFocus?: boolean;
+  invalid?: boolean;
+  errorMessage?: string | null;
+  className?: string;
+}
+
+/**
+ * Segmented code input with one box per character. Shared by the auth/MFA
+ * flows (numeric codes) and the space join form (alphanumeric invite codes).
+ */
+export function SegmentedCodeInput({
   value,
   onChange,
   onComplete,
   disabled,
   label,
+  length = OTP_CODE_LENGTH,
+  alphanumeric = false,
   autoFocus = false,
   invalid = false,
   errorMessage,
   className,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  onComplete?: (value: string) => void;
-  disabled?: boolean;
-  label: string;
-  autoFocus?: boolean;
-  invalid?: boolean;
-  errorMessage?: string | null;
-  className?: string;
-}) {
+}: SegmentedCodeInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const errorId = useId();
   const wasInvalid = useRef(false);
   const prefersReducedMotion = useReducedMotion();
   const [focused, setFocused] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
-  const digits = Array.from(
-    { length: OTP_CODE_LENGTH },
-    (_, index) => value[index] ?? "",
-  );
-  const activeIndex = Math.min(value.length, OTP_CODE_LENGTH - 1);
+  const chars = Array.from({ length }, (_, index) => value[index] ?? "");
+  const slotKeys = Array.from({ length }, (_, index) => `slot-${index}`);
+  const activeIndex = Math.min(value.length, length - 1);
 
   useEffect(() => {
     if (autoFocus && !disabled) {
@@ -69,12 +75,15 @@ export function OtpCodeInput({
   }, [invalid]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const nextValue = event.currentTarget.value
-      .replace(/\D/g, "")
-      .slice(0, OTP_CODE_LENGTH);
+    const nextValue = alphanumeric
+      ? event.currentTarget.value
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, "")
+          .slice(0, length)
+      : event.currentTarget.value.replace(/\D/g, "").slice(0, length);
 
     onChange(nextValue);
-    if (nextValue.length === OTP_CODE_LENGTH) {
+    if (nextValue.length === length) {
       onComplete?.(nextValue);
     }
   };
@@ -102,31 +111,31 @@ export function OtpCodeInput({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           type="text"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          autoCapitalize="off"
+          inputMode={alphanumeric ? "text" : "numeric"}
+          autoComplete={alphanumeric ? undefined : "one-time-code"}
+          autoCapitalize={alphanumeric ? "characters" : "off"}
           spellCheck={false}
           enterKeyHint="done"
-          pattern="[0-9]*"
-          maxLength={OTP_CODE_LENGTH}
+          pattern={alphanumeric ? "[A-Za-z0-9]*" : "[0-9]*"}
+          maxLength={length}
           disabled={disabled}
           aria-invalid={invalid || undefined}
           aria-label={label}
           className="absolute inset-0 z-10 size-full cursor-text rounded-xl opacity-0 outline-none disabled:cursor-not-allowed"
         />
 
-        {digits.map((digit, index) => {
+        {chars.map((char, index) => {
           const active = focused && index === activeIndex;
 
           return (
-            <Fragment key={OTP_SLOT_KEYS[index]}>
+            <Fragment key={slotKeys[index]}>
               <span
                 aria-hidden="true"
                 className={cn(
                   "relative flex size-11 items-center justify-center overflow-hidden rounded-xl border text-lg font-semibold tabular-nums sm:size-12",
                   invalid
                     ? "border-destructive/50 bg-destructive/5 text-destructive"
-                    : digit
+                    : char
                       ? "border-primary/35 bg-primary/[0.06] text-foreground shadow-sm"
                       : "border-border/70 bg-background text-foreground shadow-sm",
                   active &&
@@ -136,9 +145,9 @@ export function OtpCodeInput({
                   disabled && "opacity-50",
                 )}
               >
-                {digit ? (
+                {char ? (
                   <motion.span
-                    key={digit}
+                    key={char}
                     initial={{
                       opacity: 0,
                       y: prefersReducedMotion ? 0 : 10,
@@ -148,17 +157,17 @@ export function OtpCodeInput({
                     transition={{ duration: 0.14, ease: "easeOut" }}
                     className="block"
                   >
-                    {digit}
+                    {char}
                   </motion.span>
                 ) : null}
-                {active && !digit ? (
+                {active && !char ? (
                   <span
                     aria-hidden="true"
                     className="absolute h-5 w-px animate-pulse bg-primary"
                   />
                 ) : null}
               </span>
-              {index === 2 ? (
+              {index === 2 && length > 3 ? (
                 <span
                   aria-hidden="true"
                   className="px-0.5 text-sm font-semibold text-muted-foreground/50"

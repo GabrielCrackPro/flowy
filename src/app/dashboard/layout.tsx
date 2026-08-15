@@ -1,4 +1,5 @@
 import { Header, Sidebar } from "@components/dashboard";
+import { BannerStack } from "@components/shared/banner-stack";
 import { IncidentBanner } from "@components/shared/incident-banner";
 import { MfaSetupBanner } from "@components/shared/mfa-setup-banner";
 import { OfflineBanner } from "@components/shared/offline-banner";
@@ -27,19 +28,17 @@ export default function DashboardLayout({
       </Suspense>
       <div className="flex min-w-0 flex-1 flex-col">
         <Suspense fallback={null}>
-          <OfflineBanner />
-        </Suspense>
-        <Suspense fallback={null}>
           <Header />
         </Suspense>
         <Suspense fallback={null}>
-          <PushNotificationsBanner />
+          <BannerStack>
+            <OfflineBanner />
+            <PushNotificationsBanner />
+            <IncidentBanner />
+          </BannerStack>
         </Suspense>
         <Suspense fallback={null}>
           <MfaSetupBanner />
-        </Suspense>
-        <Suspense fallback={null}>
-          <IncidentBanner />
         </Suspense>
         <main
           id="main"

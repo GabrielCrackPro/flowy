@@ -1,11 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Banner } from "@/components/shared/banner";
+import { MfaSetupDialog } from "@/components/shared/mfa-setup-dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { ShieldCheck } from "@/lib/icons";
 import { listMfaFactors } from "@/lib/supabase/mfa";
@@ -28,9 +29,9 @@ function isRecentAccount(createdAt: string | undefined) {
  */
 export function MfaSetupBanner() {
   const { t } = useTranslation();
-  const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuth();
+  const [setupOpen, setSetupOpen] = useState(false);
   const [dismissed, setDismissed] = useState(() => {
     if (typeof window === "undefined") return false;
     try {
@@ -42,20 +43,24 @@ export function MfaSetupBanner() {
   const [checked, setChecked] = useState(false);
   const [mfaEnabled, setMfaEnabled] = useState(false);
 
+  const checkMfa = useCallback(async () => {
+    const { data, error } = await listMfaFactors();
+    if (!error && data.totp.some((factor) => factor.status === "verified")) {
+      setMfaEnabled(true);
+    }
+    setChecked(true);
+  }, []);
+
   useEffect(() => {
     let active = true;
 
-    const checkMfa = async () => {
-      const { data, error } = await listMfaFactors();
+    const runCheck = async () => {
       if (!active) return;
-      if (!error && data.totp.some((factor) => factor.status === "verified")) {
-        setMfaEnabled(true);
-      }
-      setChecked(true);
+      await checkMfa();
     };
 
     if (user && isRecentAccount(user.created_at)) {
-      void checkMfa();
+      void runCheck();
     } else {
       setChecked(true);
     }
@@ -63,7 +68,7 @@ export function MfaSetupBanner() {
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [user, checkMfa]);
 
   const visible =
     checked &&
@@ -99,7 +104,7 @@ export function MfaSetupBanner() {
                 title={t("settings.security.mfaBannerText")}
                 description={t("settings.security.mfaBannerHint")}
                 actionLabel={t("settings.security.mfaBannerAction")}
-                onAction={() => router.push("/dashboard/profile#security")}
+                onAction={() => setSetupOpen(true)}
                 onDismiss={dismiss}
                 dismissLabel={t("common.close")}
               />
@@ -107,6 +112,12 @@ export function MfaSetupBanner() {
           </div>
         </motion.div>
       )}
+
+      <MfaSetupDialog
+        open={setupOpen}
+        onOpenChange={setSetupOpen}
+        onComplete={() => void checkMfa()}
+      />
     </AnimatePresence>
   );
 }

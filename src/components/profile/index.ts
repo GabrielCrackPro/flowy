@@ -5,7 +5,6 @@ export * from "./color-picker";
 export * from "./profile-form";
 export * from "./push-notifications";
 export * from "./settings-nav";
-export * from "./space-avatar-uploader";
 export * from "./space-manager";
 export { ThemeCustomizationSheet } from "./theme-customization-modal";
 export * from "./theme-preview";

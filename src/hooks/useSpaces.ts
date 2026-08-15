@@ -67,8 +67,17 @@ export function useSpaces() {
   const create = useMutation({
     mutationFn: ({ name, isPersonal }: { name: string; isPersonal: boolean }) =>
       createSpace(name, isPersonal),
-    onSuccess: async () => {
+    onSuccess: async (space) => {
       toast.success(t("profile.spaces.created"));
+      // Land the user in the new space right away (silent — the create toast
+      // already confirms the action, so no extra "activated" toast).
+      if (space?.id) {
+        try {
+          await setActiveSpace(space.id);
+        } catch {
+          // Best-effort: the space still exists, just not activated.
+        }
+      }
       await invalidateSpaceDependent();
     },
     onError: () => toast.error(t("profile.spaces.createError")),
@@ -76,8 +85,16 @@ export function useSpaces() {
 
   const join = useMutation({
     mutationFn: (code: string) => joinSpace(code),
-    onSuccess: async () => {
+    onSuccess: async (space) => {
       toast.success(t("profile.spaces.joined"));
+      // Same as create: activate the joined space immediately.
+      if (space?.id) {
+        try {
+          await setActiveSpace(space.id);
+        } catch {
+          // Best-effort: the space still exists, just not activated.
+        }
+      }
       await invalidateSpaceDependent();
     },
     onError: () => toast.error(t("profile.spaces.joinError")),
