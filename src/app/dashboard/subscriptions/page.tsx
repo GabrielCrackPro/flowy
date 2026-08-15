@@ -3,16 +3,19 @@
 import { BackHeader } from "@components/dashboard";
 import {
   ActionsColumn,
+  buildFinanceListActionBar,
   type Column,
   ConfirmDialog,
   CustomColumn,
+  DataExportMenu,
   EmptyState,
   EntityListView,
-  ErrorBoundary,
+  FinancePageShell,
   GradientButton,
   Icon,
   NumberColumn,
-  PageTransition,
+  SummaryMetricCard,
+  SummaryMetricGrid,
   TextColumn,
   type ViewMode,
 } from "@components/shared";
@@ -20,7 +23,6 @@ import { Badge } from "@components/ui";
 import { useSubscriptionApi } from "@hooks/api/useSubscriptionApi";
 import { useProfile } from "@hooks/useProfile";
 import { cn, formatCurrency } from "@lib/utils";
-import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -28,7 +30,7 @@ import {
   SubscriptionCardSkeleton,
 } from "@/components/subscriptions/subscription-card";
 import { SubscriptionFormSheet } from "@/components/subscriptions/subscription-form-dialog";
-import { useEntityFormModal } from "@/hooks";
+import { useCreateEntityFromQuery, useEntityFormModal } from "@/hooks";
 import { parseDateOnly } from "@/lib/date-only";
 import {
   Calendar,
@@ -58,6 +60,7 @@ export default function SubscriptionsPage() {
     create,
     update,
     remove,
+    refresh,
     isCreating,
     isUpdating,
   } = useSubscriptionApi();
@@ -89,6 +92,8 @@ export default function SubscriptionsPage() {
     isCreating,
     isUpdating,
   });
+
+  useCreateEntityFromQuery(openCreate);
 
   const handleQuickPayment = async () => {
     if (!quickAddSubscription) return;
@@ -154,6 +159,72 @@ export default function SubscriptionsPage() {
     };
   }, [subscriptions]);
 
+  const exportTotals = useMemo(() => {
+    const active = visible.filter((subscription) => subscription.active);
+    const monthlyTotal = active.reduce(
+      (sum, subscription) => sum + subscriptionMonthlyEquivalent(subscription),
+      0,
+    );
+
+    return [
+      {
+        label: t("subscriptions.active"),
+        value: new Intl.NumberFormat(locale).format(active.length),
+      },
+      {
+        label: t("subscriptions.monthlyTotal"),
+        value: formatCurrency(monthlyTotal, locale, currency),
+      },
+      {
+        label: t("subscriptions.yearlyTotal"),
+        value: formatCurrency(monthlyTotal * 12, locale, currency),
+      },
+    ];
+  }, [currency, locale, t, visible]);
+
+  const exportColumns = useMemo(
+    () => [
+      {
+        key: "merchant",
+        header: t("subscriptions.merchantLabel"),
+        render: (subscription: Subscription) =>
+          subscription.merchant ?? t("profile.noMerchant"),
+      },
+      {
+        key: "amount",
+        header: t("subscriptions.amountLabel"),
+        render: (subscription: Subscription) =>
+          formatCurrency(subscriptionAmount(subscription), locale, currency),
+      },
+      {
+        key: "billingCycle",
+        header: t("subscriptions.billingCycleLabel"),
+        render: (subscription: Subscription) =>
+          subscription.billingCycle
+            ? t(`subscriptions.cycles.${subscription.billingCycle}`)
+            : "—",
+      },
+      {
+        key: "nextPayment",
+        header: t("subscriptions.nextPayment"),
+        render: (subscription: Subscription) =>
+          subscription.nextPayment
+            ? new Intl.DateTimeFormat(locale).format(
+                parseDateOnly(subscription.nextPayment) ??
+                  new Date(subscription.nextPayment),
+              )
+            : t("subscriptions.noNextPayment"),
+      },
+      {
+        key: "status",
+        header: t("common.status"),
+        render: (subscription: Subscription) =>
+          subscription.active ? t("profile.active") : t("profile.inactive"),
+      },
+    ],
+    [currency, locale, t],
+  );
+
   const columns: Column<Subscription>[] = useMemo(
     () => [
       TextColumn({
@@ -177,7 +248,7 @@ export default function SubscriptionsPage() {
       }),
       TextColumn({
         header: t("subscriptions.billingCycleLabel"),
-        className: "hidden sm:table-cell",
+        className: "hidden md:table-cell",
         sortable: true,
         sortValue: (subscription) => subscription.billingCycle ?? "",
         value: (subscription) =>
@@ -246,6 +317,7 @@ export default function SubscriptionsPage() {
         ),
       }),
       ActionsColumn({
+        ariaLabel: t("profile.actions"),
         actions: (subscription) => [
           {
             label: t("subscriptions.quickPayment"),
@@ -272,156 +344,130 @@ export default function SubscriptionsPage() {
   );
 
   return (
-    <PageTransition>
-      <ErrorBoundary>
-        <div className="space-y-6">
-          <BackHeader
-            title={t("nav.subscriptions")}
-            href="/dashboard"
-            actions={
-              <GradientButton onClick={openCreate} fullWidth={false}>
-                <span className="hidden sm:inline">
-                  {t("subscriptions.new")}
-                </span>
+    <FinancePageShell>
+      <BackHeader title={t("nav.subscriptions")} href="/dashboard" />
+
+      <p className="text-sm text-muted-foreground">
+        {t("subscriptions.pageDescription")}
+      </p>
+
+      {subscriptions.length > 0 && (
+        <SummaryMetricGrid>
+          <SummaryMetricCard
+            label={t("subscriptions.active")}
+            value={stats.active}
+            icon={Repeat2}
+            tone="info"
+          />
+          <SummaryMetricCard
+            label={t("subscriptions.monthlyTotal")}
+            value={formatCurrency(stats.monthlyTotal, locale, currency)}
+            icon={Wallet}
+            tone="positive"
+          />
+          <SummaryMetricCard
+            label={t("subscriptions.yearlyTotal")}
+            value={formatCurrency(stats.yearlyTotal, locale, currency)}
+            icon={Wallet}
+            tone="warning"
+          />
+        </SummaryMetricGrid>
+      )}
+
+      <EntityListView
+        data={visible}
+        columns={columns}
+        loading={loading}
+        keyExtractor={(subscription) => subscription.id}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        searchPlaceholder={t("subscriptions.searchPlaceholder")}
+        view={view}
+        onViewChange={setView}
+        skeletonVariant="detail"
+        emptyState={
+          <EmptyState
+            icon={<Icon icon={Repeat2} className="size-5" />}
+            title={t("subscriptions.emptyTitle")}
+            description={
+              searchQuery
+                ? t("common.noResults")
+                : t("subscriptions.emptyDescription")
+            }
+            action={
+              <GradientButton onClick={openCreate} size="sm">
+                {t("subscriptions.emptyAction")}
               </GradientButton>
             }
           />
-
-          <p className="text-sm text-muted-foreground">
-            {t("subscriptions.pageDescription")}
-          </p>
-
-          {subscriptions.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.15 }}
-              className="grid gap-4 sm:grid-cols-3"
-            >
-              <div className="rounded-2xl border border-border/40 bg-gradient-to-br from-card to-card/50 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400">
-                    <Icon icon={Repeat2} className="size-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {t("subscriptions.active")}
-                    </p>
-                    <p className="text-lg font-semibold">{stats.active}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border/40 bg-gradient-to-br from-card to-card/50 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-                    <Icon icon={Wallet} className="size-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {t("subscriptions.monthlyTotal")}
-                    </p>
-                    <p className="text-lg font-semibold">
-                      {formatCurrency(stats.monthlyTotal, locale, currency)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border/40 bg-gradient-to-br from-card to-card/50 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
-                    <Icon icon={Wallet} className="size-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {t("subscriptions.yearlyTotal")}
-                    </p>
-                    <p className="text-lg font-semibold">
-                      {formatCurrency(stats.yearlyTotal, locale, currency)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          <EntityListView
-            data={visible}
-            columns={columns}
-            loading={loading}
-            keyExtractor={(subscription) => subscription.id}
-            searchQuery={searchQuery}
-            onSearchQueryChange={setSearchQuery}
-            searchPlaceholder={t("subscriptions.searchPlaceholder")}
-            view={view}
-            onViewChange={setView}
-            skeletonVariant="detail"
-            emptyState={
-              <EmptyState
-                icon={<Icon icon={Repeat2} className="size-5" />}
-                title={t("subscriptions.emptyTitle")}
-                description={
-                  searchQuery
-                    ? t("common.noResults")
-                    : t("subscriptions.emptyDescription")
-                }
-                action={
-                  <GradientButton onClick={openCreate} size="sm">
-                    {t("subscriptions.emptyAction")}
-                  </GradientButton>
-                }
+        }
+        actionBar={buildFinanceListActionBar({
+          create: { label: t("subscriptions.new"), onClick: openCreate },
+          exportAction:
+            visible.length > 0 ? (
+              <DataExportMenu
+                data={visible}
+                columns={exportColumns}
+                totals={exportTotals}
+                summaryLabel={t("dashboard.financialSummary")}
+                title={t("nav.subscriptions")}
+                filenamePrefix="subscriptions"
+                locale={locale}
               />
-            }
-            renderCard={(subscription, _index) => (
-              <SubscriptionCard
-                key={subscription.id}
-                subscription={subscription}
-                onEdit={() => openEdit(subscription)}
-                onDelete={() => setDeleting(subscription)}
-                onQuickPayment={() => setQuickAddSubscription(subscription)}
-              />
-            )}
-            renderSkeletonCard={(index) => (
-              <SubscriptionCardSkeleton index={index} />
-            )}
+            ) : undefined,
+          refresh: {
+            onRefresh: refresh,
+            refreshing: loading,
+            label: t("dashboard.refresh"),
+          },
+        })}
+        renderCard={(subscription, _index) => (
+          <SubscriptionCard
+            key={subscription.id}
+            subscription={subscription}
+            onEdit={() => openEdit(subscription)}
+            onDelete={() => setDeleting(subscription)}
+            onQuickPayment={() => setQuickAddSubscription(subscription)}
           />
-        </div>
+        )}
+        renderSkeletonCard={(index) => (
+          <SubscriptionCardSkeleton index={index} />
+        )}
+      />
 
-        <SubscriptionFormSheet
-          open={formOpen}
-          onOpenChange={closeForm}
-          subscription={editing}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-        />
+      <SubscriptionFormSheet
+        open={formOpen}
+        onOpenChange={closeForm}
+        subscription={editing}
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+      />
 
-        <ConfirmDialog
-          open={!!deleting}
-          onOpenChange={() => setDeleting(null)}
-          title={t("subscriptions.deleteTitle")}
-          description={t("subscriptions.deleteDescription")}
-          onConfirm={handleDelete}
-        />
+      <ConfirmDialog
+        open={!!deleting}
+        onOpenChange={() => setDeleting(null)}
+        title={t("subscriptions.deleteTitle")}
+        description={t("subscriptions.deleteDescription")}
+        onConfirm={handleDelete}
+      />
 
-        <ConfirmDialog
-          open={!!quickAddSubscription}
-          onOpenChange={() => setQuickAddSubscription(null)}
-          title={t("subscriptions.recordPayment")}
-          description={
-            quickAddSubscription
-              ? t("subscriptions.recordPaymentDesc", {
-                  merchant: quickAddSubscription.merchant ?? "",
-                })
-              : ""
-          }
-          confirmLabel={t("subscriptions.confirmPayment")}
-          cancelLabel={t("common.cancel")}
-          variant="default"
-          icon={<Icon icon={CreditCard} className="size-6 text-violet-600" />}
-          onConfirm={handleQuickPayment}
-        />
-      </ErrorBoundary>
-    </PageTransition>
+      <ConfirmDialog
+        open={!!quickAddSubscription}
+        onOpenChange={() => setQuickAddSubscription(null)}
+        title={t("subscriptions.recordPayment")}
+        description={
+          quickAddSubscription
+            ? t("subscriptions.recordPaymentDesc", {
+                merchant: quickAddSubscription.merchant ?? "",
+              })
+            : ""
+        }
+        confirmLabel={t("subscriptions.confirmPayment")}
+        cancelLabel={t("common.cancel")}
+        variant="default"
+        icon={<Icon icon={CreditCard} className="size-6 text-violet-600" />}
+        onConfirm={handleQuickPayment}
+      />
+    </FinancePageShell>
   );
 }

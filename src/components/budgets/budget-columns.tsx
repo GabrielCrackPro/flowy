@@ -152,6 +152,7 @@ export function buildBudgetColumns({
     }),
 
     ActionsColumn({
+      ariaLabel: t("profile.actions"),
       actions: (budget) => [
         {
           label: t("budgets.edit"),

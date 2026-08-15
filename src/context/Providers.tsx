@@ -6,7 +6,6 @@ import { OfflineProvider } from "@context/OfflineProvider";
 import { ProfileProvider } from "@context/ProfileContext";
 import { ThemeProvider } from "@context/ThemeContext";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { MotionConfig } from "framer-motion";
 import { ThemeProvider as NextThemeProvider } from "next-themes";
 import { queryClient } from "@/lib/react-query";
@@ -35,7 +34,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
             </ThemeProvider>
           </ProfileProvider>
         </NextThemeProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
       </MotionConfig>
     </QueryClientProvider>
   );

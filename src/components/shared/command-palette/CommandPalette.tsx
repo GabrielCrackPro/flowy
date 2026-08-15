@@ -10,20 +10,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useSignOut } from "@/hooks/useSignOut";
 import { useTheme } from "@/hooks/useTheme";
 import { search } from "@/lib/api/search";
-import {
-  ArrowUpDown,
-  Home,
-  LogOut,
-  Moon,
-  Plus,
-  Repeat2,
-  Settings,
-  Sparkles,
-  Sun,
-  Tag,
-  Target,
-  Wallet,
-} from "@/lib/icons";
+import { ArrowUpDown, Repeat2, Tag, Target, Wallet } from "@/lib/icons";
 import type { SearchResultItem } from "@/types/SearchResult";
 import type { IconProps } from "../icon";
 import { CommandPaletteActions } from "./CommandPaletteActions";
@@ -38,6 +25,12 @@ import { CommandPaletteInput } from "./CommandPaletteInput";
 import { CommandPaletteOverlay } from "./CommandPaletteOverlay";
 import { CommandPaletteRecent } from "./CommandPaletteRecent";
 import { CommandPaletteResults } from "./CommandPaletteResults";
+import {
+  type CommandContext,
+  type ResolvedCommand,
+  resolveCommand,
+  useCommandRegistry,
+} from "./command-registry";
 import { deleteAllRecent, getRecent, saveRecent } from "./utils";
 
 const sectionMeta: Record<
@@ -67,127 +60,6 @@ const sectionLabels: Record<SearchResultItem["type"], string> = {
   subscription: "nav.subscriptions",
 };
 
-interface QuickAction {
-  id: string;
-  icon: IconProps["icon"];
-  labelKey: string;
-  url: string;
-  keywords: string[];
-}
-
-interface SystemAction {
-  id: string;
-  icon: IconProps["icon"];
-  label: string;
-  keywords: string[];
-  action: () => void;
-}
-
-const quickActions: QuickAction[] = [
-  {
-    id: "new-transaction",
-    icon: Plus,
-    labelKey: "header.newTransaction",
-    url: "/dashboard/transactions/add",
-    keywords: [
-      "nueva",
-      "nuevo",
-      "crear",
-      "transacción",
-      "transaccion",
-      "transaction",
-      "add",
-      "añadir",
-    ],
-  },
-  {
-    id: "new-budget",
-    icon: Wallet,
-    labelKey: "nav.budgets",
-    url: "/dashboard/budgets",
-    keywords: ["nuevo", "presupuesto", "presupuest", "budget", "crear", "add"],
-  },
-  {
-    id: "new-goal",
-    icon: Target,
-    labelKey: "nav.goals",
-    url: "/dashboard/goals",
-    keywords: [
-      "nueva",
-      "meta",
-      "goal",
-      "crear",
-      "ahorro",
-      "saving",
-      "objetivo",
-    ],
-  },
-];
-
-const navActions: QuickAction[] = [
-  {
-    id: "nav-overview",
-    icon: Home,
-    labelKey: "nav.overview",
-    url: "/dashboard",
-    keywords: ["resumen", "inicio", "home", "overview", "ir", "panel"],
-  },
-  {
-    id: "nav-transactions",
-    icon: ArrowUpDown,
-    labelKey: "nav.transactions",
-    url: "/dashboard/transactions",
-    keywords: [
-      "transacciones",
-      "transactions",
-      "movimientos",
-      "gastos",
-      "ingresos",
-    ],
-  },
-  {
-    id: "nav-categories",
-    icon: Tag,
-    labelKey: "nav.categories",
-    url: "/dashboard/categories",
-    keywords: ["categorías", "categorias", "categories"],
-  },
-  {
-    id: "nav-budgets",
-    icon: Wallet,
-    labelKey: "nav.budgets",
-    url: "/dashboard/budgets",
-    keywords: ["presupuestos", "budgets", "presupuesto"],
-  },
-  {
-    id: "nav-goals",
-    icon: Target,
-    labelKey: "nav.goals",
-    url: "/dashboard/goals",
-    keywords: ["metas", "goals", "objetivos", "ahorro"],
-  },
-  {
-    id: "nav-subscriptions",
-    icon: Repeat2,
-    labelKey: "nav.subscriptions",
-    url: "/dashboard/subscriptions",
-    keywords: ["suscripciones", "subscriptions", "recurrentes"],
-  },
-  {
-    id: "nav-settings",
-    icon: Settings,
-    labelKey: "nav.settings",
-    url: "/dashboard/profile",
-    keywords: [
-      "configuración",
-      "configuracion",
-      "settings",
-      "ajustes",
-      "perfil",
-    ],
-  },
-];
-
 interface CommandPaletteProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -206,67 +78,36 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const lastPosRef = useRef<{ x: number; y: number } | null>(null);
+  const searchRequestRef = useRef(0);
+  const registeredCommands = useCommandRegistry();
 
-  function handleThemeSelect() {
-    const pos = lastPosRef.current;
-    lastPosRef.current = null;
-    onOpenChange(false);
-    toggleTheme(pos ?? undefined);
-  }
-
-  const systemActions = useMemo<SystemAction[]>(
-    () => [
-      {
-        id: "toggle-theme",
-        icon: isDark ? Sun : Moon,
-        label: isDark ? t("search.themeLight") : t("search.themeDark"),
-        keywords: [
-          "tema",
-          "theme",
-          "oscuro",
-          "claro",
-          "dark",
-          "light",
-          "modo",
-          "toggle",
-        ],
-        action: () => {
-          onOpenChange(false);
-        },
-      },
-      {
-        id: "whats-new",
-        icon: Sparkles,
-        label: t("search.whatsNew"),
-        keywords: [
-          "novedades",
-          "changelog",
-          "versión",
-          "version",
-          "release",
-          "actualizaciones",
-          "updates",
-          "news",
-          "nuevo",
-        ],
-        action: () => {
-          onOpenChange(false);
-          openChangelog();
-        },
-      },
-      {
-        id: "sign-out",
-        icon: LogOut,
-        label: t("search.signOut"),
-        keywords: ["cerrar", "sesión", "sesion", "logout", "signout", "salir"],
-        action: async () => {
-          onOpenChange(false);
-          await handleSignOut();
-        },
-      },
+  const commandContext = useMemo<CommandContext>(
+    () => ({
+      t,
+      isDark,
+      close: () => onOpenChange(false),
+      navigate: (url) => router.push(url),
+      toggleTheme: () => toggleTheme(),
+      openChangelog,
+      signOut: handleSignOut,
+    }),
+    [
+      t,
+      isDark,
+      onOpenChange,
+      router,
+      toggleTheme,
+      openChangelog,
+      handleSignOut,
     ],
-    [isDark, onOpenChange, handleSignOut, t, openChangelog],
+  );
+
+  const commands = useMemo<ResolvedCommand[]>(
+    () =>
+      registeredCommands.map((command) =>
+        resolveCommand(command, commandContext),
+      ),
+    [registeredCommands, commandContext],
   );
 
   const refreshRecent = useCallback(() => {
@@ -316,6 +157,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   }, [open]);
 
   useEffect(() => {
+    const requestId = ++searchRequestRef.current;
+
     if (query.length < 2) {
       setResults([]);
       setLoading(false);
@@ -328,6 +171,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     const timer = setTimeout(async () => {
       try {
         const data = await search(query);
+        if (requestId !== searchRequestRef.current) return;
         setResults(data.results);
         setActiveFilter("all");
         if (data.results.length > 0) {
@@ -335,9 +179,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           refreshRecent();
         }
       } catch {
-        setResults([]);
+        if (requestId === searchRequestRef.current) setResults([]);
       } finally {
-        setLoading(false);
+        if (requestId === searchRequestRef.current) setLoading(false);
       }
     }, 300);
 
@@ -368,37 +212,25 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     return sectionOrder.filter((t) => types.has(t));
   }, [grouped]);
 
-  // Match against the translated label AND the keyword aliases, so typing
-  // the visible label of an action always finds it
-  const matchesQuery = useCallback(
-    (keywords: string[], label: string) => {
-      const q = query.toLowerCase();
-      return [label, ...keywords].some((term) =>
-        term.toLowerCase().includes(q),
-      );
-    },
-    [query],
+  // Match against resolved labels and keyword aliases so registered commands
+  // remain searchable without changing the palette implementation.
+  const matchingCommands = useMemo(() => {
+    if (query.length < 2) return commands;
+    const normalizedQuery = query.toLowerCase();
+    return commands.filter((command) =>
+      [command.label, ...command.keywords].some((term) =>
+        term.toLowerCase().includes(normalizedQuery),
+      ),
+    );
+  }, [commands, query]);
+
+  const matchingNav = matchingCommands.filter(
+    (command) => command.group === "navigation",
   );
-
-  const matchingNav = useMemo(() => {
-    if (query.length < 2) return navActions;
-    return navActions.filter((a) => matchesQuery(a.keywords, t(a.labelKey)));
-  }, [query, t, matchesQuery]);
-
-  const matchingActions = useMemo(() => {
-    if (query.length < 2) return quickActions;
-    return quickActions.filter((a) => matchesQuery(a.keywords, t(a.labelKey)));
-  }, [query, t, matchesQuery]);
-
-  const matchingSystem = useMemo(() => {
-    if (query.length < 2) return systemActions;
-    return systemActions.filter((a) => matchesQuery(a.keywords, a.label));
-  }, [query, systemActions, matchesQuery]);
-
-  const hasMatchingQuick =
-    matchingNav.length > 0 ||
-    matchingActions.length > 0 ||
-    matchingSystem.length > 0;
+  const matchingActions = matchingCommands.filter(
+    (command) => command.group !== "navigation",
+  );
+  const hasMatchingCommands = matchingCommands.length > 0;
 
   function handleSelect(item: SearchResultItem) {
     onOpenChange(false);
@@ -415,32 +247,40 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     setRecentSearches([]);
   }
 
-  function handleAction(action: QuickAction) {
+  function handleCommand(command: ResolvedCommand) {
     onOpenChange(false);
-    router.push(action.url);
-  }
-
-  function handleSystemAction(action: (typeof systemActions)[number]) {
-    action.action();
+    void command.execute(commandContext);
   }
 
   const showHint = query.length >= 1 && query.length < 2 && !loading;
   const showSearching = loading && query.length >= 2;
   const showNoQuickResults =
-    !loading && query.length >= 2 && results.length === 0 && !hasMatchingQuick;
-  const showQuickItems = !loading && query.length >= 2 && hasMatchingQuick;
+    !loading &&
+    query.length >= 2 &&
+    results.length === 0 &&
+    !hasMatchingCommands;
+  const showQuickItems = !loading && query.length >= 2 && hasMatchingCommands;
   const showFilterEmpty =
     !loading && grouped.length > 0 && filteredGroups.length === 0;
   const showResults = !loading && filteredGroups.length > 0;
+  const suggestedQueries = [
+    {
+      label: t("nav.transactions"),
+      query: t("nav.transactions"),
+      icon: ArrowUpDown,
+    },
+    { label: t("nav.budgets"), query: t("nav.budgets"), icon: Wallet },
+    { label: t("nav.goals"), query: t("nav.goals"), icon: Target },
+  ];
 
   return (
     <>
       <CommandPaletteOverlay open={open} onClose={() => onOpenChange(false)} />
-      <CommandPaletteContainer open={open}>
+      <CommandPaletteContainer open={open} onOpenChange={onOpenChange}>
         <Command
           shouldFilter={false}
-          label="Buscar en Flowy"
-          className="overflow-hidden bg-background"
+          label={t("search.placeholder")}
+          className="flex max-h-[min(88dvh,720px)] flex-col overflow-hidden bg-background"
         >
           <CommandPaletteInput
             value={query}
@@ -460,7 +300,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             />
           )}
 
-          <Command.List className="max-h-96 overflow-y-auto overscroll-contain py-1.5">
+          <Command.List className="min-h-0 max-h-[min(64dvh,480px)] overflow-y-auto overscroll-contain py-1.5 sm:max-h-96">
             {query.length === 0 && (
               <>
                 <CommandPaletteRecent
@@ -470,12 +310,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                   t={t}
                 />
                 <CommandPaletteActions
-                  navActions={matchingNav}
-                  quickActions={matchingActions}
-                  systemActions={matchingSystem}
-                  onActionSelect={handleAction}
-                  onSystemActionSelect={handleSystemAction}
-                  onThemeSelect={handleThemeSelect}
+                  navigationCommands={matchingNav}
+                  actionCommands={matchingActions}
+                  onCommandSelect={handleCommand}
                   t={t}
                 />
               </>
@@ -487,22 +324,29 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
             {showQuickItems && (
               <CommandPaletteActions
-                navActions={matchingNav}
-                quickActions={matchingActions}
-                systemActions={matchingSystem}
-                onActionSelect={handleAction}
-                onSystemActionSelect={handleSystemAction}
-                onThemeSelect={handleThemeSelect}
+                navigationCommands={matchingNav}
+                actionCommands={matchingActions}
+                onCommandSelect={handleCommand}
                 t={t}
               />
             )}
 
             {showNoQuickResults && (
-              <CommandPaletteEmpty type="noResults" t={t} />
+              <CommandPaletteEmpty
+                type="noResults"
+                t={t}
+                suggestions={suggestedQueries}
+                onSuggestion={setQuery}
+              />
             )}
 
             {showFilterEmpty && (
-              <CommandPaletteEmpty type="filterEmpty" t={t} />
+              <CommandPaletteEmpty
+                type="filterEmpty"
+                t={t}
+                suggestions={suggestedQueries}
+                onSuggestion={setQuery}
+              />
             )}
 
             {showResults && (
@@ -526,7 +370,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
               !showResults &&
               query.length === 0 &&
               recentSearches.length === 0 &&
-              !hasMatchingQuick && <div className="h-2" />}
+              !hasMatchingCommands && <div className="h-2" />}
           </Command.List>
 
           <CommandPaletteFooter t={t} />

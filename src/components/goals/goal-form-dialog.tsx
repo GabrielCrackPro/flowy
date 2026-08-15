@@ -2,6 +2,8 @@
 
 import {
   CurrencyInput,
+  createDateQuickActions,
+  DatePicker,
   EntitySheetFooter,
   EntitySheetHeader,
   FormSection,
@@ -10,6 +12,7 @@ import {
   PreviewCard,
 } from "@components/shared";
 import { Input, Sheet, SheetContent } from "@components/ui";
+import { useDateLocale } from "@hooks/useDateLocale";
 import { useProfile } from "@hooks/useProfile";
 import { useReactForm } from "@hooks/useReactForm";
 import { cn, formatCurrency } from "@lib/utils";
@@ -39,6 +42,7 @@ export function GoalFormSheet({
   const { profile } = useProfile();
 
   const locale = profile?.locale ?? "es-ES";
+  const dateLocale = useDateLocale(locale);
   const currency = profile?.currency ?? "USD";
 
   const form = useReactForm({
@@ -110,13 +114,26 @@ export function GoalFormSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex h-full w-full flex-col p-0 sm:max-w-xl"
+        className="flex w-full flex-col p-0 h-full sm:max-w-xl"
       >
         <EntitySheetHeader
           icon={<GoalIcon size="lg" />}
           iconGradient="from-amber-500/20 to-amber-500/10"
           iconColor="text-amber-600 dark:text-amber-400"
           title={editing ? t("goals.edit") : t("goals.new")}
+          subtitle={t("goals.description")}
+          metadata={
+            <>
+              <span className="inline-flex items-center gap-1">
+                <Icon icon={Calendar} className="size-3" />
+                {deadlineLabel}
+              </span>
+              <span className="inline-flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
+                <Icon icon={Sparkles} className="size-3" />
+                {progress}%
+              </span>
+            </>
+          }
         />
 
         <div className="flex-1 overflow-y-auto">
@@ -228,19 +245,12 @@ export function GoalFormSheet({
             </FormSection>
 
             <FormSection label={t("goals.deadline")} error={errors.deadline}>
-              <Input
-                type="date"
-                value={
-                  values.deadline
-                    ? values.deadline.toISOString().split("T")[0]
-                    : ""
-                }
-                onChange={(e) =>
-                  handleValueChange("deadline")(
-                    e.target.value ? new Date(e.target.value) : null,
-                  )
-                }
-                className="text-base"
+              <DatePicker
+                date={values.deadline ?? undefined}
+                onSelect={(date) => handleValueChange("deadline")(date ?? null)}
+                placeholder={t("goals.deadline")}
+                locale={dateLocale}
+                quickActions={createDateQuickActions((key) => t(key))}
               />
             </FormSection>
           </div>

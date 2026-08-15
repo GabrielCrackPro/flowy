@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@components/ui";
+import { Sheet, SheetContent } from "@components/ui";
 import { cn, formatCurrency } from "@lib/utils";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -20,14 +14,15 @@ import {
   ExternalLink,
   Repeat2,
   Wallet,
-  X,
 } from "@/lib/icons";
 import type { Category } from "@/types/Category";
 import type { Transaction, TransactionType } from "@/types/Transaction";
 import { PAYMENT_METHOD_KEY } from "@/utils/constants";
 import { AnimatedGradient } from "./animated-gradient";
 import { EntityAudit } from "./entity-audit";
+import { EntitySheetHeader } from "./entity-sheet/entity-sheet-header";
 import { CategoryIcon, Icon } from "./icon";
+import { PaymentMethodIcon } from "./payment-method-icon";
 import { TagBadge } from "./tag-badge";
 
 interface TransactionDetailModalProps {
@@ -81,17 +76,19 @@ export function TransactionDetailModal({
     }
   };
 
+  const transactionDateLabel = transaction.date
+    ? new Intl.DateTimeFormat(locale, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }).format(parseDateOnly(transaction.date) ?? new Date(transaction.date))
+    : null;
+
   const detailRows = [
     {
       label: t("transactions.date"),
       icon: Calendar,
-      value: transaction.date ? (
-        new Intl.DateTimeFormat(locale, {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        }).format(parseDateOnly(transaction.date) ?? new Date(transaction.date))
-      ) : (
+      value: transactionDateLabel ?? (
         <span className="text-muted-foreground/30">—</span>
       ),
     },
@@ -113,10 +110,18 @@ export function TransactionDetailModal({
       label: t("transactions.paymentMethod"),
       icon: Wallet,
       value: transaction.paymentMethod ? (
-        t(
-          PAYMENT_METHOD_KEY[transaction.paymentMethod] ??
-            transaction.paymentMethod,
-        )
+        <div className="flex items-center gap-2">
+          <PaymentMethodIcon
+            method={transaction.paymentMethod}
+            className="size-4 text-muted-foreground"
+          />
+          <span>
+            {t(
+              PAYMENT_METHOD_KEY[transaction.paymentMethod] ??
+                transaction.paymentMethod,
+            )}
+          </span>
+        </div>
       ) : (
         <span className="text-muted-foreground/30">—</span>
       ),
@@ -143,54 +148,80 @@ export function TransactionDetailModal({
         side="right"
         className="w-full sm:max-w-105 p-0 flex flex-col"
       >
-        <SheetHeader className="border-b border-border/50 px-6 py-5 text-left bg-gradient-to-r from-muted/30 to-transparent">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div
-                className={cn(
-                  "flex size-10 items-center justify-center rounded-xl text-white shadow-sm",
-                  isIncome
-                    ? "bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 text-emerald-600 dark:from-emerald-500/30 dark:to-emerald-500/20 dark:text-emerald-400"
-                    : "bg-gradient-to-br from-rose-500/20 to-rose-500/10 text-rose-600 dark:from-rose-500/30 dark:to-rose-500/20 dark:text-rose-400",
-                )}
-              >
-                {isIncome ? (
-                  <Icon icon={ArrowUpCircle} className="size-5" />
-                ) : (
-                  <Icon icon={ArrowDownCircle} className="size-5" />
-                )}
-              </div>
-              <SheetTitle className="text-lg truncate">
-                {t("transaction.detailTitle")}
-              </SheetTitle>
-            </div>
-            <div className="flex shrink-0 items-center gap-1">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link
-                  href={`/dashboard/transactions/${transaction.id}`}
-                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/40 transition duration-200 hover:bg-gradient-to-br hover:from-muted/50 hover:to-muted/30 hover:text-foreground"
-                  onClick={onClose}
-                >
-                  <Icon icon={ExternalLink} className="size-4" />
-                  <span className="sr-only">
-                    {t("transactions.viewDetails")}
+        <EntitySheetHeader
+          icon={
+            <Icon
+              icon={isIncome ? ArrowUpCircle : ArrowDownCircle}
+              className="size-5"
+            />
+          }
+          iconGradient={
+            isIncome
+              ? "from-emerald-500/20 to-emerald-500/10"
+              : "from-rose-500/20 to-rose-500/10"
+          }
+          iconColor={
+            isIncome
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-rose-600 dark:text-rose-400"
+          }
+          title={t("transaction.detailTitle")}
+          subtitle={
+            transaction.description ||
+            (isIncome ? t("transaction.income") : t("transaction.expense"))
+          }
+          metadata={
+            <>
+              {transactionDateLabel ? (
+                <span className="inline-flex items-center gap-1">
+                  <Icon icon={Calendar} className="size-3" />
+                  {transactionDateLabel}
+                </span>
+              ) : null}
+              {tags && tags.length > 0 ? (
+                <span className="inline-flex min-w-0 max-w-[8rem] items-center gap-1">
+                  <Icon
+                    icon={CategoryIcon}
+                    className="size-3 shrink-0 text-muted-foreground/70"
+                  />
+                  <span className="truncate">{tags[0].name}</span>
+                  {tags.length > 1 ? (
+                    <span className="shrink-0 text-muted-foreground/60">
+                      +{tags.length - 1}
+                    </span>
+                  ) : null}
+                </span>
+              ) : null}
+              {transaction.paymentMethod ? (
+                <span className="inline-flex min-w-0 max-w-[9rem] items-center gap-1">
+                  <PaymentMethodIcon
+                    method={transaction.paymentMethod}
+                    className="size-3.5 shrink-0 text-muted-foreground/70"
+                  />
+                  <span className="truncate">
+                    {t(
+                      PAYMENT_METHOD_KEY[transaction.paymentMethod] ??
+                        transaction.paymentMethod,
+                    )}
                   </span>
-                </Link>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                </span>
+              ) : null}
+            </>
+          }
+          headerAction={
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                href={`/dashboard/transactions/${transaction.id}`}
+                aria-label={t("transactions.viewDetails")}
+                title={t("transactions.viewDetails")}
+                className="flex size-8 items-center justify-center rounded-lg border border-border/60 bg-muted/30 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                onClick={onClose}
               >
-                <SheetClose className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/40 transition duration-200 hover:bg-gradient-to-br hover:from-muted/50 hover:to-muted/30 hover:text-foreground">
-                  <Icon icon={X} className="size-4" />
-                </SheetClose>
-              </motion.div>
-            </div>
-          </div>
-        </SheetHeader>
+                <Icon icon={ExternalLink} className="size-4" />
+              </Link>
+            </motion.div>
+          }
+        />
 
         <div className="flex-1 space-y-6 overflow-y-auto p-5 sm:p-6">
           <motion.div

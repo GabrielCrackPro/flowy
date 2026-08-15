@@ -90,12 +90,19 @@ export default function ForgotPasswordPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
           >
-            <FormField label={t("forgotPassword.emailLabel")} required>
+            <FormField
+              label={t("forgotPassword.emailLabel")}
+              htmlFor="forgot-password-email"
+              required
+            >
               <Input
+                id="forgot-password-email"
+                name="email"
                 type="email"
                 autoComplete="email"
                 startIcon={<Icon icon={Mail} className="size-4" />}
                 placeholder={t("forgotPassword.emailPlaceholder")}
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-11"
@@ -111,7 +118,7 @@ export default function ForgotPasswordPage() {
             <Button
               type="submit"
               className="h-11 w-full text-base"
-              disabled={busy || !email}
+              disabled={busy}
             >
               {busy
                 ? t("forgotPassword.submittingButton")

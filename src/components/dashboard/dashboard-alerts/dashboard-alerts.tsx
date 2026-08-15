@@ -217,7 +217,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="flex w-full items-center gap-3.5 overflow-hidden rounded-2xl border border-border/30 bg-card px-4 py-3.5 shadow-[0_2px_10px_rgba(0,0,0,0.04)]"
+          className="flex w-full items-center gap-3.5 overflow-hidden rounded-2xl border border-border/60 bg-card px-4 py-3.5 shadow-[var(--shadow-card)]"
         >
           <div className="size-10 shrink-0">
             <Skeleton variant="rounded" />
@@ -271,9 +271,9 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
     <section aria-label={t("alerts.barTitle")} className="space-y-0">
       <div
         className={cn(
-          "overflow-hidden rounded-2xl border shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition duration-300",
+          "overflow-hidden rounded-2xl border shadow-[var(--shadow-card)] transition duration-300",
           bar.border,
-          isExpanded && "border-border/25 shadow-[0_6px_20px_rgba(0,0,0,0.08)]",
+          isExpanded && "border-border/60 shadow-[var(--shadow-card-hover)]",
         )}
       >
         <Button

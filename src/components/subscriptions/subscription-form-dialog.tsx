@@ -2,6 +2,8 @@
 
 import {
   CurrencyInput,
+  createDateQuickActions,
+  DatePicker,
   EntitySheetFooter,
   EntitySheetHeader,
   FormSection,
@@ -22,17 +24,11 @@ import {
 import { useDateLocale } from "@hooks/useDateLocale";
 import { useProfile } from "@hooks/useProfile";
 import { useReactForm } from "@hooks/useReactForm";
-import { cn, formatCurrency } from "@lib/utils";
+import { formatCurrency } from "@lib/utils";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Calendar as CalendarPicker } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { parseDateOnly } from "@/lib/date-only";
 import { Calendar, CreditCard, Repeat2, Wallet } from "@/lib/icons";
 import { createSubscriptionSchema } from "@/lib/schemas";
@@ -164,7 +160,7 @@ export function SubscriptionFormSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex h-full w-full flex-col p-0 sm:max-w-xl"
+        className="flex w-full flex-col p-0 h-full sm:max-w-xl"
       >
         <EntitySheetHeader
           icon={<Icon icon={CreditCard} className="size-5" />}
@@ -172,6 +168,21 @@ export function SubscriptionFormSheet({
           iconColor="text-violet-600 dark:text-violet-400"
           title={
             subscription ? t("subscriptions.edit") : t("subscriptions.new")
+          }
+          subtitle={t("subscriptions.pageDescription")}
+          metadata={
+            <>
+              <span className="inline-flex items-center gap-1">
+                <Icon icon={Repeat2} className="size-3" />
+                {t(`subscriptions.cycles.${values.billingCycle}`)}
+              </span>
+              {monthlyEquivalent > 0 ? (
+                <span className="inline-flex items-center gap-1 font-medium text-violet-600 dark:text-violet-400">
+                  <Icon icon={Wallet} className="size-3" />
+                  {formatAmount(monthlyEquivalent)}
+                </span>
+              ) : null}
+            </>
           }
         />
 
@@ -295,37 +306,16 @@ export function SubscriptionFormSheet({
               label={t("subscriptions.nextPaymentLabel")}
               icon={Calendar}
             >
-              <Popover>
-                <PopoverTrigger
-                  className={cn(
-                    "flex h-11 w-full items-center justify-between rounded-lg border border-border/30 bg-card/60 px-3 text-sm transition duration-200 outline-none",
-                    "hover:border-border/50 hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:shadow-sm",
-                    "focus-visible:border-primary/40 focus-visible:ring-3 focus-visible:ring-primary/20",
-                    values.nextPayment
-                      ? "text-foreground"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  {values.nextPayment
-                    ? format(values.nextPayment, "d MMM yyyy", {
-                        locale: dateLocale,
-                      })
-                    : t("subscriptions.selectDate")}
-                  <Icon
-                    icon={Calendar}
-                    className="size-4 text-muted-foreground"
-                  />
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto p-0">
-                  <CalendarPicker
-                    mode="single"
-                    selected={values.nextPayment}
-                    onSelect={(date) =>
-                      handleValueChange("nextPayment")(date ?? undefined)
-                    }
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePicker
+                date={values.nextPayment}
+                onSelect={(date) =>
+                  handleValueChange("nextPayment")(date ?? undefined)
+                }
+                placeholder={t("subscriptions.selectDate")}
+                locale={dateLocale}
+                align="end"
+                quickActions={createDateQuickActions((key) => t(key))}
+              />
             </FormSection>
 
             <section className="flex items-start justify-between gap-4 rounded-xl border border-border/30 bg-muted/20 p-4">

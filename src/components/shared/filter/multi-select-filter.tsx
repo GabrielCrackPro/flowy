@@ -1,15 +1,28 @@
 "use client";
 
-import { Input, Popover, PopoverContent, PopoverTrigger } from "@components/ui";
+import {
+  Button,
+  Input,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@components/ui";
 import { useMultiSelectFilter } from "@hooks/filter";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  OPTION_ROW_BASE,
+  OPTION_ROW_INTERACTION,
+  OPTION_ROW_SELECTED,
+} from "@/components/ui/control-styles";
 import { Check, ChevronDown, Search, X } from "@/lib/icons";
 import type { FilterField, FilterValues } from "@/types/ui";
 import { Icon } from "../icon";
+import { PaymentMethodIcon } from "../payment-method-icon";
 import { FilterButton } from "./filter-button";
+import { FilterFieldIcon } from "./filter-field-icon";
 import { FilterOptionIcon } from "./filter-option-icon";
 
 interface MultiSelectFilterProps {
@@ -18,17 +31,47 @@ interface MultiSelectFilterProps {
   onChange: (key: string, value: string | undefined) => void;
 }
 
+function MultiSelectOptionIcon({
+  option,
+  selected = false,
+  compact = false,
+}: {
+  option: NonNullable<FilterField["options"]>[number];
+  selected?: boolean;
+  compact?: boolean;
+}) {
+  if (!option.paymentMethod) {
+    return <FilterOptionIcon option={option} size={compact ? "xs" : "sm"} />;
+  }
+
+  return (
+    <span
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground transition-colors",
+        compact ? "size-3.5" : "size-5",
+        selected && "bg-primary/15 text-primary",
+      )}
+    >
+      <PaymentMethodIcon
+        method={option.paymentMethod}
+        className={compact ? "size-2.5" : "size-3.5"}
+      />
+    </span>
+  );
+}
+
 export function MultiSelectFilter({
   field,
   values,
   onChange,
 }: MultiSelectFilterProps) {
   const { t } = useTranslation();
-  const { open, setOpen, selected, isActive, toggle } = useMultiSelectFilter({
-    fieldKey: field.key,
-    values,
-    onChange,
-  });
+  const { open, setOpen, selected, isActive, toggle, clear } =
+    useMultiSelectFilter({
+      fieldKey: field.key,
+      values,
+      onChange,
+    });
   const [searchDraft, setSearchDraft] = useState("");
 
   const filteredOptions = useMemo(() => {
@@ -55,17 +98,17 @@ export function MultiSelectFilter({
         render={
           <FilterButton
             active={isActive}
-            className="max-sm:w-full max-sm:justify-between"
+            className="max-sm:w-full max-sm:justify-start"
+            aria-label={field.label}
           >
+            <FilterFieldIcon field={field} active={isActive} />
             {selected.length > 0 ? (
               <>
-                <span className="flex items-center gap-1">
+                <span className="flex shrink-0 items-center gap-1">
                   {selectedOptions?.slice(0, 3).map((option) => (
-                    <FilterOptionIcon
-                      key={option.value}
-                      option={option}
-                      size="xs"
-                    />
+                    <span key={option.value}>
+                      <MultiSelectOptionIcon option={option} compact />
+                    </span>
                   ))}
                   {selected.length > 3 && (
                     <span className="text-muted-foreground/70">
@@ -73,12 +116,12 @@ export function MultiSelectFilter({
                     </span>
                   )}
                 </span>
-                <span className="max-w-24 truncate">
+                <span className="min-w-0 flex-1 text-left whitespace-nowrap">
                   {t("filters.selected", { count: selected.length })}
                 </span>
               </>
             ) : (
-              <span className="max-w-24 truncate">
+              <span className="min-w-0 flex-1 text-left whitespace-nowrap">
                 {field.placeholder ?? field.label}
               </span>
             )}
@@ -87,7 +130,7 @@ export function MultiSelectFilter({
               animate={{ rotate: open ? 180 : 0 }}
               transition={{ duration: 0.2 }}
             >
-              <Icon icon={ChevronDown} className="size-3 shrink-0" />
+              <Icon icon={ChevronDown} className="ml-auto size-3 shrink-0" />
             </motion.div>
           </FilterButton>
         }
@@ -95,9 +138,32 @@ export function MultiSelectFilter({
 
       <PopoverContent
         align="start"
-        className="w-60 p-2 border-border/30 shadow-xl rounded-xl"
+        className="w-[min(20rem,calc(100vw-2rem))] rounded-xl border-border/50 p-2.5 shadow-lg"
         sideOffset={8}
       >
+        <div className="mb-2 flex items-center justify-between gap-3 border-b border-border/40 px-1 pb-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="truncate text-xs font-semibold text-foreground">
+              {field.label}
+            </span>
+            {isActive && (
+              <span className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold tabular-nums text-primary ring-1 ring-primary/20">
+                {selected.length}
+              </span>
+            )}
+          </div>
+          {isActive && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              onClick={clear}
+              className="h-8 shrink-0 rounded-lg px-2 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              {t("filters.clearSelection")}
+            </Button>
+          )}
+        </div>
         {/* Search input inside dropdown */}
         {field.options && field.options.length > 6 && (
           <div className="relative mb-2">
@@ -109,13 +175,16 @@ export function MultiSelectFilter({
               value={searchDraft}
               onChange={(e) => setSearchDraft(e.target.value)}
               placeholder={t("filters.searchOptions")}
-              className="h-8 rounded-lg border-border/30 bg-muted/20 pl-8 pr-8 text-xs placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:border-primary/40"
+              aria-label={t("filters.searchOptions")}
+              className="h-8 rounded-lg border-border/40 bg-muted/20 pl-8 pr-8 text-xs placeholder:text-muted-foreground/40 focus-visible:border-primary/40 focus-visible:ring-1 focus-visible:ring-primary/20"
             />
             {searchDraft && (
               <button
                 type="button"
                 onClick={() => setSearchDraft("")}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-0.5 text-muted-foreground/40 hover:text-foreground"
+                aria-label={t("search.clearSearch")}
+                title={t("search.clearSearch")}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-0.5 text-muted-foreground/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               >
                 <Icon icon={X} className="size-3" />
               </button>
@@ -123,7 +192,7 @@ export function MultiSelectFilter({
           </div>
         )}
 
-        <div className="flex flex-col gap-1 max-h-64 overflow-y-auto">
+        <div className="flex max-h-72 flex-col gap-1 overflow-y-auto pr-0.5">
           {!field.options?.length ? (
             <p className="px-3 py-4 text-center text-xs text-muted-foreground">
               {t("filters.noOptions")}
@@ -133,54 +202,48 @@ export function MultiSelectFilter({
               {t("filters.noOptions")}
             </p>
           ) : (
-            filteredOptions.map((option, index) => {
+            filteredOptions.map((option) => {
               const isSelected = selected.includes(option.value);
 
               return (
-                <motion.label
+                <label
                   key={option.value}
-                  initial={{ opacity: 0, x: -5 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2, delay: index * 0.04 }}
                   className={cn(
-                    "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-xs transition duration-200",
-                    isSelected
-                      ? "bg-gradient-to-r from-primary/12 to-primary/6 text-primary shadow-sm"
-                      : "text-muted-foreground hover:bg-gradient-to-r hover:from-muted/60 hover:to-muted/40 hover:text-foreground",
+                    OPTION_ROW_BASE,
+                    "min-h-11 cursor-pointer gap-3 px-3",
+                    OPTION_ROW_INTERACTION,
+                    isSelected ? OPTION_ROW_SELECTED : "text-muted-foreground",
+                    "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/30",
                   )}
                 >
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
+                  <span
                     className={cn(
-                      "flex size-4.5 shrink-0 items-center justify-center rounded-lg border transition duration-200",
+                      "flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors",
                       isSelected
-                        ? "border-primary bg-gradient-to-br from-primary to-primary/90 text-primary-foreground shadow-md"
-                        : "border-border/30 bg-card",
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                        : "border-border/60 bg-background",
                     )}
                   >
-                    {isSelected && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Icon icon={Check} className="size-3" />
-                      </motion.div>
-                    )}
-                  </motion.div>
+                    {isSelected && <Icon icon={Check} className="size-3" />}
+                  </span>
 
-                  <FilterOptionIcon option={option} size="xs" />
+                  <MultiSelectOptionIcon
+                    option={option}
+                    selected={isSelected}
+                  />
 
-                  <span className="font-medium">{option.label}</span>
+                  <span className="min-w-0 flex-1 break-words font-medium leading-snug">
+                    {option.label}
+                  </span>
 
                   <input
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => toggle(option.value)}
+                    aria-label={option.label}
                     className="sr-only"
                   />
-                </motion.label>
+                </label>
               );
             })
           )}

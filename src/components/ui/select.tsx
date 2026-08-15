@@ -3,6 +3,13 @@
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 import type * as React from "react";
 import { Icon } from "@/components/shared/icon";
+import {
+  CONTROL_DISABLED,
+  CONTROL_FOCUS,
+  CONTROL_SURFACE,
+  OPTION_ROW_BASE,
+  OPTION_ROW_INTERACTION,
+} from "@/components/ui/control-styles";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
@@ -61,14 +68,14 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "group flex w-fit items-center justify-between gap-1.5 rounded-lg border border-border/30 bg-card/60 py-1.5 pr-2 pl-3 text-sm whitespace-nowrap transition duration-200 outline-none select-none",
-        "hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:border-border/50 hover:shadow-sm",
-        "focus-visible:border-primary/40 focus-visible:ring-3 focus-visible:ring-primary/20",
-        "disabled:cursor-not-allowed disabled:opacity-50",
+        "group flex w-fit items-center justify-between px-3 py-1.5 select-none",
+        CONTROL_SURFACE,
+        CONTROL_FOCUS,
+        CONTROL_DISABLED,
+        "hover:border-border hover:bg-muted/30",
         "aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20",
-        "data-placeholder:text-muted-foreground data-[size=default]:h-9 data-[size=sm]:h-8 data-[size=sm]:rounded-[min(var(--radius-md),10px)]",
-        "*:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5",
-        "dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+        "data-placeholder:text-muted-foreground data-[size=default]:h-11 data-[size=sm]:h-10 data-[size=sm]:rounded-xl",
+        "*:data-[slot=select-value]:flex *:data-[slot=select-value]:min-w-0 *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 *:data-[slot=select-value]:whitespace-nowrap",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
@@ -160,10 +167,11 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-default items-center gap-2 rounded-lg py-1.5 pr-8 pl-2 text-sm outline-hidden select-none transition",
-        "hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 hover:text-foreground",
-        "focus:bg-gradient-to-r focus:from-muted/50 focus:to-muted/30 focus:text-foreground",
-        "data-selected:bg-gradient-to-r data-selected:from-primary/10 data-selected:to-primary/5 data-selected:text-primary data-selected:font-medium",
+        OPTION_ROW_BASE,
+        "cursor-default pr-8 select-none outline-hidden",
+        OPTION_ROW_INTERACTION,
+        "focus:bg-muted/60 focus:text-foreground",
+        "data-selected:bg-primary/10 data-selected:font-medium data-selected:text-primary",
         "not-data-[variant=destructive]:focus:**:text-foreground",
         "data-disabled:pointer-events-none data-disabled:opacity-50",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",

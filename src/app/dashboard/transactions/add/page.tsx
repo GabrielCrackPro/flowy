@@ -2,7 +2,10 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { TransactionForm } from "@/components/shared";
+import {
+  getDefaultTransactionValues,
+  TransactionForm,
+} from "@/components/shared";
 import { useTransactionApi } from "@/hooks/api";
 import type { CreateTransactionSchema } from "@/lib/schemas";
 
@@ -23,7 +26,7 @@ export default function NewTransactionPage() {
     >
       <TransactionForm
         mode="create"
-        initialValues={{ type: "EXPENSE", amount: 0, date: new Date() }}
+        initialValues={getDefaultTransactionValues()}
         onSubmit={handleSubmit}
       />
     </motion.div>

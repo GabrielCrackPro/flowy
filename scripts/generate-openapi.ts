@@ -3077,6 +3077,41 @@ paths["/api/upload"] = {
     ),
     rateLimit: RATE.upload,
   }),
+  delete: op({
+    operationId: "uploads.receiptDelete",
+    summary: "Delete an uploaded receipt",
+    description:
+      "Deletes a previously uploaded receipt file from storage. Returns `{ success: true }` on success.",
+    tags: ["Uploads"],
+    requestBody: jsonBody({
+      type: "object",
+      properties: {
+        url: {
+          type: "string",
+          description: "Public URL of the receipt to delete",
+        },
+      },
+      required: ["url"],
+    }),
+    responses: responses(
+      {
+        200: {
+          description: "Receipt deleted",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: { success: { type: "boolean" } },
+                required: ["success"],
+              },
+            },
+          },
+        },
+      },
+      { rateLimited: true },
+    ),
+    rateLimit: RATE.upload,
+  }),
 };
 
 paths["/api/upload/space"] = {

@@ -31,13 +31,31 @@ function getServiceClient() {
   });
 }
 
-function generatePath(userId: string, ext: string): string {
-  const ts = Date.now().toString(36);
-  const rand = Math.random().toString(36).slice(2, 10);
-  return `${userId}/${ts}-${rand}.${ext}`;
+async function generatePath(
+  userId: string,
+  ext: string,
+  file: File,
+): Promise<string> {
+  // Content-addressed paths make retrying the same upload idempotent instead
+  // of creating another storage object for the same document.
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    await file.arrayBuffer(),
+  );
+  const hash = Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+  return `${userId}/${hash}.${ext}`;
 }
 
-function getExtension(filename: string): string {
+function getExtension(filename: string, contentType?: string): string {
+  if (contentType === "image/jpeg" || contentType === "image/jpg") {
+    return "jpg";
+  }
+  if (contentType === "image/png") return "png";
+  if (contentType === "image/webp") return "webp";
+  if (contentType === "application/pdf") return "pdf";
+
   const parts = filename.split(".");
   return parts.length > 1
     ? (parts[parts.length - 1]?.toLowerCase() ?? "bin")
@@ -142,8 +160,8 @@ async function uploadFile(
   await ensureBucket(bucket, maxSize);
 
   const supabase = getServiceClient();
-  const ext = getExtension(file.name);
-  const path = generatePath(userId, ext);
+  const ext = getExtension(file.name, file.type);
+  const path = await generatePath(userId, ext, file);
 
   const { error } = await supabase.storage
     .from(bucket)
@@ -214,6 +232,36 @@ export async function deleteFile(
 
 export async function deleteReceipt(url: string): Promise<void> {
   await deleteFile(RECEIPTS_BUCKET, url);
+}
+
+/**
+ * Deletes a receipt only when no transaction still references its public URL.
+ * This keeps shared/content-addressed uploads safe when one transaction is
+ * removed or replaces its receipt.
+ */
+export async function deleteReceiptIfUnreferenced(url: string): Promise<void> {
+  const { prisma } = await import("@/lib/prisma/client");
+  const references = await prisma.transaction.count({
+    where: { receiptUrl: url },
+  });
+
+  if (references === 0) {
+    await deleteReceipt(url);
+  }
+}
+
+/** Deletes an unreferenced receipt uploaded by the authenticated user. */
+export async function deleteReceiptForUser(
+  userId: string,
+  url: string,
+): Promise<void> {
+  const prefix = publicPrefix(RECEIPTS_BUCKET);
+  if (!url.startsWith(prefix)) return;
+
+  const path = url.slice(prefix.length);
+  if (!path.startsWith(`${userId}/`)) return;
+
+  await deleteReceiptIfUnreferenced(url);
 }
 
 export async function deleteAvatar(url: string): Promise<void> {

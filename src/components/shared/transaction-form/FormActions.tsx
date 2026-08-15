@@ -31,7 +31,12 @@ export function FormActions({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.3 }}
-      className={cn("flex flex-col gap-2", embedded ? "" : "lg:col-start-2")}
+      className={cn(
+        "flex flex-col gap-2",
+        embedded
+          ? "sticky bottom-0 z-10 -mx-4 border-t border-border/50 bg-background/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6"
+          : "lg:col-start-2",
+      )}
     >
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
         <Button

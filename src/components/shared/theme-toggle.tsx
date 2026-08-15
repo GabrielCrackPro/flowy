@@ -22,17 +22,18 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     setMounted(true);
   }, []);
 
+  const label = mounted
+    ? isDark
+      ? t("common.lightMode")
+      : t("common.darkMode")
+    : t("common.toggleTheme");
+
   return (
     <Button
       size="icon"
       variant="ghost"
-      aria-label={
-        mounted
-          ? isDark
-            ? t("common.lightMode")
-            : t("common.darkMode")
-          : t("common.toggleTheme")
-      }
+      aria-label={label}
+      title={label}
       className={cn(
         className,
         "transition-transform duration-500 active:rotate-180",

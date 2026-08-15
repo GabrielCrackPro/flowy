@@ -14,6 +14,10 @@ interface GradientButtonProps {
   hideIcon?: boolean;
   icon?: React.ReactNode;
   fullWidth?: boolean;
+  /** Render the icon as a clean standalone glyph on compact mobile states. */
+  mobileIconOnly?: boolean;
+  /** Accessible name for icon-only responsive states. */
+  ariaLabel?: string;
 }
 
 const SIZE_STYLES = {
@@ -29,6 +33,8 @@ export function GradientButton({
   hideIcon = false,
   icon,
   fullWidth = true,
+  mobileIconOnly = false,
+  ariaLabel,
 }: GradientButtonProps) {
   const sizeStyle = SIZE_STYLES[size];
   const isSmall = size === "sm";
@@ -36,6 +42,8 @@ export function GradientButton({
   return (
     <Button
       onClick={onClick}
+      aria-label={ariaLabel}
+      title={ariaLabel}
       className={cn(
         "gap-2 transition duration-300",
         sizeStyle,
@@ -52,12 +60,23 @@ export function GradientButton({
           whileTap={{ scale: 0.9 }}
           transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
           className={cn(
-            "flex items-center justify-center rounded-lg bg-gradient-to-br from-primary-foreground/20 to-primary-foreground/10 transition duration-300 shadow-sm",
-            isSmall ? "size-5" : "size-6",
+            "flex items-center justify-center transition duration-300",
+            mobileIconOnly
+              ? "size-6 rounded-none bg-transparent shadow-none sm:size-5 sm:rounded-lg sm:bg-gradient-to-br sm:from-primary-foreground/20 sm:to-primary-foreground/10 sm:shadow-sm"
+              : cn(
+                  "rounded-lg bg-gradient-to-br from-primary-foreground/20 to-primary-foreground/10 shadow-sm",
+                  isSmall ? "size-5" : "size-6",
+                ),
           )}
         >
           {icon || (
-            <Icon icon={Plus} className={cn(isSmall ? "size-3" : "size-3.5")} />
+            <Icon
+              icon={Plus}
+              className={cn(
+                isSmall ? "size-3" : "size-3.5",
+                mobileIconOnly && "text-white",
+              )}
+            />
           )}
         </motion.span>
       )}

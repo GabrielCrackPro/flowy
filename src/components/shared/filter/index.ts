@@ -2,6 +2,7 @@ export * from "./active-filter-chips";
 export * from "./data-filters";
 export * from "./date-range-filter";
 export * from "./filter-button";
+export * from "./filter-field-icon";
 export * from "./filter-renderer";
 export * from "./filters-panel";
 export * from "./filters-toggle";

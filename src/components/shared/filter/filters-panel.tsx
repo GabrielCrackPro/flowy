@@ -33,10 +33,8 @@ export function FiltersPanel({ open, children }: FiltersPanelProps) {
             ease: "easeInOut",
           }}
         >
-          <div className="relative space-y-4 overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-muted/40 via-muted/20 to-muted/10 p-3.5 shadow-lg sm:p-5">
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50" />
-            <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-            <div className="relative">{children}</div>
+          <div className="space-y-4 rounded-xl border border-border/50 bg-muted/20 p-3 shadow-sm sm:p-4">
+            {children}
           </div>
         </motion.div>
       )}

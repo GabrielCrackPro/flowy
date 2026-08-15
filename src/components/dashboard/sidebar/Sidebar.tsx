@@ -142,14 +142,14 @@ export function SidebarContent({
 
   return (
     <div
-      className={cn("flex h-full w-full flex-col bg-transparent", className)}
+      className={cn("flex h-full w-full flex-col bg-background/75", className)}
     >
       <div
         className={cn(
           "flex shrink-0 items-center border-b border-border/30 transition-[padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
           collapsed && variant === "desktop"
             ? "flex-col gap-1.5 px-2 py-1.5"
-            : "justify-between px-5 py-5",
+            : "justify-between px-4 py-4",
         )}
       >
         <Link
@@ -227,7 +227,7 @@ export function SidebarContent({
           "sidebar-scrollbar flex-1 min-h-0 w-full scroll-smooth overflow-y-auto transition-[padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
           collapsed && variant === "desktop"
             ? "px-0 py-3 space-y-1"
-            : "px-3 py-3 space-y-5",
+            : "px-2.5 py-3 space-y-5",
         )}
       >
         {nav.map((section, sectionIndex) => (
@@ -309,7 +309,7 @@ export function SidebarContent({
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="p-3 pb-0 pt-3"
             >
-              <NewTransaction />
+              <NewTransaction size="sm" />
             </motion.div>
           ) : (
             <motion.div
@@ -415,7 +415,7 @@ export function Sidebar() {
         id="sidebar"
         style={{ width: collapsed ? "4.5rem" : "18rem" }}
         className={cn(
-          "hidden md:flex h-screen shrink-0 transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] border-r border-border/30 bg-transparent",
+          "hidden h-screen shrink-0 border-r border-border/50 bg-background/80 shadow-[8px_0_24px_-24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex",
         )}
         aria-label={t("nav.mainAriaLabel")}
       >

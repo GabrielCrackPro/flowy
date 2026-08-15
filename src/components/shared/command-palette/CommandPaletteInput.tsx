@@ -1,9 +1,9 @@
 "use client";
 
 import { Command } from "cmdk";
-import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Loader2, SearchIcon, X } from "@/lib/icons";
+import { cn } from "@/lib/utils";
 import { Icon } from "../icon";
 
 interface CommandPaletteInputProps {
@@ -22,16 +22,18 @@ export function CommandPaletteInput({
   const { t } = useTranslation();
 
   return (
-    <div className="flex items-center gap-3 border-b border-border/30 px-4 py-2 transition-shadow focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-inset">
-      <Icon
-        icon={SearchIcon}
-        className="size-4 shrink-0 text-muted-foreground/50"
-      />
+    <div className="flex min-h-16 items-center gap-3 border-b border-border/50 bg-background px-4 py-2.5 sm:min-h-14 sm:py-2">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <Icon icon={SearchIcon} className="size-4" />
+      </span>
       <Command.Input
         placeholder={placeholder}
         value={value}
         onValueChange={onChange}
-        className="flex h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
+        aria-label={placeholder}
+        autoComplete="off"
+        inputMode="search"
+        className="h-11 min-w-0 flex-1 border-0 bg-transparent text-base font-medium outline-none ring-0 placeholder:text-muted-foreground/50 focus:border-transparent focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 sm:h-10 sm:text-sm"
         autoFocus
       />
       {loading && (
@@ -41,17 +43,19 @@ export function CommandPaletteInput({
         />
       )}
       {!loading && value.length > 0 && (
-        <motion.button
+        <button
           type="button"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onMouseDown={(e) => e.preventDefault()}
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => onChange("")}
           aria-label={t("search.clearSearch")}
-          className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted/50 text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
+          title={t("search.clearSearch")}
+          className={cn(
+            "flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground/60 transition-colors",
+            "hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+          )}
         >
-          <Icon icon={X} className="size-3.5" />
-        </motion.button>
+          <Icon icon={X} className="size-4" />
+        </button>
       )}
     </div>
   );

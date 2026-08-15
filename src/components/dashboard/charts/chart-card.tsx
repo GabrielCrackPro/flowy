@@ -30,7 +30,7 @@ export function ChartCardSkeleton() {
         )}
       />
 
-      <div className="relative p-6 sm:p-7">
+      <div className="relative p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <motion.div
@@ -56,7 +56,7 @@ export function ChartCardSkeleton() {
             <Skeleton variant="rounded" />
           </div>
         </div>
-        <div className="mt-6 h-[180px]">
+        <div className="mt-5 h-[180px]">
           <Skeleton className="h-full w-full rounded-lg" />
         </div>
       </div>

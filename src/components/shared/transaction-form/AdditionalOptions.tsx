@@ -1,6 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { useId } from "react";
 import { Badge, Textarea } from "@/components/ui";
 import { ChevronDown, StickyNote } from "@/lib/icons";
+import { cn } from "@/lib/utils";
 import { Icon } from "../icon";
 
 interface AdditionalOptionsProps {
@@ -13,6 +15,7 @@ interface AdditionalOptionsProps {
   notesLabel: string;
   placeholder: string;
   modifiedLabel: string;
+  embedded?: boolean;
 }
 
 export function AdditionalOptions({
@@ -25,18 +28,29 @@ export function AdditionalOptions({
   notesLabel,
   placeholder,
   modifiedLabel,
+  embedded = false,
 }: AdditionalOptionsProps) {
+  const panelId = useId();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.25 }}
-      className="overflow-hidden rounded-2xl border border-border/30 bg-card shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+      className={cn(
+        "overflow-hidden border border-border/50 bg-card",
+        embedded ? "rounded-xl shadow-none" : "rounded-2xl shadow-sm",
+      )}
     >
       <motion.button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between px-5 py-4 transition-colors hover:bg-muted/30"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        className={cn(
+          "flex w-full items-center justify-between transition-colors hover:bg-muted/30",
+          embedded ? "px-4 py-3.5" : "px-5 py-4",
+        )}
         whileHover={{ backgroundColor: "rgba(var(--muted), 0.3)" }}
       >
         <div className="flex items-center gap-3">
@@ -75,17 +89,23 @@ export function AdditionalOptions({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
+            id={panelId}
             className="overflow-hidden"
           >
-            <div className="flex flex-col gap-4 border-t border-border/30 px-5 py-4 sm:px-6">
+            <div
+              className={cn(
+                "flex flex-col gap-4 border-t border-border/30 py-4",
+                embedded ? "px-4" : "px-5 sm:px-6",
+              )}
+            >
               <label
-                htmlFor="additional-options-notes"
+                htmlFor={`${panelId}-notes`}
                 className="text-sm font-medium text-foreground/90"
               >
                 {notesLabel}
               </label>
               <Textarea
-                id="additional-options-notes"
+                id={`${panelId}-notes`}
                 value={notes ?? ""}
                 onChange={onNotesChange}
                 placeholder={placeholder}

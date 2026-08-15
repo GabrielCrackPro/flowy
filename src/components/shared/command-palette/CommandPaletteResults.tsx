@@ -1,11 +1,11 @@
 "use client";
 
-import { Command } from "cmdk";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/utils";
 import type { SearchResultItem } from "@/types/SearchResult";
-import { Icon, type IconProps } from "../icon";
+import type { IconProps } from "../icon";
 import { CommandPaletteItem } from "./CommandPaletteItem";
+import { CommandPaletteSection } from "./CommandPaletteSection";
 import { Highlight } from "./Highlight";
 
 interface CommandPaletteResultsProps {
@@ -37,68 +37,61 @@ export function CommandPaletteResults({
 }: CommandPaletteResultsProps) {
   return (
     <>
-      {filteredGroups.map(({ type, items }, gi) => {
-        const meta = sectionMeta[type];
-        const IconComponent = meta.icon;
+      {filteredGroups.map(({ type, items }, groupIndex) => {
+        const IconComponent = sectionMeta[type].icon;
+
         return (
-          <motion.div
+          <CommandPaletteSection
             key={type}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: gi * 0.1 }}
+            icon={IconComponent}
+            label={t(sectionLabels[type])}
+            divided={groupIndex > 0}
           >
-            {gi > 0 && (
-              <div className="mx-4 my-1.5 border-t border-border/30" />
-            )}
-            <div className="flex items-center gap-2 px-3 pb-1 pt-0.5">
-              <div className="flex size-4 items-center justify-center">
-                <Icon icon={IconComponent} className="size-3" />
-              </div>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
-                {t(sectionLabels[type])}
-              </span>
-            </div>
-            <Command.Group>
-              <div className="space-y-0.5 px-1.5">
-                {items.map((item, index) => (
-                  <motion.div
-                    key={`${item.type}-${item.id}`}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{
-                      duration: 0.2,
-                      delay: gi * 0.1 + index * 0.03,
-                    }}
-                  >
-                    <CommandPaletteItem
-                      value={item.title}
-                      onSelect={() => onResultSelect(item)}
-                      icon={IconComponent}
-                      label={
-                        <div className="flex min-w-0 items-center gap-2">
-                          <span className="truncate">
-                            <Highlight text={item.title} query={query} />
+            {items.map((item, itemIndex) => (
+              <motion.div
+                key={`${item.type}-${item.id}`}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  duration: 0.18,
+                  delay: groupIndex * 0.04 + itemIndex * 0.025,
+                }}
+              >
+                <CommandPaletteItem
+                  value={`${item.type}:${item.id}`}
+                  onSelect={() => onResultSelect(item)}
+                  icon={IconComponent}
+                  label={
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="min-w-0 truncate">
+                          <Highlight text={item.title} query={query} />
+                        </span>
+                        {item.subtitle && (
+                          <span className="hidden max-w-[38%] shrink-0 truncate text-xs text-muted-foreground sm:inline">
+                            <Highlight text={item.subtitle} query={query} />
                           </span>
-                          {item.subtitle && (
-                            <span className="shrink-0 text-xs text-muted-foreground">
-                              <Highlight text={item.subtitle} query={query} />
-                            </span>
-                          )}
-                        </div>
-                      }
-                      right={
-                        item.amount !== undefined ? (
-                          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                            {formatCurrency(item.amount, locale, currency)}
-                          </span>
-                        ) : undefined
-                      }
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            </Command.Group>
-          </motion.div>
+                        )}
+                      </div>
+                      {item.subtitle && (
+                        <span className="mt-0.5 block truncate text-xs text-muted-foreground sm:hidden">
+                          <Highlight text={item.subtitle} query={query} />
+                        </span>
+                      )}
+                    </div>
+                  }
+                  showChevron
+                  right={
+                    item.amount !== undefined ? (
+                      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                        {formatCurrency(item.amount, locale, currency)}
+                      </span>
+                    ) : undefined
+                  }
+                />
+              </motion.div>
+            ))}
+          </CommandPaletteSection>
         );
       })}
     </>

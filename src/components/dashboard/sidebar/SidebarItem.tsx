@@ -63,8 +63,8 @@ export function SidebarItem({
         }}
         onBlur={() => setTooltipOpen(false)}
         className={cn(
-          "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200",
-          "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+          "group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200",
+          "touch-manipulation focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
           collapsed
             ? "justify-center px-0 mx-auto size-10 hover:bg-muted/40"
             : "active:scale-[0.98]",
@@ -79,7 +79,7 @@ export function SidebarItem({
         {active && !collapsed ? (
           <motion.span
             layoutId={pillLayoutId}
-            className="absolute inset-0 rounded-xl bg-primary/10 ring-1 ring-inset ring-primary/15"
+            className="absolute inset-0 z-0 rounded-xl bg-primary/10 ring-1 ring-inset ring-primary/15"
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
           />
         ) : null}
@@ -87,7 +87,7 @@ export function SidebarItem({
         {/* Left accent indicator */}
         <motion.span
           className={cn(
-            "absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary transition duration-200",
+            "absolute left-0 top-1/2 z-10 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary transition duration-200",
             collapsed ? "hidden" : "",
           )}
           initial={false}
@@ -97,7 +97,10 @@ export function SidebarItem({
         <motion.div
           whileHover={{ scale: collapsed ? 1.15 : 1.08 }}
           transition={{ duration: 0.2 }}
-          className="flex shrink-0 items-center justify-center rounded-lg transition duration-200"
+          className={cn(
+            "relative z-10 flex size-8 shrink-0 items-center justify-center rounded-lg transition duration-200",
+            active && !collapsed && "bg-primary/10",
+          )}
         >
           <Icon
             icon={IconComponent}
@@ -111,7 +114,7 @@ export function SidebarItem({
         </motion.div>
 
         <motion.div
-          className="flex min-w-0 items-center gap-2 overflow-hidden"
+          className="relative z-10 flex min-w-0 items-center gap-2 overflow-hidden"
           initial={false}
           animate={{
             opacity: collapsed ? 0 : 1,

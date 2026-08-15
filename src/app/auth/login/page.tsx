@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input } from "@components/ui";
+import { Button, Checkbox, Input } from "@components/ui";
 import {
   Form,
   FormAlert,
@@ -180,15 +180,21 @@ export default function LoginPage() {
           <div className="flex items-center justify-between">
             <RHFFormField
               name="rememberMe"
-              render={({ field }) => (
-                <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                  <input
-                    type="checkbox"
+              render={({ field, fieldState }) => (
+                <label
+                  htmlFor="remember-me"
+                  className="flex min-h-8 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <Checkbox
+                    id="remember-me"
+                    name={field.name}
                     checked={field.value}
-                    onChange={field.onChange}
-                    className="size-4 rounded border-border"
+                    onCheckedChange={(checked) =>
+                      field.onChange(checked === true)
+                    }
+                    aria-invalid={fieldState.invalid || undefined}
                   />
-                  {t("common.rememberMe")}
+                  <span>{t("common.rememberMe")}</span>
                 </label>
               )}
             />

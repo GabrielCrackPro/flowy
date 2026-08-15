@@ -21,7 +21,15 @@ export function PwaShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <div className={isMobile ? "pb-20" : undefined}>{children}</div>
+      <div
+        className={
+          isMobile
+            ? "pb-[calc(4rem+env(safe-area-inset-bottom,0px))]"
+            : undefined
+        }
+      >
+        {children}
+      </div>
       <PwaFab />
       <PwaBottomNav />
     </>

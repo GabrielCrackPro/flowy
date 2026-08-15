@@ -1,10 +1,9 @@
 "use client";
 
-import { Command } from "cmdk";
-import { motion } from "framer-motion";
 import { Clock, X } from "@/lib/icons";
 import { Icon } from "../icon";
 import { CommandPaletteItem } from "./CommandPaletteItem";
+import { CommandPaletteSection } from "./CommandPaletteSection";
 
 interface CommandPaletteRecentProps {
   recentSearches: string[];
@@ -22,53 +21,32 @@ export function CommandPaletteRecent({
   if (recentSearches.length === 0) return null;
 
   return (
-    <>
-      <div className="flex items-center gap-2 px-3 pb-1 pt-2">
-        <motion.div
-          initial={{ rotate: -90 }}
-          animate={{ rotate: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Icon icon={Clock} className="size-3" />
-        </motion.div>
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
-          {t("search.recent")}
-        </span>
-      </div>
-      <Command.Group>
-        <div className="space-y-0.5 px-1.5">
-          {recentSearches.map((sq, index) => (
-            <motion.div
-              key={sq}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{
-                duration: 0.2,
-                delay: index * 0.05,
-              }}
-            >
-              <CommandPaletteItem
-                value={sq}
-                onSelect={() => onRecentClick(sq)}
-                icon={Clock}
-                label={<span className="truncate">{sq}</span>}
-              />
-            </motion.div>
-          ))}
-        </div>
-        <div className="px-[calc(1.5rem-1px)] pb-1 pt-1">
-          <motion.button
+    <CommandPaletteSection
+      icon={Clock}
+      label={t("search.recent")}
+      footer={
+        <div className="px-2 pb-1 pt-1">
+          <button
             type="button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             onClick={onClearRecent}
-            className="flex items-center gap-1 text-[11px] text-muted-foreground/40 transition-colors hover:text-muted-foreground/70"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-[11px] text-muted-foreground/60 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
           >
             <Icon icon={X} className="size-3" />
             {t("search.clearRecent")}
-          </motion.button>
+          </button>
         </div>
-      </Command.Group>
-    </>
+      }
+    >
+      {recentSearches.map((query) => (
+        <CommandPaletteItem
+          key={query}
+          value={query}
+          onSelect={() => onRecentClick(query)}
+          icon={Clock}
+          label={<span className="truncate">{query}</span>}
+          showChevron
+        />
+      ))}
+    </CommandPaletteSection>
   );
 }

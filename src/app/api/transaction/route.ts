@@ -39,6 +39,12 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get("type");
     const categoryId = searchParams.get("categoryId");
     const paymentMethod = searchParams.get("paymentMethod");
+    const paymentMethods = paymentMethod
+      ? paymentMethod
+          .split(",")
+          .filter(Boolean)
+          .map((method) => paymentMethodSchema.parse(method))
+      : [];
     const from = searchParams.get("from");
     const to = searchParams.get("to");
     const search = searchParams.get("search");
@@ -73,9 +79,8 @@ export async function GET(request: NextRequest) {
     const transactions = await TransactionService.list(auth.id, {
       type: type ? transactionTypeSchema.parse(type) : undefined,
       categoryId: categoryId ?? undefined,
-      paymentMethod: paymentMethod
-        ? paymentMethodSchema.parse(paymentMethod)
-        : undefined,
+      paymentMethod:
+        paymentMethods.length > 1 ? paymentMethods : paymentMethods[0],
       from: from ?? undefined,
       to: to ?? undefined,
       search: search ?? undefined,

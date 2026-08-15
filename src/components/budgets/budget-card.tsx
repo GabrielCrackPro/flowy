@@ -90,11 +90,13 @@ export function BudgetCard({
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="flex items-center gap-1.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
             <Button
               variant="ghost"
               size="icon-xs"
               onClick={() => onEdit(budget)}
+              aria-label={t("common.edit")}
+              title={t("common.edit")}
               className="size-7"
             >
               <Icon icon={Pencil} className="size-3.5" />
@@ -103,6 +105,8 @@ export function BudgetCard({
               variant="ghost"
               size="icon-xs"
               onClick={() => onDelete(budget)}
+              aria-label={t("common.delete")}
+              title={t("common.delete")}
               className="size-7 text-destructive hover:text-destructive"
             >
               <Icon icon={Trash2} className="size-3.5" />

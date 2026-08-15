@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { Filter } from "@/lib/icons";
 import { Icon, type IconProps } from "../icon";
 
 export type FilterType =
@@ -33,34 +33,44 @@ export function CommandPaletteFilters({
 }: CommandPaletteFiltersProps) {
   if (availableFilters.length <= 1) return null;
 
+  const buttonClass =
+    "inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30";
+
   return (
-    <div className="flex items-center gap-1.5 border-b border-border/30 px-4 py-2.5">
-      <motion.button
+    <div className="flex items-center gap-1.5 overflow-x-auto border-b border-border/50 px-4 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <button
         type="button"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
         onClick={() => onFilterChange("all")}
-        data-active={activeFilter === "all"}
-        className="rounded-lg px-2.5 py-1 text-xs font-medium transition data-[active=true]:bg-gradient-to-r from-primary to-primary/90 text-white data-[active=true]:shadow-md data-[active=false]:text-muted-foreground/70 data-[active=false]:hover:text-foreground"
+        aria-pressed={activeFilter === "all"}
+        className={`${buttonClass} ${
+          activeFilter === "all"
+            ? "border-primary/30 bg-primary/10 text-primary"
+            : "border-border/50 bg-background/70 text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-foreground"
+        }`}
       >
+        <Icon icon={Filter} className="size-3.5" />
         {t("filters.all")}
-      </motion.button>
+      </button>
+
       {availableFilters.map((type) => {
         const meta = sectionMeta[type];
-        const FIcon = meta.icon;
+        const active = activeFilter === type;
+
         return (
-          <motion.button
+          <button
             key={type}
             type="button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             onClick={() => onFilterChange(type)}
-            data-active={activeFilter === type}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition data-[active=true]:bg-gradient-to-r from-primary to-primary/90 text-white data-[active=true]:shadow-md data-[active=false]:text-muted-foreground/70 data-[active=false]:hover:text-foreground"
+            aria-pressed={active}
+            className={`${buttonClass} ${
+              active
+                ? "border-primary/30 bg-primary/10 text-primary"
+                : "border-border/50 bg-background/70 text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-foreground"
+            }`}
           >
-            <Icon icon={FIcon} className="size-3" />
+            <Icon icon={meta.icon} className="size-3.5" />
             {t(sectionLabels[type])}
-          </motion.button>
+          </button>
         );
       })}
     </div>

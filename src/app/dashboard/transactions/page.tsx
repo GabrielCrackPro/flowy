@@ -8,11 +8,10 @@ import {
   CustomColumn,
   DataTable,
   EmptyState,
-  ErrorBoundary,
+  FinancePageShell,
   Icon,
   IconColumn,
   NumberColumn,
-  PageTransition,
   PaymentMethodIcon,
   PendingSyncBadge,
   SelectColumn,
@@ -67,7 +66,6 @@ export default function TransactionsPage() {
     sorted,
     totals,
     loadingDone,
-    hasFilters,
     allSelected,
     filterFields,
     setDetailTx,
@@ -100,6 +98,7 @@ export default function TransactionsPage() {
 
       IconColumn({
         sortable: true,
+        sortLabel: t("transactions.type"),
         sortValue: (tx) => tx.type,
         icon: (tx) =>
           tx.type === "INCOME" ? (
@@ -154,7 +153,7 @@ export default function TransactionsPage() {
 
       TagsColumn({
         header: t("transactions.category"),
-        className: "hidden sm:table-cell",
+        className: "hidden md:table-cell",
         sortable: true,
         sortValue: (tx) => tx.tags?.map((tag) => tag.name).join(", ") ?? "",
         getTags: (tx) => tx.tags,
@@ -220,6 +219,7 @@ export default function TransactionsPage() {
       }),
 
       ActionsColumn({
+        ariaLabel: t("profile.actions"),
         actions: (tx) => [
           {
             label: t("transactions.viewDetails"),
@@ -259,143 +259,138 @@ export default function TransactionsPage() {
   );
 
   return (
-    <PageTransition>
-      <ErrorBoundary>
-        <div className="space-y-6">
-          <BackHeader title={t("transactions.title")} href="/dashboard" />
+    <FinancePageShell>
+      <BackHeader title={t("transactions.title")} href="/dashboard" />
 
-          <TransactionSummaryCards
-            expenses={totals.expenses}
-            income={totals.income}
-            balance={totals.balance}
-            loadingDone={loadingDone}
+      <TransactionSummaryCards
+        expenses={totals.expenses}
+        income={totals.income}
+        balance={totals.balance}
+        loadingDone={loadingDone}
+        locale={locale}
+        currency={currency}
+        t={t}
+        formatCurrency={formatCurrency}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.15 }}
+      >
+        {loading && !loadingDone ? (
+          <CardSkeleton />
+        ) : (
+          <Card className="overflow-hidden">
+            <div className="p-3 sm:p-4">
+              <TransactionFilterToolbar
+                filters={filters}
+                filterOpen={filterOpen}
+                filterFields={filterFields}
+                t={t}
+                transactionCount={sorted.length}
+                transactions={sorted}
+                loading={loading}
+                lastRefreshedAt={lastRefreshedAt}
+                locale={locale}
+                currency={currency}
+                onFilterChange={handleFilterChange}
+                onClearFilters={handleClearFilters}
+                onFilterOpenChange={setFilterOpen}
+                onRefresh={handleRefresh}
+                formatFilterValue={formatFilterValue}
+                onRemoveChip={handleRemoveChip}
+              />
+            </div>
+
+            <TransactionBulkActions
+              selectedCount={selectedIds.size}
+              onDelete={handleBulkDelete}
+              t={t}
+            />
+
+            <DataTable
+              columns={columns}
+              data={sorted}
+              keyExtractor={(tx) => tx.id}
+              loading={loading}
+              pageSize={20}
+              onRowClick={(tx) => setDetailTx(tx)}
+              bare
+              emptyState={
+                <EmptyState
+                  icon={<Icon icon={ArrowUpDown} size="lg" />}
+                  title={t("transactions.empty")}
+                  description={t("dashboard.noTransactionsDesc")}
+                  iconClassName="from-blue-500/20 to-blue-500/10 text-blue-600 ring-blue-500/10 dark:from-blue-500/30 dark:to-blue-500/20 dark:text-blue-400"
+                  action={
+                    <Link
+                      href="/dashboard/transactions/add"
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                    >
+                      {t("nav.newTransaction")}
+                      <Icon icon={ArrowRight} className="size-3.5" />
+                    </Link>
+                  }
+                />
+              }
+            />
+          </Card>
+        )}
+      </motion.div>
+
+      {loadingDone && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
+          <TransactionReceipts
+            transactions={sorted}
             locale={locale}
             currency={currency}
             t={t}
-            formatCurrency={formatCurrency}
           />
+        </motion.div>
+      )}
 
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
-          >
-            {loading && !loadingDone ? (
-              <CardSkeleton />
-            ) : (
-              <Card className="overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.08)] border-border/40 bg-gradient-to-br from-card to-card/50">
-                <div className="border-b border-border/30 bg-gradient-to-r from-muted/20 to-muted/10 px-6 py-4">
-                  <TransactionFilterToolbar
-                    filters={filters}
-                    filterOpen={filterOpen}
-                    hasFilters={hasFilters}
-                    filterFields={filterFields}
-                    t={t}
-                    transactionCount={sorted.length}
-                    transactions={sorted}
-                    loading={loading}
-                    lastRefreshedAt={lastRefreshedAt}
-                    locale={locale}
-                    currency={currency}
-                    onFilterChange={handleFilterChange}
-                    onClearFilters={handleClearFilters}
-                    onFilterOpenChange={setFilterOpen}
-                    onRefresh={handleRefresh}
-                    formatFilterValue={formatFilterValue}
-                    onRemoveChip={handleRemoveChip}
-                  />
-                </div>
+      <TransactionDetailModal
+        transaction={detailTx}
+        tags={detailTx?.tags}
+        locale={locale}
+        currency={currency}
+        onClose={() => setDetailTx(null)}
+        onUpdate={update}
+      />
 
-                <TransactionBulkActions
-                  selectedCount={selectedIds.size}
-                  onDelete={handleBulkDelete}
-                  t={t}
-                />
+      <ConfirmDialog
+        open={!!deleteTx}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTx(null);
+        }}
+        title={t("transactions.delete")}
+        description={t("transactions.deleteConfirm")}
+        confirmLabel={t("transactions.delete")}
+        cancelLabel={t("transaction.cancel")}
+        onConfirm={() => {
+          if (deleteTx) {
+            remove(deleteTx.id);
+            setDeleteTx(null);
+          }
+        }}
+      />
 
-                <DataTable
-                  columns={columns}
-                  data={sorted}
-                  keyExtractor={(tx) => tx.id}
-                  loading={loading}
-                  pageSize={20}
-                  onRowClick={(tx) => setDetailTx(tx)}
-                  bare
-                  emptyState={
-                    <EmptyState
-                      icon={<Icon icon={ArrowUpDown} size="lg" />}
-                      title={t("transactions.empty")}
-                      description={t("dashboard.noTransactionsDesc")}
-                      iconClassName="from-blue-500/20 to-blue-500/10 text-blue-600 ring-blue-500/10 dark:from-blue-500/30 dark:to-blue-500/20 dark:text-blue-400"
-                      action={
-                        <Link
-                          href="/dashboard/transactions/add"
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-                        >
-                          {t("nav.newTransaction")}
-                          <Icon icon={ArrowRight} className="size-3.5" />
-                        </Link>
-                      }
-                    />
-                  }
-                />
-              </Card>
-            )}
-          </motion.div>
-
-          {loadingDone && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-            >
-              <TransactionReceipts
-                transactions={sorted}
-                locale={locale}
-                currency={currency}
-                t={t}
-              />
-            </motion.div>
-          )}
-
-          <TransactionDetailModal
-            transaction={detailTx}
-            tags={detailTx?.tags}
-            locale={locale}
-            currency={currency}
-            onClose={() => setDetailTx(null)}
-            onUpdate={update}
-          />
-
-          <ConfirmDialog
-            open={!!deleteTx}
-            onOpenChange={(open) => {
-              if (!open) setDeleteTx(null);
-            }}
-            title={t("transactions.delete")}
-            description={t("transactions.deleteConfirm")}
-            confirmLabel={t("transactions.delete")}
-            cancelLabel={t("transaction.cancel")}
-            onConfirm={() => {
-              if (deleteTx) {
-                remove(deleteTx.id);
-                setDeleteTx(null);
-              }
-            }}
-          />
-
-          <ConfirmDialog
-            open={bulkDeleteTx}
-            onOpenChange={(open) => {
-              if (!open) setBulkDeleteTx(false);
-            }}
-            title={`${t("transactions.delete")} (${selectedIds.size})`}
-            description={t("transactions.deleteConfirm")}
-            confirmLabel={t("transactions.delete")}
-            cancelLabel={t("transaction.cancel")}
-            onConfirm={handleBulkDelete}
-          />
-        </div>
-      </ErrorBoundary>
-    </PageTransition>
+      <ConfirmDialog
+        open={bulkDeleteTx}
+        onOpenChange={(open) => {
+          if (!open) setBulkDeleteTx(false);
+        }}
+        title={`${t("transactions.delete")} (${selectedIds.size})`}
+        description={t("transactions.deleteConfirm")}
+        confirmLabel={t("transactions.delete")}
+        cancelLabel={t("transaction.cancel")}
+        onConfirm={handleBulkDelete}
+      />
+    </FinancePageShell>
   );
 }

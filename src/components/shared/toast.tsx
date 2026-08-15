@@ -190,7 +190,7 @@ export function AppToast({
 }: AppToastProps) {
   const { Icon: IconComponent, tone } = variants[variant];
   const { t } = useTranslation();
-  const isMobile = useMediaQuery("(max-width: 600px)");
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
   const enterAnimation = isMobile
     ? { opacity: 0, y: 48, scale: 0.95 }
@@ -240,7 +240,9 @@ export function AppToast({
       }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className="group relative flex w-full items-start gap-4 max-[600px]:gap-2.5 overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 max-[600px]:p-3.5 transition duration-500 ease-out hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1"
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+      className="group relative flex w-full items-start gap-4 overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-br from-card to-card/50 p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] max-[767px]:gap-2.5 max-[767px]:p-3.5"
     >
       {/* Background gradient */}
       <Animated.div
@@ -252,7 +254,6 @@ export function AppToast({
           toneBgClasses[tone],
         )}
       />
-
       {/* Top gradient border */}
       <Animated.div
         initial={{ scaleX: 0 }}
@@ -263,7 +264,6 @@ export function AppToast({
           toneBorderClasses[tone],
         )}
       />
-
       {/* Icon */}
       <Animated.div
         initial={{ scale: 0, rotate: -180 }}
@@ -278,21 +278,20 @@ export function AppToast({
         whileHover={{ scale: 1.15, rotate: 8 }}
         whileTap={{ scale: 0.9 }}
         className={cn(
-          "relative flex size-10 max-[600px]:size-8 shrink-0 items-center justify-center rounded-xl transition-transform",
+          "relative flex size-10 shrink-0 items-center justify-center rounded-xl transition-transform max-[767px]:size-8",
           toneAccentClasses[tone],
         )}
       >
         <Icon
           icon={IconComponent}
           className={cn(
-            "size-5 max-[600px]:size-4",
+            "size-5 max-[767px]:size-4",
             variant === "loading" && "animate-spin",
           )}
         />
       </Animated.div>
-
       {/* Content */}
-      <div className="relative flex min-w-0 flex-1 flex-col gap-2.5 max-[600px]:gap-1.5 py-0.5">
+      <div className="relative flex min-w-0 flex-1 flex-col gap-2.5 py-0.5 max-[767px]:gap-1.5">
         <Animated.p
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -337,13 +336,12 @@ export function AppToast({
               delay: 0.3,
               ease: [0.25, 0.1, 0.25, 1],
             }}
-            className="mt-2 max-[600px]:mt-1.5"
+            className="mt-2 flex flex-wrap items-center gap-2 max-[767px]:mt-1.5 max-[767px]:[&>a]:min-h-10 max-[767px]:[&>a]:w-full max-[767px]:[&>button]:min-h-10 max-[767px]:[&>button]:w-full"
           >
             {action}
           </Animated.div>
         ) : null}
       </div>
-
       {/* Close button */}
       <Animated.button
         initial={{ opacity: 0, scale: 0.8 }}
@@ -353,12 +351,11 @@ export function AppToast({
         whileTap={{ scale: 0.85 }}
         type="button"
         onClick={() => sonnerToast.dismiss(id)}
-        aria-label="Cerrar notificación"
-        className="relative -m-1 flex size-8 max-[600px]:size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground/50 transition-colors hover:bg-muted/80 hover:text-foreground"
+        aria-label={t("common.close")}
+        className="relative -m-1 flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground/50 transition-colors hover:bg-muted/80 hover:text-foreground max-[767px]:size-8"
       >
         <Icon icon={X} className="size-4" />
       </Animated.button>
-
       {/* Progress bar */}
       {hasProgress ? (
         <div className="absolute inset-x-0 bottom-0 h-0.5 rounded-b-2xl bg-foreground/[0.05]">

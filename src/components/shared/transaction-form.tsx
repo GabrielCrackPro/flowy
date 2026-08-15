@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, FormAlert, FormField, Input } from "@components/ui";
+import { FormAlert, FormField, Input } from "@components/ui";
 import { useCategoryApi } from "@hooks/api";
 import { useBudgetApi } from "@hooks/api/useBudgetApi";
 import { useProfile } from "@hooks/useProfile";
@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAmountInput, useDateLocale, useThrottle } from "@/hooks";
+import { deleteUploadedReceipt } from "@/lib/api/upload";
 import { Camera, Pencil } from "@/lib/icons";
 import { BackHeader } from "../dashboard/header/BackHeader";
 import { FileUpload } from "./file-upload";
@@ -22,6 +23,18 @@ import { AdditionalOptions } from "./transaction-form/AdditionalOptions";
 import { AmountSection } from "./transaction-form/AmountSection";
 import { FormActions } from "./transaction-form/FormActions";
 import { TransactionSidebar } from "./transaction-form/TransactionSidebar";
+
+export function getDefaultTransactionValues(): CreateTransactionSchema {
+  return {
+    type: "EXPENSE",
+    amount: 0,
+    description: "",
+    date: new Date(),
+    categoryIds: [],
+    isRecurring: false,
+    budgetId: undefined,
+  };
+}
 
 interface TransactionFormProps {
   mode: "create" | "edit";
@@ -73,6 +86,12 @@ export function TransactionForm({
 
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [touched, setTouched] = useState<Set<string>>(new Set());
+  const initialReceiptUrlRef = useRef<string | null>(
+    initialValues.receiptUrl ?? null,
+  );
+  const receiptUrlRef = useRef<string | null>(initialValues.receiptUrl ?? null);
+  const receiptCommittedRef = useRef(false);
+  const clearReceiptRef = useRef<() => void>(() => undefined);
 
   // Get currency symbol position
   const { currencySymbol: detectedSymbol, symbolPosition } = useMemo<{
@@ -124,8 +143,24 @@ export function TransactionForm({
       if (values.amount <= 0) {
         throw new Error(t("transaction.validation.amountMustBePositive"));
       }
-      await onSubmit({ ...values, description: descriptionValue });
-      onSuccess?.();
+      try {
+        await onSubmit({ ...values, description: descriptionValue });
+        receiptCommittedRef.current = true;
+        onSuccess?.();
+      } catch (error) {
+        // A failed create cannot leave an uploaded object orphaned. Remove
+        // only new receipts; an existing edit receipt remains retryable.
+        if (mode === "create" && values.receiptUrl) {
+          try {
+            await deleteUploadedReceipt(values.receiptUrl);
+            receiptUrlRef.current = null;
+            clearReceiptRef.current();
+          } catch {
+            // Keep the URL in the form so the user can retry the create.
+          }
+        }
+        throw error;
+      }
     },
   });
 
@@ -148,6 +183,36 @@ export function TransactionForm({
 
   const isExpense = values.type === "EXPENSE";
 
+  const handleReceiptChange = useCallback(
+    (url: string | null) => {
+      const previousUrl = receiptUrlRef.current;
+      receiptUrlRef.current = url;
+      handleValueChange("receiptUrl")(url);
+
+      if (
+        previousUrl &&
+        previousUrl !== url &&
+        previousUrl !== initialReceiptUrlRef.current
+      ) {
+        void deleteUploadedReceipt(previousUrl).catch(() => undefined);
+      }
+    },
+    [handleValueChange],
+  );
+
+  clearReceiptRef.current = () => handleValueChange("receiptUrl")(null);
+
+  useEffect(() => {
+    return () => {
+      const receiptUrl = receiptUrlRef.current;
+      if (mode === "create" || receiptUrl !== initialReceiptUrlRef.current) {
+        if (!receiptCommittedRef.current && receiptUrl) {
+          void deleteUploadedReceipt(receiptUrl).catch(() => undefined);
+        }
+      }
+    };
+  }, [mode]);
+
   const toggleCategory = useCallback(
     (id: string) => {
       const current = values.categoryIds ?? [];
@@ -160,8 +225,12 @@ export function TransactionForm({
   );
 
   useEffect(() => {
+    // The sheet should open without moving focus into the form. This keeps
+    // the table action that opened it as the user's context and avoids a
+    // distracting jump on touch devices.
+    if (embedded) return;
     amountRef.current?.focus();
-  }, []);
+  }, [embedded]);
 
   const descriptionError = useMemo(() => {
     if (!touched.has("description")) return undefined;
@@ -217,13 +286,13 @@ export function TransactionForm({
 
         <div
           className={cn(
-            "grid grid-cols-1 gap-6",
+            "grid grid-cols-1",
             embedded
-              ? "pt-2"
-              : "pt-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start",
+              ? "gap-4 pt-2"
+              : "gap-6 pt-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start",
           )}
         >
-          <div className="space-y-6">
+          <div className={cn(embedded ? "space-y-4" : "space-y-6")}>
             <AmountSection
               embedded={embedded}
               isExpense={isExpense}
@@ -245,26 +314,46 @@ export function TransactionForm({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
-              className="relative overflow-hidden rounded-2xl border border-border/30 bg-card bg-linear-to-br from-primary/5 via-primary/[0.02] to-transparent shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 sm:p-6"
+              className={cn(
+                "relative overflow-hidden border border-border/30 bg-card",
+                embedded
+                  ? "rounded-xl p-4"
+                  : "rounded-2xl bg-linear-to-br from-primary/5 via-primary/[0.02] to-transparent p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] sm:p-6",
+              )}
             >
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-primary via-primary/50 to-primary" />
+              {!embedded && (
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-primary via-primary/50 to-primary" />
+              )}
 
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary ring-1 ring-inset ring-primary/10">
+                <div
+                  className={cn(
+                    "flex size-8 items-center justify-center rounded-lg text-primary ring-1 ring-inset ring-primary/10",
+                    embedded
+                      ? "bg-primary/10"
+                      : "bg-linear-to-br from-primary/20 to-primary/10",
+                  )}
+                >
                   <Icon icon={Pencil} className="size-4" />
                 </div>
-                <span className="text-sm font-semibold text-foreground/90">
+                <span
+                  id="transaction-description-heading"
+                  className="text-sm font-semibold text-foreground/90"
+                >
                   {t("transaction.descriptionField")}
                 </span>
               </div>
 
               <FormField error={descriptionError} required>
                 <Input
+                  id="transaction-description"
                   value={values.description ?? ""}
                   onChange={handleChange("description")}
                   onBlur={() => touch("description")}
                   placeholder={t("transaction.descriptionPlaceholder")}
                   autoComplete="off"
+                  aria-labelledby="transaction-description-heading"
+                  aria-required="true"
                   aria-invalid={descriptionError ? true : undefined}
                   className="h-12 text-base focus:ring-2 focus:ring-primary/20"
                 />
@@ -302,12 +391,26 @@ export function TransactionForm({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.15 }}
-              className="relative overflow-hidden rounded-2xl border border-border/30 bg-card bg-linear-to-br from-amber-500/5 via-amber-500/[0.02] to-transparent shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-5 sm:p-6"
+              className={cn(
+                "relative overflow-hidden border border-border/30 bg-card",
+                embedded
+                  ? "rounded-xl p-4"
+                  : "rounded-2xl bg-linear-to-br from-amber-500/5 via-amber-500/[0.02] to-transparent p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] sm:p-6",
+              )}
             >
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-amber-500 via-amber-400 to-amber-500" />
+              {!embedded && (
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-amber-500 via-amber-400 to-amber-500" />
+              )}
 
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-amber-500/20 to-amber-500/10 text-amber-600 ring-1 ring-inset ring-amber-500/10 dark:from-amber-500/30 dark:to-amber-500/20 dark:text-amber-400">
+                <div
+                  className={cn(
+                    "flex size-8 items-center justify-center rounded-lg text-amber-600 ring-1 ring-inset ring-amber-500/10 dark:text-amber-400",
+                    embedded
+                      ? "bg-amber-500/10 dark:bg-amber-500/20"
+                      : "bg-linear-to-br from-amber-500/20 to-amber-500/10 dark:from-amber-500/30 dark:to-amber-500/20",
+                  )}
+                >
                   <Icon icon={Camera} className="size-4" />
                 </div>
                 <span className="text-sm font-semibold text-foreground/90">
@@ -317,12 +420,12 @@ export function TransactionForm({
 
               <FormField>
                 <FileUpload
+                  compact={embedded}
                   value={values.receiptUrl}
-                  onChange={(url) =>
-                    handleValueChange("receiptUrl")(url ?? undefined)
-                  }
+                  onChange={handleReceiptChange}
                   labels={{
                     uploadLabel: t("transaction.uploadReceipt"),
+                    viewLabel: t("transaction.viewReceipt"),
                     dragHint: t("transaction.dragDropHint"),
                     fileTypesHint: t("transaction.fileTypesHint"),
                     changeLabel: t("transaction.changeFile"),
@@ -347,6 +450,7 @@ export function TransactionForm({
                 notesLabel={t("transaction.notes")}
                 placeholder={t("transaction.notesPlaceholder")}
                 modifiedLabel={t("transaction.modified")}
+                embedded={embedded}
               />
             ) : null}
           </div>
@@ -389,6 +493,7 @@ export function TransactionForm({
                 notesLabel={t("transaction.notes")}
                 placeholder={t("transaction.notesPlaceholder")}
                 modifiedLabel={t("transaction.modified")}
+                embedded={embedded}
               />
             </div>
           ) : null}

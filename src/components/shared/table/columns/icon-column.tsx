@@ -5,6 +5,7 @@ import type { Column } from "../data-table";
 
 interface IconColumnOptions<T> {
   header?: ReactNode;
+  sortLabel?: string;
   className?: string | ((row: T) => string);
   sortable?: boolean;
   align?: "left" | "center" | "right";
@@ -14,6 +15,7 @@ interface IconColumnOptions<T> {
 
 export function IconColumn<T>({
   header = null,
+  sortLabel,
   icon,
   className,
   sortable = false,
@@ -22,6 +24,7 @@ export function IconColumn<T>({
 }: IconColumnOptions<T>): Column<T> {
   return {
     header,
+    sortLabel,
     sortable,
     sortValue,
     skeleton: (
