@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.37](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.36...flowy-v0.1.37) (2026-08-15)
+
+
+### Features
+
+* **ui:** inline space management, banner stack and PWA sheet polish ([#184](https://github.com/GabrielCrackPro/flowy/issues/184)) ([cabceaf](https://github.com/GabrielCrackPro/flowy/commit/cabceaffbe2cc79857b5fbc72a74afe63d963ab2))
+
 ## [0.1.36](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.35...flowy-v0.1.36) (2026-08-15)
 
 
