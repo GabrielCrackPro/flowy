@@ -4,7 +4,14 @@ import { cn } from "@lib/utils";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, Info, TriangleAlert, X } from "@/lib/icons";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Info,
+  Loader2,
+  TriangleAlert,
+  X,
+} from "@/lib/icons";
 
 export type BannerSeverity = "danger" | "warning" | "success" | "info";
 export type BannerVariant = "card" | "strip";
@@ -81,7 +88,7 @@ const stripStyles: Record<
   info: {
     bar: "border-primary/20 bg-primary/5",
     icon: "text-primary",
-    title: "text-foreground/80",
+    title: "text-foreground",
     sub: "text-muted-foreground",
     button: "bg-primary text-primary-foreground hover:bg-primary/90",
   },
@@ -100,6 +107,10 @@ interface BannerProps {
   actionLabel?: string;
   /** Icon inside the action button (card defaults to ArrowRight, strip is icon-free). */
   actionIcon?: LucideIcon;
+  /** Shows a spinner in the action button and disables it (e.g. enabling push). */
+  actionBusy?: boolean;
+  /** Strip only: extra content pinned to the end of the row (e.g. sync status). */
+  trailing?: ReactNode;
   onAction?: () => void;
   /** Card only: when provided, the title/description area becomes clickable (e.g. open alert). */
   onBodyClick?: () => void;
@@ -153,6 +164,8 @@ function StripBanner({
   description,
   actionLabel,
   actionIcon,
+  actionBusy,
+  trailing,
   onAction,
   onDismiss,
   dismissLabel,
@@ -164,6 +177,8 @@ function StripBanner({
   description?: ReactNode;
   actionLabel?: string;
   actionIcon?: LucideIcon;
+  actionBusy?: boolean;
+  trailing?: ReactNode;
   onAction?: () => void;
   onDismiss?: () => void;
   dismissLabel?: string;
@@ -173,7 +188,7 @@ function StripBanner({
 
   return (
     <div
-      className={cn("relative w-full border-b px-3 py-2 sm:px-4", style.bar)}
+      className={cn("relative w-full border-b px-3 py-1.5 sm:px-4", style.bar)}
     >
       <div
         className={cn(
@@ -181,7 +196,7 @@ function StripBanner({
           // Right padding reserves space for the dismiss button, which is
           // absolutely positioned (so it never wraps to its own row on
           // narrow screens) and keeps the action button clear of it.
-          onDismiss && "pr-7",
+          onDismiss && "pr-6",
         )}
       >
         {pulse ? (
@@ -202,11 +217,11 @@ function StripBanner({
         )}
 
         <div className="min-w-0 flex-1">
-          <p className={cn("text-sm font-semibold sm:truncate", style.title)}>
+          <p className={cn("text-xs font-semibold sm:truncate", style.title)}>
             {title}
           </p>
           {description && (
-            <p className={cn("text-xs sm:truncate", style.sub)}>
+            <p className={cn("text-[11px] sm:truncate", style.sub)}>
               {description}
             </p>
           )}
@@ -216,15 +231,22 @@ function StripBanner({
           <Button
             size="sm"
             onClick={onAction}
+            disabled={actionBusy}
             className={cn(
-              "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold shadow-sm transition",
+              "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold shadow-sm transition disabled:opacity-60",
               style.button,
             )}
           >
-            {ActionIcon && <ActionIcon className="size-3.5" />}
+            {actionBusy ? (
+              <Loader2 aria-hidden className="size-3.5 animate-spin" />
+            ) : ActionIcon ? (
+              <ActionIcon className="size-3.5" />
+            ) : null}
             {actionLabel}
           </Button>
         )}
+
+        {trailing ? <div className="shrink-0">{trailing}</div> : null}
       </div>
 
       {onDismiss && (
@@ -256,6 +278,8 @@ export function Banner({
   description,
   actionLabel,
   actionIcon,
+  actionBusy,
+  trailing,
   onAction,
   onBodyClick,
   onDismiss,
@@ -275,6 +299,8 @@ export function Banner({
         description={description}
         actionLabel={actionLabel}
         actionIcon={actionIcon}
+        actionBusy={actionBusy}
+        trailing={trailing}
         onAction={onAction}
         onDismiss={onDismiss}
         dismissLabel={dismissLabel}
@@ -359,14 +385,19 @@ export function Banner({
               <Button
                 size="sm"
                 onClick={onAction}
+                disabled={actionBusy}
                 className={cn(
-                  "flex w-full shrink-0 items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ring-1 ring-inset sm:w-auto",
+                  "flex w-full shrink-0 items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ring-1 ring-inset disabled:opacity-60 sm:w-auto",
                   "bg-none hover:bg-none",
                   style.button,
                 )}
               >
-                {actionLabel}
-                <ArrowRight className="size-3.5" />
+                {actionBusy ? (
+                  <Loader2 aria-hidden className="size-3.5 animate-spin" />
+                ) : (
+                  actionLabel
+                )}
+                {!actionBusy && <ArrowRight className="size-3.5" />}
               </Button>
             )}
 

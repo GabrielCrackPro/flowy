@@ -10,11 +10,13 @@ import { CategoryFormSheet } from "@/components/categories/category-form-dialog"
 import { NewTransaction } from "@/components/dashboard/new-transaction/new-transaction";
 import { GoalFormSheet } from "@/components/goals";
 import { Icon } from "@/components/shared/icon";
+import { useRouteProgress } from "@/components/shared/route-progress";
 import { SubscriptionFormSheet } from "@/components/subscriptions/subscription-form-dialog";
 import { useBudgetApi } from "@/hooks/api/useBudgetApi";
 import { useCategoryApi } from "@/hooks/api/useCategoryApi";
 import { useGoalApi } from "@/hooks/api/useGoalApi";
 import { useSubscriptionApi } from "@/hooks/api/useSubscriptionApi";
+import { useHideOnScroll } from "@/hooks/useHideOnScroll";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import {
   ArrowUpDown,
@@ -68,9 +70,14 @@ export function PwaFab() {
 function PwaFabContent() {
   const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
+  const { isNavigating } = useRouteProgress();
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeAction, setActiveAction] = useState<AddActionId | null>(null);
   const open = menuOpen || activeAction !== null;
+  const { hidden: fabHidden } = useHideOnScroll({
+    suppress: menuOpen || activeAction !== null,
+  });
+  const hideFab = fabHidden && !menuOpen && activeAction === null;
 
   const { create: createBudget, isCreating: isCreatingBudget } = useBudgetApi();
   const {
@@ -95,6 +102,15 @@ function PwaFabContent() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open]);
+
+  // During in-flight navigation the page is about to swap; close any open
+  // menu/form and let the whole FAB fade out so it never lingers mid-swap.
+  useEffect(() => {
+    if (isNavigating) {
+      setMenuOpen(false);
+      setActiveAction(null);
+    }
+  }, [isNavigating]);
 
   const closeForm = () => {
     setMenuOpen(false);
@@ -164,10 +180,21 @@ function PwaFabContent() {
 
   return (
     <>
-      <div
+      <motion.div
+        initial={false}
+        animate={{
+          opacity: isNavigating ? 0 : 1,
+          y: hideFab ? 140 : 0,
+        }}
+        transition={
+          prefersReducedMotion
+            ? { duration: 0 }
+            : { type: "spring", stiffness: 420, damping: 38 }
+        }
         className={cn(
           "fixed right-4 z-[45] flex flex-col items-end",
           "bottom-[calc(4rem+env(safe-area-inset-bottom,0px)+1rem)]",
+          isNavigating && "pointer-events-none",
         )}
       >
         <AnimatePresence>
@@ -289,7 +316,7 @@ function PwaFabContent() {
             </AnimatePresence>
           </motion.span>
         </motion.button>
-      </div>
+      </motion.div>
 
       <NewTransaction
         openInSheet

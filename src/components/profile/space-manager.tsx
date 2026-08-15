@@ -1,95 +1,32 @@
 "use client";
 
-import { ConfirmDialog, Icon, Skeleton } from "@components/shared";
-import { Button, Input, Switch } from "@components/ui";
+import { Skeleton } from "@components/shared";
 import { useProfile } from "@hooks/useProfile";
 import { useSpaces } from "@hooks/useSpaces";
 import type { SpaceSummary } from "@lib/api/space";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { SheetLayout } from "@/components/ui/sheet-layout";
-import { Check, KeyRound, Loader2, Pencil, Plus, X } from "@/lib/icons";
+import { SpaceCreateForm } from "../shared/space-create-form";
+import { SpaceEditSheet } from "../shared/space-edit-sheet";
+import { SpaceJoinForm } from "../shared/space-join-form";
+import { SpaceLeaveDialog } from "../shared/space-leave-dialog";
+import { SpaceMembersSheet } from "../shared/space-members-sheet";
 import { toast } from "../shared/toast";
-import { SpaceAvatarUploader } from "./space-avatar-uploader";
 import { SpaceCard } from "./space-card";
-import { SpaceMembersSheet } from "./space-members-sheet";
 
 export function SpaceManager() {
-  const {
-    spaces,
-    activeSpaceId,
-    isLoading,
-    create,
-    join,
-    setActive,
-    leave,
-    remove,
-    rename,
-    removeMember,
-  } = useSpaces();
+  const { spaces, activeSpaceId, isLoading, setActive, removeMember } =
+    useSpaces();
   const { profile } = useProfile();
   const { t } = useTranslation();
 
-  const [name, setName] = useState("");
-  const [joinCode, setJoinCode] = useState("");
-  const [isPersonal, setIsPersonal] = useState(false);
   const [leaveTarget, setLeaveTarget] = useState<SpaceSummary | null>(null);
   const [editingSpace, setEditingSpace] = useState<SpaceSummary | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editIsPersonal, setEditIsPersonal] = useState(false);
-  const [editAvatar, setEditAvatar] = useState<string | null>(null);
   const [membersSpace, setMembersSpace] = useState<SpaceSummary | null>(null);
-
-  const isOnlyMember = (space: SpaceSummary) =>
-    space.ownerId === profile?.id && space.members.length <= 1;
-
-  const handleCreate = (event: React.FormEvent) => {
-    event.preventDefault();
-    const value = name.trim();
-    if (!value || create.isPending) return;
-    create.mutate(
-      { name: value, isPersonal },
-      {
-        onSuccess: () => {
-          setName("");
-          setIsPersonal(false);
-        },
-      },
-    );
-  };
-
-  const handleJoin = (event: React.FormEvent) => {
-    event.preventDefault();
-    const value = joinCode.trim();
-    if (!value || join.isPending) return;
-    join.mutate(value, { onSuccess: () => setJoinCode("") });
-  };
 
   const handleCopyCode = (code: string) => {
     void navigator.clipboard.writeText(code);
     toast.success(t("profile.spaces.codeCopied"));
-  };
-
-  const handleOpenEdit = (space: SpaceSummary) => {
-    setEditingSpace(space);
-    setEditName(space.name);
-    setEditIsPersonal(space.isPersonal);
-    setEditAvatar(space.avatarUrl ?? null);
-  };
-
-  const handleEditSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    const value = editName.trim();
-    if (!value || !editingSpace || rename.isPending) return;
-    rename.mutate(
-      {
-        id: editingSpace.id,
-        name: value,
-        isPersonal: editIsPersonal,
-        avatarUrl: editAvatar,
-      },
-      { onSuccess: () => setEditingSpace(null) },
-    );
   };
 
   const handleRemoveMember = (memberUserId: string) => {
@@ -103,107 +40,8 @@ export function SpaceManager() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
-        <form
-          onSubmit={handleCreate}
-          className="relative overflow-hidden rounded-2xl bg-muted/25 p-4 transition-colors focus-within:bg-muted/35 sm:p-5"
-        >
-          <div className="mb-4 flex items-center gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
-              <Icon icon={Plus} className="size-4" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold">
-                {t("profile.spaces.create")}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t("profile.spaces.createHint")}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder={t("profile.spaces.createPlaceholder")}
-              maxLength={60}
-              className="h-11"
-            />
-            <Button
-              type="submit"
-              disabled={!name.trim() || create.isPending}
-              className="h-11 shrink-0 gap-1.5"
-            >
-              {create.isPending ? (
-                <Icon icon={Loader2} className="size-4 animate-spin" />
-              ) : (
-                <Icon icon={Plus} className="size-4" />
-              )}
-              {t("profile.spaces.create")}
-            </Button>
-          </div>
-
-          <div className="mt-3 flex items-center gap-3 rounded-xl bg-muted/30 px-3 py-2.5">
-            <Switch
-              checked={isPersonal}
-              onCheckedChange={setIsPersonal}
-              disabled={create.isPending}
-              size="sm"
-            />
-            <div className="flex flex-col">
-              <span className="text-xs font-medium text-foreground">
-                {t("profile.spaces.createPersonal")}
-              </span>
-              <p className="text-[11px] text-muted-foreground">
-                {t("profile.spaces.createPersonalHint")}
-              </p>
-            </div>
-          </div>
-        </form>
-
-        <form
-          onSubmit={handleJoin}
-          className="relative overflow-hidden rounded-2xl bg-muted/25 p-4 transition-colors focus-within:bg-muted/35 sm:p-5"
-        >
-          <div className="mb-4 flex items-center gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-              <Icon icon={KeyRound} className="size-4" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold">
-                {t("profile.spaces.join")}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t("profile.spaces.joinHint")}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Input
-              value={joinCode}
-              onChange={(event) =>
-                setJoinCode(event.target.value.toUpperCase())
-              }
-              placeholder={t("profile.spaces.joinPlaceholder")}
-              maxLength={8}
-              className="h-11 font-mono tracking-widest uppercase"
-            />
-            <Button
-              type="submit"
-              variant="outline"
-              disabled={!joinCode.trim() || join.isPending}
-              className="h-11 shrink-0 gap-1.5"
-            >
-              {join.isPending ? (
-                <Icon icon={Loader2} className="size-4 animate-spin" />
-              ) : (
-                <Icon icon={KeyRound} className="size-4" />
-              )}
-              {t("profile.spaces.join")}
-            </Button>
-          </div>
-        </form>
+        <SpaceCreateForm />
+        <SpaceJoinForm />
       </div>
 
       <div>
@@ -258,11 +96,8 @@ export function SpaceManager() {
                 isActive={space.id === activeSpaceId}
                 isOwner={space.ownerId === profile?.id}
                 activatePending={setActive.isPending}
-                renamePending={rename.isPending}
-                leavePending={leave.isPending}
-                removePending={remove.isPending}
                 onActivate={() => setActive.mutate(space.id)}
-                onEdit={() => handleOpenEdit(space)}
+                onEdit={() => setEditingSpace(space)}
                 onLeave={() => setLeaveTarget(space)}
                 onCopyCode={handleCopyCode}
                 onManageMembers={() => setMembersSpace(space)}
@@ -272,129 +107,21 @@ export function SpaceManager() {
         )}
       </div>
 
-      <ConfirmDialog
+      <SpaceLeaveDialog
+        space={leaveTarget}
         open={leaveTarget !== null}
         onOpenChange={(open) => {
           if (!open) setLeaveTarget(null);
         }}
-        title={
-          leaveTarget && isOnlyMember(leaveTarget)
-            ? `${t("profile.spaces.leaveConfirmOwner")} "${leaveTarget.name}"`
-            : `${t("profile.spaces.leaveConfirm")} "${leaveTarget?.name ?? ""}"`
-        }
-        description={
-          leaveTarget && isOnlyMember(leaveTarget)
-            ? t("profile.spaces.leaveConfirmOwnerDescription")
-            : t("profile.spaces.leaveConfirmDescription")
-        }
-        confirmLabel={
-          leaveTarget && isOnlyMember(leaveTarget)
-            ? t("profile.spaces.deleteSpace")
-            : t("profile.spaces.leaveSpace")
-        }
-        cancelLabel={t("profile.spaces.cancel")}
-        onConfirm={() => {
-          if (leaveTarget) {
-            if (isOnlyMember(leaveTarget)) {
-              remove.mutate(leaveTarget.id);
-            } else {
-              leave.mutate(leaveTarget.id);
-            }
-          }
-          setLeaveTarget(null);
-        }}
       />
 
-      <SheetLayout
+      <SpaceEditSheet
+        space={editingSpace}
         open={editingSpace !== null}
         onOpenChange={(open) => {
           if (!open) setEditingSpace(null);
         }}
-        title={t("profile.spaces.rename")}
-        description={t("profile.spaces.renameHint")}
-        icon={Pencil}
-        iconGradient="from-indigo-500/20 to-indigo-500/10"
-        iconColor="text-indigo-600 dark:text-indigo-400"
-        maxWidth="sm:max-w-[500px]"
-        footerRight={
-          <>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setEditingSpace(null)}
-              disabled={rename.isPending}
-              className="h-10"
-            >
-              <X className="size-4 mr-2" />
-              {t("common.cancel")}
-            </Button>
-            <Button
-              type="submit"
-              onClick={handleEditSubmit}
-              disabled={!editName.trim() || rename.isPending}
-              className="h-10 gap-1.5 shadow-sm"
-            >
-              {rename.isPending ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  {t("common.saving")}
-                </>
-              ) : (
-                <>
-                  {t("profile.spaces.save")}
-                  <Check className="size-4" />
-                </>
-              )}
-            </Button>
-          </>
-        }
-      >
-        <form onSubmit={handleEditSubmit} className="space-y-6">
-          <SpaceAvatarUploader
-            name={editingSpace?.name ?? ""}
-            value={editAvatar}
-            onChange={setEditAvatar}
-            disabled={rename.isPending}
-          />
-
-          <div className="space-y-2">
-            <label
-              className="text-sm font-medium text-foreground"
-              htmlFor="editSpaceName"
-            >
-              {t("profile.spaces.createPlaceholder")}
-            </label>
-            <Input
-              id="editSpaceName"
-              value={editName}
-              onChange={(event) => setEditName(event.target.value)}
-              placeholder={t("profile.spaces.createPlaceholder")}
-              maxLength={60}
-              autoFocus
-              className="h-11 rounded-xl border-border/70 bg-background/80 px-3 shadow-sm"
-            />
-          </div>
-
-          {editingSpace && editingSpace.members.length <= 1 && (
-            <div className="flex items-center gap-3 rounded-lg bg-muted/30 px-3 py-2">
-              <Switch
-                checked={editIsPersonal}
-                onCheckedChange={setEditIsPersonal}
-                disabled={rename.isPending}
-                size="sm"
-              />
-              <div className="flex flex-col">
-                <span className="text-xs font-medium text-foreground">
-                  {t("profile.spaces.renamePersonal")}
-                </span>
-                <p className="text-[10px] text-muted-foreground">
-                  {t("profile.spaces.renamePersonalHint")}
-                </p>
-              </div>
-            </div>
-          )}
-        </form>
-      </SheetLayout>
+      />
 
       <SpaceMembersSheet
         space={membersSpace}

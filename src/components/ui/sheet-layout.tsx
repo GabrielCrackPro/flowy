@@ -32,6 +32,7 @@ interface SheetLayoutProps {
   contentClassName?: string;
   showDescriptionInHeader?: boolean;
   showHeader?: boolean;
+  titleId?: string;
 }
 
 export function SheetLayout({
@@ -54,6 +55,7 @@ export function SheetLayout({
   contentClassName,
   showDescriptionInHeader = true,
   showHeader = true,
+  titleId,
 }: SheetLayoutProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -71,6 +73,7 @@ export function SheetLayout({
             iconGradient={iconGradient}
             iconBackground={iconBackground}
             iconColor={iconColor}
+            titleId={titleId}
           />
         ) : (
           <SheetTitle className="sr-only">{title}</SheetTitle>

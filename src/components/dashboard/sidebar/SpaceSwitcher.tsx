@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared";
+import { Icon, SpaceGlyph } from "@/components/shared";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,64 +15,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSpaces } from "@/hooks/useSpaces";
-import {
-  Check,
-  ChevronsUpDown,
-  Layers,
-  Loader2,
-  Settings2,
-  Users,
-} from "@/lib/icons";
+import { Check, ChevronsUpDown, Loader2, Settings2 } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { SidebarTooltip } from "./SidebarTooltip";
 
 interface SpaceSwitcherProps {
   collapsed?: boolean;
   onNavigate?: () => void;
-}
-
-function SpaceGlyph({
-  name,
-  active,
-  shared,
-  avatarUrl,
-  className,
-}: {
-  name: string;
-  active?: boolean;
-  shared?: boolean;
-  avatarUrl?: string | null;
-  className?: string;
-}) {
-  return (
-    <span
-      className={cn(
-        "relative flex shrink-0 items-center justify-center rounded-lg font-semibold text-primary-foreground shadow-sm",
-        active
-          ? "bg-linear-to-br from-primary to-primary/70 shadow-primary/20"
-          : "bg-linear-to-br from-primary/80 to-primary/50 shadow-primary/10",
-        className,
-      )}
-    >
-      {avatarUrl ? (
-        /* biome-ignore lint/performance/noImgElement: Avatars are served from Supabase public storage. */
-        <img
-          src={avatarUrl}
-          alt={name}
-          className="size-full rounded-lg object-cover"
-        />
-      ) : name ? (
-        name.trim().charAt(0).toUpperCase()
-      ) : (
-        <Icon icon={Layers} className="size-3.5" />
-      )}
-      {shared ? (
-        <span className="absolute -bottom-1 -right-1 flex size-4 items-center justify-center rounded-full bg-background text-primary ring-1 ring-border/60">
-          <Icon icon={Users} className="size-2.5" />
-        </span>
-      ) : null}
-    </span>
-  );
 }
 
 export function SpaceSwitcher({

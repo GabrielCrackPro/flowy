@@ -18,6 +18,7 @@ import {
   UserMinus,
   Users,
 } from "@/lib/icons";
+
 import { cn } from "@/lib/utils";
 
 function SpaceGlyph({
@@ -174,9 +175,6 @@ export interface SpaceCardProps {
   isActive: boolean;
   isOwner: boolean;
   activatePending?: boolean;
-  renamePending?: boolean;
-  leavePending?: boolean;
-  removePending?: boolean;
   onActivate: () => void;
   onEdit: () => void;
   onLeave: () => void;
@@ -189,9 +187,6 @@ export function SpaceCard({
   isActive,
   isOwner,
   activatePending = false,
-  renamePending = false,
-  leavePending = false,
-  removePending = false,
   onActivate,
   onEdit,
   onLeave,
@@ -346,13 +341,8 @@ export function SpaceCard({
               aria-label={`${t("profile.spaces.rename")} ${space.name}`}
               className="text-muted-foreground hover:text-foreground"
               onClick={onEdit}
-              disabled={renamePending}
             >
-              {renamePending ? (
-                <Icon icon={Loader2} className="size-4 animate-spin" />
-              ) : (
-                <Icon icon={Pencil} className="size-4" />
-              )}
+              <Icon icon={Pencil} className="size-4" />
             </Button>
           ) : null}
 
@@ -379,13 +369,8 @@ export function SpaceCard({
               title={t("profile.spaces.leave")}
               className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
               onClick={onLeave}
-              disabled={leavePending || removePending}
             >
-              {leavePending || removePending ? (
-                <Icon icon={Loader2} className="size-4 animate-spin" />
-              ) : (
-                <Icon icon={LogOut} className="size-4" />
-              )}
+              <Icon icon={LogOut} className="size-4" />
               {t("profile.spaces.leave")}
             </Button>
           ) : (

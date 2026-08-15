@@ -144,6 +144,7 @@ export const app: AppTranslationMessages = {
     openMenu: "Abrir menú",
     closeMenu: "Cerrar menú",
     more: "Más",
+    moreHint: "Más herramientas financieras",
     mainAriaLabel: "Navegación principal",
   },
   profile: {
@@ -205,6 +206,7 @@ export const app: AppTranslationMessages = {
       removeMemberDescription:
         "El usuario dejará de tener acceso a este espacio y no podrá ver sus transacciones, presupuestos ni metas. Podrá volver a unirse con el código de invitación.",
       copyCode: "Copiar código de invitación",
+      inviteCode: "Código de invitación",
       codeCopied: "Código copiado al portapapeles",
       codeWithOwner: "Código con el propietario",
       rename: "Renombrar espacio",
@@ -501,6 +503,7 @@ export const app: AppTranslationMessages = {
       bannerText:
         "Recibe avisos de presupuestos, suscripciones y metas — incluso con Flowy cerrado",
       bannerAction: "Activar",
+      bannerEnabling: "Activando…",
       devicesTitle: "Dispositivos",
       devicesHint:
         "Cada navegador o aplicación instalada tiene su propia suscripción push. Los nombres se guardan en tu cuenta",
@@ -666,6 +669,13 @@ export const app: AppTranslationMessages = {
     refresh: "Actualizar",
     syncing: "Sincronizando…",
     synced: "Sincronizado",
+    loading: {
+      auth: "Verificando tu sesión…",
+      data: "Cargando tus finanzas…",
+      charts: "Preparando tus gráficos…",
+      transactions: "Obteniendo transacciones…",
+      final: "Casi listo…",
+    },
     syncInfo: {
       title: "Sincronización en vivo",
       body: "Tus datos se actualizan automáticamente en tiempo real. Los cambios que hagas tú u otros miembros se reflejan al instante en todos tus dispositivos.",
@@ -1115,11 +1125,19 @@ export const app: AppTranslationMessages = {
     createdBy: "Creado por",
     updatedBy: "Modificado por",
   },
+  notFound: {
+    title: "Esta página no existe",
+    description:
+      "La página que buscas ya no está aquí. El enlace podría estar roto, la página pudo haberse movido o la URL no es correcta.",
+    goHome: "Ir al resumen",
+    goBack: "Retroceder",
+  },
   errors: {
     title: "Algo salió mal",
     retry: "Reintentar",
     somethingWentWrong: "Algo salió mal",
     failedToLoad: "Error al cargar",
+    technicalDetails: "Detalles técnicos",
     network: {
       message:
         "No se puede conectar al servidor. Verifica tu conexión a internet.",

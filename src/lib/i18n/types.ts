@@ -131,6 +131,7 @@ export type AppTranslationMessages = {
     openMenu: string;
     closeMenu: string;
     more: string;
+    moreHint: string;
     mainAriaLabel: string;
   };
   profile: {
@@ -189,6 +190,7 @@ export type AppTranslationMessages = {
       removeMemberConfirmName: string;
       removeMemberDescription: string;
       copyCode: string;
+      inviteCode: string;
       codeCopied: string;
       codeWithOwner: string;
       rename: string;
@@ -446,6 +448,7 @@ export type AppTranslationMessages = {
       noDevices: string;
       bannerText: string;
       bannerAction: string;
+      bannerEnabling: string;
       devicesTitle: string;
       devicesHint: string;
       currentDevice: string;
@@ -592,6 +595,13 @@ export type AppTranslationMessages = {
     refresh: string;
     syncing: string;
     synced: string;
+    loading: {
+      auth: string;
+      data: string;
+      charts: string;
+      transactions: string;
+      final: string;
+    };
     syncInfo: {
       title: string;
       body: string;
@@ -1009,11 +1019,18 @@ export type AppTranslationMessages = {
     createdBy: string;
     updatedBy: string;
   };
+  notFound: {
+    title: string;
+    description: string;
+    goHome: string;
+    goBack: string;
+  };
   errors: {
     title: string;
     retry: string;
     somethingWentWrong: string;
     failedToLoad: string;
+    technicalDetails: string;
     network: {
       message: string;
       hint: string;
