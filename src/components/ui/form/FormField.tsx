@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { FIELD_LABEL } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 
 interface FormFieldProps {
@@ -24,16 +25,13 @@ export function FormField({
     <div className={cn("space-y-2", className)}>
       {label &&
         (htmlFor ? (
-          <label
-            htmlFor={htmlFor}
-            className="text-sm font-medium text-foreground"
-          >
+          <label htmlFor={htmlFor} className={FIELD_LABEL}>
             {label}
 
             {required && <span className="ml-1 text-destructive">*</span>}
           </label>
         ) : (
-          <div className="text-sm font-medium text-foreground">
+          <div className={FIELD_LABEL}>
             {label}
 
             {required && <span className="ml-1 text-destructive">*</span>}

@@ -12,46 +12,125 @@ import { useTranslation } from "react-i18next";
 import { useHaptic } from "@/hooks/useHaptic";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { queryClient } from "@/lib/react-query/client";
+import { cn } from "@/lib/utils";
 
 const PULL_THRESHOLD = 80; // px before refresh triggers on release
 const MAX_PULL = 120; // max visual pull distance
 const RESISTANCE = 0.4; // pull resistance factor (lower = harder to pull)
 
-/** Tiny spinner used inside the pull indicator. Matches the app theme. */
-function Spinner() {
+const RING_SIZE = 34;
+const RING_STROKE = 3;
+const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+type Phase = "idle" | "pulling" | "threshold-reached" | "refreshing";
+
+interface RingProps {
+  /** 0..1 — how close the pull is to the release threshold. */
+  progress: number;
+}
+
+/**
+ * Material-style indicator: a track ring that fills with the pull, and an
+ * arrow that rotates from "pull down" toward "release up" as the user reaches
+ * the threshold. Follows the finger in real time.
+ */
+function ProgressRing({ progress }: RingProps) {
+  const clamped = Math.min(Math.max(progress, 0), 1);
+  const offset = RING_CIRCUMFERENCE * (1 - clamped);
+
   return (
     <svg
-      className="h-4 w-4 animate-spin text-primary"
-      viewBox="0 0 24 24"
-      fill="none"
+      width={RING_SIZE}
+      height={RING_SIZE}
+      viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
+      className="shrink-0 text-primary"
       aria-hidden="true"
     >
+      {/* Track */}
       <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
+        cx={RING_SIZE / 2}
+        cy={RING_SIZE / 2}
+        r={RING_RADIUS}
+        fill="none"
         stroke="currentColor"
-        strokeWidth="3"
+        strokeOpacity={0.15}
+        strokeWidth={RING_STROKE}
       />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+      {/* Progress arc — grows clockwise from the top as you pull */}
+      <circle
+        cx={RING_SIZE / 2}
+        cy={RING_SIZE / 2}
+        r={RING_RADIUS}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={RING_STROKE}
+        strokeLinecap="round"
+        strokeDasharray={RING_CIRCUMFERENCE}
+        strokeDashoffset={offset}
+        transform={`rotate(-90 ${RING_SIZE / 2} ${RING_SIZE / 2})`}
+        className="transition-[stroke-dashoffset] duration-75 ease-out"
       />
+      {/* Arrow: points down while pulling, rotates up at the threshold */}
+      <g
+        transform={`rotate(${clamped * 180} ${RING_SIZE / 2} ${RING_SIZE / 2})`}
+        className="transition-transform duration-100 ease-out"
+      >
+        <path
+          d={`M${RING_SIZE / 2} 7v14 m6-6-6 6-6-6`}
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </g>
     </svg>
   );
 }
 
-type Phase = "idle" | "pulling" | "threshold-reached" | "refreshing";
+/** Spinning arc shown while the refetch is in flight. */
+function RefreshingSpinner() {
+  return (
+    <svg
+      width={RING_SIZE}
+      height={RING_SIZE}
+      viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
+      className="shrink-0 animate-spin text-primary motion-reduce:animate-none"
+      aria-hidden="true"
+    >
+      <circle
+        cx={RING_SIZE / 2}
+        cy={RING_SIZE / 2}
+        r={RING_RADIUS}
+        fill="none"
+        stroke="currentColor"
+        strokeOpacity={0.15}
+        strokeWidth={RING_STROKE}
+      />
+      <circle
+        cx={RING_SIZE / 2}
+        cy={RING_SIZE / 2}
+        r={RING_RADIUS}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={RING_STROKE}
+        strokeLinecap="round"
+        strokeDasharray={RING_CIRCUMFERENCE * 0.62}
+        strokeDashoffset={RING_CIRCUMFERENCE * 0.2}
+        transform={`rotate(-90 ${RING_SIZE / 2} ${RING_SIZE / 2})`}
+      />
+    </svg>
+  );
+}
 
 /**
  * Pull-to-refresh gesture for mobile viewports — browsers and installed PWAs
  * alike, so both behave identically.
  *
  * When the user overscrolls at the very top of the scroll container (touch only),
- * a subtle indicator appears. Pull past 80 px, release, and every active TanStack
- * Query query is refetched — no full page reload.
+ * a Material-style ring indicator follows the drag; pull past 80 px, release,
+ * and every active TanStack Query query is refetched — no full page reload.
  */
 export function PullToRefresh({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
@@ -149,7 +228,7 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
   // ── Animate the indicator height ────────────────────────────────
   useEffect(() => {
     if (phase === "refreshing") {
-      controls.start({ height: 56 });
+      controls.start({ height: 52 });
     } else if (phase === "idle") {
       controls.start({ height: 0 });
     } else {
@@ -160,7 +239,8 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
   // Don't render the touch wrapper at all on desktop
   if (!enabled) return <>{children}</>;
 
-  // ── Label ───────────────────────────────────────────────────────
+  // ── Indicator state ─────────────────────────────────────────────
+  const progress = distance / PULL_THRESHOLD;
   const label =
     phase === "refreshing"
       ? t("pwa.refreshing")
@@ -176,37 +256,28 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
       onTouchEnd={onTouchEnd}
       className="relative min-h-0"
     >
-      {/* Pull indicator — slides down from the top */}
+      {/* Pull indicator — floats in the gap pulled above the content */}
       <motion.div
         animate={controls}
         initial={{ height: 0 }}
-        className="flex items-center justify-center gap-2 overflow-hidden text-[11px] text-muted-foreground"
+        className="flex items-start justify-center overflow-hidden"
       >
-        {phase === "refreshing" ? (
-          <Spinner />
-        ) : (
-          <svg
-            className="h-3.5 w-3.5 transition-transform duration-200"
-            style={{
-              transform:
-                phase === "threshold-reached"
-                  ? "rotate(180deg)"
-                  : "rotate(0deg)",
-            }}
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M8 3.333v9.334M4 7.333l4-4 4 4"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
-        <span className="select-none">{label}</span>
+        <output
+          aria-live="polite"
+          className={cn(
+            "mt-1 flex items-center gap-2.5 rounded-full border border-border/50 bg-background/90 py-1.5 pl-1.5 pr-4 shadow-lg shadow-black/5 backdrop-blur-sm",
+            phase === "refreshing" && "pr-3.5",
+          )}
+        >
+          {phase === "refreshing" ? (
+            <RefreshingSpinner />
+          ) : (
+            <ProgressRing progress={progress} />
+          )}
+          <span className="select-none text-xs font-medium text-foreground">
+            {label}
+          </span>
+        </output>
       </motion.div>
 
       {children}

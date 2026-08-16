@@ -3,11 +3,25 @@
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import type * as React from "react";
 import { Icon } from "@/components/shared/icon";
+import { useOverlayOpen } from "@/hooks/useOverlayOpen";
 import { CheckIcon, ChevronRightIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
-function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
-  return <MenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
+function DropdownMenu({
+  open,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: MenuPrimitive.Root.Props) {
+  const overlay = useOverlayOpen<MenuPrimitive.Root.ChangeEventDetails>({
+    open,
+    defaultOpen,
+    onOpenChange,
+  });
+
+  return (
+    <MenuPrimitive.Root data-slot="dropdown-menu" {...overlay} {...props} />
+  );
 }
 
 function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {

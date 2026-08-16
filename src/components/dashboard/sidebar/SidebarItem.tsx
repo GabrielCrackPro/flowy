@@ -66,7 +66,7 @@ export function SidebarItem({
           "group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200",
           "touch-manipulation focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
           collapsed
-            ? "justify-center px-0 mx-auto size-10 hover:bg-muted/40"
+            ? "justify-center gap-0 px-0 py-0 mx-auto size-10 min-h-0 hover:bg-muted/40"
             : "active:scale-[0.98]",
           active
             ? collapsed

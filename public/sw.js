@@ -5,7 +5,7 @@
 // - Immutable hashed build assets, icons and the manifest: cache-first.
 // - API calls (authenticated financial data) are never intercepted.
 
-const CACHE_VERSION = "1.0.1";
+const CACHE_VERSION = "1.0.3";
 const STATIC_CACHE = `flowy-static-${CACHE_VERSION}`;
 const SHELL_CACHE = `flowy-shell-${CACHE_VERSION}`;
 

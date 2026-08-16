@@ -39,6 +39,14 @@ export type AuthTranslationMessages = {
     edit: string;
     delete: string;
     saving: string;
+    decreaseAmount: string;
+    increaseAmount: string;
+    download: string;
+    selectAll: string;
+    pageLoading: string;
+    preview: string;
+    valid: string;
+    openFullPage: string;
   };
   login: {
     formTitle: string;
@@ -303,8 +311,13 @@ export type AppTranslationMessages = {
       mfaSetupPreparing: string;
       mfaSetupDescription: string;
       mfaScanHint: string;
+      mfaStepScanLabel: string;
+      mfaStepVerifyLabel: string;
+      mfaStepVerifyHint: string;
       mfaManualSecret: string;
       mfaManualSecretLabel: string;
+      mfaModeScanLabel: string;
+      mfaModeManualLabel: string;
       mfaCopySecret: string;
       mfaSecretCopied: string;
       mfaCodeLabel: string;
@@ -541,6 +554,7 @@ export type AppTranslationMessages = {
     searchPlaceholder: string;
     noFilterResults: string;
     newLabel: string;
+    backToApp: string;
   };
   insights: {
     title: string;
@@ -726,6 +740,9 @@ export type AppTranslationMessages = {
     clearConfirmTitle: string;
     clearConfirmDescription: string;
     clearSuccess: string;
+    clearError: string;
+    spaceLabel: string;
+    byActor: string;
     transactionCreated: string;
     transactionUpdated: string;
     transactionDeleted: string;
@@ -858,6 +875,7 @@ export type AppTranslationMessages = {
     detailTitle: string;
     descriptionField: string;
     descriptionPlaceholder: string;
+    noDescription: string;
     date: string;
     selectDate: string;
     amount: string;
@@ -876,8 +894,8 @@ export type AppTranslationMessages = {
     recurring: string;
     recurringDesc: string;
     assignToBudget: string;
-    assignToBudgetHint: string;
     selectBudget: string;
+    unnamedBudget: string;
     receipt: string;
     notes: string;
     notesPlaceholder: string;
@@ -888,6 +906,12 @@ export type AppTranslationMessages = {
     replyPlaceholder: string;
     cancelReply: string;
     commentDeleteConfirm: string;
+    commentAdded: string;
+    commentUpdated: string;
+    commentDeleted: string;
+    commentAddError: string;
+    commentUpdateError: string;
+    commentDeleteError: string;
     cancel: string;
     saving: string;
     save: string;
@@ -1151,6 +1175,7 @@ export type AppTranslationMessages = {
     pendingTitle: string;
     popoverOffline: string;
     popoverPending: string;
+    serviceIssue: string;
     legendLabel: string;
     lastSync: string;
     savedLocally: string;

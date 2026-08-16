@@ -68,8 +68,12 @@ function getActivityMessage(
     meta.name ||
     meta.merchant ||
     meta.amount ||
-    (metadata.spaceName ? `Espacio: ${metadata.spaceName}` : "") ||
-    (metadata.actorName ? `por ${metadata.actorName}` : "");
+    (metadata.spaceName
+      ? t("activity.spaceLabel", { name: metadata.spaceName })
+      : "") ||
+    (metadata.actorName
+      ? t("activity.byActor", { name: metadata.actorName })
+      : "");
 
   const key = `activity.${entity}${action.charAt(0).toUpperCase()}${action.slice(1)}`;
 
@@ -213,11 +217,11 @@ export function ActivityFeedCard({
     mutationFn: clearActivities,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dashboard", activeSpaceId] });
-      toast.success("Actividad eliminada correctamente");
+      toast.success(t("activity.clearSuccess"));
     },
     onError: (error) => {
       toast.error(
-        error instanceof Error ? error.message : "Could not delete activity",
+        error instanceof Error ? error.message : t("activity.clearError"),
       );
     },
   });

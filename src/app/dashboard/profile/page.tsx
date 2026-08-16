@@ -43,7 +43,6 @@ import {
   Coins,
   Crown,
   Droplet,
-  ExternalLink,
   GitBranch,
   Globe2,
   Info,
@@ -55,7 +54,6 @@ import {
 } from "@/lib/icons";
 
 const GITHUB_URL = "https://github.com/GabrielCrackPro/flowy";
-const CHANGELOG_URL = `${GITHUB_URL}/blob/main/CHANGELOG.md`;
 
 function currencyName(code: string, locale: string): string {
   try {
@@ -516,10 +514,10 @@ export default function SettingsPage() {
                   </a>
                 </Button>
                 <Button asChild variant="outline" size="sm">
-                  <a href={CHANGELOG_URL} target="_blank" rel="noreferrer">
-                    <Icon icon={ExternalLink} className="size-4" />
+                  <Link href="/changelog">
+                    <Icon icon={Sparkles} className="size-4" />
                     {t("changelog.viewFull")}
-                  </a>
+                  </Link>
                 </Button>
                 <Button asChild variant="outline" size="sm">
                   <Link href="/status">

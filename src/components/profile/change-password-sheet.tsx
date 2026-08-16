@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared";
+import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { toast } from "@/components/shared/toast";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form/FormField";
 import { Input } from "@/components/ui/input";
-import { SheetLayout } from "@/components/ui/sheet-layout";
 import { useReactForm } from "@/hooks/useReactForm";
 import { changePassword } from "@/lib/api/account";
 import { Eye, EyeOff, KeyRound, Loader2, Lock } from "@/lib/icons";
@@ -74,7 +74,7 @@ export function ChangePasswordSheet({
   );
 
   return (
-    <SheetLayout
+    <BottomSheet
       open={open}
       onOpenChange={(open) => {
         if (!open) form.reset();
@@ -82,40 +82,41 @@ export function ChangePasswordSheet({
       }}
       title={t("settings.security.changePassword")}
       description={t("settings.security.changePasswordHint")}
-      icon={KeyRound}
+      icon={<Icon icon={KeyRound} className="size-5" />}
       iconGradient="from-indigo-500/20 to-indigo-500/10"
       iconColor="text-indigo-600 dark:text-indigo-400"
-      maxWidth="sm:max-w-[500px]"
-      footerRight={
-        <>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleClose}
-            disabled={form.busy}
-            className="h-10"
-          >
-            {t("common.cancel")}
-          </Button>
-          <Button
-            type="submit"
-            onClick={() => form.handleSubmit()}
-            disabled={form.busy}
-            className="h-10 gap-1.5 shadow-sm"
-          >
-            {form.busy ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                {t("common.saving")}
-              </>
-            ) : (
-              <>
-                {t("settings.security.changePassword")}
-                <KeyRound className="size-4" />
-              </>
-            )}
-          </Button>
-        </>
+      className="sm:max-w-[500px] sm:mx-auto sm:rounded-3xl"
+      contentClassName="px-4 py-5 sm:px-6 sm:py-6"
+      footerSecondary={
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={handleClose}
+          disabled={form.busy}
+          className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
+        >
+          {t("common.cancel")}
+        </Button>
+      }
+      footerPrimary={
+        <Button
+          type="submit"
+          onClick={() => form.handleSubmit()}
+          disabled={form.busy}
+          className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 sm:h-10 sm:w-auto sm:min-w-28"
+        >
+          {form.busy ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              {t("common.saving")}
+            </>
+          ) : (
+            <>
+              {t("settings.security.changePassword")}
+              <KeyRound className="size-4" />
+            </>
+          )}
+        </Button>
       }
     >
       <form onSubmit={(e) => form.handleSubmit(e)} className="space-y-6">
@@ -178,6 +179,6 @@ export function ChangePasswordSheet({
           </div>
         ) : null}
       </form>
-    </SheetLayout>
+    </BottomSheet>
   );
 }

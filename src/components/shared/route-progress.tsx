@@ -10,6 +10,7 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 const SAFETY_MS = 15000;
@@ -68,6 +69,7 @@ export function useRouteProgress(): RouteProgressState {
 }
 
 function RouteProgressInner() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -212,7 +214,7 @@ function RouteProgressInner() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
           role="progressbar"
-          aria-label="Page loading"
+          aria-label={t("common.pageLoading")}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(progress * 100)}

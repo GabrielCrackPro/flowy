@@ -19,7 +19,7 @@ import { cn, formatCurrency } from "@lib/utils";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Calendar, Sparkles, Target } from "@/lib/icons";
+import { Calendar, PiggyBank, Sparkles, Target, Wallet } from "@/lib/icons";
 import { createGoalSchema } from "@/lib/schemas/goal";
 import type { CreateGoalInput, Goal, UpdateGoalInput } from "@/types/Goal";
 
@@ -199,7 +199,11 @@ export function GoalFormSheet({
               </div>
             </PreviewCard>
 
-            <FormSection label={t("goals.titleLabel")} error={errors.title}>
+            <FormSection
+              label={t("goals.titleLabel")}
+              icon={Target}
+              error={errors.title}
+            >
               <Input
                 value={values.title}
                 onChange={(e) => handleValueChange("title")(e.target.value)}
@@ -210,6 +214,7 @@ export function GoalFormSheet({
 
             <FormSection
               label={t("goals.targetAmount")}
+              icon={Wallet}
               error={errors.targetAmount}
             >
               <CurrencyInput
@@ -228,6 +233,7 @@ export function GoalFormSheet({
 
             <FormSection
               label={t("goals.savedAmount")}
+              icon={PiggyBank}
               error={errors.savedAmount}
             >
               <CurrencyInput
@@ -244,7 +250,11 @@ export function GoalFormSheet({
               />
             </FormSection>
 
-            <FormSection label={t("goals.deadline")} error={errors.deadline}>
+            <FormSection
+              label={t("goals.deadline")}
+              icon={Calendar}
+              error={errors.deadline}
+            >
               <DatePicker
                 date={values.deadline ?? undefined}
                 onSelect={(date) => handleValueChange("deadline")(date ?? null)}

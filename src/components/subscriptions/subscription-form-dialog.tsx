@@ -241,6 +241,7 @@ export function SubscriptionFormSheet({
             <FormSection
               label={t("subscriptions.merchantLabel")}
               htmlFor="subscription-merchant"
+              icon={CreditCard}
               error={errors.merchant}
             >
               <Input
@@ -255,6 +256,7 @@ export function SubscriptionFormSheet({
             <FormSection
               label={t("subscriptions.amountLabel")}
               htmlFor="subscription-amount"
+              icon={Wallet}
               error={errors.amount}
             >
               <CurrencyInput
@@ -283,7 +285,7 @@ export function SubscriptionFormSheet({
                   )
                 }
               >
-                <SelectTrigger className="h-11 w-full">
+                <SelectTrigger className="w-full">
                   <SelectValue
                     placeholder={t("subscriptions.selectBillingCycle")}
                     options={BILLING_CYCLES.map((cycle) => ({

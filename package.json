@@ -17,6 +17,7 @@
     "lint:openapi": "redocly lint public/openapi.json",
     "check:openapi-routes": "node scripts/check-openapi-routes.mjs",
     "check:openapi": "pnpm generate:openapi && git diff --exit-code -- public/openapi.json && pnpm lint:openapi && pnpm check:openapi-routes",
+    "generate:splash": "node scripts/generate-splash.mjs",
     "generate:changelog": "node scripts/generate-changelog.mjs",
     "check:changelog": "pnpm generate:changelog && git diff --exit-code -- src/lib/changelog/generated.json",
     "prepare": "git config core.hooksPath .githooks || true",
@@ -76,6 +77,7 @@
     "@types/web-push": "^3.6.4",
     "lint-staged": "^17.3.0",
     "prisma": "^5.13.0",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.11",
     "typescript": "^5"

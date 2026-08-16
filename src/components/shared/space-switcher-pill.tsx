@@ -318,6 +318,7 @@ export function SpaceSwitcherPill({
           }
           className="max-h-[min(88dvh,720px)]"
           contentClassName="p-3"
+          snapPoints={[0.5, 0.92]}
         >
           <AnimatePresence initial={false}>
             {!(

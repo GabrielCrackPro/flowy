@@ -34,8 +34,10 @@ import { translateAuthError } from "@/lib/auth/errors";
 import { getLocaleCookie, getLocaleStorage, normalizeLocale } from "@/lib/i18n";
 import {
   ArrowRight,
+  Coins,
   Eye,
   EyeOff,
+  Languages,
   Loader2,
   Lock,
   Mail,
@@ -347,9 +349,13 @@ export default function RegisterPage() {
                         }}
                       >
                         <SelectTrigger
-                          className="h-11 w-full"
+                          className="w-full"
                           aria-label={t("register.localeLabel")}
                         >
+                          <Icon
+                            icon={Languages}
+                            className="size-4 text-muted-foreground"
+                          />
                           <SelectValue
                             placeholder={form.values.locale}
                             options={LOCALES.map((locale) => ({
@@ -387,9 +393,13 @@ export default function RegisterPage() {
                         }}
                       >
                         <SelectTrigger
-                          className="h-11 w-full"
+                          className="w-full"
                           aria-label={t("register.currencyLabel")}
                         >
+                          <Icon
+                            icon={Coins}
+                            className="size-4 text-muted-foreground"
+                          />
                           <SelectValue
                             placeholder={form.values.currency}
                             options={CURRENCIES.map((currency) => ({

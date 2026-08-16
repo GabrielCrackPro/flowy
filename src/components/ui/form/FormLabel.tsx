@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FIELD_LABEL } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 
 // Standalone section-heading label used OUTSIDE react-hook-form context
@@ -13,7 +14,8 @@ const FormSectionLabel = React.forwardRef<
     <label
       ref={ref}
       className={cn(
-        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+        FIELD_LABEL,
+        "peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
         className,
       )}
       {...props}

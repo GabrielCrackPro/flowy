@@ -4,12 +4,26 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import type * as React from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared/icon";
+import { useOverlayOpen } from "@/hooks/useOverlayOpen";
 import { XIcon } from "@/lib/icons";
 
 import { cn } from "@/lib/utils";
 
-function Dialog({ ...props }: DialogPrimitive.Root.Props) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />;
+function Dialog({
+  open,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: DialogPrimitive.Root.Props) {
+  // Android system back / iOS swipe-back / browser back closes the dialog
+  // instead of navigating away.
+  const overlay = useOverlayOpen<DialogPrimitive.Root.ChangeEventDetails>({
+    open,
+    defaultOpen,
+    onOpenChange,
+  });
+
+  return <DialogPrimitive.Root data-slot="dialog" {...overlay} {...props} />;
 }
 
 function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {

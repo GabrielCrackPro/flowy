@@ -309,7 +309,10 @@ export function SidebarContent({
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="p-3 pb-0 pt-3"
             >
-              <NewTransaction size="sm" />
+              <NewTransaction
+                size="sm"
+                className="w-full sm:h-10 shadow-md shadow-primary/20"
+              />
             </motion.div>
           ) : (
             <motion.div
@@ -345,7 +348,6 @@ export function SidebarContent({
 
         <div
           className={cn(
-            "flex items-center justify-between",
             collapsed && variant === "desktop" ? "py-1" : "px-3 py-2",
           )}
         >

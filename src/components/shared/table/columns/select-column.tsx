@@ -8,6 +8,7 @@ interface SelectColumnOptions<T> {
   className?: string;
   getId: (row: T) => string;
   getLabel?: (row: T) => string;
+  selectAllLabel: string;
   onSelect: (id: string) => void;
   onSelectAll: () => void;
 }
@@ -17,6 +18,7 @@ export function SelectColumn<T>({
   allSelected,
   getId,
   getLabel,
+  selectAllLabel,
   onSelect,
   onSelectAll,
   className = "w-10",
@@ -28,7 +30,7 @@ export function SelectColumn<T>({
           checked={allSelected}
           onCheckedChange={onSelectAll}
           onClick={(e) => e.stopPropagation()}
-          aria-label="Select all"
+          aria-label={selectAllLabel}
         />
       </div>
     ),

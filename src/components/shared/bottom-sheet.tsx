@@ -19,11 +19,24 @@ interface BottomSheetProps {
   iconBackground?: string;
   iconColor?: string;
   headerAction?: ReactNode;
+  /** When set, renders a "open in full page" link icon in the header. */
+  externalHref?: string;
   children: ReactNode;
   footer?: ReactNode;
+  /** Left/right footer actions (stacked on mobile, split on desktop). */
+  footerLeft?: ReactNode;
+  footerRight?: ReactNode;
+  /** Three-action footer: primary/secondary/tertiary (see SheetActionFooter). */
+  footerPrimary?: ReactNode;
+  footerSecondary?: ReactNode;
+  footerTertiary?: ReactNode;
   className?: string;
   contentClassName?: string;
   footerClassName?: string;
+  /** Ascending viewport-height fractions (0..1) for mobile pull-up expand/collapse. */
+  snapPoints?: number[];
+  /** Detent to open on (defaults to the smallest). */
+  defaultSnapPoint?: number;
 }
 
 /**
@@ -41,12 +54,28 @@ export function BottomSheet({
   iconBackground,
   iconColor,
   headerAction,
+  externalHref,
   children,
   footer,
+  footerLeft,
+  footerRight,
+  footerPrimary,
+  footerSecondary,
+  footerTertiary,
   className,
   contentClassName,
   footerClassName,
+  snapPoints,
+  defaultSnapPoint,
 }: BottomSheetProps) {
+  const hasFooter = Boolean(
+    footer ||
+      footerLeft ||
+      footerRight ||
+      footerPrimary ||
+      footerSecondary ||
+      footerTertiary,
+  );
   const titleId = useId();
   const descriptionId = useId();
   const [mounted, setMounted] = useState(false);
@@ -61,6 +90,8 @@ export function BottomSheet({
         ? createPortal(
             <SheetContent
               side="bottom"
+              snapPoints={snapPoints}
+              defaultSnapPoint={defaultSnapPoint}
               aria-labelledby={titleId}
               aria-describedby={description ? descriptionId : undefined}
               className={cn(
@@ -74,6 +105,8 @@ export function BottomSheet({
                 subtitle={description}
                 metadata={metadata}
                 headerAction={headerAction}
+                externalHref={externalHref}
+                onExternalNavigate={() => onOpenChange(false)}
                 iconGradient={iconGradient}
                 iconBackground={iconBackground}
                 iconColor={iconColor}
@@ -84,17 +117,24 @@ export function BottomSheet({
               <div
                 className={cn(
                   "min-h-0 flex-1 overflow-y-auto overscroll-contain",
-                  !footer && "pb-[env(safe-area-inset-bottom,0px)]",
+                  !hasFooter && "pb-[env(safe-area-inset-bottom,0px)]",
                   contentClassName,
                 )}
               >
                 {children}
               </div>
 
-              {footer && (
+              {hasFooter && (
                 <SheetActionFooter
+                  start={footerLeft}
+                  end={footerRight}
+                  primary={footerPrimary}
+                  secondary={footerSecondary}
+                  tertiary={footerTertiary}
                   content={footer}
-                  contentClassName="flex-row items-center justify-end"
+                  contentClassName={
+                    footer ? "flex-row items-center justify-end" : undefined
+                  }
                   className={footerClassName}
                 />
               )}

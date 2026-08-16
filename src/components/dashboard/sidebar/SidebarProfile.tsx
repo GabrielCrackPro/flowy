@@ -129,38 +129,42 @@ export function SidebarProfile({
             "group flex w-full items-center text-left transition-colors outline-none",
             "focus-visible:ring-3 focus-visible:ring-ring/50",
             collapsed
-              ? "p-3 justify-center hover:bg-muted/30"
+              ? "p-3 justify-center hover:bg-muted/40"
               : cn(
-                  "gap-3 rounded-xl hover:bg-accent/70 hover:text-accent-foreground",
+                  "gap-3 rounded-xl justify-between hover:bg-muted/40 hover:text-foreground",
                   mobile ? "px-3 py-3" : "px-3 py-2.5",
                 ),
-            "[&[aria-expanded='true']]:bg-accent [&[aria-expanded='true']]:text-accent-foreground",
+            "data-open:bg-muted/50",
           )}
         >
-          <UserAvatar
-            profile={profile}
-            size="lg"
-            className="transition-transform duration-200 hover:scale-[1.03]"
-          />
-
-          <motion.div
-            initial={false}
-            animate={{
-              opacity: collapsed ? 0 : 1,
-              x: collapsed ? -6 : 0,
-              width: collapsed ? 0 : "auto",
-            }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="min-w-0 overflow-hidden"
+          <span
+            className={cn("flex min-w-0 items-center", !collapsed && "gap-3")}
           >
-            <p className="truncate text-sm font-semibold text-foreground leading-tight">
-              {fullName}
-            </p>
+            <UserAvatar
+              profile={profile}
+              size="lg"
+              className="transition-transform duration-200 hover:scale-[1.03]"
+            />
 
-            <p className="truncate text-xs text-muted-foreground mt-0.5">
-              {email}
-            </p>
-          </motion.div>
+            <motion.div
+              initial={false}
+              animate={{
+                opacity: collapsed ? 0 : 1,
+                x: collapsed ? -6 : 0,
+                width: collapsed ? 0 : "auto",
+              }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="min-w-0 overflow-hidden"
+            >
+              <p className="truncate text-sm font-semibold text-foreground leading-tight">
+                {fullName}
+              </p>
+
+              <p className="truncate text-xs text-muted-foreground mt-0.5">
+                {email}
+              </p>
+            </motion.div>
+          </span>
 
           <motion.span
             initial={false}
@@ -169,11 +173,11 @@ export function SidebarProfile({
               width: collapsed ? 0 : "auto",
             }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className={cn("shrink-0 overflow-hidden", !collapsed && "ml-auto")}
+            className="shrink-0 overflow-hidden"
           >
             <Icon
               icon={ChevronUp}
-              className="size-4 text-muted-foreground transition duration-200 group-hover:-translate-y-0.5 group-hover:text-foreground"
+              className="size-4 text-muted-foreground transition duration-200 group-data-[open]:rotate-180 group-hover:-translate-y-0.5 group-hover:text-foreground"
             />
           </motion.span>
         </DropdownMenuTrigger>

@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { BottomSheet } from "@/components/shared/bottom-sheet";
+import { Icon } from "@/components/shared/icon";
 import { SearchInput } from "@/components/shared/search-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SheetLayout } from "@/components/ui/sheet-layout";
 import { useLocaleContext } from "@/context/LocaleContext";
 import {
   type ChangelogEntry,
@@ -22,9 +23,6 @@ import {
   ExternalLink,
   Sparkles,
 } from "@/lib/icons";
-
-const CHANGELOG_URL =
-  "https://github.com/GabrielCrackPro/flowy/blob/main/CHANGELOG.md";
 
 const DEFAULT_VISIBLE_OLDER = 3;
 
@@ -172,7 +170,13 @@ interface ChangelogSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function ChangelogSheet({ open, onOpenChange }: ChangelogSheetProps) {
+const DOT_COLORS: Record<string, string> = {
+  features: "border-emerald-500 bg-emerald-100 dark:bg-emerald-900/50",
+  fixes: "border-amber-500 bg-amber-100 dark:bg-amber-900/50",
+  mixed: "border-primary bg-primary/20",
+};
+
+export function ChangelogContent({ open }: { open: boolean }) {
   const { t } = useTranslation();
   const { locale } = useLocaleContext();
   const [showAll, setShowAll] = useState(false);
@@ -259,29 +263,8 @@ export function ChangelogSheet({ open, onOpenChange }: ChangelogSheetProps) {
   const totalVisible = (latest ? 1 : 0) + visibleOlder.length;
   const isEmpty = totalVisible === 0;
 
-  const DOT_COLORS: Record<string, string> = {
-    features: "border-emerald-500 bg-emerald-100 dark:bg-emerald-900/50",
-    fixes: "border-amber-500 bg-amber-100 dark:bg-amber-900/50",
-    mixed: "border-primary bg-primary/20",
-  };
-
   return (
-    <SheetLayout
-      open={open}
-      onOpenChange={onOpenChange}
-      title={t("changelog.title")}
-      description={t("changelog.description")}
-      icon={Sparkles}
-      className="sm:max-w-lg"
-      footerRight={
-        <Button asChild variant="outline" className="w-full">
-          <a href={CHANGELOG_URL} target="_blank" rel="noreferrer">
-            <ExternalLink />
-            {t("changelog.viewFull")}
-          </a>
-        </Button>
-      }
-    >
+    <>
       {/* Search bar */}
       <SearchInput
         value={searchQuery}
@@ -421,6 +404,26 @@ export function ChangelogSheet({ open, onOpenChange }: ChangelogSheetProps) {
           )}
         </div>
       )}
-    </SheetLayout>
+    </>
+  );
+}
+
+export function ChangelogSheet({ open, onOpenChange }: ChangelogSheetProps) {
+  const { t } = useTranslation();
+
+  return (
+    <BottomSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("changelog.title")}
+      description={t("changelog.description")}
+      icon={<Icon icon={Sparkles} className="size-5" />}
+      externalHref="/changelog"
+      className="sm:max-w-lg sm:mx-auto sm:rounded-3xl"
+      contentClassName="px-4 py-5 sm:px-5 sm:py-5"
+      snapPoints={[0.45, 0.92]}
+    >
+      <ChangelogContent open={open} />
+    </BottomSheet>
   );
 }

@@ -88,7 +88,7 @@ export default function EditTransactionPage() {
   if (stateNode) {
     return (
       <div className="pb-10">
-        <BackHeader title="Editar transacción" />
+        <BackHeader title={t("transaction.editTransaction")} />
         {stateNode}
       </div>
     );

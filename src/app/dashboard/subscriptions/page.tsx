@@ -465,7 +465,7 @@ export default function SubscriptionsPage() {
         confirmLabel={t("subscriptions.confirmPayment")}
         cancelLabel={t("common.cancel")}
         variant="default"
-        icon={<Icon icon={CreditCard} className="size-6 text-violet-600" />}
+        icon={<Icon icon={CreditCard} className="size-5" />}
         onConfirm={handleQuickPayment}
       />
     </FinancePageShell>

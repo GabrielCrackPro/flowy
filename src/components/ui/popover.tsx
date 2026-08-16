@@ -3,10 +3,22 @@
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import type * as React from "react";
 
+import { useOverlayOpen } from "@/hooks/useOverlayOpen";
 import { cn } from "@/lib/utils";
 
-function Popover({ ...props }: PopoverPrimitive.Root.Props) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />;
+function Popover({
+  open,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: PopoverPrimitive.Root.Props) {
+  const overlay = useOverlayOpen<PopoverPrimitive.Root.ChangeEventDetails>({
+    open,
+    defaultOpen,
+    onOpenChange,
+  });
+
+  return <PopoverPrimitive.Root data-slot="popover" {...overlay} {...props} />;
 }
 
 function PopoverTrigger({ ...props }: PopoverPrimitive.Trigger.Props) {

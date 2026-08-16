@@ -3,6 +3,7 @@
 import { Input } from "@components/ui";
 import { cn } from "@lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Minus, Plus } from "@/lib/icons";
 
 interface CurrencyInputProps {
@@ -36,6 +37,7 @@ export function CurrencyInput({
   quickAmounts = [10, 50, 100, 500, 1000],
   showIncrementButtons = false,
 }: CurrencyInputProps) {
+  const { t } = useTranslation();
   const [focused, setFocused] = useState(false);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -147,7 +149,7 @@ export function CurrencyInput({
         {showIncrementButtons && (
           <button
             type="button"
-            aria-label="Decrease amount"
+            aria-label={t("common.decreaseAmount")}
             onClick={() => handleStep(-1)}
             disabled={value <= min}
             className="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex size-7 items-center justify-center rounded-md border border-border/50 bg-muted/50 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
@@ -234,7 +236,7 @@ export function CurrencyInput({
         {showIncrementButtons && (
           <button
             type="button"
-            aria-label="Increase amount"
+            aria-label={t("common.increaseAmount")}
             onClick={() => handleStep(1)}
             className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex size-7 items-center justify-center rounded-md border border-border/50 bg-muted/50 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >

@@ -6,14 +6,30 @@ import { Icon } from "@/components/shared/icon";
 import {
   CONTROL_DISABLED,
   CONTROL_FOCUS,
+  CONTROL_ICON_GAP,
+  CONTROL_PLACEHOLDER,
   CONTROL_SURFACE,
   OPTION_ROW_BASE,
   OPTION_ROW_INTERACTION,
 } from "@/components/ui/control-styles";
+import { useOverlayOpen } from "@/hooks/useOverlayOpen";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
-const Select = SelectPrimitive.Root;
+function Select<Value, Multiple extends boolean | undefined = false>({
+  open,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: SelectPrimitive.Root.Props<Value, Multiple>) {
+  const overlay = useOverlayOpen<SelectPrimitive.Root.ChangeEventDetails>({
+    open,
+    defaultOpen,
+    onOpenChange,
+  });
+
+  return <SelectPrimitive.Root {...overlay} {...props} />;
+}
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
@@ -68,13 +84,13 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "group flex w-fit items-center justify-between px-3 py-1.5 select-none",
+        `group flex w-fit items-center justify-between ${CONTROL_ICON_GAP} px-3 py-1.5 text-sm select-none`,
         CONTROL_SURFACE,
         CONTROL_FOCUS,
         CONTROL_DISABLED,
         "hover:border-border hover:bg-muted/30",
         "aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20",
-        "data-placeholder:text-muted-foreground data-[size=default]:h-11 data-[size=sm]:h-10 data-[size=sm]:rounded-xl",
+        `data-placeholder:${CONTROL_PLACEHOLDER} data-[size=default]:h-11 data-[size=sm]:h-10 data-[size=sm]:rounded-xl`,
         "*:data-[slot=select-value]:flex *:data-[slot=select-value]:min-w-0 *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 *:data-[slot=select-value]:whitespace-nowrap",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
@@ -175,12 +191,14 @@ function SelectItem({
         "not-data-[variant=destructive]:focus:**:text-foreground",
         "data-disabled:pointer-events-none data-disabled:opacity-50",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        "*:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        `*:[span]:last:flex *:[span]:last:items-center *:[span]:last:${CONTROL_ICON_GAP}`,
         className,
       )}
       {...props}
     >
-      <SelectPrimitive.ItemText className="flex flex-1 shrink-0 gap-2 whitespace-nowrap">
+      <SelectPrimitive.ItemText
+        className={`flex flex-1 shrink-0 ${CONTROL_ICON_GAP} whitespace-nowrap`}
+      >
         {children}
       </SelectPrimitive.ItemText>
       <SelectPrimitive.ItemIndicator

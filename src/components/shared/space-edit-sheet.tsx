@@ -2,8 +2,8 @@
 
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
+import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { Button } from "@/components/ui";
-import { SheetLayout } from "@/components/ui/sheet-layout";
 import { useSpaces } from "@/hooks/useSpaces";
 import type { SpaceSummary } from "@/lib/api/space";
 import { Check, Loader2, Pencil, X } from "@/lib/icons";
@@ -31,46 +31,47 @@ export function SpaceEditSheet({
   const formId = useId();
 
   return (
-    <SheetLayout
+    <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
       title={t("profile.spaces.rename")}
       description={t("profile.spaces.renameHint")}
-      icon={Pencil}
+      icon={<Pencil className="size-5" />}
       iconGradient="from-indigo-500/20 to-indigo-500/10"
       iconColor="text-indigo-600 dark:text-indigo-400"
-      maxWidth="sm:max-w-[500px]"
-      footerRight={
-        <>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => onOpenChange(false)}
-            disabled={rename.isPending}
-            className="h-10"
-          >
-            <X className="mr-2 size-4" />
-            {t("common.cancel")}
-          </Button>
-          <Button
-            type="submit"
-            form={formId}
-            disabled={!space || rename.isPending}
-            className="h-10 gap-1.5 shadow-sm"
-          >
-            {rename.isPending ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                {t("common.saving")}
-              </>
-            ) : (
-              <>
-                {t("profile.spaces.save")}
-                <Check className="size-4" />
-              </>
-            )}
-          </Button>
-        </>
+      className="sm:max-w-[500px] sm:mx-auto sm:rounded-3xl"
+      contentClassName="px-4 py-5 sm:px-6 sm:py-6"
+      footerSecondary={
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => onOpenChange(false)}
+          disabled={rename.isPending}
+          className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
+        >
+          <X className="mr-2 size-4" />
+          {t("common.cancel")}
+        </Button>
+      }
+      footerPrimary={
+        <Button
+          type="submit"
+          form={formId}
+          disabled={!space || rename.isPending}
+          className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 sm:h-10 sm:w-auto sm:min-w-28"
+        >
+          {rename.isPending ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              {t("common.saving")}
+            </>
+          ) : (
+            <>
+              {t("profile.spaces.save")}
+              <Check className="size-4" />
+            </>
+          )}
+        </Button>
       }
     >
       {space ? (
@@ -82,6 +83,6 @@ export function SpaceEditSheet({
           onSaved={() => onOpenChange(false)}
         />
       ) : null}
-    </SheetLayout>
+    </BottomSheet>
   );
 }

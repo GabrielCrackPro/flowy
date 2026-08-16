@@ -25,6 +25,8 @@ interface NewTransactionProps {
   controlledOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   hideTrigger?: boolean;
+  /** Extra classes merged into the trigger button (e.g. w-full in the sidebar). */
+  className?: string;
 }
 
 export function NewTransaction({
@@ -34,6 +36,7 @@ export function NewTransaction({
   controlledOpen,
   onOpenChange,
   hideTrigger = false,
+  className,
 }: NewTransactionProps) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -57,6 +60,7 @@ export function NewTransaction({
     "hover:from-primary/95 hover:to-primary/90",
     "shadow-primary/20 hover:shadow-xl hover:shadow-primary/30",
     compactMobile && "max-sm:size-10 max-sm:gap-0 max-sm:px-0",
+    className,
   );
 
   const onSubmit = async (values: CreateTransactionSchema) => {

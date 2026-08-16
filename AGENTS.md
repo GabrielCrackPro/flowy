@@ -169,7 +169,7 @@ Repo: `GabrielCrackPro/flowy` (public). The `gh` CLI is authenticated on this ma
 
 ## Skills
 
-Skills in `.agents/skills/` are loadable by name: `write-issues` (draft an issue in chat), `github-issues` (create/update issues on GitHub), `github-project-board` (read/triage the Flowy board), `github-workflow` (branch → commit → PR → ask-before-merge, with the `[skip deploy]` rule), plus the standard web/frontend/database review skills.
+Skills in `.agents/skills/` are loadable by name: `write-issues` (draft an issue in chat), `github-issues` (create/update issues on GitHub), `github-project-board` (read/triage the Flowy board), `github-workflow` (the full ship cycle: branch → commit → PR → ask-before-merge → release/deploy verification, with the `[skip deploy]` rule and migration fallbacks), plus the standard web/frontend/database review skills.
 
 ## Machine gotchas
 

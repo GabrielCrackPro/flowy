@@ -3,6 +3,7 @@ import {
   CONTROL_DISABLED,
   CONTROL_FOCUS,
   CONTROL_SURFACE,
+  INPUT_PLACEHOLDER,
 } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +18,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="relative w-full">
         {startIcon && (
-          <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground/60">
+          <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
             {startIcon}
           </div>
         )}
@@ -28,7 +29,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className={cn(
             "flex h-11 w-full px-3 text-sm",
             CONTROL_SURFACE,
-            "placeholder:text-muted-foreground/50",
+            INPUT_PLACEHOLDER,
             CONTROL_FOCUS,
             CONTROL_DISABLED,
             "aria-invalid:border-destructive/60 aria-invalid:ring-3 aria-invalid:ring-destructive/15",
@@ -40,7 +41,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         />
 
         {endIcon && (
-          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted-foreground/60">
+          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted-foreground [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
             {endIcon}
           </div>
         )}

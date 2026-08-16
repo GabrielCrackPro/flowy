@@ -10,7 +10,6 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Icon } from "@/components/shared/icon";
 import { useRouteProgress } from "@/components/shared/route-progress";
 import { UserAvatar } from "@/components/shared/user-avatar";
-import { AlertDialogMedia } from "@/components/ui";
 import { useHaptic } from "@/hooks/useHaptic";
 import { useHideOnScroll } from "@/hooks/useHideOnScroll";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -471,11 +470,7 @@ export function PwaBottomNav() {
           cancelLabel={t("common.cancel")}
           onConfirm={() => void handleSignOut()}
           variant="destructive"
-          icon={
-            <AlertDialogMedia className="bg-destructive/15 shadow-destructive/20">
-              <Icon icon={TriangleAlert} className="size-6 text-destructive" />
-            </AlertDialogMedia>
-          }
+          icon={<Icon icon={TriangleAlert} className="size-5" />}
         />
       </div>
     </motion.nav>
