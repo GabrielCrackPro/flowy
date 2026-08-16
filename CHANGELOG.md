@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.38](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.37...flowy-v0.1.38) (2026-08-16)
+
+
+### Features
+
+* **ui:** snap-point sheets, MFA flow, and PWA/status polish ([#187](https://github.com/GabrielCrackPro/flowy/issues/187)) ([3188e24](https://github.com/GabrielCrackPro/flowy/commit/3188e2471790da5cc3cc33189decc1d9033dc3f2))
+
 ## [0.1.37](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.36...flowy-v0.1.37) (2026-08-15)
 
 
