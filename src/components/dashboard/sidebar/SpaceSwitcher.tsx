@@ -66,15 +66,17 @@ export function SpaceSwitcher({
           }}
           onBlur={() => setTooltipOpen(false)}
           className={cn(
-            "relative flex w-full items-center gap-2.5 rounded-xl border border-border/40 bg-muted/30 text-left outline-none transition",
-            "hover:border-primary/40 hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50",
-            "data-open:border-primary/40 data-open:bg-muted/50",
+            "relative flex w-full items-center gap-2.5 rounded-xl text-left outline-none transition",
+            "hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring/50",
+            "data-open:bg-muted/50",
             collapsed
-              ? "mx-auto size-11 justify-center px-0"
+              ? "mx-auto size-11 justify-center gap-0 px-0"
               : "h-12 justify-between px-3",
           )}
         >
-          <span className="flex min-w-0 items-center gap-2.5">
+          <span
+            className={cn("flex min-w-0 items-center", !collapsed && "gap-2.5")}
+          >
             <SpaceGlyph
               name={activeSpace?.name ?? ""}
               active={!!activeSpace}

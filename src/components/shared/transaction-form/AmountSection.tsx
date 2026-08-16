@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import type { useAmountInput } from "@/hooks/useAmountInput";
 import { cn, formatCurrency } from "@/lib/utils";
 import { AnimatedGradient } from "../animated-gradient";
+import { FORM_CARD_SHELL } from "./FormCard";
 import { TypeSelector } from "./TypeSelector";
 
 export function AmountSection({
@@ -45,7 +46,7 @@ export function AmountSection({
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="relative overflow-hidden rounded-2xl border border-border/30 bg-card shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+      className={FORM_CARD_SHELL}
     >
       <AnimatedGradient
         active={isExpense}

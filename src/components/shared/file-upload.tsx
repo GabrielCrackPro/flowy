@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { authenticatedRequest } from "@/lib/api/client";
 import { deleteUploadedReceipt } from "@/lib/api/upload";
@@ -52,19 +53,6 @@ interface FileUploadProps {
   className?: string;
 }
 
-const DEFAULT_LABELS: FileUploadLabels = {
-  uploadLabel: "Upload receipt",
-  viewLabel: "View receipt",
-  dragHint: "Drop a file or click to upload",
-  fileTypesHint: "PNG, JPG, WebP, PDF \u2022 Max 10 MB",
-  changeLabel: "Change",
-  removeLabel: "Remove",
-  uploadingLabel: "Uploading...",
-  errorLabel: "Couldn't upload the file",
-  retryLabel: "Retry",
-  maxSizeError: "File exceeds the maximum size of {{maxSize}} MB",
-};
-
 type UploadState =
   | { status: "idle" }
   | { status: "dragging" }
@@ -85,6 +73,7 @@ export function FileUpload({
   compact = false,
   className,
 }: FileUploadProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
   const [state, setState] = useState<UploadState>({ status: "idle" });
@@ -118,8 +107,20 @@ export function FileUpload({
   }, [previewUrl]);
 
   const labels = useMemo(
-    () => ({ ...DEFAULT_LABELS, ...userLabels }),
-    [userLabels],
+    () => ({
+      uploadLabel: t("transaction.uploadReceipt"),
+      viewLabel: t("transaction.viewReceipt"),
+      dragHint: t("transaction.dragDropHint"),
+      fileTypesHint: t("transaction.fileTypesHint"),
+      changeLabel: t("transaction.changeFile"),
+      removeLabel: t("transaction.removeFile"),
+      uploadingLabel: t("transaction.uploadProgress"),
+      errorLabel: t("transaction.uploadError"),
+      retryLabel: t("transaction.retry"),
+      maxSizeError: t("transaction.uploadTooLarge"),
+      ...userLabels,
+    }),
+    [t, userLabels],
   );
   const hasFile = !!value;
 
@@ -134,11 +135,10 @@ export function FileUpload({
         setUploadProgress(null);
         setState({
           status: "error",
-          message: (
-            labels.maxSizeError ??
-            DEFAULT_LABELS.maxSizeError ??
-            "File exceeds the maximum size of {{maxSize}} MB"
-          ).replace("{{maxSize}}", String(Math.round(maxSize / 1024 / 1024))),
+          message: (labels.maxSizeError ?? "").replace(
+            "{{maxSize}}",
+            String(Math.round(maxSize / 1024 / 1024)),
+          ),
         });
         return;
       }
@@ -194,7 +194,7 @@ export function FileUpload({
         setUploadProgress(null);
         setState({
           status: "error",
-          message: labels.errorLabel ?? DEFAULT_LABELS.errorLabel ?? "",
+          message: labels.errorLabel ?? "",
         });
       }
     },
@@ -363,7 +363,7 @@ export function FileUpload({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-foreground/90">
-                  {value.split("/").pop() || "receipt"}
+                  {value.split("/").pop() || t("transaction.receipt")}
                 </p>
                 <p className="text-xs text-muted-foreground/50">PDF</p>
               </div>
@@ -374,7 +374,7 @@ export function FileUpload({
                   href={value}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Download"
+                  aria-label={t("common.download")}
                   className={cn(
                     "flex items-center justify-center rounded-lg text-muted-foreground/50 transition hover:bg-linear-to-br hover:from-muted/50 hover:to-muted/30 hover:text-foreground",
                     compact ? "size-7" : "size-8",

@@ -4,8 +4,8 @@ import { Button, Switch } from "@components/ui";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon, type IconProps } from "@/components/shared";
+import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { toast } from "@/components/shared/toast";
-import { SheetLayout } from "@/components/ui/sheet-layout";
 import { useProfile } from "@/hooks/useProfile";
 import {
   ALL_DASHBOARD_CARDS,
@@ -175,7 +175,7 @@ export function DashboardCustomize({
         </Button>
       )}
 
-      <SheetLayout
+      <BottomSheet
         open={open}
         onOpenChange={(next) => {
           setOpen(next);
@@ -183,15 +183,16 @@ export function DashboardCustomize({
         }}
         title={t("dashboard.customizeTitle")}
         description={t("dashboard.customizeDescription")}
-        icon={LayoutGrid}
-        footerLeft={
+        icon={<Icon icon={LayoutGrid} className="size-5" />}
+        className="sm:max-w-md sm:mx-auto sm:rounded-3xl"
+        contentClassName="px-4 py-5 sm:px-6 sm:py-6"
+        footerTertiary={
           <Button
             type="button"
-            variant="ghost"
-            size="sm"
+            variant="destructive"
             onClick={handleReset}
             disabled={busy}
-            className="text-muted-foreground hover:text-destructive"
+            className="h-11 w-full sm:h-10 sm:w-auto sm:px-3"
           >
             <Icon
               icon={bulkBusy ? Loader2 : RotateCcw}
@@ -200,8 +201,12 @@ export function DashboardCustomize({
             {t("dashboard.customizeReset")}
           </Button>
         }
-        footerRight={
-          <Button type="button" onClick={() => setOpen(false)}>
+        footerPrimary={
+          <Button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 sm:h-10 sm:w-auto sm:min-w-28"
+          >
             {t("common.close")}
           </Button>
         }
@@ -315,7 +320,7 @@ export function DashboardCustomize({
             );
           })}
         </div>
-      </SheetLayout>
+      </BottomSheet>
     </>
   );
 }

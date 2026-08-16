@@ -2,8 +2,10 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
+import { useBottomSheetDetents } from "@/hooks/useBottomSheetDetents";
 import { useBottomSheetSwipe } from "@/hooks/useBottomSheetSwipe";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { useSystemBackDismiss } from "@/hooks/useSystemBackDismiss";
 import { cn } from "@/lib/utils";
 
 interface SheetContextValue {
@@ -65,6 +67,10 @@ export function Sheet({
     };
   }, [open, setOpen]);
 
+  // Android system back / iOS swipe-back / browser back closes the sheet
+  // instead of navigating away.
+  useSystemBackDismiss(open, () => setOpen(false));
+
   return (
     <SheetContext.Provider value={{ open, setOpen }}>
       {children}
@@ -97,18 +103,29 @@ export function SheetContent({
   side = "right",
   className,
   children,
+  snapPoints,
+  defaultSnapPoint,
   ...props
 }: {
   side?: "left" | "right" | "top" | "bottom";
   className?: string;
   children: React.ReactNode;
+  /** Ascending viewport-height fractions (0..1) for pull-up expand/collapse. */
+  snapPoints?: number[];
+  /** Detent to open on (defaults to the smallest). */
+  defaultSnapPoint?: number;
   id?: string;
   "aria-labelledby"?: string;
   "aria-describedby"?: string;
 }) {
   const { open, setOpen } = useSheet();
   const isMobile = useIsMobile();
-  const { offset, swipeHandlers } = useBottomSheetSwipe({
+  const { offset, swipeHandlers: dismissSwipeHandlers } = useBottomSheetSwipe({
+    onDismiss: () => setOpen(false),
+  });
+  const detents = useBottomSheetDetents({
+    detents: snapPoints && snapPoints.length > 1 ? snapPoints : [1],
+    defaultIndex: defaultSnapPoint,
     onDismiss: () => setOpen(false),
   });
 
@@ -122,6 +139,13 @@ export function SheetContent({
   }, []);
 
   const effectiveSide = !mounted || !isMobile ? side : "bottom";
+  const hasDetents =
+    isMobile && snapPoints !== undefined && snapPoints.length > 1;
+  const swipeHandlers = hasDetents
+    ? detents.swipeHandlers
+    : dismissSwipeHandlers;
+  const translateY = hasDetents ? detents.dragY : offset;
+  const dragging = hasDetents ? detents.isDragging : offset > 0;
 
   React.useEffect(() => {
     if (!open) return;
@@ -175,14 +199,32 @@ export function SheetContent({
             data-slot="sheet-content"
             role="dialog"
             aria-modal="true"
-            initial={hiddenTransform[effectiveSide]}
-            animate={{ x: 0, y: effectiveSide === "bottom" ? offset : 0 }}
+            initial={{
+              ...hiddenTransform[effectiveSide],
+              ...(hasDetents
+                ? { height: `${detents.targetHeightFraction * 100}dvh` }
+                : {}),
+            }}
+            animate={{
+              x: 0,
+              y: effectiveSide === "bottom" ? translateY : 0,
+              ...(hasDetents
+                ? {
+                    height: `${
+                      (detents.isDragging
+                        ? detents.heightFraction
+                        : detents.targetHeightFraction) * 100
+                    }dvh`,
+                  }
+                : {}),
+            }}
             exit={hiddenTransform[effectiveSide]}
             transition={
-              effectiveSide === "bottom" && offset > 0
+              dragging
                 ? { duration: 0 }
                 : { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
             }
+            style={hasDetents ? { maxHeight: "none" } : undefined}
             className={cn(
               "fixed z-50 bg-background outline-none",
               effectiveSide === "bottom"

@@ -90,9 +90,10 @@ export function SpaceLeaveConfirm({
         </Button>
         <Button
           type="button"
+          variant="destructive"
           onClick={confirm}
           disabled={isPending}
-          className="h-11 w-full gap-1.5 bg-destructive text-white hover:bg-destructive/90 sm:h-10 sm:w-auto"
+          className="h-11 w-full gap-1.5 sm:h-10 sm:w-auto"
         >
           {isPending ? (
             <Icon icon={Loader2} className="size-4 animate-spin" />

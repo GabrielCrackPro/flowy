@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { toast } from "@/components/shared/toast";
 import { Button } from "@/components/ui/button";
-import { SheetClose } from "@/components/ui/sheet";
-import { SheetLayout } from "@/components/ui/sheet-layout";
 import { useProfile } from "@/hooks/useProfile";
 import {
   AlertTriangle,
@@ -207,178 +206,178 @@ export function ThemeCustomizationSheet({
   };
 
   return (
-    <SheetLayout
-      open={open}
-      onOpenChange={setOpen}
-      trigger={
-        <Button
-          variant="ghost"
-          className={label ? "gap-1.5" : undefined}
-          title={t("settings.theme.customize")}
-        >
-          <Palette className="size-4" />
-          {label ? (
-            <span className="hidden sm:inline">
-              {t("settings.theme.customize")}
-            </span>
-          ) : null}
-        </Button>
-      }
-      title={t("settings.theme.title")}
-      description={t("settings.theme.description")}
-      icon={Palette}
-      maxWidth="sm:max-w-2xl"
-      footerLeft={
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => void handleResetToDefaults()}
-          disabled={saving}
-          className="text-muted-foreground hover:text-destructive"
-        >
-          <RotateCcw className="size-4 mr-2" />
-          {t("settings.theme.resetToDefaults")}
-        </Button>
-      }
-      footerRight={
-        <>
-          <SheetClose>
-            <Button
-              variant="outline"
-              className="h-10"
-              onClick={handleCancel}
-              disabled={saving}
-            >
-              <X className="size-4 mr-2" />
-              {t("settings.theme.cancel")}
-            </Button>
-          </SheetClose>
+    <>
+      <Button
+        variant="ghost"
+        className={label ? "gap-1.5" : undefined}
+        title={t("settings.theme.customize")}
+        onClick={() => setOpen(true)}
+      >
+        <Palette className="size-4" />
+        {label ? (
+          <span className="hidden sm:inline">
+            {t("settings.theme.customize")}
+          </span>
+        ) : null}
+      </Button>
+
+      <BottomSheet
+        open={open}
+        onOpenChange={setOpen}
+        title={t("settings.theme.title")}
+        description={t("settings.theme.description")}
+        icon={<Palette className="size-5" />}
+        className="sm:max-w-2xl sm:mx-auto sm:rounded-3xl"
+        contentClassName="px-4 py-5 sm:px-6 sm:py-6"
+        footerTertiary={
+          <Button
+            variant="destructive"
+            onClick={() => void handleResetToDefaults()}
+            disabled={saving}
+            className="h-11 w-full sm:h-10 sm:w-auto sm:px-3"
+          >
+            <RotateCcw className="mr-2 size-4" />
+            {t("settings.theme.resetToDefaults")}
+          </Button>
+        }
+        footerSecondary={
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={saving}
+            className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
+          >
+            <X className="mr-2 size-4" />
+            {t("settings.theme.cancel")}
+          </Button>
+        }
+        footerPrimary={
           <Button
             onClick={() => void handleSave()}
             disabled={saving || !hasChanges}
-            className="h-10 min-w-[120px]"
+            className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 sm:h-10 sm:w-auto sm:min-w-[120px]"
           >
             {saving ? (
-              <Loader2 className="mr-2 size-4 animate-spin" />
+              <Loader2 className="size-4 animate-spin" />
             ) : (
-              <Check className="mr-2 size-4" />
+              <Check className="size-4" />
             )}
             {saving ? t("common.saving") : t("settings.theme.saveChanges")}
           </Button>
-        </>
-      }
-    >
-      <div className="space-y-5">
-        <div className="space-y-2.5">
-          <div className="flex items-center gap-2">
-            <Sparkles className="size-3.5 text-primary" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t("settings.theme.presets")}
-            </h3>
-          </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {THEME_PRESETS.map((preset) => {
-              const selected = activePreset?.id === preset.id;
-              return (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => {
-                    setLocalColors(preset.colors);
-                    toast.success(
-                      t("settings.theme.presetApplied", {
-                        name: t(`settings.theme.presetNames.${preset.id}`),
-                      }),
-                    );
-                  }}
-                  className={`group flex min-h-14 flex-col items-start justify-between rounded-lg border p-2 text-left transition-colors ${
-                    selected
-                      ? "border-primary/60 bg-primary/8 ring-1 ring-primary/20"
-                      : "border-border/40 bg-muted/10 hover:border-primary/40 hover:bg-muted/30"
-                  }`}
-                  aria-pressed={selected}
-                >
-                  <span className="flex gap-1" aria-hidden="true">
-                    {[
-                      preset.colors.primaryColor,
-                      preset.colors.secondaryColor,
-                      preset.colors.accentColor,
-                    ].map((color) => (
-                      <span
-                        key={color}
-                        className="size-3 rounded-full ring-1 ring-black/10"
-                        style={{ backgroundColor: color ?? undefined }}
-                      />
-                    ))}
-                  </span>
-                  <span className="truncate text-[11px] font-medium">
-                    {t(`settings.theme.presetNames.${preset.id}`)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Color Pickers Section */}
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t("settings.theme.colorSettings")}
-            </h3>
-            {hasChanges ? (
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                {t("settings.theme.unsavedChanges")}
-              </span>
-            ) : null}
-          </div>
-
+        }
+      >
+        <div className="space-y-5">
           <div className="space-y-2.5">
-            <div className="grid gap-2 sm:grid-cols-3">
-              <ColorPicker
-                label={t("settings.theme.primary")}
-                value={localColors.primaryColor}
-                onChange={(color) =>
-                  setLocalColors({ ...localColors, primaryColor: color })
-                }
-                className="rounded-lg border border-border/30 bg-muted/[0.08] p-2"
-              />
-              <ColorPicker
-                label={t("settings.theme.secondary")}
-                value={localColors.secondaryColor}
-                onChange={(color) =>
-                  setLocalColors({ ...localColors, secondaryColor: color })
-                }
-                className="rounded-lg border border-border/30 bg-muted/[0.08] p-2"
-              />
-              <ColorPicker
-                label={t("settings.theme.accent")}
-                value={localColors.accentColor}
-                onChange={(color) =>
-                  setLocalColors({ ...localColors, accentColor: color })
-                }
-                className="rounded-lg border border-border/30 bg-muted/[0.08] p-2"
-              />
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-3.5 text-primary" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t("settings.theme.presets")}
+              </h3>
             </div>
-            {contrastWarning ? (
-              <div className="flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/8 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
-                <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-                <span>{t("settings.theme.contrastWarning")}</span>
-              </div>
-            ) : null}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {THEME_PRESETS.map((preset) => {
+                const selected = activePreset?.id === preset.id;
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => {
+                      setLocalColors(preset.colors);
+                      toast.success(
+                        t("settings.theme.presetApplied", {
+                          name: t(`settings.theme.presetNames.${preset.id}`),
+                        }),
+                      );
+                    }}
+                    className={`group flex min-h-14 flex-col items-start justify-between rounded-lg border p-2 text-left transition-colors ${
+                      selected
+                        ? "border-primary/60 bg-primary/8 ring-1 ring-primary/20"
+                        : "border-border/40 bg-muted/10 hover:border-primary/40 hover:bg-muted/30"
+                    }`}
+                    aria-pressed={selected}
+                  >
+                    <span className="flex gap-1" aria-hidden="true">
+                      {[
+                        preset.colors.primaryColor,
+                        preset.colors.secondaryColor,
+                        preset.colors.accentColor,
+                      ].map((color) => (
+                        <span
+                          key={color}
+                          className="size-3 rounded-full ring-1 ring-black/10"
+                          style={{ backgroundColor: color ?? undefined }}
+                        />
+                      ))}
+                    </span>
+                    <span className="truncate text-[11px] font-medium">
+                      {t(`settings.theme.presetNames.${preset.id}`)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        {/* Theme Preview Section */}
-        <div className="space-y-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {t("settings.theme.livePreview")}
-          </h3>
-          <div className="rounded-xl border border-border/30 bg-muted/20 p-3 sm:p-4">
-            <ThemePreview colors={localColors} />
+          {/* Color Pickers Section */}
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t("settings.theme.colorSettings")}
+              </h3>
+              {hasChanges ? (
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                  {t("settings.theme.unsavedChanges")}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="space-y-2.5">
+              <div className="grid gap-2 sm:grid-cols-3">
+                <ColorPicker
+                  label={t("settings.theme.primary")}
+                  value={localColors.primaryColor}
+                  onChange={(color) =>
+                    setLocalColors({ ...localColors, primaryColor: color })
+                  }
+                  className="rounded-lg border border-border/30 bg-muted/[0.08] p-2"
+                />
+                <ColorPicker
+                  label={t("settings.theme.secondary")}
+                  value={localColors.secondaryColor}
+                  onChange={(color) =>
+                    setLocalColors({ ...localColors, secondaryColor: color })
+                  }
+                  className="rounded-lg border border-border/30 bg-muted/[0.08] p-2"
+                />
+                <ColorPicker
+                  label={t("settings.theme.accent")}
+                  value={localColors.accentColor}
+                  onChange={(color) =>
+                    setLocalColors({ ...localColors, accentColor: color })
+                  }
+                  className="rounded-lg border border-border/30 bg-muted/[0.08] p-2"
+                />
+              </div>
+              {contrastWarning ? (
+                <div className="flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/8 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+                  <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+                  <span>{t("settings.theme.contrastWarning")}</span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Theme Preview Section */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("settings.theme.livePreview")}
+            </h3>
+            <div className="rounded-xl border border-border/30 bg-muted/20 p-3 sm:p-4">
+              <ThemePreview colors={localColors} />
+            </div>
           </div>
         </div>
-      </div>
-    </SheetLayout>
+      </BottomSheet>
+    </>
   );
 }

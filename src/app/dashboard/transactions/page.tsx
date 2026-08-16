@@ -93,7 +93,8 @@ export default function TransactionsPage() {
         onSelect: handleSelect,
         onSelectAll: () => handleSelectAll(sorted.map((tx) => tx.id)),
         getId: (tx) => tx.id,
-        getLabel: (tx) => tx.description ?? "transaction",
+        getLabel: (tx) => tx.description ?? t("common.transaction"),
+        selectAllLabel: t("common.selectAll"),
       }),
 
       IconColumn({
@@ -120,7 +121,7 @@ export default function TransactionsPage() {
         sortable: true,
         sortValue: (tx) => tx.description ?? "",
         value: (tx) => tx.description,
-        emptyValue: "Sin descripción",
+        emptyValue: t("transaction.noDescription"),
         className: "min-w-0",
         secondaryText: (tx) =>
           tx.date

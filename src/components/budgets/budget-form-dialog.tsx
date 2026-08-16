@@ -17,7 +17,7 @@ import { cn, formatCurrency } from "@lib/utils";
 import { motion } from "framer-motion";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Calendar, Sparkles, Wallet } from "@/lib/icons";
+import { Calendar, Sparkles, Tag, Wallet } from "@/lib/icons";
 import { createBudgetSchema } from "@/lib/schemas/budget";
 import type {
   Budget,
@@ -240,6 +240,7 @@ export function BudgetFormSheet({
 
             <FormSection
               label={t("budgets.categoryLabel")}
+              icon={Tag}
               error={errors.categoryIds}
             >
               {expenseCategories.length === 0 ? (

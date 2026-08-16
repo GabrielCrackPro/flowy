@@ -44,6 +44,14 @@ export const auth: AuthTranslationMessages = {
     edit: "Editar",
     delete: "Eliminar",
     saving: "Guardando…",
+    decreaseAmount: "Disminuir importe",
+    increaseAmount: "Aumentar importe",
+    download: "Descargar",
+    selectAll: "Seleccionar todos",
+    pageLoading: "Cargando página",
+    preview: "Vista previa",
+    valid: "Válido",
+    openFullPage: "Abrir en página completa",
   },
   login: {
     formTitle: "Bienvenido de nuevo",
@@ -333,9 +341,15 @@ export const app: AppTranslationMessages = {
         "Escanea el código QR con tu aplicación de autenticación y confírmalo con un código de seis dígitos.",
       mfaScanHint:
         "Escanea este código QR con tu aplicación de autenticación e introduce el código de seis dígitos que genera.",
+      mfaStepScanLabel: "Escanear código QR",
+      mfaStepVerifyLabel: "Introducir código",
+      mfaStepVerifyHint:
+        "Introduce el código de seis dígitos que muestra tu aplicación de autenticación para terminar la configuración.",
       mfaManualSecret:
         "¿No puedes escanearlo? Introduce manualmente esta clave:",
       mfaManualSecretLabel: "Clave de configuración manual",
+      mfaModeScanLabel: "Código QR",
+      mfaModeManualLabel: "Clave manual",
       mfaCopySecret: "Copiar clave de configuración",
       mfaSecretCopied: "Clave de configuración copiada",
       mfaCodeLabel: "Código de autenticación",
@@ -601,6 +615,7 @@ export const app: AppTranslationMessages = {
     searchPlaceholder: "Filtrar por funcionalidad o ámbito…",
     noFilterResults: "Ninguna entrada coincide con tu búsqueda",
     newLabel: "Nuevo",
+    backToApp: "Volver a la app",
   },
   insights: {
     title: "Perspectivas",
@@ -818,6 +833,9 @@ export const app: AppTranslationMessages = {
     clearConfirmDescription:
       "Se eliminarán todos los registros del feed de actividad. Esta acción no se puede deshacer.",
     clearSuccess: "El feed de actividad se eliminó correctamente",
+    clearError: "No se pudo eliminar la actividad",
+    spaceLabel: "Espacio: {{name}}",
+    byActor: "por {{name}}",
     transactionCreated: "Creaste la transacción {{description}}",
     transactionUpdated: "Actualizaste la transacción {{description}}",
     transactionDeleted: "Eliminaste la transacción {{description}}",
@@ -959,6 +977,7 @@ export const app: AppTranslationMessages = {
     detailTitle: "Detalle de transacción",
     descriptionField: "Descripción",
     descriptionPlaceholder: "¿En qué fue esta transacción?",
+    noDescription: "Sin descripción",
     date: "Fecha",
     selectDate: "Seleccionar fecha",
     amount: "Importe",
@@ -977,8 +996,8 @@ export const app: AppTranslationMessages = {
     recurring: "Transacción recurrente",
     recurringDesc: "Repite automáticamente",
     assignToBudget: "Asignar a presupuesto",
-    assignToBudgetHint: "Solo para ingresos",
     selectBudget: "Seleccionar presupuesto",
+    unnamedBudget: "Presupuesto {{id}}",
     receipt: "Comprobante",
     notes: "Notas",
     notesPlaceholder: "Notas adicionales (opcional)",
@@ -989,6 +1008,12 @@ export const app: AppTranslationMessages = {
     replyPlaceholder: "Escribe una respuesta...",
     cancelReply: "Cancelar respuesta",
     commentDeleteConfirm: "¿Eliminar este comentario?",
+    commentAdded: "Comentario añadido",
+    commentUpdated: "Comentario actualizado",
+    commentDeleted: "Comentario eliminado",
+    commentAddError: "No se pudo añadir el comentario",
+    commentUpdateError: "No se pudo actualizar el comentario",
+    commentDeleteError: "No se pudo eliminar el comentario",
     cancel: "Cancelar",
     saving: "Guardando...",
     save: "Guardar transacción",
@@ -1267,6 +1292,8 @@ export const app: AppTranslationMessages = {
       "Estás sin conexión. Los cambios se guardan en este dispositivo y se sincronizarán al reconectar.",
     popoverPending:
       "Los cambios se sincronizarán automáticamente en cuanto vuelvas a estar en línea.",
+    serviceIssue:
+      "Los servicios de Flowy están teniendo problemas. Los cambios se guardan en este dispositivo y se sincronizarán cuando se restablezcan.",
     legendLabel: "Estado",
     lastSync: "Última sincronización",
     savedLocally:

@@ -8,6 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import {
   COMPACT_SELECTOR_CONTROL,
   CONTROL_FOCUS,
+  CONTROL_PLACEHOLDER,
   CONTROL_SURFACE,
   SELECTOR_CONTROL,
 } from "@/components/ui/control-styles";
@@ -92,7 +93,7 @@ export function DatePicker({
           sizeClasses,
           CONTROL_SURFACE,
           CONTROL_FOCUS,
-          !date && "text-muted-foreground",
+          !date && CONTROL_PLACEHOLDER,
           className,
         )}
       >

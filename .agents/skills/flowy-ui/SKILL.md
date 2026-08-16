@@ -32,6 +32,9 @@ Use `CARD_SHELL` / `CARD_ICON_TILE` / `CARD_CONTENT` tokens for entity cards:
 
 Card anatomy: `rounded-2xl border border-border/60 bg-card`, soft `--shadow-card`, hover lifts `-translate-y-0.5` + `--shadow-card-hover`. Icons sit in tinted tiles (`bg-primary/10 text-primary ring-1 ring-inset ring-primary/10`).
 
+### Form cards (`transaction-form/FormCard.tsx`)
+The new-transaction form's section cards (amount / description / receipt) share one anatomy: `FORM_CARD_SHELL` (rounded-2xl border + subtle shadow) + a top gradient hairline + a `size-8` tinted icon tile + a `text-sm font-semibold` heading. Use `FormCard` with a `tone` (`primary` | `amber`) and `icon`/`title` for new form sections instead of hand-rolling the shell/hairline/icon-tile markup; pass `embedded` for the flat `rounded-xl` sheet variant.
+
 ### Stat / summary cards (`summary-metric-card.tsx`, `stats-card.tsx`)
 Keep 2–4 per row; each shows an icon tile, label, and value. Tones use tinted tokens (e.g. `tone="positive"` → emerald tints, `"warning"` → amber, `"info"` → primary/blue). Icons per entity:
 
@@ -48,6 +51,9 @@ Keep 2–4 per row; each shows an icon tile, label, and value. Tones use tinted 
 - Use `buildFinanceListActionBar({ create, exportAction, filterAction, refresh })` on entity list pages — it centralizes create/refresh wiring.
 - Mobile icon buttons: `size-10 rounded-xl`; desktop `size-9`. Only the **filter** button keeps a label on mobile; other header buttons are icon-only.
 
+### Confirm dialogs (`shared/confirm-dialog.tsx`)
+`ConfirmDialog` is the only confirm surface — build on it instead of a raw `AlertDialog` so headers/footers can't drift. Header renders the `icon` (pass a `size-5` glyph) in a tone tile driven by `variant` (`destructive` red / `default` primary). For async flows (e.g. MFA unenroll) pass `closeOnConfirm={false}` and a `children` body; use `confirmDisabled`/`cancelDisabled` and a `ReactNode` `confirmLabel` for spinner/busy states.
+
 ## 3. Controls (`src/components/ui/control-styles.ts`)
 
 Reuse these tokens so every input/select/option looks the same:
@@ -56,8 +62,13 @@ Reuse these tokens so every input/select/option looks the same:
 CONTROL_SURFACE   // base: rounded-xl border border-border/50 bg-background/80 shadow-sm
 CONTROL_FOCUS     // focus: border-primary/50 ring-3 ring-primary/15
 CONTROL_DISABLED
-SELECTOR_CONTROL  // trigger: min-h-11, px-3, whitespace-nowrap
-OPTION_ROW_BASE   // dropdown rows: min-h-10, rounded-lg, px-2.5
+FIELD_LABEL       // field-label typography: text-sm font-medium text-foreground (no leading-none)
+CONTROL_ICON_GAP    // icon → label `gap-2` for select triggers, filter buttons, option rows
+CONTROL_PLACEHOLDER // `text-muted-foreground` for placeholder/empty values
+INPUT_PLACEHOLDER   // native <input>/<textarea> `::placeholder`, same color as CONTROL_PLACEHOLDER
+SELECTOR_CONTROL  // trigger: min-h-11, px-3, whitespace-nowrap (composes CONTROL_ICON_GAP)
+COMPACT_SELECTOR_CONTROL  // trigger: min-h-10, same anatomy as SELECTOR_CONTROL
+OPTION_ROW_BASE   // dropdown rows: min-h-10, rounded-lg, px-2.5 (composes CONTROL_ICON_GAP)
 OPTION_ROW_INTERACTION
 OPTION_ROW_SELECTED  // bg-primary/10 text-primary font-medium
 ```
@@ -65,21 +76,70 @@ OPTION_ROW_SELECTED  // bg-primary/10 text-primary font-medium
 Rules:
 - Labels are **left-aligned**, never centered.
 - Selectors carry icons (field icon + option icon when the entity has one).
+- Input `startIcon`/`endIcon` slots render icons at `size-4` with `text-muted-foreground`, matching select trigger icons.
+- Placeholder/empty values use `CONTROL_PLACEHOLDER` (muted); selected values render in foreground. Never hardcode `text-muted-foreground` or `gap-2` in a new select variant — use these tokens.
 - Triggers are `min-h-11` on mobile, `min-h-10`/`h-9` on desktop; dropdown rows `min-h-10` touch targets.
 - Checkmarks / selected states use `border-primary bg-primary text-primary-foreground`.
+- Destructive actions (delete, leave space, remove member, unenroll MFA, reset) use the `Button` `variant="destructive"` — a **solid red gradient** (`from-destructive to-destructive/90 text-destructive-foreground shadow-md shadow-destructive/20`). Never hand-roll `bg-destructive text-destructive-foreground hover:bg-destructive/90` inline; `AlertDialogAction` already ships the same gradient, so don't override it with flat classes either.
 - Never trim option text unless necessary — allow wrapping (`break-words` in option rows).
+- Multi-step flows use the shared `Stepper` (`ui/stepper.tsx`): numbered circles, a check mark for completed steps, and connector lines. Pass `activeIndex` plus an optional `onStepClick` to make completed steps clickable for back-navigation.
 
-## 4. Sheets (`src/components/ui/sheet.tsx`)
+## 4. Sheets — `BottomSheet` is the only chrome
 
-- **Every sheet becomes a bottom sheet on mobile automatically** (`SheetContent` uses `useIsMobile`). Callers pass the desktop side (`side="right"` for forms/details) and get the mobile treatment for free: full-width, `max-h-[92dvh]`, `rounded-t-3xl`, drag handle + swipe-down dismissal.
-- Mobile bottom sheets open from the bottom (spring/cubic-bezier), desktop side sheets slide in from their side. Respect `prefers-reduced-motion` (framer-motion `useReducedMotion`).
+`SheetLayout` is **deleted**. Every sheet renders through the shared
+`BottomSheet` (`src/components/shared/bottom-sheet.tsx`) — **do not create a
+new sheet wrapper**. It is a bottom sheet on **all** viewports (mobile *and*
+desktop); on desktop it's centered and width-capped via `className`.
+
+```tsx
+<BottomSheet
+  open={open}
+  onOpenChange={setOpen}
+  title={t("…")}
+  description={t("…")}
+  icon={<Icon icon={Wallet} className="size-5" />}
+  externalHref="/changelog" // optional "open full page" header link
+  className="sm:max-w-md sm:mx-auto sm:rounded-3xl"
+  contentClassName="px-4 py-5 sm:px-6 sm:py-6"
+  snapPoints={[0.5, 0.92]} // optional mobile pull-up detents (ascending 0..1)
+  defaultSnapPoint={0}
+  footerLeft={…} // or footerRight, or footerPrimary/footerSecondary/footerTertiary
+>
+  …
+</BottomSheet>
+```
+
+### `BottomSheet` API
+
+| Prop | Purpose |
+| --- | --- |
+| `open` / `onOpenChange` | Controlled open state. |
+| `title` / `description` | Header title + muted subtitle (wired to `aria-labelledby` / `aria-describedby`). |
+| `metadata` | Optional extra row under the subtitle (chips, counts, space name). |
+| `icon` | `ReactNode` — pass `<Icon icon={X} className="size-5" />` (or a raw lucide `<X className="size-5" />`). |
+| `iconGradient` / `iconBackground` / `iconColor` | Icon-tile tone (defaults `from-primary/20 to-primary/10`, `bg-gradient-to-br`, `text-primary`). |
+| `headerAction` | Custom trailing node rendered before the close button. |
+| `externalHref` | Renders the “open in full page” external-link icon. It **closes the sheet first** (`onExternalNavigate`) then navigates, so the sheet never lingers over the destination page. Use for surfaces with a standalone route (`/status`, `/changelog`). |
+| `footer` | Custom footer content, laid out right-aligned in a row (for full-width/custom footers). |
+| `footerLeft` / `footerRight` | Responsive start/end actions via `SheetActionFooter`: stacked on mobile, split left/right on desktop. A lone `footerRight` is right-aligned on desktop (`ml-auto`). |
+| `footerPrimary` / `footerSecondary` / `footerTertiary` | Three-action footer: primary is full-width top on mobile (rightmost on desktop); secondary and tertiary share a half-width row below on mobile (middle / far-left on desktop). Buttons should carry `w-full sm:w-auto`. |
+| `className` | Passed to `SheetContent`. For desktop width: `sm:max-w-{size} sm:mx-auto sm:rounded-3xl` (mirrors the old `SheetLayout` `maxWidth`). |
+| `contentClassName` | Scroll-area padding. The old `SheetLayout` wrapper supplied `px-4 py-5 sm:px-6 sm:py-6` — pass it here explicitly. |
+| `footerClassName` | Extra classes for the footer wrapper. |
+| `snapPoints` | Optional ascending viewport-height fractions (0..1), e.g. `[0.5, 0.92]`. Enables **mobile** pull-up expand / pull-down collapse via the drag handle. Two or more points required; desktop ignores it. |
+| `defaultSnapPoint` | Index of the detent to open on (defaults to `0`, the smallest, so the sheet can be pulled up). |
+
+### Chrome behavior (from `ui/sheet.tsx` + `EntitySheetHeader`)
+
+- Opens from the bottom with a spring/cubic-bezier; `rounded-t-3xl`, drag handle, swipe-down dismissal, system-back dismissal, and `pb-[env(safe-area-inset-bottom)]`. Respect `prefers-reduced-motion`.
+- With `snapPoints`, the drag handle also **expands/collapses** between detents (drag up to grow, down past the smallest to dismiss). Implemented by `useBottomSheetDetents` (`src/hooks/useBottomSheetDetents.ts`); desktop and non-snap sheets keep the legacy `useBottomSheetSwipe` behavior.
 - **No shadows on sheet surfaces** — separation comes from `bg-background`, `border`, and the `bg-black/60 backdrop-blur-sm` overlay.
-- Use the shared shell components:
-  - `EntitySheetHeader` (`entity-sheet/entity-sheet-header.tsx`) — icon tile, title, muted subtitle, metadata row, close button. Sticky, blurred.
-  - `SheetActionFooter` (`entity-sheet/sheet-action-footer.tsx`) — sticky footer with safe-area padding; mobile stacks primary above secondary (`flex-col-reverse`), desktop lays out `start`/`end`.
-  - `EntitySheetFooter` — cancel (ghost) + submit (primary, dominant on mobile).
-  - `BottomSheet` — the shared mobile sheet wrapper (header + scroll area + footer).
-- Form sheets (budget/goal/subscription/category/new-transaction) should reuse `EntitySheetHeader` + `EntitySheetFooter` + `FormSection` + `PreviewCard` — **do not hand-roll a new header/footer**.
+- Supporting pieces (reuse, don't re-roll):
+  - `EntitySheetHeader` (`entity-sheet/entity-sheet-header.tsx`) — icon tile, title, subtitle, metadata, `externalHref` link, close button; sticky + blurred.
+  - `SheetActionFooter` (`entity-sheet/sheet-action-footer.tsx`) — sticky safe-area footer; `footerLeft`/`footerRight` map to `start`/`end`, `footer` maps to custom `content`.
+  - `EntitySheetFooter` (`entity-sheet/entity-sheet-footer.tsx`) — cancel (ghost) + submit (primary) for entity form dialogs.
+- The low-level `Sheet`/`SheetContent` primitive (`ui/sheet.tsx`) still auto-converts any `side` to bottom on mobile, but **do not hand-roll a new sheet** — compose via `BottomSheet`.
+- Entity form dialogs (budget/goal/category/subscription/new-transaction) currently use `EntitySheetHeader` + `EntitySheetFooter` directly inside `Sheet`/`SheetContent`; when touching them, prefer migrating to `BottomSheet` so there is a single chrome. Reuse `FormSection` + `PreviewCard` for their content.
 
 ## 5. Mobile chrome (identical for browser tab and installed PWA)
 

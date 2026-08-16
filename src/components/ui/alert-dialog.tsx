@@ -3,10 +3,30 @@
 import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react/alert-dialog";
 import type * as React from "react";
 
+import { useOverlayOpen } from "@/hooks/useOverlayOpen";
 import { cn } from "@/lib/utils";
 
-function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
+function AlertDialog({
+  open,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: AlertDialogPrimitive.Root.Props) {
+  // Android system back / iOS swipe-back / browser back closes the dialog
+  // instead of navigating away.
+  const overlay = useOverlayOpen<AlertDialogPrimitive.Root.ChangeEventDetails>({
+    open,
+    defaultOpen,
+    onOpenChange,
+  });
+
+  return (
+    <AlertDialogPrimitive.Root
+      data-slot="alert-dialog"
+      {...overlay}
+      {...props}
+    />
+  );
 }
 
 function AlertDialogTrigger({ ...props }: AlertDialogPrimitive.Trigger.Props) {

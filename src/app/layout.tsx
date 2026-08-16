@@ -4,6 +4,7 @@ import "./globals.css";
 
 import type { Viewport } from "next";
 import { Geist } from "next/font/google";
+import { AppleStartupLinks } from "@/components/shared/apple-startup-links";
 import { Favicon } from "@/components/shared/favicon";
 import { ServiceWorkerRegister } from "@/components/shared/service-worker-register";
 import { SkipLink } from "@/components/shared/skip-link";
@@ -45,6 +46,7 @@ export default function RootLayout({
       <body className="min-h-full bg-background text-foreground">
         <Providers>
           <SkipLink />
+          <AppleStartupLinks />
           <Favicon />
           <ServiceWorkerRegister />
           <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.08),transparent_38%)] dark:bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.12),transparent_38%)]">

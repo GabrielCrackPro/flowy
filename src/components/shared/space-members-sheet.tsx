@@ -1,9 +1,9 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
+import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { SheetClose } from "@/components/ui/sheet";
-import { SheetLayout } from "@/components/ui/sheet-layout";
 import type { SpaceSummary } from "@/lib/api/space";
 import { Users, X } from "@/lib/icons";
 import { SpaceMembersList } from "./space-members-list";
@@ -33,13 +33,16 @@ export function SpaceMembersSheet({
   if (!space) return null;
 
   return (
-    <SheetLayout
+    <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
       title={`${t("profile.spaces.members")} ${space.name}`}
-      icon={Users}
+      icon={<Users className="size-5" />}
       iconGradient="from-indigo-500/20 to-indigo-500/10"
       iconColor="text-indigo-600 dark:text-indigo-400"
+      className="sm:max-w-md sm:mx-auto sm:rounded-3xl"
+      contentClassName="px-4 py-5 sm:px-6 sm:py-6"
+      snapPoints={[0.5, 0.92]}
       footerRight={
         <SheetClose>
           <Button variant="outline" className="h-10">
@@ -55,6 +58,6 @@ export function SpaceMembersSheet({
         onRemoveMember={onRemoveMember}
         removePending={removePending}
       />
-    </SheetLayout>
+    </BottomSheet>
   );
 }

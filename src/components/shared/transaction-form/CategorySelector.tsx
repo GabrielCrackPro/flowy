@@ -3,6 +3,7 @@ import { TagBadge } from "@/components/shared/tag-badge";
 import {
   COMPACT_SELECTOR_CONTROL,
   CONTROL_FOCUS,
+  CONTROL_PLACEHOLDER,
   CONTROL_SURFACE,
   OPTION_ROW_BASE,
   OPTION_ROW_INTERACTION,
@@ -67,7 +68,12 @@ export function CategorySelector({
           )}
         >
           <Icon icon={Tag} className="size-4 shrink-0 text-muted-foreground" />
-          <span className="min-w-0 flex-1 text-left whitespace-nowrap">
+          <span
+            className={cn(
+              "min-w-0 flex-1 text-left whitespace-nowrap",
+              selectedTags.length === 0 && CONTROL_PLACEHOLDER,
+            )}
+          >
             {selectedTags.length > 0
               ? `${selectedTags.length} ${selectedTags.length !== 1 ? selectedTextPlural : selectedText}`
               : loading

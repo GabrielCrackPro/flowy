@@ -1,25 +1,16 @@
 "use client";
 
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared";
+import { ConfirmDialog, Icon } from "@/components/shared";
 import { MfaSetupDialog } from "@/components/shared/mfa-setup-dialog";
 import {
   OTP_CODE_LENGTH,
   SegmentedCodeInput,
 } from "@/components/shared/segmented-code-input";
 import { toast } from "@/components/shared/toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  Badge,
-} from "@/components/ui";
+import { Badge } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import { FormAlert, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -81,105 +72,177 @@ export function getQrImageSource(qrCode: string) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(value)}`;
 }
 
+const QR_LIGHT_COLORS = {
+  dots: "#2563eb",
+  corners: "#1d4ed8",
+  background: "#ffffff",
+};
+
+const QR_DARK_COLORS = {
+  dots: "#bfdbfe",
+  corners: "#93c5fd",
+  background: "#0f172a",
+};
+
 export function StyledQrCode({
   uri,
   fallbackSrc,
   alt,
+  onFallback,
 }: {
   uri: string;
   fallbackSrc: string;
   alt: string;
+  onFallback?: () => void;
 }) {
   const { isDark } = useTheme();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [fallback, setFallback] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const lightRef = useRef<HTMLDivElement>(null);
+  const darkRef = useRef<HTMLDivElement>(null);
+  const onFallbackRef = useRef(onFallback);
+  const [status, setStatus] = useState<"loading" | "ready" | "fallback">(
+    "loading",
+  );
 
   useEffect(() => {
-    const colors = isDark
-      ? {
-          dots: "#bfdbfe",
-          corners: "#93c5fd",
-          background: "#0f172a",
-        }
-      : {
-          dots: "#2563eb",
-          corners: "#1d4ed8",
-          background: "#ffffff",
-        };
+    onFallbackRef.current = onFallback;
+  }, [onFallback]);
+
+  useEffect(() => {
     let disposed = false;
-    const container = containerRef.current;
+    const lightContainer = lightRef.current;
+    const darkContainer = darkRef.current;
 
-    if (!container) return;
+    if (!lightContainer || !darkContainer) return;
 
-    container.replaceChildren();
-    setFallback(false);
+    lightContainer.replaceChildren();
+    darkContainer.replaceChildren();
+    setStatus("loading");
 
     void import("qr-code-styling")
       .then(({ default: QRCodeStyling }) => {
-        if (disposed || !container) return;
+        if (disposed || !lightContainer || !darkContainer) return;
 
-        const qrCode = new QRCodeStyling({
-          width: 256,
-          height: 256,
-          type: "svg",
-          data: uri,
-          image: "/app-icon.svg",
-          margin: 12,
-          qrOptions: {
-            errorCorrectionLevel: "H",
-          },
-          dotsOptions: {
-            type: "rounded",
-            color: colors.dots,
-          },
-          cornersSquareOptions: {
-            type: "extra-rounded",
-            color: colors.corners,
-          },
-          cornersDotOptions: {
-            type: "dot",
-            color: colors.corners,
-          },
-          backgroundOptions: {
-            color: colors.background,
-          },
-          imageOptions: {
-            hideBackgroundDots: true,
-            imageSize: 0.18,
-            margin: 4,
-            crossOrigin: "anonymous",
-          },
-        });
+        const render = (
+          container: HTMLDivElement,
+          colors: { dots: string; corners: string; background: string },
+        ) => {
+          const qrCode = new QRCodeStyling({
+            width: 256,
+            height: 256,
+            type: "svg",
+            data: uri,
+            image: "/app-icon.svg",
+            margin: 12,
+            qrOptions: {
+              errorCorrectionLevel: "H",
+            },
+            dotsOptions: {
+              type: "rounded",
+              color: colors.dots,
+            },
+            cornersSquareOptions: {
+              type: "extra-rounded",
+              color: colors.corners,
+            },
+            cornersDotOptions: {
+              type: "dot",
+              color: colors.corners,
+            },
+            backgroundOptions: {
+              color: colors.background,
+            },
+            imageOptions: {
+              hideBackgroundDots: true,
+              imageSize: 0.18,
+              margin: 4,
+              crossOrigin: "anonymous",
+            },
+          });
 
-        qrCode.append(container);
-        const svg = container.querySelector("svg");
-        if (svg) {
-          svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-          svg.style.display = "block";
-          svg.style.height = "100%";
-          svg.style.width = "100%";
-        }
+          qrCode.append(container);
+          const svg = container.querySelector("svg");
+          if (svg) {
+            svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+            svg.style.display = "block";
+            svg.style.height = "100%";
+            svg.style.width = "100%";
+          }
+        };
+
+        render(lightContainer, QR_LIGHT_COLORS);
+        render(darkContainer, QR_DARK_COLORS);
+        setStatus("ready");
       })
       .catch(() => {
-        if (!disposed) setFallback(true);
+        if (!disposed) {
+          setStatus("fallback");
+          onFallbackRef.current?.();
+        }
       });
 
     return () => {
       disposed = true;
-      container.replaceChildren();
+      lightContainer.replaceChildren();
+      darkContainer.replaceChildren();
     };
-  }, [isDark, uri]);
+  }, [uri]);
 
-  return fallback ? (
-    /* biome-ignore lint/performance/noImgElement: Supabase's SVG data URL is the resilient fallback renderer. */
-    <img
-      src={fallbackSrc}
-      alt={alt}
-      decoding="async"
-      className="size-full object-contain"
-    />
-  ) : (
-    <div ref={containerRef} className="size-full" role="img" aria-label={alt} />
+  if (status === "fallback") {
+    return (
+      /* biome-ignore lint/performance/noImgElement: Supabase's SVG data URL is the resilient fallback renderer. */
+      <img
+        src={fallbackSrc}
+        alt={alt}
+        decoding="async"
+        className="size-full object-contain"
+      />
+    );
+  }
+
+  return (
+    <div className="relative size-full" role="img" aria-label={alt}>
+      <motion.div
+        ref={lightRef}
+        className="absolute inset-0"
+        initial={false}
+        animate={{
+          opacity: status === "ready" && !isDark ? 1 : 0,
+          scale: status === "ready" ? 1 : 0.96,
+        }}
+        transition={{ duration: reduceMotion ? 0 : 0.35, ease: "easeOut" }}
+      />
+      <motion.div
+        ref={darkRef}
+        className="absolute inset-0"
+        initial={false}
+        animate={{
+          opacity: status === "ready" && isDark ? 1 : 0,
+          scale: status === "ready" ? 1 : 0.96,
+        }}
+        transition={{ duration: reduceMotion ? 0 : 0.35, ease: "easeOut" }}
+      />
+      <AnimatePresence>
+        {status === "loading" ? (
+          <motion.div
+            key="qr-skeleton"
+            className="absolute inset-0"
+            aria-hidden="true"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.2, ease: "easeOut" }}
+          >
+            <div className="size-full animate-pulse">
+              <div className="size-full rounded-lg bg-muted/60" />
+              <span className="absolute left-[8%] top-[8%] size-[22%] rounded-[3px] border-2 border-foreground/20" />
+              <span className="absolute right-[8%] top-[8%] size-[22%] rounded-[3px] border-2 border-foreground/20" />
+              <span className="absolute bottom-[8%] left-[8%] size-[22%] rounded-[3px] border-2 border-foreground/20" />
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -538,86 +601,66 @@ export function MfaSettings() {
         onComplete={() => void loadFactors()}
       />
 
-      <AlertDialog
+      <ConfirmDialog
         open={factorToRemove !== null}
         onOpenChange={(open) => {
           if (!open && !removalBusy) clearFactorRemoval();
         }}
+        title={t("settings.security.mfaDisableConfirmTitle")}
+        description={t("settings.security.mfaDisableVerificationDescription")}
+        icon={<Icon icon={ShieldCheck} className="size-5" />}
+        confirmLabel={
+          <>
+            {removalBusy ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <X className="size-4" />
+            )}
+            {removalBusy
+              ? t("settings.security.mfaDisabling")
+              : t("settings.security.mfaDisable")}
+          </>
+        }
+        onConfirm={() => void removeFactor()}
+        closeOnConfirm={false}
+        confirmDisabled={
+          removalBusy ||
+          removalPreparing ||
+          (!removalVerified &&
+            (removalChallengeId === null ||
+              removalCode.length !== OTP_CODE_LENGTH))
+        }
+        cancelDisabled={removalBusy}
       >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <div className="mb-2 flex items-center gap-2">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-                <Icon icon={ShieldCheck} className="size-5" />
-              </span>
-              <AlertDialogTitle>
-                {t("settings.security.mfaDisableConfirmTitle")}
-              </AlertDialogTitle>
-            </div>
-            <AlertDialogDescription>
-              {t("settings.security.mfaDisableVerificationDescription")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <div className="space-y-3">
-            <FormField
-              label={t("settings.security.mfaChallengeCodeLabel")}
-              required
-            >
-              <SegmentedCodeInput
-                value={removalCode}
-                onChange={(nextCode) => {
-                  setRemovalCode(nextCode);
-                  if (removalError) setRemovalError(null);
-                }}
-                onComplete={(completeCode) => {
-                  void removeFactor(completeCode);
-                }}
-                disabled={removalBusy || removalPreparing || removalVerified}
-                label={t("settings.security.mfaChallengeCodeLabel")}
-                invalid={Boolean(removalError)}
-                errorMessage={removalError}
-                autoFocus
-                className="justify-center sm:justify-center"
-              />
-            </FormField>
-            <p className="text-xs text-muted-foreground">
-              {removalPreparing
-                ? t("settings.security.mfaChallengeChecking")
-                : t("settings.security.mfaChallengeDescription")}
-            </p>
-          </div>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={removalBusy}>
-              {t("common.cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              disabled={
-                removalBusy ||
-                removalPreparing ||
-                (!removalVerified &&
-                  (removalChallengeId === null ||
-                    removalCode.length !== OTP_CODE_LENGTH))
-              }
-              onClick={(event) => {
-                event.preventDefault();
-                void removeFactor();
+        <div className="space-y-3">
+          <FormField
+            label={t("settings.security.mfaChallengeCodeLabel")}
+            required
+          >
+            <SegmentedCodeInput
+              value={removalCode}
+              onChange={(nextCode) => {
+                setRemovalCode(nextCode);
+                if (removalError) setRemovalError(null);
               }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {removalBusy ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <X className="size-4" />
-              )}
-              {removalBusy
-                ? t("settings.security.mfaDisabling")
-                : t("settings.security.mfaDisable")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              onComplete={(completeCode) => {
+                void removeFactor(completeCode);
+              }}
+              disabled={removalBusy || removalPreparing || removalVerified}
+              label={t("settings.security.mfaChallengeCodeLabel")}
+              invalid={Boolean(removalError)}
+              errorMessage={removalError}
+              autoFocus
+              className="justify-center sm:justify-center"
+            />
+          </FormField>
+          <p className="text-xs text-muted-foreground">
+            {removalPreparing
+              ? t("settings.security.mfaChallengeChecking")
+              : t("settings.security.mfaChallengeDescription")}
+          </p>
+        </div>
+      </ConfirmDialog>
     </div>
   );
 }

@@ -17,7 +17,15 @@ import { Switch } from "@/components/ui/switch";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useReactForm } from "@/hooks/useReactForm";
-import { AtSign, Check, Languages, Loader2, UserRound, X } from "@/lib/icons";
+import {
+  AtSign,
+  Check,
+  Coins,
+  Languages,
+  Loader2,
+  UserRound,
+  X,
+} from "@/lib/icons";
 import {
   CURRENCIES,
   currencyName,
@@ -114,9 +122,10 @@ export function ProfileForm({
               }}
             >
               <SelectTrigger
-                className="h-11 w-full"
+                className="w-full"
                 aria-label={t("settings.profile.currencyLabel")}
               >
+                <Icon icon={Coins} className="size-4 text-muted-foreground" />
                 <SelectValue
                   placeholder={form.values.currency || "USD"}
                   options={CURRENCIES.map((currency) => ({
@@ -146,9 +155,13 @@ export function ProfileForm({
               }}
             >
               <SelectTrigger
-                className="h-11 w-full"
+                className="w-full"
                 aria-label={t("settings.profile.localeLabel")}
               >
+                <Icon
+                  icon={Languages}
+                  className="size-4 text-muted-foreground"
+                />
                 <SelectValue
                   placeholder="es"
                   options={LOCALES.map((locale) => ({

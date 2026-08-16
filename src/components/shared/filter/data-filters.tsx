@@ -243,6 +243,7 @@ export function DataFilters({
           onOpenChange={handleMobileOpenChange}
           title={resolvedFilterLabel}
           description={t("filters.filterAndSearch")}
+          snapPoints={[0.5, 0.92]}
           icon={<Icon icon={Filter} className="size-5" />}
           metadata={
             activeFiltersCount > 0 ? (

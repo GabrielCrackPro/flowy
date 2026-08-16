@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "@/components/shared/toast";
 import { useProfile } from "@/hooks/useProfile";
 import { commentApi } from "@/lib/api/comment";
@@ -10,6 +11,7 @@ import type { Comment, CreateCommentInput } from "@/types/Comment";
 export function useComments(entityType: string, entityId: string | null) {
   const queryClient = useQueryClient();
   const { profile } = useProfile();
+  const { t } = useTranslation();
   const activeSpaceId = profile?.activeSpaceId ?? null;
 
   const queryKey = ["comments", activeSpaceId, entityType, entityId];
@@ -30,11 +32,13 @@ export function useComments(entityType: string, entityId: string | null) {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
-      toast.success("Comentario añadido");
+      toast.success(t("transaction.commentAdded"));
     },
     onError: (error) => {
       toast.error(
-        error instanceof Error ? error.message : "Error al añadir comentario",
+        error instanceof Error
+          ? error.message
+          : t("transaction.commentAddError"),
       );
     },
   });
@@ -44,13 +48,13 @@ export function useComments(entityType: string, entityId: string | null) {
       commentApi.update(data.id, { content: data.content }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
-      toast.success("Comentario actualizado");
+      toast.success(t("transaction.commentUpdated"));
     },
     onError: (error) => {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Error al actualizar comentario",
+          : t("transaction.commentUpdateError"),
       );
     },
   });
@@ -59,11 +63,13 @@ export function useComments(entityType: string, entityId: string | null) {
     mutationFn: (id: string) => commentApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
-      toast.success("Comentario eliminado");
+      toast.success(t("transaction.commentDeleted"));
     },
     onError: (error) => {
       toast.error(
-        error instanceof Error ? error.message : "Error al eliminar comentario",
+        error instanceof Error
+          ? error.message
+          : t("transaction.commentDeleteError"),
       );
     },
   });

@@ -9,8 +9,15 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     display: "standalone",
     display_override: ["standalone", "minimal-ui"],
-    background_color: "#0a0a0a",
-    theme_color: "#0a0a0a",
+    // Explicitly allow rotation — some Android launchers pin installed PWAs
+    // to portrait when the manifest doesn't declare an orientation.
+    orientation: "any",
+    // Match the app's real first paint (light --background in globals.css) so
+    // the Android splash / task switcher / system nav bar blend into the UI
+    // instead of flashing dark. iOS uses the generated apple-touch-startup-image
+    // files (scripts/generate-splash.mjs) which are light too.
+    background_color: "#f4f7fa",
+    theme_color: "#f4f7fa",
     screenshots: [
       {
         src: "/screenshots/screenshot-desktop.png",

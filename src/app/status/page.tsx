@@ -27,10 +27,16 @@ import {
   RelativeTime,
   ThemeToggle,
 } from "@/components/shared";
+import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { toast } from "@/components/shared/toast";
 import { ClaimAdminAccessCard } from "@/components/status/claim-admin-access-card";
+import {
+  COMPONENT_META,
+  STATUS_DOT,
+  STATUS_PILL,
+  statusKey,
+} from "@/components/status/status-meta";
 import { Button } from "@/components/ui/button";
-import { SheetLayout } from "@/components/ui/sheet-layout";
 import { Switch } from "@/components/ui/switch";
 import { useProfile } from "@/hooks/useProfile";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
@@ -42,13 +48,10 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock,
-  Database,
   Droplet,
-  HardDrive,
   Loader2,
   Minus,
   RefreshCw,
-  ShieldCheck,
   TrendingDown,
   TrendingUp,
   TriangleAlert,
@@ -81,35 +84,6 @@ interface StatusResponse extends StatusSnapshot {
   lastSuccessfulAt?: string | null;
 }
 
-const COMPONENT_META: Record<
-  ComponentId,
-  { icon: typeof Activity; order: number }
-> = {
-  api: { icon: Activity, order: 0 },
-  database: { icon: Database, order: 1 },
-  auth: { icon: ShieldCheck, order: 2 },
-  push: { icon: BellRing, order: 3 },
-  storage: { icon: HardDrive, order: 4 },
-};
-
-function statusKey(status: ComponentStatus): string {
-  switch (status) {
-    case "ok":
-      return "status.statusOk";
-    case "degraded":
-      return "status.statusDegraded";
-    case "down":
-      return "status.statusDown";
-  }
-}
-
-const STATUS_PILL: Record<ComponentStatus, string> = {
-  ok: "bg-emerald-500/10 text-emerald-600 ring-emerald-500/20 dark:text-emerald-400",
-  degraded:
-    "bg-amber-500/10 text-amber-600 ring-amber-500/20 dark:text-amber-400",
-  down: "bg-red-500/10 text-red-600 ring-red-500/20 dark:text-red-400",
-};
-
 const INCIDENT_DOT: Record<IncidentStatus, string> = {
   investigating: "bg-amber-500",
   monitoring: "bg-blue-500",
@@ -139,9 +113,11 @@ const SEVERITY_STYLE: Record<IncidentSeverity, string> = {
 function LatencySparkline({
   values,
   color,
+  label,
 }: {
   values: number[];
   color: string;
+  label: string;
 }) {
   if (values.length < 2) return null;
   const width = 96;
@@ -158,9 +134,9 @@ function LatencySparkline({
       viewBox={`0 0 ${width} ${height}`}
       className="shrink-0 opacity-70"
       role="img"
-      aria-label="latency"
+      aria-label={label}
     >
-      <title>latency</title>
+      <title>{label}</title>
       <polyline
         points={points}
         fill="none"
@@ -371,12 +347,6 @@ function StatusPageSkeleton({ label }: { label: string }) {
   );
 }
 
-const STATUS_DOT: Record<ComponentStatus, string> = {
-  ok: "bg-emerald-500",
-  degraded: "bg-amber-500",
-  down: "bg-red-500",
-};
-
 const STATUS_CHIP: Record<ComponentStatus, string> = {
   ok: "from-emerald-500/15 to-emerald-500/5 text-emerald-600 dark:text-emerald-400",
   degraded:
@@ -402,12 +372,14 @@ function UptimeBars({
   selectedDate,
   checksLabel,
   noDataLabel,
+  statusLabel,
 }: {
   bars: UptimeBar[];
   onSelect?: (bar: UptimeBar) => void;
   selectedDate?: string | null;
   checksLabel: string;
   noDataLabel: string;
+  statusLabel: (status: ComponentStatus) => string;
 }) {
   return (
     <div className="flex flex-wrap gap-px">
@@ -417,8 +389,8 @@ function UptimeBars({
           type="button"
           disabled={!onSelect}
           onClick={() => onSelect?.(bar)}
-          title={`${bar.date}: ${bar.status ?? "—"} · ${bar.checks} ${checksLabel}`}
-          aria-label={`${bar.date}: ${bar.status ?? noDataLabel}, ${bar.checks} ${checksLabel}`}
+          title={`${bar.date}: ${bar.status ? statusLabel(bar.status) : "—"} · ${bar.checks} ${checksLabel}`}
+          aria-label={`${bar.date}: ${bar.status ? statusLabel(bar.status) : noDataLabel}, ${bar.checks} ${checksLabel}`}
           initial={{ opacity: 0, scale: 0.4 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{
@@ -892,17 +864,24 @@ function ComponentDetailSheet({
   const latencyFillId = `latency-fill-${component ?? "unknown"}`;
 
   return (
-    <SheetLayout
+    <BottomSheet
       open={component !== null}
       onOpenChange={onOpenChange}
       title={name}
       description={
         component ? t("status.componentDetail", { component: name }) : undefined
       }
-      icon={component ? COMPONENT_META[component].icon : Activity}
+      icon={
+        <Icon
+          icon={component ? COMPONENT_META[component].icon : Activity}
+          className="size-5"
+        />
+      }
       iconGradient="from-primary/20 to-primary/10"
       iconColor="text-primary"
-      maxWidth="sm:max-w-lg"
+      className="sm:max-w-lg sm:mx-auto sm:rounded-3xl"
+      contentClassName="px-4 py-5 sm:px-6 sm:py-6"
+      snapPoints={[0.45, 0.92]}
     >
       {error ? (
         <div className="flex flex-col items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1243,7 +1222,7 @@ function ComponentDetailSheet({
           )}
         </div>
       )}
-    </SheetLayout>
+    </BottomSheet>
   );
 }
 
@@ -1273,15 +1252,16 @@ function DaySummarySheet({
         : t("status.noData");
 
   return (
-    <SheetLayout
+    <BottomSheet
       open={bar !== null && component !== null}
       onOpenChange={onOpenChange}
       title={dateLabel}
       description={name}
-      icon={CalendarClock}
+      icon={<Icon icon={CalendarClock} className="size-5" />}
       iconGradient="from-primary/20 to-primary/10"
       iconColor="text-primary"
-      maxWidth="sm:max-w-sm"
+      className="sm:max-w-sm sm:mx-auto sm:rounded-3xl"
+      contentClassName="px-4 py-5 sm:px-6 sm:py-6"
     >
       {bar && (
         <div className="space-y-3">
@@ -1315,11 +1295,15 @@ function DaySummarySheet({
           )}
         </div>
       )}
-    </SheetLayout>
+    </BottomSheet>
   );
 }
 
-export default function StatusPage() {
+export default function StatusPage({
+  embedded = false,
+}: {
+  embedded?: boolean;
+}) {
   const { t, i18n } = useTranslation();
   const { profile, loading: profileLoading } = useProfile();
   const isAdmin = profile?.role === "admin" && !profileLoading;
@@ -1457,23 +1441,30 @@ export default function StatusPage() {
   const maintenance: IncidentRecord[] = data?.maintenance ?? [];
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-3xl px-4 py-8 sm:py-12">
-      {/* Header */}
-      <header className="mb-8 flex items-center justify-between gap-3">
-        <Link
-          href="/"
-          className="flex items-center gap-2.5 text-foreground transition-opacity hover:opacity-80"
-        >
-          <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-md shadow-primary/20">
-            <Icon icon={Droplet} className="size-5" />
-          </span>
-          <span className="text-lg font-bold tracking-tight">Flowy</span>
-          <span className="mt-0.5 hidden rounded-full bg-muted/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest text-muted-foreground sm:inline">
-            {t("status.title")}
-          </span>
-        </Link>
-        <ThemeToggle />
-      </header>
+    <div
+      className={cn(
+        "mx-auto w-full max-w-3xl px-4",
+        embedded ? "py-6" : "min-h-screen py-8 sm:py-12",
+      )}
+    >
+      {/* Header (hidden when embedded in a bottom sheet, which has its own) */}
+      {!embedded && (
+        <header className="mb-8 flex items-center justify-between gap-3">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 text-foreground transition-opacity hover:opacity-80"
+          >
+            <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-md shadow-primary/20">
+              <Icon icon={Droplet} className="size-5" />
+            </span>
+            <span className="text-lg font-bold tracking-tight">Flowy</span>
+            <span className="mt-0.5 hidden rounded-full bg-muted/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest text-muted-foreground sm:inline">
+              {t("status.title")}
+            </span>
+          </Link>
+          <ThemeToggle />
+        </header>
+      )}
       {/* Overall banner */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
@@ -1820,6 +1811,7 @@ export default function StatusPage() {
                         <span className="flex shrink-0 items-center px-1">
                           <LatencySparkline
                             values={latencyValues}
+                            label={t("status.latency")}
                             color={
                               component.status === "ok"
                                 ? "var(--color-emerald-500)"
@@ -1897,6 +1889,7 @@ export default function StatusPage() {
                         }
                         checksLabel={t("status.checks")}
                         noDataLabel={t("status.noData")}
+                        statusLabel={(status) => t(statusKey(status))}
                       />
                       {!hasAnyHistory && (
                         <p className="mt-2.5 flex items-center gap-1.5 text-xs text-muted-foreground/60">
@@ -1951,15 +1944,17 @@ export default function StatusPage() {
             <LegendItem color="bg-border/40" label={t("status.noData")} />
           </div>
         )}
-        <footer className="mt-10 flex items-center justify-center border-t border-border/30 pt-6 text-center">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-xs font-medium text-primary/70 transition hover:text-primary hover:underline underline-offset-2"
-          >
-            <Icon icon={Droplet} className="size-3.5" />
-            {t("status.backToApp")}
-          </Link>
-        </footer>
+        {!embedded && (
+          <footer className="mt-10 flex items-center justify-center border-t border-border/30 pt-6 text-center">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-xs font-medium text-primary/70 transition hover:text-primary hover:underline underline-offset-2"
+            >
+              <Icon icon={Droplet} className="size-3.5" />
+              {t("status.backToApp")}
+            </Link>
+          </footer>
+        )}
       </motion.div>
     </div>
   );

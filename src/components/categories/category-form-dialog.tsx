@@ -14,7 +14,15 @@ import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowDownCircle, ArrowUpCircle, Check, Sparkles } from "@/lib/icons";
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  ArrowUpDown,
+  Check,
+  Palette,
+  Sparkles,
+  Tag,
+} from "@/lib/icons";
 import { createCategorySchema } from "@/lib/schemas/category";
 import type {
   Category,
@@ -170,7 +178,9 @@ export function CategoryFormSheet({
                     : t("transactions.expenses")}
                 </span>
                 {trimmedName && (
-                  <span className="text-xs text-muted-foreground">Preview</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t("common.preview")}
+                  </span>
                 )}
               </div>
             </PreviewCard>
@@ -178,6 +188,7 @@ export function CategoryFormSheet({
             <FormSection
               label={t("categories.nameLabel")}
               htmlFor="category-name"
+              icon={Tag}
               error={errors.name}
             >
               <Input
@@ -197,13 +208,13 @@ export function CategoryFormSheet({
                 <span>{values.name.length}/50</span>
                 {trimmedName.length > 0 && trimmedName.length <= 50 && (
                   <span className="text-emerald-600 dark:text-emerald-400">
-                    ✓ Valid
+                    ✓ {t("common.valid")}
                   </span>
                 )}
               </div>
             </FormSection>
 
-            <FormSection label={t("categories.typeLabel")}>
+            <FormSection label={t("categories.typeLabel")} icon={ArrowUpDown}>
               <div className="grid grid-cols-2 gap-1 rounded-2xl bg-background/80 p-1 shadow-inner">
                 {(["EXPENSE", "INCOME"] as const).map((typeOption) => {
                   const active = values.type === typeOption;
@@ -250,7 +261,7 @@ export function CategoryFormSheet({
               </div>
             </FormSection>
 
-            <FormSection label={t("categories.iconLabel")}>
+            <FormSection label={t("categories.iconLabel")} icon={Sparkles}>
               <div className="grid grid-cols-8 gap-2.5">
                 {CATEGORY_ICON_OPTIONS.map((option) => {
                   const selected = values.icon === option.key;
@@ -290,7 +301,7 @@ export function CategoryFormSheet({
               </div>
             </FormSection>
 
-            <FormSection label={t("categories.colorLabel")}>
+            <FormSection label={t("categories.colorLabel")} icon={Palette}>
               <div className="grid grid-cols-8 gap-3">
                 {CATEGORY_COLORS.map((candidate) => {
                   const selected = values.color === candidate;

@@ -2,9 +2,11 @@
 
 import { SheetClose, SheetHeader, SheetTitle } from "@components/ui/sheet";
 import { cn } from "@lib/utils";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { X } from "@/lib/icons";
+import { ExternalLink, X } from "@/lib/icons";
 import { Icon } from "../icon";
 
 interface EntitySheetHeaderProps {
@@ -13,6 +15,10 @@ interface EntitySheetHeaderProps {
   subtitle?: string;
   metadata?: ReactNode;
   headerAction?: ReactNode;
+  /** When set, renders a "open in full page" link icon in the header. */
+  externalHref?: string;
+  /** Invoked when the external link is clicked, so the sheet can close first. */
+  onExternalNavigate?: () => void;
   subtitleId?: string;
   chipClassName?: string;
   iconGradient?: string;
@@ -27,6 +33,8 @@ export function EntitySheetHeader({
   subtitle,
   metadata,
   headerAction,
+  externalHref,
+  onExternalNavigate,
   subtitleId,
   chipClassName,
   iconGradient = "from-primary/20 to-primary/10",
@@ -35,6 +43,7 @@ export function EntitySheetHeader({
   titleId,
 }: EntitySheetHeaderProps) {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
 
   return (
     <SheetHeader className="sticky top-0 z-10 shrink-0 border-b border-border/60 bg-background/95 px-4 py-3 text-left backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-6 sm:py-4">
@@ -67,13 +76,38 @@ export function EntitySheetHeader({
               {subtitle}
             </p>
           ) : null}
-          {metadata ? (
-            <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-              {metadata}
-            </div>
-          ) : null}
+          <AnimatePresence initial={false}>
+            {metadata ? (
+              <motion.div
+                key="metadata"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{
+                  duration: reduceMotion ? 0 : 0.2,
+                  ease: "easeOut",
+                }}
+                className="overflow-hidden"
+              >
+                <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 pt-1 text-xs text-muted-foreground">
+                  {metadata}
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
         {headerAction}
+        {externalHref ? (
+          <Link
+            href={externalHref}
+            onClick={onExternalNavigate}
+            aria-label={t("common.openFullPage")}
+            className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted/30 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:size-8 sm:rounded-lg"
+          >
+            <Icon icon={ExternalLink} className="size-4" />
+            <span className="sr-only">{t("common.openFullPage")}</span>
+          </Link>
+        ) : null}
         <SheetClose
           aria-label={t("common.close")}
           className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted/30 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:size-8 sm:rounded-lg"

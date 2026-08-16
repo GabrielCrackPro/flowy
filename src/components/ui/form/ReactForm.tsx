@@ -9,6 +9,7 @@ import {
   FormProvider,
   useFormContext,
 } from "react-hook-form";
+import { FIELD_LABEL } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 
 const Form = FormProvider;
@@ -92,7 +93,8 @@ const FormLabel = React.forwardRef<
       ref={ref}
       htmlFor={formItemId}
       className={cn(
-        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+        FIELD_LABEL,
+        "peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
         className,
       )}
       {...props}

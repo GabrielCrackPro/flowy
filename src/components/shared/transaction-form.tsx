@@ -18,10 +18,10 @@ import { deleteUploadedReceipt } from "@/lib/api/upload";
 import { Camera, Pencil } from "@/lib/icons";
 import { BackHeader } from "../dashboard/header/BackHeader";
 import { FileUpload } from "./file-upload";
-import { Icon } from "./icon";
 import { AdditionalOptions } from "./transaction-form/AdditionalOptions";
 import { AmountSection } from "./transaction-form/AmountSection";
 import { FormActions } from "./transaction-form/FormActions";
+import { FormCard } from "./transaction-form/FormCard";
 import { TransactionSidebar } from "./transaction-form/TransactionSidebar";
 
 export function getDefaultTransactionValues(): CreateTransactionSchema {
@@ -310,40 +310,14 @@ export function TransactionForm({
               amountTouched={touched.has("amount")}
             />
 
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className={cn(
-                "relative overflow-hidden border border-border/30 bg-card",
-                embedded
-                  ? "rounded-xl p-4"
-                  : "rounded-2xl bg-linear-to-br from-primary/5 via-primary/[0.02] to-transparent p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] sm:p-6",
-              )}
+            <FormCard
+              tone="primary"
+              icon={Pencil}
+              title={t("transaction.descriptionField")}
+              titleId="transaction-description-heading"
+              embedded={embedded}
+              delay={0.1}
             >
-              {!embedded && (
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-primary via-primary/50 to-primary" />
-              )}
-
-              <div className="mb-4 flex items-center gap-3">
-                <div
-                  className={cn(
-                    "flex size-8 items-center justify-center rounded-lg text-primary ring-1 ring-inset ring-primary/10",
-                    embedded
-                      ? "bg-primary/10"
-                      : "bg-linear-to-br from-primary/20 to-primary/10",
-                  )}
-                >
-                  <Icon icon={Pencil} className="size-4" />
-                </div>
-                <span
-                  id="transaction-description-heading"
-                  className="text-sm font-semibold text-foreground/90"
-                >
-                  {t("transaction.descriptionField")}
-                </span>
-              </div>
-
               <FormField error={descriptionError} required>
                 <Input
                   id="transaction-description"
@@ -358,7 +332,7 @@ export function TransactionForm({
                   className="h-12 text-base focus:ring-2 focus:ring-primary/20"
                 />
               </FormField>
-            </motion.div>
+            </FormCard>
 
             {embedded ? (
               <TransactionSidebar
@@ -387,37 +361,13 @@ export function TransactionForm({
               />
             ) : null}
 
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.15 }}
-              className={cn(
-                "relative overflow-hidden border border-border/30 bg-card",
-                embedded
-                  ? "rounded-xl p-4"
-                  : "rounded-2xl bg-linear-to-br from-amber-500/5 via-amber-500/[0.02] to-transparent p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] sm:p-6",
-              )}
+            <FormCard
+              tone="amber"
+              icon={Camera}
+              title={t("transaction.receipt")}
+              embedded={embedded}
+              delay={0.15}
             >
-              {!embedded && (
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-amber-500 via-amber-400 to-amber-500" />
-              )}
-
-              <div className="mb-4 flex items-center gap-3">
-                <div
-                  className={cn(
-                    "flex size-8 items-center justify-center rounded-lg text-amber-600 ring-1 ring-inset ring-amber-500/10 dark:text-amber-400",
-                    embedded
-                      ? "bg-amber-500/10 dark:bg-amber-500/20"
-                      : "bg-linear-to-br from-amber-500/20 to-amber-500/10 dark:from-amber-500/30 dark:to-amber-500/20",
-                  )}
-                >
-                  <Icon icon={Camera} className="size-4" />
-                </div>
-                <span className="text-sm font-semibold text-foreground/90">
-                  {t("transaction.receipt")}
-                </span>
-              </div>
-
               <FormField>
                 <FileUpload
                   compact={embedded}
@@ -437,7 +387,7 @@ export function TransactionForm({
                   }}
                 />
               </FormField>
-            </motion.div>
+            </FormCard>
 
             {embedded ? (
               <AdditionalOptions

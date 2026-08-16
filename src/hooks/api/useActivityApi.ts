@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "@/components/shared/toast";
 import { useProfile } from "@/hooks/useProfile";
 import { clearActivities, getActivities } from "@/lib/api/activity";
@@ -9,6 +10,7 @@ import type { Activity, ActivityFilters } from "@/types/Activity";
 export function useActivityApi(filters?: ActivityFilters) {
   const queryClient = useQueryClient();
   const { profile } = useProfile();
+  const { t } = useTranslation();
   const activeSpaceId = profile?.activeSpaceId ?? null;
 
   const query = useQuery({
@@ -22,11 +24,11 @@ export function useActivityApi(filters?: ActivityFilters) {
       queryClient.invalidateQueries({
         queryKey: ["activities", activeSpaceId],
       });
-      toast.success("Actividad eliminada correctamente");
+      toast.success(t("activity.clearSuccess"));
     },
     onError: (error) => {
       toast.error(
-        error instanceof Error ? error.message : "Could not delete activity",
+        error instanceof Error ? error.message : t("activity.clearError"),
       );
     },
   });

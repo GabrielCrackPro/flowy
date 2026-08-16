@@ -211,7 +211,7 @@ export function AccountSecurityActions() {
         }
         cancelLabel={t("common.cancel")}
         onConfirm={() => void handleSignOutAll()}
-        icon={<LogOut className="size-6 text-destructive" />}
+        icon={<LogOut className="size-5" />}
         variant="destructive"
       />
 
@@ -227,7 +227,7 @@ export function AccountSecurityActions() {
         }
         cancelLabel={t("common.cancel")}
         onConfirm={() => void handleDeleteAccount()}
-        icon={<Icon icon={ShieldAlert} className="size-6 text-destructive" />}
+        icon={<Icon icon={ShieldAlert} className="size-5" />}
         variant="destructive"
       />
     </>

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { DatePicker } from "@/components/shared/date-picker";
 import { Icon } from "@/components/shared/icon";
@@ -18,7 +19,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { SheetLayout } from "@/components/ui/sheet-layout";
 import { Textarea } from "@/components/ui/textarea";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { useReactForm } from "@/hooks/useReactForm";
@@ -871,47 +871,48 @@ export function IncidentAdminPanel() {
       />
 
       {/* Draft preview before publishing publicly */}
-      <SheetLayout
+      <BottomSheet
         open={previewTarget !== null}
         onOpenChange={(open) => {
           if (!open) setPreviewTarget(null);
         }}
         title={t("status.incidents.preview")}
         description={t("status.incidents.previewHint")}
-        icon={Send}
+        icon={<Icon icon={Send} className="size-5" />}
         iconGradient="from-primary/20 to-primary/10"
         iconColor="text-primary"
-        maxWidth="sm:max-w-[500px]"
-        footerRight={
-          <>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setPreviewTarget(null)}
-              disabled={publishingId !== null}
-              className="h-10"
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button
-              type="button"
-              onClick={() => {
-                if (!previewTarget) return;
-                void publishDraft(previewTarget).then(() =>
-                  setPreviewTarget(null),
-                );
-              }}
-              disabled={publishingId !== null}
-              className="h-10 gap-1.5"
-            >
-              {publishingId !== null ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Send className="size-4" />
-              )}
-              {t("status.incidents.publish")}
-            </Button>
-          </>
+        className="sm:max-w-[500px] sm:mx-auto sm:rounded-3xl"
+        contentClassName="px-4 py-5 sm:px-6 sm:py-6"
+        footerSecondary={
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setPreviewTarget(null)}
+            disabled={publishingId !== null}
+            className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
+          >
+            {t("common.cancel")}
+          </Button>
+        }
+        footerPrimary={
+          <Button
+            type="button"
+            onClick={() => {
+              if (!previewTarget) return;
+              void publishDraft(previewTarget).then(() =>
+                setPreviewTarget(null),
+              );
+            }}
+            disabled={publishingId !== null}
+            className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 sm:h-10 sm:w-auto sm:min-w-28"
+          >
+            {publishingId !== null ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Send className="size-4" />
+            )}
+            {t("status.incidents.publish")}
+          </Button>
         }
       >
         {previewTarget && (
@@ -945,10 +946,10 @@ export function IncidentAdminPanel() {
             )}
           </article>
         )}
-      </SheetLayout>
+      </BottomSheet>
 
       {/* Post an update to an existing incident */}
-      <SheetLayout
+      <BottomSheet
         open={updateTarget !== null}
         onOpenChange={(open) => {
           if (!open) {
@@ -964,43 +965,44 @@ export function IncidentAdminPanel() {
               })
             : ""
         }
-        icon={MessageSquare}
+        icon={<Icon icon={MessageSquare} className="size-5" />}
         iconGradient="from-primary/20 to-primary/10"
         iconColor="text-primary"
-        maxWidth="sm:max-w-[500px]"
-        footerRight={
-          <>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setUpdateTarget(null);
-                updateForm.reset();
-              }}
-              disabled={updatingId !== null}
-              className="h-10"
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button
-              type="submit"
-              onClick={() => updateForm.handleSubmit()}
-              disabled={updatingId !== null}
-              className="h-10 gap-1.5 shadow-sm"
-            >
-              {updatingId !== null ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  {t("common.saving")}
-                </>
-              ) : (
-                <>
-                  {t("status.incidents.postUpdate")}
-                  <MessageSquare className="size-4" />
-                </>
-              )}
-            </Button>
-          </>
+        className="sm:max-w-[500px] sm:mx-auto sm:rounded-3xl"
+        contentClassName="px-4 py-5 sm:px-6 sm:py-6"
+        footerSecondary={
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setUpdateTarget(null);
+              updateForm.reset();
+            }}
+            disabled={updatingId !== null}
+            className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
+          >
+            {t("common.cancel")}
+          </Button>
+        }
+        footerPrimary={
+          <Button
+            type="submit"
+            onClick={() => updateForm.handleSubmit()}
+            disabled={updatingId !== null}
+            className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 sm:h-10 sm:w-auto sm:min-w-28"
+          >
+            {updatingId !== null ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                {t("common.saving")}
+              </>
+            ) : (
+              <>
+                {t("status.incidents.postUpdate")}
+                <MessageSquare className="size-4" />
+              </>
+            )}
+          </Button>
         }
       >
         <form
@@ -1068,50 +1070,51 @@ export function IncidentAdminPanel() {
             </div>
           ) : null}
         </form>
-      </SheetLayout>
+      </BottomSheet>
 
-      <SheetLayout
+      <BottomSheet
         open={createOpen}
         onOpenChange={setCreateOpen}
         title={t("status.incidents.create")}
         description={t("status.incidents.createHint")}
-        icon={Activity}
+        icon={<Icon icon={Activity} className="size-5" />}
         iconGradient="from-primary/20 to-primary/10"
         iconColor="text-primary"
-        maxWidth="sm:max-w-[500px]"
-        footerRight={
-          <>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setCreateOpen(false);
-                form.reset();
-              }}
-              disabled={form.busy}
-              className="h-10"
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button
-              type="submit"
-              onClick={() => form.handleSubmit()}
-              disabled={form.busy}
-              className="h-10 gap-1.5 shadow-sm"
-            >
-              {form.busy ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  {t("common.saving")}
-                </>
-              ) : (
-                <>
-                  {t("common.create")}
-                  <Plus className="size-4" />
-                </>
-              )}
-            </Button>
-          </>
+        className="sm:max-w-[500px] sm:mx-auto sm:rounded-3xl"
+        contentClassName="px-4 py-5 sm:px-6 sm:py-6"
+        footerSecondary={
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setCreateOpen(false);
+              form.reset();
+            }}
+            disabled={form.busy}
+            className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
+          >
+            {t("common.cancel")}
+          </Button>
+        }
+        footerPrimary={
+          <Button
+            type="submit"
+            onClick={() => form.handleSubmit()}
+            disabled={form.busy}
+            className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 sm:h-10 sm:w-auto sm:min-w-28"
+          >
+            {form.busy ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                {t("common.saving")}
+              </>
+            ) : (
+              <>
+                {t("common.create")}
+                <Plus className="size-4" />
+              </>
+            )}
+          </Button>
         }
       >
         <form onSubmit={(e) => form.handleSubmit(e)} className="space-y-6">
@@ -1351,7 +1354,7 @@ export function IncidentAdminPanel() {
             </div>
           ) : null}
         </form>
-      </SheetLayout>
+      </BottomSheet>
     </section>
   );
 }
