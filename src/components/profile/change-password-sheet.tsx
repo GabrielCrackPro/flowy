@@ -85,7 +85,7 @@ export function ChangePasswordSheet({
       icon={<Icon icon={KeyRound} className="size-5" />}
       iconGradient="from-indigo-500/20 to-indigo-500/10"
       iconColor="text-indigo-600 dark:text-indigo-400"
-      className="sm:max-w-[500px] sm:mx-auto sm:rounded-3xl"
+      className="sm:max-w-[500px]"
       contentClassName="px-4 py-5 sm:px-6 sm:py-6"
       footerSecondary={
         <Button

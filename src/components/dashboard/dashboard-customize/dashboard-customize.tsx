@@ -184,7 +184,7 @@ export function DashboardCustomize({
         title={t("dashboard.customizeTitle")}
         description={t("dashboard.customizeDescription")}
         icon={<Icon icon={LayoutGrid} className="size-5" />}
-        className="sm:max-w-md sm:mx-auto sm:rounded-3xl"
+        className="sm:max-w-md"
         contentClassName="px-4 py-5 sm:px-6 sm:py-6"
         footerTertiary={
           <Button

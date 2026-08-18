@@ -227,7 +227,7 @@ export function ThemeCustomizationSheet({
         title={t("settings.theme.title")}
         description={t("settings.theme.description")}
         icon={<Palette className="size-5" />}
-        className="sm:max-w-2xl sm:mx-auto sm:rounded-3xl"
+        className="sm:max-w-2xl"
         contentClassName="px-4 py-5 sm:px-6 sm:py-6"
         footerTertiary={
           <Button

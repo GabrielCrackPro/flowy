@@ -94,10 +94,7 @@ export function BottomSheet({
               defaultSnapPoint={defaultSnapPoint}
               aria-labelledby={titleId}
               aria-describedby={description ? descriptionId : undefined}
-              className={cn(
-                "flex max-h-[min(92dvh,720px)] w-full flex-col rounded-t-3xl border-x-0 p-0",
-                className,
-              )}
+              className={cn("flex w-full flex-col p-0", className)}
             >
               <EntitySheetHeader
                 icon={icon}

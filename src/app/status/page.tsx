@@ -879,7 +879,7 @@ function ComponentDetailSheet({
       }
       iconGradient="from-primary/20 to-primary/10"
       iconColor="text-primary"
-      className="sm:max-w-lg sm:mx-auto sm:rounded-3xl"
+      className="sm:max-w-lg"
       contentClassName="px-4 py-5 sm:px-6 sm:py-6"
       snapPoints={[0.45, 0.92]}
     >
@@ -1260,7 +1260,7 @@ function DaySummarySheet({
       icon={<Icon icon={CalendarClock} className="size-5" />}
       iconGradient="from-primary/20 to-primary/10"
       iconColor="text-primary"
-      className="sm:max-w-sm sm:mx-auto sm:rounded-3xl"
+      className="sm:max-w-sm"
       contentClassName="px-4 py-5 sm:px-6 sm:py-6"
     >
       {bar && (

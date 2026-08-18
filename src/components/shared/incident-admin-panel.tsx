@@ -881,7 +881,7 @@ export function IncidentAdminPanel() {
         icon={<Icon icon={Send} className="size-5" />}
         iconGradient="from-primary/20 to-primary/10"
         iconColor="text-primary"
-        className="sm:max-w-[500px] sm:mx-auto sm:rounded-3xl"
+        className="sm:max-w-[500px]"
         contentClassName="px-4 py-5 sm:px-6 sm:py-6"
         footerSecondary={
           <Button
@@ -968,7 +968,7 @@ export function IncidentAdminPanel() {
         icon={<Icon icon={MessageSquare} className="size-5" />}
         iconGradient="from-primary/20 to-primary/10"
         iconColor="text-primary"
-        className="sm:max-w-[500px] sm:mx-auto sm:rounded-3xl"
+        className="sm:max-w-[500px]"
         contentClassName="px-4 py-5 sm:px-6 sm:py-6"
         footerSecondary={
           <Button
@@ -1080,7 +1080,7 @@ export function IncidentAdminPanel() {
         icon={<Icon icon={Activity} className="size-5" />}
         iconGradient="from-primary/20 to-primary/10"
         iconColor="text-primary"
-        className="sm:max-w-[500px] sm:mx-auto sm:rounded-3xl"
+        className="sm:max-w-[500px]"
         contentClassName="px-4 py-5 sm:px-6 sm:py-6"
         footerSecondary={
           <Button
