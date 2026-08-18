@@ -2,6 +2,21 @@
   "currentVersion": "0.1.39",
   "entries": [
     {
+      "version": "0.1.39",
+      "date": "2026-08-18",
+      "sections": [
+        {
+          "type": "fixes",
+          "items": [
+            {
+              "text": "open desktop sheets as right-side drawers (#190)",
+              "scope": "ui"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.38",
       "date": "2026-08-16",
       "sections": [
