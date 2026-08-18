@@ -7,6 +7,8 @@ tags: indexes, composite-index, multi-column, query-optimization
 
 ## Create Composite Indexes for Multi-Column Queries
 
+> **Flowy:** the hot composite indexes already exist — `transactions(space_id, date)` and `budgets(space_id, month, year)` in `supabase/migrations/015_composite_indexes.sql`. Put the equality column (`space_id`) first, matching that pattern.
+
 When queries filter on multiple columns, a composite index is more efficient than separate single-column indexes.
 
 **Incorrect (separate indexes require bitmap scan):**

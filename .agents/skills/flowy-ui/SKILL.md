@@ -88,8 +88,8 @@ Rules:
 
 `SheetLayout` is **deleted**. Every sheet renders through the shared
 `BottomSheet` (`src/components/shared/bottom-sheet.tsx`) — **do not create a
-new sheet wrapper**. It is a bottom sheet on **all** viewports (mobile *and*
-desktop); on desktop it's centered and width-capped via `className`.
+new sheet wrapper**. It is a bottom sheet on **mobile** and a full-height
+right-edge drawer on **desktop**, width-capped via `className`.
 
 ```tsx
 <BottomSheet
@@ -99,7 +99,7 @@ desktop); on desktop it's centered and width-capped via `className`.
   description={t("…")}
   icon={<Icon icon={Wallet} className="size-5" />}
   externalHref="/changelog" // optional "open full page" header link
-  className="sm:max-w-md sm:mx-auto sm:rounded-3xl"
+  className="sm:max-w-md"
   contentClassName="px-4 py-5 sm:px-6 sm:py-6"
   snapPoints={[0.5, 0.92]} // optional mobile pull-up detents (ascending 0..1)
   defaultSnapPoint={0}
@@ -123,7 +123,7 @@ desktop); on desktop it's centered and width-capped via `className`.
 | `footer` | Custom footer content, laid out right-aligned in a row (for full-width/custom footers). |
 | `footerLeft` / `footerRight` | Responsive start/end actions via `SheetActionFooter`: stacked on mobile, split left/right on desktop. A lone `footerRight` is right-aligned on desktop (`ml-auto`). |
 | `footerPrimary` / `footerSecondary` / `footerTertiary` | Three-action footer: primary is full-width top on mobile (rightmost on desktop); secondary and tertiary share a half-width row below on mobile (middle / far-left on desktop). Buttons should carry `w-full sm:w-auto`. |
-| `className` | Passed to `SheetContent`. For desktop width: `sm:max-w-{size} sm:mx-auto sm:rounded-3xl` (mirrors the old `SheetLayout` `maxWidth`). |
+| `className` | Passed to `SheetContent`. For desktop width: `sm:max-w-{size}`. |
 | `contentClassName` | Scroll-area padding. The old `SheetLayout` wrapper supplied `px-4 py-5 sm:px-6 sm:py-6` — pass it here explicitly. |
 | `footerClassName` | Extra classes for the footer wrapper. |
 | `snapPoints` | Optional ascending viewport-height fractions (0..1), e.g. `[0.5, 0.92]`. Enables **mobile** pull-up expand / pull-down collapse via the drag handle. Two or more points required; desktop ignores it. |
@@ -131,14 +131,14 @@ desktop); on desktop it's centered and width-capped via `className`.
 
 ### Chrome behavior (from `ui/sheet.tsx` + `EntitySheetHeader`)
 
-- Opens from the bottom with a spring/cubic-bezier; `rounded-t-3xl`, drag handle, swipe-down dismissal, system-back dismissal, and `pb-[env(safe-area-inset-bottom)]`. Respect `prefers-reduced-motion`.
+- Mobile: opens from the bottom with a spring/cubic-bezier; `rounded-t-3xl`, drag handle, swipe-down dismissal, system-back dismissal, and `pb-[env(safe-area-inset-bottom)]`. Desktop: slides in from the right edge full-height (`inset-y-0 right-0`). Respect `prefers-reduced-motion`.
 - With `snapPoints`, the drag handle also **expands/collapses** between detents (drag up to grow, down past the smallest to dismiss). Implemented by `useBottomSheetDetents` (`src/hooks/useBottomSheetDetents.ts`); desktop and non-snap sheets keep the legacy `useBottomSheetSwipe` behavior.
 - **No shadows on sheet surfaces** — separation comes from `bg-background`, `border`, and the `bg-black/60 backdrop-blur-sm` overlay.
 - Supporting pieces (reuse, don't re-roll):
   - `EntitySheetHeader` (`entity-sheet/entity-sheet-header.tsx`) — icon tile, title, subtitle, metadata, `externalHref` link, close button; sticky + blurred.
   - `SheetActionFooter` (`entity-sheet/sheet-action-footer.tsx`) — sticky safe-area footer; `footerLeft`/`footerRight` map to `start`/`end`, `footer` maps to custom `content`.
   - `EntitySheetFooter` (`entity-sheet/entity-sheet-footer.tsx`) — cancel (ghost) + submit (primary) for entity form dialogs.
-- The low-level `Sheet`/`SheetContent` primitive (`ui/sheet.tsx`) still auto-converts any `side` to bottom on mobile, but **do not hand-roll a new sheet** — compose via `BottomSheet`.
+- The low-level `Sheet`/`SheetContent` primitive (`ui/sheet.tsx`) resolves to a right-edge drawer on desktop and a bottom sheet on mobile (the `side` prop is legacy), but **do not hand-roll a new sheet** — compose via `BottomSheet`.
 - Entity form dialogs (budget/goal/category/subscription/new-transaction) currently use `EntitySheetHeader` + `EntitySheetFooter` directly inside `Sheet`/`SheetContent`; when touching them, prefer migrating to `BottomSheet` so there is a single chrome. Reuse `FormSection` + `PreviewCard` for their content.
 
 ## 5. Mobile chrome (identical for browser tab and installed PWA)

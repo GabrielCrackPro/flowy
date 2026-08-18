@@ -19,6 +19,12 @@ boolean prop proliferation by using compound components, lifting state, and
 composing internals. These patterns make codebases easier for both humans and AI
 agents to work with as they scale.
 
+## Flowy specifics (read first)
+
+- **React 19** — the `react19-no-forwardref` rule applies: pass `ref` as a normal prop instead of `forwardRef`.
+- **shadcn/ui on Base UI** (`@base-ui/react` + phantom-ui) — custom triggers use the `render` prop, not Radix's `asChild`.
+- **The shared chrome already follows these patterns** — `BottomSheet`, `ActionBar`, `ConfirmDialog`, `control-styles.ts`, `EntitySheetHeader/Footer`, and `SheetActionFooter` (in `src/components/shared/` + `src/components/ui/`) are the composition seams. Reuse them instead of adding boolean props to new components; see the `flowy-ui` skill.
+
 ## When to Apply
 
 Reference these guidelines when:
@@ -83,7 +89,3 @@ Each rule file contains:
 - Incorrect code example with explanation
 - Correct code example with explanation
 - Additional context and references
-
-## Full Compiled Document
-
-For the complete guide with all rules expanded: `AGENTS.md`

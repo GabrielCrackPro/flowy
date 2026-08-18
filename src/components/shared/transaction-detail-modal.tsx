@@ -200,7 +200,7 @@ export function TransactionDetailModal({
         </>
       }
       externalHref={`/dashboard/transactions/${transaction.id}`}
-      className="sm:max-w-105 sm:mx-auto sm:rounded-3xl"
+      className="sm:max-w-105"
       contentClassName="space-y-6 p-5 sm:p-6"
       snapPoints={[0.5, 0.92]}
     >

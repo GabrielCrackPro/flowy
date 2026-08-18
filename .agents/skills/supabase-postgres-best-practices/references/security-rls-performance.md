@@ -7,6 +7,8 @@ tags: rls, performance, security, optimization
 
 ## Optimize RLS Policies for Performance
 
+> **Flowy:** RLS predicates filter on `space_id`; the `space_id` FK + composite indexes already exist (`008_spaces.sql`, `015_composite_indexes.sql`). Keep policy predicates indexable by `space_id`, and remember Realtime bypasses RLS (validate payloads client-side).
+
 Poorly written RLS policies can cause severe performance issues. Use subqueries and indexes strategically.
 
 **Incorrect (function called for every row):**

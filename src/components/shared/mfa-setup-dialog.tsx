@@ -271,7 +271,7 @@ export function MfaSetupDialog({
           </>
         ) : undefined
       }
-      className="sm:max-w-[560px] sm:mx-auto sm:rounded-3xl"
+      className="sm:max-w-[560px]"
       contentClassName="px-4 py-5 sm:px-6 sm:py-6"
       footerSecondary={
         setup && step === 1 ? (

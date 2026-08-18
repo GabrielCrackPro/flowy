@@ -129,16 +129,24 @@ export function SheetContent({
     onDismiss: () => setOpen(false),
   });
 
-  // On mobile every sheet becomes a bottom sheet for consistent UX. Desktop
-  // keeps the caller-provided side. `useIsMobile` starts false during SSR, so
-  // nothing renders until the viewport is known to avoid a flash of the
-  // desktop side before the mobile re-render.
+  // On mobile every sheet becomes a bottom sheet for consistent UX; on
+  // desktop every sheet opens from the right edge. `useIsMobile` starts false
+  // during SSR, so nothing renders until the viewport is known to avoid a
+  // flash of the desktop side before the mobile re-render.
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  const effectiveSide = !mounted || !isMobile ? side : "bottom";
+  type EffectiveSide = "right" | "bottom";
+
+  // `side` is kept for API compatibility; desktop is always right, mobile is
+  // always bottom.
+  void side;
+
+  const effectiveSide: EffectiveSide =
+    !mounted || !isMobile ? "right" : "bottom";
+
   const hasDetents =
     isMobile && snapPoints !== undefined && snapPoints.length > 1;
   const swipeHandlers = hasDetents
@@ -158,21 +166,40 @@ export function SheetContent({
     };
   }, [open]);
 
-  const sidePosition: Record<typeof side, string> = {
-    left: "inset-y-0 left-0 h-full border-r",
+  const sidePosition: Record<EffectiveSide, string> = {
     right: "inset-y-0 right-0 h-full border-l",
-    top: "inset-x-0 top-0 border-b",
     bottom: "inset-x-0 bottom-0 border-t",
   };
 
-  const hiddenTransform: Record<typeof side, { x?: string; y?: string }> = {
-    left: { x: "-100%" },
+  const hiddenTransform: Record<EffectiveSide, { x?: string; y?: string }> = {
     right: { x: "100%" },
-    top: { y: "-100%" },
     bottom: { y: "100%" },
   };
 
   const bottomPosition = "inset-x-0 bottom-0 max-h-[92dvh] w-full border-t";
+
+  const initialAnimation = {
+    ...hiddenTransform[effectiveSide],
+    ...(hasDetents
+      ? { height: `${detents.targetHeightFraction * 100}dvh` }
+      : {}),
+  };
+
+  const animateAnimation = {
+    x: 0,
+    y: effectiveSide === "bottom" ? translateY : 0,
+    ...(hasDetents
+      ? {
+          height: `${
+            (detents.isDragging
+              ? detents.heightFraction
+              : detents.targetHeightFraction) * 100
+          }dvh`,
+        }
+      : {}),
+  };
+
+  const exitAnimation = hiddenTransform[effectiveSide];
 
   // Mobile sheets take their own height; drop the full-height constraint
   // that right-side sheets use so `max-h-[92dvh]` wins.
@@ -199,26 +226,9 @@ export function SheetContent({
             data-slot="sheet-content"
             role="dialog"
             aria-modal="true"
-            initial={{
-              ...hiddenTransform[effectiveSide],
-              ...(hasDetents
-                ? { height: `${detents.targetHeightFraction * 100}dvh` }
-                : {}),
-            }}
-            animate={{
-              x: 0,
-              y: effectiveSide === "bottom" ? translateY : 0,
-              ...(hasDetents
-                ? {
-                    height: `${
-                      (detents.isDragging
-                        ? detents.heightFraction
-                        : detents.targetHeightFraction) * 100
-                    }dvh`,
-                  }
-                : {}),
-            }}
-            exit={hiddenTransform[effectiveSide]}
+            initial={initialAnimation}
+            animate={animateAnimation}
+            exit={exitAnimation}
             transition={
               dragging
                 ? { duration: 0 }

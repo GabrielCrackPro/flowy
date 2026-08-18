@@ -11,6 +11,8 @@ metadata:
 
 Turn a brief task description into a complete, copy-paste-ready GitHub issue that follows the project's template at `.github/ISSUE_TEMPLATE/engineering-task.yml`.
 
+This skill only **drafts** — it never writes to GitHub. To create or update an issue on GitHub, use the `github-issues` skill (it owns the canonical body template and label conventions).
+
 ## Input
 
 - A task brief: a sentence, paragraph, or rough description of work to be done.

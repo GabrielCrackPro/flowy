@@ -7,6 +7,8 @@ tags: foreign-key, indexes, joins, schema
 
 ## Index Foreign Key Columns
 
+> **Flowy:** `space_id` foreign keys are already indexed (`space_members_space_id_idx` in `008_spaces.sql`; composite `space_id` indexes in `015_composite_indexes.sql`). Any new FK column must ship its index in the same migration.
+
 Postgres does not automatically index foreign key columns. Missing indexes cause slow JOINs and CASCADE operations.
 
 **Incorrect (unindexed foreign key):**

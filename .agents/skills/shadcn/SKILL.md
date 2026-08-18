@@ -19,6 +19,25 @@ A framework for building ui, components and design systems. Components are added
 
 The JSON above contains the project config and installed components. Use `npx shadcn@latest docs <component>` to get documentation and example URLs for any component.
 
+## Flowy project context (authoritative)
+
+The `info` output above may not populate in every environment. In this repo the concrete values are:
+
+- **Base:** `base` — Base UI (`@base-ui/react` + `@aejkatappaja/phantom-ui`), **not** Radix. Custom triggers use the `render` prop, not `asChild` (see `rules/base-vs-radix.md`).
+- **Style / preset:** `base-nova`.
+- **Icon library:** `lucide` (`lucide-react`). Never assume a different library.
+- **Tailwind:** v4 (CSS-first) — tokens live in `@theme inline` in `src/app/globals.css`; a `tailwind.config.ts` shim exists. Never create a new CSS file.
+- **Aliases:** components `@/components` (ui → `@/components/ui`), utils `@/lib/utils`, lib `@/lib`, hooks `@/hooks`.
+- **Package manager:** `pnpm` — use `pnpm dlx shadcn@latest …`.
+
+**Installed components** (`src/components/ui/`): `alert-dialog`, `badge`, `button`, `calendar`, `card`, `chart`, `checkbox`, `dialog`, `dropdown-menu`, `input`, `popover`, `select`, `sheet`, `sonner`, `stepper`, `switch`, `table`, `textarea`, plus a custom `form/` directory (`FormAlert`, `FormField`, `FormLabel`, `ReactForm`).
+
+**Local deviations to respect (do not overwrite or bypass):**
+
+- `Sheet` is heavily customized and driven through `BottomSheet` (`src/components/shared/bottom-sheet.tsx`): a right-edge full-height drawer on desktop, a bottom sheet on mobile. See the `flowy-ui` skill — don't re-add a vanilla shadcn Sheet.
+- `stepper.tsx` is a local addition, not an upstream shadcn component.
+- `control-styles.ts` holds shared control tokens — prefer it over raw class strings (see `flowy-ui`).
+
 ## Principles
 
 1. **Use existing components first.** Use `npx shadcn@latest search` to check registries before writing custom UI. Check community registries too.

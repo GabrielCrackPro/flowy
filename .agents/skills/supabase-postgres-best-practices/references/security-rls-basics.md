@@ -7,6 +7,8 @@ tags: rls, row-level-security, multi-tenant, security
 
 ## Enable Row Level Security for Multi-Tenant Data
 
+> **Flowy:** ownership is the nullable `space_id`, not `user_id` alone — personal data uses `space_id: null`. Policies live in `supabase/migrations/002_rls.sql` and must check space membership (via `space_members`), not just `user_id = auth.uid()`.
+
 Row Level Security (RLS) enforces data access at the database level, ensuring users only see their own data.
 
 **Incorrect (application-level filtering only):**

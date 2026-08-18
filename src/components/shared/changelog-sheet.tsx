@@ -419,7 +419,7 @@ export function ChangelogSheet({ open, onOpenChange }: ChangelogSheetProps) {
       description={t("changelog.description")}
       icon={<Icon icon={Sparkles} className="size-5" />}
       externalHref="/changelog"
-      className="sm:max-w-lg sm:mx-auto sm:rounded-3xl"
+      className="sm:max-w-lg"
       contentClassName="px-4 py-5 sm:px-5 sm:py-5"
       snapPoints={[0.45, 0.92]}
     >
