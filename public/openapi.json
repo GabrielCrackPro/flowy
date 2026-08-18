@@ -7134,11 +7134,31 @@
             "description": "Whether to show the in-app language switcher"
           },
           "dashboardCards": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "Ordered dashboard card keys"
+          },
+          "dashboardOrder": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         }
       },
