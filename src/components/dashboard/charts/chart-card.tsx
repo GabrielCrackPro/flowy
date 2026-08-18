@@ -1,6 +1,6 @@
 "use client";
 
-import { Skeleton } from "@components/shared";
+import { Skeleton, useCardMotion } from "@components/shared";
 import {
   CARD_BG_GRADIENT,
   CARD_SHELL,
@@ -10,11 +10,12 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export function ChartCardSkeleton() {
+  const { item } = useCardMotion();
   return (
     <motion.article
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      variants={item}
+      initial="hidden"
+      animate="show"
       className={cn(CARD_SHELL, "min-h-[280px]")}
     >
       <div

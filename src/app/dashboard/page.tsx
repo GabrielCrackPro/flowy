@@ -27,6 +27,12 @@ import {
 import { useTranslation } from "react-i18next";
 import { MfaGate } from "@/components/auth/mfa-gate";
 import { useDashboardCards } from "@/hooks/useDashboardCards";
+import { useDashboardOrder } from "@/hooks/useDashboardOrder";
+import {
+  DASHBOARD_REGIONS,
+  type DashboardCardId,
+  orderForRegion,
+} from "@/lib/dashboard-cards";
 import { cn } from "@/lib/utils";
 
 // Dynamic imports for heavy chart components
@@ -83,9 +89,14 @@ function SectionHeading({
   );
 }
 
+function regionCards(id: string): readonly DashboardCardId[] {
+  return DASHBOARD_REGIONS.find((region) => region.id === id)?.cards ?? [];
+}
+
 export default function DashboardPage() {
   const { t } = useTranslation();
   const { isCardEnabled } = useDashboardCards();
+  const { order } = useDashboardOrder();
 
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -121,29 +132,77 @@ export default function DashboardPage() {
     setYear(y);
   }, []);
 
-  const showInsights = isCardEnabled("insights");
-  const showStats = isCardEnabled("stats");
-  const showCashFlow = isCardEnabled("cashFlow");
-  const showExpenseDistribution = isCardEnabled("expenseDistribution");
-  const showDistribution = isCardEnabled("distribution");
-  const showRecentTransactions = isCardEnabled("recentTransactions");
-  const showBudgetProgress = isCardEnabled("budgetProgress");
-  const showGoalProgress = isCardEnabled("goalProgress");
-  const showSubscriptions = isCardEnabled("subscriptions");
-  const showActivity = isCardEnabled("activity");
+  const summaryOrder = orderForRegion(order, regionCards("summary")).filter(
+    isCardEnabled,
+  );
+  const chartOrder = orderForRegion(order, regionCards("charts")).filter(
+    isCardEnabled,
+  );
+  const mainOrder = orderForRegion(order, regionCards("main")).filter(
+    isCardEnabled,
+  );
+  const asideOrder = orderForRegion(order, regionCards("aside")).filter(
+    isCardEnabled,
+  );
 
-  const showCharts = showCashFlow || showExpenseDistribution;
-  const showMainColumn =
-    showDistribution ||
-    showRecentTransactions ||
-    showBudgetProgress ||
-    showGoalProgress;
-  const showAside = showSubscriptions || showActivity;
+  const showCashFlow = chartOrder.includes("cashFlow");
+  const showExpenseDistribution = chartOrder.includes("expenseDistribution");
+  const showCharts = chartOrder.length > 0;
+  const showMainColumn = mainOrder.length > 0;
+  const showAside = asideOrder.length > 0;
   const showAnalysis = showCharts || showMainColumn || showAside;
+
+  // Pair budget + goal progress side by side only when they are adjacent in
+  // the stored order; otherwise each renders full-width in the main column.
+  const mainSlots: { ids: DashboardCardId[] }[] = [];
+  for (const id of mainOrder) {
+    const last = mainSlots[mainSlots.length - 1];
+    const sibling =
+      last &&
+      last.ids.length === 1 &&
+      ((last.ids[0] === "budgetProgress" && id === "goalProgress") ||
+        (last.ids[0] === "goalProgress" && id === "budgetProgress"));
+    if (sibling) {
+      last.ids.push(id);
+    } else {
+      mainSlots.push({ ids: [id] });
+    }
+  }
+
+  const renderMainCard = (id: DashboardCardId) => {
+    switch (id) {
+      case "distribution":
+        return (
+          <ErrorBoundary key="distribution">
+            <DistributionCard month={month} year={year} />
+          </ErrorBoundary>
+        );
+      case "recentTransactions":
+        return (
+          <ErrorBoundary key="recentTransactions">
+            <RecentTransactionsCard month={month} year={year} />
+          </ErrorBoundary>
+        );
+      case "budgetProgress":
+        return (
+          <ErrorBoundary key="budgetProgress">
+            <BudgetProgressCard month={month} year={year} />
+          </ErrorBoundary>
+        );
+      case "goalProgress":
+        return (
+          <ErrorBoundary key="goalProgress">
+            <GoalProgressCard month={month} year={year} />
+          </ErrorBoundary>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <MfaGate>
-      <div className="space-y-8 lg:space-y-10">
+      <div className="space-y-6 sm:space-y-8 lg:space-y-10">
         <DashboardHeader month={month} year={year} />
         <DashboardAlerts month={month} year={year} />
 
@@ -161,15 +220,16 @@ export default function DashboardPage() {
               </div>
             }
           />
-          {showStats && (
-            <ErrorBoundary>
-              <StatsCardGroup month={month} year={year} />
-            </ErrorBoundary>
-          )}
-          {showInsights && (
-            <ErrorBoundary>
-              <InsightsCard month={month} year={year} />
-            </ErrorBoundary>
+          {summaryOrder.map((id) =>
+            id === "stats" ? (
+              <ErrorBoundary key="stats">
+                <StatsCardGroup month={month} year={year} />
+              </ErrorBoundary>
+            ) : (
+              <ErrorBoundary key="insights">
+                <InsightsCard month={month} year={year} />
+              </ErrorBoundary>
+            ),
           )}
         </section>
 
@@ -187,25 +247,27 @@ export default function DashboardPage() {
                   showCashFlow && showExpenseDistribution && "xl:grid-cols-3",
                 )}
               >
-                {showCashFlow && (
-                  <div
-                    className={cn(showExpenseDistribution && "xl:col-span-2")}
-                  >
-                    <ErrorBoundary>
-                      <Suspense fallback={<ChartCardSkeleton />}>
-                        <CashFlowChart month={month} year={year} />
-                      </Suspense>
-                    </ErrorBoundary>
-                  </div>
-                )}
-                {showExpenseDistribution && (
-                  <div>
-                    <ErrorBoundary>
-                      <Suspense fallback={<ChartCardSkeleton />}>
-                        <ExpenseDistributionChart month={month} year={year} />
-                      </Suspense>
-                    </ErrorBoundary>
-                  </div>
+                {chartOrder.map((id) =>
+                  id === "cashFlow" ? (
+                    <div
+                      key="cashFlow"
+                      className={cn(showExpenseDistribution && "xl:col-span-2")}
+                    >
+                      <ErrorBoundary>
+                        <Suspense fallback={<ChartCardSkeleton />}>
+                          <CashFlowChart month={month} year={year} />
+                        </Suspense>
+                      </ErrorBoundary>
+                    </div>
+                  ) : (
+                    <div key="expenseDistribution">
+                      <ErrorBoundary>
+                        <Suspense fallback={<ChartCardSkeleton />}>
+                          <ExpenseDistributionChart month={month} year={year} />
+                        </Suspense>
+                      </ErrorBoundary>
+                    </div>
+                  ),
                 )}
               </div>
             )}
@@ -219,36 +281,17 @@ export default function DashboardPage() {
                       showAside ? "xl:col-span-2" : "xl:col-span-3",
                     )}
                   >
-                    {showDistribution && (
-                      <ErrorBoundary>
-                        <DistributionCard month={month} year={year} />
-                      </ErrorBoundary>
-                    )}
-                    {showRecentTransactions && (
-                      <ErrorBoundary>
-                        <RecentTransactionsCard month={month} year={year} />
-                      </ErrorBoundary>
-                    )}
-                    {(showBudgetProgress || showGoalProgress) && (
-                      <div
-                        className={cn(
-                          "grid grid-cols-1 gap-5 sm:gap-6",
-                          showBudgetProgress &&
-                            showGoalProgress &&
-                            "md:grid-cols-2",
-                        )}
-                      >
-                        {showBudgetProgress && (
-                          <ErrorBoundary>
-                            <BudgetProgressCard month={month} year={year} />
-                          </ErrorBoundary>
-                        )}
-                        {showGoalProgress && (
-                          <ErrorBoundary>
-                            <GoalProgressCard month={month} year={year} />
-                          </ErrorBoundary>
-                        )}
-                      </div>
+                    {mainSlots.map((slot) =>
+                      slot.ids.length === 2 ? (
+                        <div
+                          key={slot.ids.join("-")}
+                          className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2"
+                        >
+                          {slot.ids.map((id) => renderMainCard(id))}
+                        </div>
+                      ) : (
+                        renderMainCard(slot.ids[0])
+                      ),
                     )}
                   </div>
                 )}
@@ -259,15 +302,16 @@ export default function DashboardPage() {
                       !showMainColumn && "xl:col-span-3",
                     )}
                   >
-                    {showSubscriptions && (
-                      <ErrorBoundary>
-                        <SubscriptionCardList />
-                      </ErrorBoundary>
-                    )}
-                    {showActivity && (
-                      <ErrorBoundary>
-                        <ActivityFeedCard month={month} year={year} />
-                      </ErrorBoundary>
+                    {asideOrder.map((id) =>
+                      id === "subscriptions" ? (
+                        <ErrorBoundary key="subscriptions">
+                          <SubscriptionCardList />
+                        </ErrorBoundary>
+                      ) : (
+                        <ErrorBoundary key="activity">
+                          <ActivityFeedCard month={month} year={year} />
+                        </ErrorBoundary>
+                      ),
                     )}
                   </aside>
                 )}

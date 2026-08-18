@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@components/ui";
 import { useProfile } from "@hooks/useProfile";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowDownRight, ArrowUpRight } from "@/lib/icons";
 import { cn, formatCount, formatCurrency, formatPercentage } from "@/lib/utils";
 import { Animated } from "./animated-component";
@@ -130,6 +131,7 @@ export function StatsCard({
   trend,
 }: StatsCardProps) {
   const { profile } = useProfile();
+  const { t } = useTranslation();
 
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
@@ -149,12 +151,7 @@ export function StatsCard({
   const TrendIcon = trend && trend.value >= 0 ? ArrowUpRight : ArrowDownRight;
 
   return (
-    <Animated.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="group relative h-full"
-    >
+    <div className="group relative h-full">
       <Card
         className={cn(
           CARD_SHELL,
@@ -300,7 +297,7 @@ export function StatsCard({
                       ? currency
                       : variant === "percentage"
                         ? "%"
-                        : "items"}
+                        : t("stats.items")}
                   </span>
                 </div>
               )}
@@ -308,6 +305,6 @@ export function StatsCard({
           </div>
         </CardContent>
       </Card>
-    </Animated.div>
+    </div>
   );
 }

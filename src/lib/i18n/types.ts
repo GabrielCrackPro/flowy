@@ -533,6 +533,16 @@ export type AppTranslationMessages = {
       github: string;
       status: string;
     };
+    preferences: {
+      title: string;
+      description: string;
+      themeLabel: string;
+      themeHint: string;
+      localeLabel: string;
+      localeHint: string;
+      currencyLabel: string;
+      currencyHint: string;
+    };
   };
   changelog: {
     title: string;
@@ -638,6 +648,8 @@ export type AppTranslationMessages = {
     customizeError: string;
     customizeResetSuccess: string;
     customizeResetError: string;
+    customizeReorder: string;
+    customizeReorderHint: string;
     cards: {
       stats: string;
       cashFlow: string;
@@ -651,9 +663,8 @@ export type AppTranslationMessages = {
       groups: {
         summary: string;
         charts: string;
-        spending: string;
-        budgetsGoals: string;
-        subscriptions: string;
+        main: string;
+        aside: string;
       };
     };
     recentTransactions: string;
@@ -683,6 +694,8 @@ export type AppTranslationMessages = {
     actionsLabel: string;
     actions: {
       reviewBudgets: string;
+      setBudgets: string;
+      viewTransactions: string;
       viewSubscriptions: string;
       viewGoals: string;
     };
@@ -779,6 +792,7 @@ export type AppTranslationMessages = {
     noPayments: string;
     payments: string;
     activeBudgets: string;
+    items: string;
   };
   distribution: {
     title: string;
@@ -806,7 +820,14 @@ export type AppTranslationMessages = {
     week: string;
     month: string;
     overlays: string;
+    overlaysDesc: string;
     layers: string;
+    settings: string;
+    settingsDesc: string;
+    chartType: string;
+    timePeriod: string;
+    configure: string;
+    reset: string;
     budget: string;
     goal: string;
     expensesByCategory: string;

@@ -6,7 +6,8 @@ export const updateProfileSchema = z.object({
   currency: z.string().trim().min(3).max(8).optional(),
   locale: z.string().trim().min(2).max(10).optional(),
   showLanguageSelector: z.boolean().optional(),
-  dashboardCards: z.array(z.string()).optional(),
+  dashboardCards: z.array(z.string()).optional().nullable(),
+  dashboardOrder: z.array(z.string()).optional().nullable(),
 });
 
 export const updateThemeSchema = z.object({

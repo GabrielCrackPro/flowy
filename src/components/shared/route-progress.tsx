@@ -159,6 +159,13 @@ function RouteProgressInner() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // The progress bar tracks real route changes (pathname/search). Hash-only
+    // changes (in-page anchors like #spaces) are not navigations — starting
+    // on them would leave the bar stuck, because the commit effect keys off
+    // usePathname/useSearchParams, which never include the hash.
+    const routeKeyOf = () =>
+      `${window.location.pathname}${window.location.search}`;
+
     const originalPush = window.history.pushState;
     const originalReplace = window.history.replaceState;
 
@@ -166,9 +173,9 @@ function RouteProgressInner() {
       this: History,
       ...args: Parameters<History["pushState"]>
     ) {
-      const before = window.location.href;
+      const before = routeKeyOf();
       const result = originalPush.apply(this, args);
-      if (window.location.href !== before) start();
+      if (routeKeyOf() !== before) start();
       return result;
     };
 
@@ -176,20 +183,26 @@ function RouteProgressInner() {
       this: History,
       ...args: Parameters<History["replaceState"]>
     ) {
-      const before = window.location.href;
+      const before = routeKeyOf();
       const result = originalReplace.apply(this, args);
-      if (window.location.href !== before) start();
+      if (routeKeyOf() !== before) start();
       return result;
+    };
+
+    const handlePopState = () => {
+      // Back/forward already moved the URL; only start when the route (not
+      // just the hash) actually differs from the last committed route.
+      if (routeKeyOf() !== routeKeyRef.current) start();
     };
 
     window.history.pushState = patchedPush;
     window.history.replaceState = patchedReplace;
-    window.addEventListener("popstate", start);
+    window.addEventListener("popstate", handlePopState);
 
     return () => {
       window.history.pushState = originalPush;
       window.history.replaceState = originalReplace;
-      window.removeEventListener("popstate", start);
+      window.removeEventListener("popstate", handlePopState);
       clearTimers();
     };
   }, [start, clearTimers]);

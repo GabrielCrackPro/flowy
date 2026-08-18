@@ -16,16 +16,19 @@ import * as React from "react";
  *   accumulate — unless the browser already consumed it via system back or a
  *   newer overlay sits above it (its entry is still needed).
  *
- * Router compatibility: the pushed entries carry a marker state. Next.js's own
- * popstate handling ignores unknown history states, so an overlay-dismissing
- * back press never triggers a route change.
+ * Router compatibility: Next.js App Router copies its internal `__NA` marker
+ * onto our pushed entries, so popping one dispatches ACTION_RESTORE to the
+ * current URL. With no navigation in flight that is a harmless no-op (the
+ * back-to-dismiss behavior); the cleanup is deferred so it can never pop the
+ * entry while a navigation is pending (which would cancel it).
  */
 
 const MARKER = "__flowy_overlay__";
 
-type OverlayEntry = { dismiss: () => void; closedByBack: boolean };
+type OverlayEntry = { id: number; dismiss: () => void; closedByBack: boolean };
 
 const overlayStack: OverlayEntry[] = [];
+let nextEntryId = 0;
 
 // Swallows the popstate produced by our own `history.back()` when consuming a
 // UI-closed overlay's entry — that event must not close the overlay beneath it.
@@ -63,12 +66,13 @@ export function useSystemBackDismiss(open: boolean, onDismiss: () => void) {
     if (open) {
       if (!entryRef.current) {
         const entry: OverlayEntry = {
+          id: nextEntryId++,
           dismiss: () => dismissRef.current(),
           closedByBack: false,
         };
         entryRef.current = entry;
         overlayStack.push(entry);
-        window.history.pushState({ [MARKER]: true }, "");
+        window.history.pushState({ [MARKER]: true, id: entry.id }, "");
       }
       return;
     }
@@ -81,13 +85,37 @@ export function useSystemBackDismiss(open: boolean, onDismiss: () => void) {
       const wasTop = index === overlayStack.length - 1;
       if (index !== -1) overlayStack.splice(index, 1);
 
-      if (
-        wasTop &&
-        !entry.closedByBack &&
-        window.history.state?.[MARKER] === true
-      ) {
-        suppressNextPop = true;
-        window.history.back();
+      if (wasTop && !entry.closedByBack) {
+        // Defer the history cleanup and poll briefly. If the overlay closed
+        // while a router navigation is in flight (e.g. a sheet/menu item
+        // that navigates as it closes), popping our marker fires popstate
+        // and Next.js dispatches ACTION_RESTORE — silently cancelling the
+        // pending navigation. router.push runs inside startTransition, so
+        // the router's optimistic history entry lands a moment after this
+        // effect; the poll waits for it, and once the top entry is no longer
+        // ours the pop is skipped (the navigation wins). If nothing
+        // navigated, the marker stays on top and the poll consumes it as
+        // usual. The per-entry id also guards against consuming a newer
+        // overlay's entry when one opened on top in the meantime.
+        const STEP_MS = 25;
+        const MAX_MS = 300;
+        let elapsed = 0;
+        const consume = () => {
+          if (window.history.state?.id === entry.id) {
+            suppressNextPop = true;
+            window.history.back();
+          }
+        };
+        const poll = () => {
+          if (window.history.state?.id !== entry.id) return;
+          elapsed += STEP_MS;
+          if (elapsed >= MAX_MS) {
+            consume();
+          } else {
+            window.setTimeout(poll, STEP_MS);
+          }
+        };
+        poll();
       }
     }
   }, [open]);

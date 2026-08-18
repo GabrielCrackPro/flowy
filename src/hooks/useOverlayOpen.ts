@@ -10,6 +10,15 @@ interface UseOverlayOpenOptions<Details> {
   defaultOpen?: boolean;
   /** Forwarded open-change handler (receives the primitive's event details). */
   onOpenChange?: (open: boolean, details: Details) => void;
+  /**
+   * Intercept the system back button to close the overlay instead of
+   * navigating. Modal layers (sheets, dialogs) want this; lightweight
+   * outside-press-dismissible overlays (menus, popovers, selects) should
+   * disable it — the synthetic history entries they push race with the App
+   * Router's own history management and can silently cancel in-flight
+   * navigations (e.g. a menu item that navigates while the menu closes).
+   */
+  systemBackDismiss?: boolean;
 }
 
 /**
@@ -27,6 +36,7 @@ export function useOverlayOpen<Details>({
   open,
   defaultOpen = false,
   onOpenChange,
+  systemBackDismiss = true,
 }: UseOverlayOpenOptions<Details>) {
   const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
   const resolvedOpen = open ?? internalOpen;
@@ -41,8 +51,12 @@ export function useOverlayOpen<Details>({
     [open, onOpenChange],
   );
 
-  // Native back closes the layer instead of navigating away.
-  useSystemBackDismiss(resolvedOpen, () => setOpen(false));
+  // Native back closes the layer instead of navigating away — unless the
+  // overlay opted out (lightweight menus/popovers/selects that dismiss on
+  // outside press and must not touch history).
+  useSystemBackDismiss(systemBackDismiss ? resolvedOpen : false, () =>
+    setOpen(false),
+  );
 
   return { open: resolvedOpen, onOpenChange: setOpen };
 }

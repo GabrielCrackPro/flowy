@@ -41,6 +41,7 @@ import {
   Trash2,
   TriangleAlert,
   Wrench,
+  X,
 } from "@/lib/icons";
 import type {
   ComponentId,
@@ -886,11 +887,12 @@ export function IncidentAdminPanel() {
         footerSecondary={
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={() => setPreviewTarget(null)}
             disabled={publishingId !== null}
             className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
           >
+            <X className="size-4" />
             {t("common.cancel")}
           </Button>
         }
@@ -973,7 +975,7 @@ export function IncidentAdminPanel() {
         footerSecondary={
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={() => {
               setUpdateTarget(null);
               updateForm.reset();
@@ -981,6 +983,7 @@ export function IncidentAdminPanel() {
             disabled={updatingId !== null}
             className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
           >
+            <X className="size-4" />
             {t("common.cancel")}
           </Button>
         }
@@ -1085,7 +1088,7 @@ export function IncidentAdminPanel() {
         footerSecondary={
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={() => {
               setCreateOpen(false);
               form.reset();
@@ -1093,6 +1096,7 @@ export function IncidentAdminPanel() {
             disabled={form.busy}
             className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
           >
+            <X className="size-4" />
             {t("common.cancel")}
           </Button>
         }

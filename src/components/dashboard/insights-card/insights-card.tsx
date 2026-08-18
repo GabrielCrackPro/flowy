@@ -1,9 +1,14 @@
 "use client";
 
-import { EmptyState, Icon, SectionCard, Skeleton } from "@components/shared";
+import {
+  EmptyState,
+  Icon,
+  SectionCard,
+  Skeleton,
+  useCardMotion,
+} from "@components/shared";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
-import type { Variants } from "framer-motion";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, CheckCircle2, Lightbulb } from "@/lib/icons";
@@ -19,22 +24,6 @@ interface InsightsCardProps {
   month: number;
   year: number;
 }
-
-const container: Variants = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.06 },
-  },
-};
-
-const item: Variants = {
-  hidden: { opacity: 0, y: 8 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.35, ease: "easeOut" },
-  },
-};
 
 function InsightIcon({ severity }: { severity: InsightSeverity }) {
   const map: Record<InsightSeverity, typeof Lightbulb> = {
@@ -88,6 +77,7 @@ function InsightBorder({ severity }: { severity: InsightSeverity }) {
 }
 
 function InsightRow({ insight }: { insight: Insight }) {
+  const { item } = useCardMotion();
   const iconBg = InsightBg({ severity: insight.severity });
 
   return (
@@ -159,6 +149,7 @@ export function InsightsCard({ month, year }: InsightsCardProps) {
 
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
+  const { container } = useCardMotion();
 
   if (isLoading) {
     return (

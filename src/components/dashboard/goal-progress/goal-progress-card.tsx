@@ -8,6 +8,7 @@ import {
   Icon,
   SectionCard,
   Skeleton,
+  useCardMotion,
 } from "@components/shared";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
@@ -24,15 +25,16 @@ interface GoalProgressCardProps {
 }
 
 export function GoalProgressCardSkeleton() {
+  const { container, item } = useCardMotion();
   return (
-    <div className="space-y-4 px-5 pb-6 sm:px-6">
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="space-y-4 px-5 pb-6 sm:px-6"
+    >
       {[1, 2, 3].map((goal, index) => (
-        <motion.div
-          key={goal}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.06 }}
-        >
+        <motion.div key={goal} variants={item}>
           <div className="mb-2 flex items-center justify-between">
             <div className="flex min-w-0 items-center gap-2">
               <Skeleton variant="rounded" className="size-6" />
@@ -55,7 +57,7 @@ export function GoalProgressCardSkeleton() {
           <Skeleton className="mt-2 h-3 w-32" />
         </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
@@ -67,6 +69,7 @@ export function GoalProgressCard({ month, year }: GoalProgressCardProps) {
 
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
+  const { container, item } = useCardMotion();
   const topGoals = goals.slice(0, 3);
 
   return (
@@ -94,7 +97,12 @@ export function GoalProgressCard({ month, year }: GoalProgressCardProps) {
           }
         />
       ) : (
-        <div className="space-y-4 px-5 pb-6 sm:px-6">
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="space-y-4 px-5 pb-6 sm:px-6"
+        >
           {topGoals.map((goal, index) => {
             const pct =
               goal.targetAmount > 0
@@ -107,13 +115,7 @@ export function GoalProgressCard({ month, year }: GoalProgressCardProps) {
             const isNearCompletion = pct >= 80;
 
             return (
-              <motion.div
-                key={goal.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.08 }}
-                className="group"
-              >
+              <motion.div key={goal.id} variants={item} className="group">
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0">
                     <div
@@ -210,7 +212,7 @@ export function GoalProgressCard({ month, year }: GoalProgressCardProps) {
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       )}
     </SectionCard>
   );

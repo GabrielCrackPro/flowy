@@ -8,6 +8,7 @@ import {
   IncomeIcon,
   SectionCard,
   Skeleton,
+  useCardMotion,
 } from "@components/shared";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
@@ -25,14 +26,13 @@ interface RecentTransactionsCardProps {
 }
 
 export function RecentTransactionsCardSkeleton() {
+  const { container, item } = useCardMotion();
   return (
-    <div>
+    <motion.div variants={container} initial="hidden" animate="show">
       {[1, 2, 3, 4, 5].map((row, index) => (
         <motion.div
           key={row}
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.05 }}
+          variants={item}
           className="flex items-center gap-4 border-t border-border/30 px-5 py-3.5 sm:px-6"
         >
           <Skeleton variant="circular" className="size-10 shrink-0" />
@@ -45,7 +45,7 @@ export function RecentTransactionsCardSkeleton() {
           <Skeleton className="h-4 w-16" />
         </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
@@ -59,6 +59,7 @@ export function RecentTransactionsCard({
 
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
+  const { container, item } = useCardMotion();
 
   const recent = ((data as DashboardData)?.recentTransactions ?? []).map(
     (tx) => ({
@@ -102,63 +103,66 @@ export function RecentTransactionsCard({
           }
         />
       ) : (
-        <div>
-          {recent.map((tx, index) => (
+        <motion.div variants={container} initial="hidden" animate="show">
+          {recent.map((tx) => (
             <motion.div
               key={tx.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              className="flex items-center gap-4 border-t border-border/30 px-5 py-3.5 transition-colors duration-200 hover:bg-muted/40 sm:px-6"
+              variants={item}
+              className="border-t border-border/30"
             >
-              <div
-                className={cn(
-                  "flex size-10 shrink-0 items-center justify-center rounded-full transition-transform hover:scale-110",
-                  tx.type === "INCOME"
-                    ? "bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 text-emerald-600 dark:from-emerald-500/30 dark:to-emerald-500/20 dark:text-emerald-400"
-                    : "bg-gradient-to-br from-rose-500/20 to-rose-500/10 text-rose-600 dark:from-rose-500/30 dark:to-rose-500/20 dark:text-rose-400",
-                )}
+              <Link
+                href={`/dashboard/transactions/${tx.id}`}
+                className="flex items-center gap-4 px-5 py-3.5 transition-colors duration-200 hover:bg-muted/40 sm:px-6"
               >
-                {tx.type === "INCOME" ? (
-                  <IncomeIcon size="lg" />
-                ) : (
-                  <ExpenseIcon size="lg" />
-                )}
-              </div>
+                <div
+                  className={cn(
+                    "flex size-10 shrink-0 items-center justify-center rounded-full transition-transform hover:scale-110",
+                    tx.type === "INCOME"
+                      ? "bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 text-emerald-600 dark:from-emerald-500/30 dark:to-emerald-500/20 dark:text-emerald-400"
+                      : "bg-gradient-to-br from-rose-500/20 to-rose-500/10 text-rose-600 dark:from-rose-500/30 dark:to-rose-500/20 dark:text-rose-400",
+                  )}
+                >
+                  {tx.type === "INCOME" ? (
+                    <IncomeIcon size="lg" />
+                  ) : (
+                    <ExpenseIcon size="lg" />
+                  )}
+                </div>
 
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">
-                  {tx.description || "—"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {tx.date
-                    ? (
-                        parseDateOnly(tx.date) ?? new Date(tx.date)
-                      ).toLocaleDateString(locale, {
-                        day: "numeric",
-                        month: "short",
-                      })
-                    : "—"}
-                </p>
-              </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {tx.description || "—"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {tx.date
+                      ? (
+                          parseDateOnly(tx.date) ?? new Date(tx.date)
+                        ).toLocaleDateString(locale, {
+                          day: "numeric",
+                          month: "short",
+                        })
+                      : "—"}
+                  </p>
+                </div>
 
-              <span
-                className={cn(
-                  "shrink-0 text-sm font-semibold tabular-nums transition-colors",
-                  tx.type === "INCOME"
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-rose-600 dark:text-rose-400",
-                )}
-              >
-                {tx.type === "INCOME" ? "+" : "-"}
-                <AnimatedNumber
-                  value={tx.amount}
-                  formatter={(v) => formatCurrency(v, locale, currency)}
-                />
-              </span>
+                <span
+                  className={cn(
+                    "shrink-0 text-sm font-semibold tabular-nums transition-colors",
+                    tx.type === "INCOME"
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-rose-600 dark:text-rose-400",
+                  )}
+                >
+                  {tx.type === "INCOME" ? "+" : "-"}
+                  <AnimatedNumber
+                    value={tx.amount}
+                    formatter={(v) => formatCurrency(v, locale, currency)}
+                  />
+                </span>
+              </Link>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </SectionCard>
   );

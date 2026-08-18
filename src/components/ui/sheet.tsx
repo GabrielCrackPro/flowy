@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, animate, motion } from "framer-motion";
 import * as React from "react";
 import { useBottomSheetDetents } from "@/hooks/useBottomSheetDetents";
 import { useBottomSheetSwipe } from "@/hooks/useBottomSheetSwipe";
@@ -178,10 +178,14 @@ export function SheetContent({
 
   const bottomPosition = "inset-x-0 bottom-0 max-h-[92dvh] w-full border-t";
 
+  // Detents are applied as a `max-height` cap rather than a fixed `height`,
+  // so a short sheet collapses to its content's natural height while a tall
+  // sheet is bounded by the detent and scrolls internally (pulling up still
+  // raises the cap to reveal more).
   const initialAnimation = {
     ...hiddenTransform[effectiveSide],
     ...(hasDetents
-      ? { height: `${detents.targetHeightFraction * 100}dvh` }
+      ? { maxHeight: `${detents.targetHeightFraction * 100}dvh` }
       : {}),
   };
 
@@ -190,7 +194,7 @@ export function SheetContent({
     y: effectiveSide === "bottom" ? translateY : 0,
     ...(hasDetents
       ? {
-          height: `${
+          maxHeight: `${
             (detents.isDragging
               ? detents.heightFraction
               : detents.targetHeightFraction) * 100
@@ -200,6 +204,68 @@ export function SheetContent({
   };
 
   const exitAnimation = hiddenTransform[effectiveSide];
+
+  // Animate height changes driven by the sheet's content (e.g. a filter list
+  // growing/shrinking) instead of letting them snap. The sheet is measured at
+  // its natural `auto` height, frozen at the previous height in the same frame
+  // (before paint), then animated to the new height. Skipped while dragging so
+  // detent pulls stay 1:1 with the finger.
+  const sheetRef = React.useRef<HTMLDivElement>(null);
+  const draggingRef = React.useRef(dragging);
+  React.useEffect(() => {
+    draggingRef.current = dragging;
+  }, [dragging]);
+
+  React.useEffect(() => {
+    if (!open || effectiveSide !== "bottom") return;
+    const el = sheetRef.current;
+    if (!el) return;
+
+    let renderedHeight = el.getBoundingClientRect().height;
+    let contentHeight = el.scrollHeight;
+    let animating = false;
+    let playback: ReturnType<typeof animate> | null = null;
+
+    const observer = new ResizeObserver(() => {
+      if (animating || draggingRef.current) return;
+
+      const nextRendered = el.getBoundingClientRect().height;
+      const nextContent = el.scrollHeight;
+
+      // Detent pulls animate `max-height`, which changes the rendered height
+      // without changing the content — framer-motion already owns those, so
+      // leave them alone instead of fighting the snap animation.
+      if (Math.abs(nextContent - contentHeight) < 1) return;
+
+      contentHeight = nextContent;
+      if (Math.abs(nextRendered - renderedHeight) < 1) return;
+
+      const from = renderedHeight;
+      renderedHeight = nextRendered;
+      animating = true;
+
+      el.style.height = `${from}px`;
+      playback = animate(
+        el,
+        { height: nextRendered },
+        {
+          duration: 0.25,
+          ease: [0.16, 1, 0.3, 1],
+        },
+      );
+      playback.then(() => {
+        el.style.height = "";
+        animating = false;
+        playback = null;
+      });
+    });
+
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      playback?.stop();
+    };
+  }, [open, effectiveSide]);
 
   // Mobile sheets take their own height; drop the full-height constraint
   // that right-side sheets use so `max-h-[92dvh]` wins.
@@ -224,6 +290,7 @@ export function SheetContent({
           <motion.div
             key="sheet-content"
             data-slot="sheet-content"
+            ref={sheetRef}
             role="dialog"
             aria-modal="true"
             initial={initialAnimation}
@@ -234,7 +301,6 @@ export function SheetContent({
                 ? { duration: 0 }
                 : { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
             }
-            style={hasDetents ? { maxHeight: "none" } : undefined}
             className={cn(
               "fixed z-50 bg-background outline-none",
               effectiveSide === "bottom"

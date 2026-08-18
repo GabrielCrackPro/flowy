@@ -10,7 +10,7 @@ import { FormField } from "@/components/ui/form/FormField";
 import { Input } from "@/components/ui/input";
 import { useReactForm } from "@/hooks/useReactForm";
 import { changePassword } from "@/lib/api/account";
-import { Eye, EyeOff, KeyRound, Loader2, Lock } from "@/lib/icons";
+import { Eye, EyeOff, KeyRound, Loader2, Lock, X } from "@/lib/icons";
 import { createChangePasswordSchema } from "@/lib/schemas/auth";
 import supabase from "@/lib/supabase/client";
 
@@ -90,11 +90,12 @@ export function ChangePasswordSheet({
       footerSecondary={
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           onClick={handleClose}
           disabled={form.busy}
           className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
         >
+          <X className="size-4" />
           {t("common.cancel")}
         </Button>
       }

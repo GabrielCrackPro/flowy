@@ -1,11 +1,11 @@
 "use client";
 
-import { RelativeTime, Skeleton } from "@components/shared";
+import { RelativeTime, Skeleton, useCardMotion } from "@components/shared";
 import { useAuth } from "@hooks/useAuth";
 import { useNotifications } from "@hooks/useNotifications";
 import { useProfile } from "@hooks/useProfile";
 import { cn } from "@lib/utils";
-import { AnimatePresence, motion, type Variants } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -144,28 +144,6 @@ const barStyles: Record<
   },
 };
 
-const listVariants: Variants = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.05 },
-  },
-};
-
-const rowVariants: Variants = {
-  hidden: { opacity: 0, y: -10, scale: 0.98 },
-  show: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { type: "spring", stiffness: 420, damping: 32 },
-  },
-  exit: {
-    opacity: 0,
-    x: 28,
-    transition: { duration: 0.18, ease: "easeIn" },
-  },
-};
-
 export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
   const { user } = useAuth();
   const {
@@ -178,6 +156,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [dismissingIds, setDismissingIds] = useState<Set<string>>(new Set());
+  const { container, item } = useCardMotion();
 
   const locale = profile?.locale ?? "es-ES";
 
@@ -214,9 +193,9 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
     return (
       <section aria-label={t("alerts.barTitle")} className="space-y-0">
         <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          variants={item}
+          initial="hidden"
+          animate="show"
           className="flex w-full items-center gap-3.5 overflow-hidden rounded-2xl border border-border/60 bg-card px-4 py-3.5 shadow-[var(--shadow-card)]"
         >
           <div className="size-10 shrink-0">
@@ -442,7 +421,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                 )}
 
                 <motion.div
-                  variants={listVariants}
+                  variants={container}
                   initial="hidden"
                   animate="show"
                   className="space-y-2"
@@ -451,6 +430,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                     {alerts.map((alert) => {
                       const style = severityStyles[alert.variant];
                       const action = getAlertAction(alert.type);
+                      const ActionIcon = action?.icon ?? ArrowRight;
                       const isDismissing = dismissingIds.has(alert.id);
 
                       function handleAction() {
@@ -461,7 +441,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                         <motion.div
                           key={alert.id}
                           layout
-                          variants={rowVariants}
+                          variants={item}
                           exit={{
                             opacity: 0,
                             x: 28,
@@ -517,7 +497,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                                 <span className="hidden sm:inline">
                                   {t(action.labelKey)}
                                 </span>
-                                <ArrowRight className="size-3.5" />
+                                <ActionIcon className="size-3.5" />
                               </Button>
                             )}
 

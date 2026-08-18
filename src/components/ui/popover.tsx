@@ -16,6 +16,9 @@ function Popover({
     open,
     defaultOpen,
     onOpenChange,
+    // Popovers dismiss on outside press; no system-back history interception
+    // (see useOverlayOpen's option docs for why menus/popovers opt out).
+    systemBackDismiss: false,
   });
 
   return <PopoverPrimitive.Root data-slot="popover" {...overlay} {...props} />;

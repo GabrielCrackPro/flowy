@@ -2,16 +2,14 @@
 
 import { BackHeader } from "@components/dashboard";
 import {
-  AccountSecurityActions,
+  PreferencesSection,
   ProfileForm,
-  PushNotificationsCard,
   SettingsNav,
-  SpaceManager,
 } from "@components/profile";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ThemeCustomizationSheet } from "@/components/profile/theme-customization-modal";
 import { Animated, Icon, Skeleton, UserAvatar } from "@/components/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +25,6 @@ import { useChangelog } from "@/context/ChangelogContext";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { useSpaces } from "@/hooks/useSpaces";
 import {
   type ChangelogItem,
   type ChangelogSection,
@@ -41,7 +38,6 @@ import {
   CalendarDays,
   CheckCircle2,
   Coins,
-  Crown,
   Droplet,
   GitBranch,
   Globe2,
@@ -54,6 +50,28 @@ import {
 } from "@/lib/icons";
 
 const GITHUB_URL = "https://github.com/GabrielCrackPro/flowy";
+
+// The heavier settings sections are code-split so the profile route renders
+// quickly; navigating here only loads their chunks on demand.
+const SpaceManager = dynamic(
+  () =>
+    import("@/components/profile/space-manager").then((m) => m.SpaceManager),
+  { loading: () => <ProfileSectionSkeleton /> },
+);
+const PushNotificationsCard = dynamic(
+  () =>
+    import("@/components/profile/push-notifications").then(
+      (m) => m.PushNotificationsCard,
+    ),
+  { loading: () => <ProfileSectionSkeleton /> },
+);
+const AccountSecurityActions = dynamic(
+  () =>
+    import("@/components/profile/account-security-actions").then(
+      (m) => m.AccountSecurityActions,
+    ),
+  { loading: () => <ProfileSectionSkeleton /> },
+);
 
 function currencyName(code: string, locale: string): string {
   try {
@@ -83,31 +101,19 @@ function SectionIcon({ icon }: { icon: typeof UserRound }) {
   );
 }
 
-function SpaceOverviewAvatar({
-  name,
-  avatarUrl,
-}: {
-  name: string;
-  avatarUrl?: string | null;
-}) {
-  const [imageFailed, setImageFailed] = useState(false);
-
+function ProfileSectionSkeleton() {
   return (
-    <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-linear-to-br from-violet-500 to-violet-600 text-sm font-semibold text-white shadow-sm shadow-violet-500/20">
-      {avatarUrl && !imageFailed ? (
-        /* biome-ignore lint/performance/noImgElement: Avatars are served from Supabase public storage. */
-        <img
-          src={avatarUrl}
-          alt={name}
-          className="size-full object-cover"
-          onError={() => setImageFailed(true)}
-        />
-      ) : name ? (
-        name.trim().charAt(0).toUpperCase()
-      ) : (
-        <Users className="size-4" />
-      )}
-    </span>
+    <div
+      aria-busy="true"
+      className="space-y-3 rounded-2xl border border-border/40 bg-card p-5"
+    >
+      <Skeleton className="h-5 w-40" />
+      <Skeleton className="h-4 w-64" />
+      <div className="space-y-2 pt-2">
+        <Skeleton className="h-10 w-full rounded-xl" />
+        <Skeleton className="h-10 w-full rounded-xl" />
+      </div>
+    </div>
   );
 }
 
@@ -115,7 +121,6 @@ export default function SettingsPage() {
   const { t } = useTranslation();
   const { locale } = useLocaleContext();
   const { profile, loading } = useProfile();
-  const { activeSpace } = useSpaces();
   const { checked: pushChecked, subscribed } = usePushNotifications();
   const { openChangelog } = useChangelog();
   const [editing, setEditing] = useState(false);
@@ -171,19 +176,16 @@ export default function SettingsPage() {
               </div>
               {!loading && profile && !editing ? (
                 <CardAction>
-                  <div className="flex justify-end gap-1.5">
-                    <ThemeCustomizationSheet label />
-                    <Button
-                      variant="ghost"
-                      onClick={() => setEditing(true)}
-                      className="gap-1.5"
-                    >
-                      <Icon icon={Pencil} className="size-4" />
-                      <span className="hidden sm:inline">
-                        {t("settings.profile.edit")}
-                      </span>
-                    </Button>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setEditing(true)}
+                    className="gap-1.5"
+                  >
+                    <Icon icon={Pencil} className="size-4" />
+                    <span className="hidden sm:inline">
+                      {t("settings.profile.edit")}
+                    </span>
+                  </Button>
                 </CardAction>
               ) : null}
             </CardHeader>
@@ -231,59 +233,6 @@ export default function SettingsPage() {
                             {profile.email ?? t("profile.noEmail")}
                           </p>
                         </div>
-                      </div>
-
-                      <div className="flex flex-col gap-3 rounded-xl bg-muted/25 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-3.5">
-                        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
-                          <div className="flex min-w-0 items-center gap-2">
-                            <SpaceOverviewAvatar
-                              name={activeSpace?.name ?? ""}
-                              avatarUrl={activeSpace?.avatarUrl}
-                            />
-                            <div className="min-w-0">
-                              <span className="block text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                                {t("settings.profile.activeSpace")}
-                              </span>
-                              <span className="block max-w-52 truncate text-sm font-semibold text-foreground">
-                                {activeSpace?.name ??
-                                  t("profile.spaces.noSpace")}
-                              </span>
-                            </div>
-                          </div>
-                          {activeSpace ? (
-                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                              <span className="inline-flex items-center gap-1.5">
-                                <Users className="size-3.5" />
-                                {t(
-                                  activeSpace.members.length === 1
-                                    ? "profile.spaces.member_one"
-                                    : "profile.spaces.member_other",
-                                  { count: activeSpace.members.length },
-                                )}
-                              </span>
-                              <Badge
-                                variant="outline"
-                                className="h-6 gap-1 border-amber-500/25 px-2 text-[10px] text-amber-600 dark:text-amber-400"
-                              >
-                                <Crown className="size-3" />
-                                {activeSpace.ownerId === profile.id
-                                  ? t("profile.spaces.roleOwner")
-                                  : t("profile.spaces.roleMember")}
-                              </Badge>
-                            </div>
-                          ) : null}
-                        </div>
-                        <Button
-                          asChild
-                          variant="outline"
-                          size="sm"
-                          className="w-full shrink-0 gap-1.5 sm:w-auto"
-                        >
-                          <Link href="#spaces">
-                            <Users className="size-3.5" />
-                            <span>{t("profile.spaces.manageSpaces")}</span>
-                          </Link>
-                        </Button>
                       </div>
 
                       <div className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2 xl:grid-cols-3">
@@ -371,6 +320,10 @@ export default function SettingsPage() {
               ) : null}
             </CardContent>
           </Card>
+
+          <div id="preferences" className="scroll-mt-20">
+            <PreferencesSection />
+          </div>
 
           <Card id="spaces" className="scroll-mt-20">
             <CardHeader>

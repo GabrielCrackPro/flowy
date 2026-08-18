@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useAmountInput } from "@/hooks";
 import { Minus, Plus, Settings } from "@/lib/icons";
 import { cn, formatCurrency } from "@/lib/utils";
+import { CONFIRM_TINTS, type ConfirmTint } from "./confirm-tint";
 import { Icon } from "./icon";
 
 export type QuickActionType = "add" | "subtract" | "set";
@@ -30,7 +31,8 @@ interface QuickActionDialogProps {
   icon: LucideIcon;
   iconColor?: string;
   iconBgColor?: string;
-  buttonColor?: string;
+  /** Color tint for the confirm action. Defaults to `"amber"`. */
+  tint?: ConfirmTint;
   actionLabel: string;
   actionType: QuickActionType;
   currentAmount?: number;
@@ -53,7 +55,7 @@ export function QuickActionDialog({
   icon: IconComponent,
   iconColor = "text-amber-600",
   iconBgColor = "from-amber-500/20 to-amber-500/10",
-  buttonColor = "from-amber-500 to-amber-600",
+  tint = "amber",
   actionLabel,
   actionType = "add",
   currentAmount = 0,
@@ -130,6 +132,8 @@ export function QuickActionDialog({
   const actionIcon =
     actionType === "add" ? Plus : actionType === "subtract" ? Minus : Settings;
 
+  const tintStyle = CONFIRM_TINTS[tint];
+
   const shouldShowProgress = showProgress && targetAmount && targetAmount > 0;
 
   return (
@@ -172,7 +176,7 @@ export function QuickActionDialog({
                 <div
                   className={cn(
                     "h-full rounded-full bg-gradient-to-r",
-                    buttonColor,
+                    tintStyle.gradient,
                   )}
                   style={{ width: `${currentProgress}%` }}
                 />
@@ -258,7 +262,7 @@ export function QuickActionDialog({
                         ) === amount
                           ? cn(
                               "bg-gradient-to-r text-white shadow-md",
-                              buttonColor,
+                              tintStyle.gradient,
                             )
                           : "bg-background/80 text-muted-foreground/80 ring-1 ring-border/30 hover:text-foreground hover:ring-border/50",
                       )}
@@ -279,10 +283,7 @@ export function QuickActionDialog({
           <AlertDialogAction
             onClick={handleSubmit}
             disabled={parseFloat(amountInput.rawAmount) <= 0 || isSubmitting}
-            className={cn(
-              "gap-2 bg-gradient-to-r hover:opacity-90",
-              buttonColor,
-            )}
+            className={cn("gap-1.5", tintStyle.action)}
           >
             <Icon icon={actionIcon} className="size-4" />
             {actionLabel}

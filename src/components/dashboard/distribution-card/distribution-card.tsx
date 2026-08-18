@@ -6,12 +6,19 @@ import {
   Icon,
   SectionCard,
   Skeleton,
+  useCardMotion,
 } from "@components/shared";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { ArrowDownRight, ArrowUpRight, TrendingUp, Wallet } from "@/lib/icons";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
+} from "@/lib/icons";
 import { cn, formatCurrency, formatPercentage } from "@/lib/utils";
 import type { DashboardData } from "@/types/Dashboard";
 import { NewTransaction } from "../new-transaction";
@@ -26,6 +33,7 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
   const stats = (data as DashboardData)?.stats;
   const { profile } = useProfile();
   const { t } = useTranslation();
+  const { container, item: itemVariant } = useCardMotion();
 
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
@@ -33,16 +41,46 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
   const income = stats?.incomeThisMonth ?? 0;
   const expenses = stats?.expensesThisMonth ?? 0;
   const savings = income - expenses;
-  const _total = income || 1;
   const savingsRate = income > 0 ? (savings / income) * 100 : null;
   const expensesPct = income > 0 ? (expenses / income) * 100 : 0;
   const savingsPct = income > 0 ? (savings / income) * 100 : 0;
+
+  const savingsTone: "over" | "low" | "healthy" =
+    savings < 0
+      ? "over"
+      : savingsRate !== null && savingsRate < 20
+        ? "low"
+        : "healthy";
+
+  const savingsBarGradient = {
+    over: "from-rose-600 via-rose-500 to-rose-600",
+    low: "from-amber-500 via-amber-400 to-amber-500",
+    healthy: "from-blue-500 via-blue-400 to-blue-500",
+  }[savingsTone];
+
+  const savingsDot = {
+    over: "bg-rose-500",
+    low: "bg-amber-500",
+    healthy: "bg-blue-500",
+  }[savingsTone];
+
+  const savingsIconTone = {
+    over: "from-rose-500/20 to-rose-500/10 text-rose-600 ring-rose-500/15 dark:from-rose-500/30 dark:to-rose-500/20 dark:text-rose-400 dark:ring-rose-500/25",
+    low: "from-amber-500/20 to-amber-500/10 text-amber-600 ring-amber-500/15 dark:from-amber-500/30 dark:to-amber-500/20 dark:text-amber-400 dark:ring-amber-500/25",
+    healthy:
+      "from-blue-500/20 to-blue-500/10 text-blue-600 ring-blue-500/15 dark:from-blue-500/30 dark:to-blue-500/20 dark:text-blue-400 dark:ring-blue-500/25",
+  }[savingsTone];
+
+  const savingsPillGradient = {
+    over: "from-rose-500 to-rose-600",
+    low: "from-amber-500 to-amber-600",
+    healthy: "from-blue-500 to-blue-600",
+  }[savingsTone];
 
   const items = [
     {
       label: t("distribution.income"),
       amount: income,
-      color: "from-emerald-500 via-emerald-400 to-emerald-500",
       barColor: "from-emerald-500/20 to-emerald-500/10",
       icon: ArrowUpRight,
       iconBg:
@@ -53,7 +91,6 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
     {
       label: t("distribution.expenses"),
       amount: expenses,
-      color: "from-rose-500 via-rose-400 to-rose-500",
       barColor: "from-rose-500/20 to-rose-500/10",
       icon: ArrowDownRight,
       iconBg:
@@ -128,9 +165,14 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
           </div>
         </div>
       ) : hasData ? (
-        <div className="mt-6 space-y-5 px-5 pb-6 sm:px-6">
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="mt-6 space-y-5 px-5 pb-6 sm:px-6"
+        >
           {/* Stacked bar with inline labels + legend */}
-          <div className="space-y-2.5">
+          <motion.div variants={itemVariant} className="space-y-2.5">
             <div
               className={cn(
                 "relative flex h-4 overflow-hidden rounded-full shadow-inner ring-1 ring-inset",
@@ -179,9 +221,7 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
                   }}
                   className={cn(
                     "relative overflow-hidden bg-gradient-to-r",
-                    savingsPct < 20
-                      ? "from-amber-500 via-amber-400 to-amber-500"
-                      : "from-blue-500 via-blue-400 to-blue-500",
+                    savingsBarGradient,
                   )}
                 >
                   {/* Shimmer */}
@@ -206,23 +246,20 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
                 {formatPercentage(expensesPct, locale, 0)}
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="size-2 shrink-0 rounded-full bg-blue-500" />
+                <span
+                  className={cn("size-2 shrink-0 rounded-full", savingsDot)}
+                />
                 {t("distribution.savings")}{" "}
                 {formatPercentage(savingsPct, locale, 0)}
               </span>
             </div>
-          </div>
+          </motion.div>
 
           <div className="space-y-5">
             {items.map((item, index) => {
               const IconComponent = item.icon;
               return (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
-                >
+                <motion.div key={item.label} variants={itemVariant}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div
@@ -273,27 +310,26 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            variants={itemVariant}
             className="flex items-center justify-between gap-3 rounded-xl bg-gradient-to-br from-muted/40 to-muted/5 px-4 py-3 ring-1 ring-inset ring-border/40"
           >
             <div className="flex min-w-0 items-center gap-3">
               <div
                 className={cn(
                   "flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ring-1 ring-inset",
-                  savings >= 0
-                    ? "from-blue-500/20 to-blue-500/10 text-blue-600 ring-blue-500/15 dark:from-blue-500/30 dark:to-blue-500/20 dark:text-blue-400 dark:ring-blue-500/25"
-                    : "from-rose-500/20 to-rose-500/10 text-rose-600 ring-rose-500/15 dark:from-rose-500/30 dark:to-rose-500/20 dark:text-rose-400 dark:ring-rose-500/25",
+                  savingsIconTone,
                 )}
               >
-                <Icon icon={TrendingUp} className="size-4" />
+                <Icon
+                  icon={savingsTone === "over" ? TrendingDown : TrendingUp}
+                  className="size-4"
+                />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground/90">
+                <p className="truncate text-sm font-medium text-foreground/90">
                   {t("distribution.savings")}
                 </p>
-                <p className="text-[11px] text-muted-foreground/60">
+                <p className="truncate text-[11px] text-muted-foreground/60">
                   {t("distribution.savingsRate")}
                   {savingsRate !== null
                     ? `: ${formatPercentage(savingsRate, locale, 1)}`
@@ -303,10 +339,8 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
             </div>
             <span
               className={cn(
-                "shrink-0 rounded-full px-3 py-1 text-xs font-semibold tabular-nums text-white shadow-sm",
-                savings >= 0
-                  ? "bg-gradient-to-r from-blue-500 to-blue-600"
-                  : "bg-gradient-to-r from-rose-500 to-rose-600",
+                "shrink-0 max-w-[45%] truncate rounded-full bg-gradient-to-r px-3 py-1 text-xs font-semibold tabular-nums text-white shadow-sm",
+                savingsPillGradient,
               )}
             >
               <AnimatedNumber
@@ -315,7 +349,7 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
               />
             </span>
           </motion.div>
-        </div>
+        </motion.div>
       ) : (
         <EmptyState
           icon={<Icon icon={TrendingUp} size="lg" />}

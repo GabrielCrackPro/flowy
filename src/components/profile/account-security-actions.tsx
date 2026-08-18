@@ -98,16 +98,21 @@ export function AccountSecurityActions() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="rounded-xl bg-muted/25 p-3 sm:p-4">
+          <div className="rounded-xl bg-muted/25 p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
                   <Monitor className="size-4" />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">
-                    {t("settings.security.currentSession")}
-                  </p>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">
+                      {t("settings.security.currentSession")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("settings.security.currentSessionHint")}
+                    </p>
+                  </div>
                   <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-xs">
                     <div className="flex items-center gap-1.5">
                       <Clock className="size-3.5 text-muted-foreground" />
@@ -135,7 +140,6 @@ export function AccountSecurityActions() {
               </div>
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() => setSignOutAllOpen(true)}
                 className="w-full shrink-0 gap-1.5 sm:w-auto"
               >
@@ -164,9 +168,9 @@ export function AccountSecurityActions() {
             <Button
               variant="outline"
               onClick={() => setPasswordOpen(true)}
-              className="w-full sm:w-auto"
+              className="w-full gap-1.5 sm:w-auto"
             >
-              <Icon icon={Lock} className="mr-2 size-4" />
+              <Icon icon={Lock} className="size-3.5" />
               {t("settings.security.changePassword")}
             </Button>
           </div>
@@ -188,9 +192,9 @@ export function AccountSecurityActions() {
             <Button
               variant="destructive"
               onClick={() => setDeleteOpen(true)}
-              className="w-full sm:w-auto"
+              className="w-full gap-1.5 sm:w-auto"
             >
-              <Icon icon={Trash2} className="mr-2 size-4" />
+              <Icon icon={Trash2} className="size-3.5" />
               {t("settings.security.deleteAccount")}
             </Button>
           </div>

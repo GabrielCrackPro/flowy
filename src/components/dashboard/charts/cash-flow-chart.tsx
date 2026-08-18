@@ -1,5 +1,6 @@
 "use client";
 
+import { ChartToggle } from "@components/charts";
 import {
   AnimatedNumber,
   EmptyState,
@@ -8,6 +9,7 @@ import {
 } from "@components/shared";
 import type { ChartConfig } from "@components/ui";
 import {
+  Button,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -18,7 +20,7 @@ import { useChartLayers } from "@hooks/useChartLayers";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   CartesianGrid,
@@ -28,7 +30,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { ChartArea, ChevronRight, TrendingUp } from "@/lib/icons";
+import {
+  ChartArea,
+  ChartColumn,
+  ChartLine,
+  ChevronRight,
+  Settings2,
+  TrendingUp,
+} from "@/lib/icons";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { DashboardData } from "@/types/Dashboard";
 import {
@@ -42,7 +51,7 @@ import {
 } from "./cash-flow-constants";
 import { CashFlowLegend } from "./cash-flow-legend";
 import { renderSeries } from "./cash-flow-series";
-import { CashFlowToolbar } from "./cash-flow-toolbar";
+import { CashFlowSettingsSheet } from "./cash-flow-settings-sheet";
 import { ChartCardSkeleton } from "./chart-card";
 
 interface CashFlowChartProps {
@@ -67,28 +76,49 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
       ? (saved as TimePeriod)
       : "month";
   });
-  const [showOverlays, setShowOverlays] = useState(false);
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => {
-    const saved = localStorage.getItem("flowy-collapsed-groups");
-    return saved ? new Set(JSON.parse(saved)) : new Set(["chartType"]);
-  });
-
-  const { layers, handleLayerVisibilityChange } = useChartLayers(
-    buildInitialLayers(t),
+  const [showOverlays, setShowOverlays] = useState<boolean>(
+    () => localStorage.getItem("flowy-chart-overlays") === "true",
   );
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const toggleGroup = (group: string) => {
-    const newCollapsed = new Set(collapsedGroups);
-    if (newCollapsed.has(group)) {
-      newCollapsed.delete(group);
-    } else {
-      newCollapsed.add(group);
+  const defaultLayers = useMemo(() => buildInitialLayers(t), [t]);
+
+  const initialLayers = useMemo(() => {
+    try {
+      const saved = localStorage.getItem("flowy-chart-layers");
+      if (!saved) return defaultLayers;
+      const visibleMap = JSON.parse(saved) as Record<string, boolean>;
+      return defaultLayers.map((layer) => ({
+        ...layer,
+        visible: visibleMap[layer.id] ?? layer.visible,
+      }));
+    } catch {
+      return defaultLayers;
     }
-    setCollapsedGroups(newCollapsed);
-    localStorage.setItem(
-      "flowy-collapsed-groups",
-      JSON.stringify([...newCollapsed]),
-    );
+  }, [defaultLayers]);
+
+  const { layers, handleLayerVisibilityChange, resetLayers } =
+    useChartLayers(initialLayers);
+
+  useEffect(() => {
+    const visibleMap: Record<string, boolean> = {};
+    for (const layer of layers) {
+      visibleMap[layer.id] = layer.visible;
+    }
+    localStorage.setItem("flowy-chart-layers", JSON.stringify(visibleMap));
+  }, [layers]);
+
+  useEffect(() => {
+    localStorage.setItem("flowy-chart-overlays", String(showOverlays));
+  }, [showOverlays]);
+
+  const resetSettings = () => {
+    setChartType("area");
+    localStorage.setItem("flowy-chart-type", "area");
+    setTimePeriod("month");
+    localStorage.setItem("flowy-time-period", "month");
+    setShowOverlays(false);
+    resetLayers(defaultLayers);
   };
 
   const locale = profile?.locale ?? "es-ES";
@@ -219,131 +249,160 @@ export function CashFlowChart({ month, year }: CashFlowChartProps) {
   }
 
   return (
-    <SectionCard
-      icon={<Icon icon={ChartArea} className="size-5" />}
-      title={getTitle()}
-      description={getDescription()}
-      action={
-        <CashFlowToolbar
-          chartType={chartType}
-          onChartTypeChange={(type) => {
-            setChartType(type);
-            localStorage.setItem("flowy-chart-type", type);
-          }}
-          timePeriod={timePeriod}
-          onTimePeriodChange={(period) => {
-            setTimePeriod(period);
-            localStorage.setItem("flowy-time-period", period);
-          }}
-          layers={layers}
-          onLayerVisibilityChange={handleLayerVisibilityChange}
-          collapsedGroups={collapsedGroups}
-          onToggleGroup={toggleGroup}
-          showOverlays={showOverlays}
-          onToggleOverlays={() => setShowOverlays((prev) => !prev)}
-        />
-      }
-    >
-      {hasData && hasAnyLayerVisible ? (
-        <div className="px-5 pb-6 sm:px-6">
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-80 w-full"
-          >
-            <ComposedChart
-              data={data}
-              margin={{ left: 12, right: 12, top: 40, bottom: 12 }}
+    <>
+      <SectionCard
+        icon={<Icon icon={ChartArea} className="size-5" />}
+        title={getTitle()}
+        description={getDescription()}
+        action={
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <ChartToggle<ChartType>
+              value={chartType}
+              onChange={(type) => {
+                setChartType(type);
+                localStorage.setItem("flowy-chart-type", type);
+              }}
+              options={[
+                { value: "area", label: t("charts.area"), icon: ChartArea },
+                { value: "bar", label: t("charts.bar"), icon: ChartColumn },
+                { value: "line", label: t("charts.line"), icon: ChartLine },
+              ]}
+              labelHiddenUntil="sm"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setSettingsOpen(true)}
+              aria-label={t("charts.configure")}
+              className={cn(
+                "rounded-xl border border-border/30 bg-card text-muted-foreground shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors",
+                "hover:border-border/50 hover:text-foreground",
+                settingsOpen &&
+                  "border-primary/40 bg-primary/10 text-primary hover:border-primary/40 hover:text-primary",
+              )}
             >
-              <CartesianGrid vertical={false} strokeDasharray="4 4" />
-              <XAxis
-                dataKey="label"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                interval="preserveStartEnd"
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                width={48}
-                tickFormatter={(value: number) => compactFormatter(value)}
-              />
-              <ChartTooltip
-                cursor
-                content={<ChartTooltipContent formatter={tooltipFormatter} />}
-              />
-              <Legend
-                verticalAlign="top"
-                height={36}
-                content={(props) => (
-                  <CashFlowLegend
-                    payload={props.payload}
-                    chartConfig={chartConfig}
-                  />
-                )}
-              />
-              {showOverlays &&
-                budgetLines.map((budget) => (
-                  <ReferenceLine
-                    key={`budget-${budget.label}-${budget.y}`}
-                    y={budget.y}
-                    stroke={budget.color}
-                    strokeDasharray="3 3"
-                    strokeWidth={1.5}
-                    label={{
-                      value: budget.label,
-                      position: "insideTopRight",
-                      fill: budget.color,
-                      fontSize: 10,
-                    }}
-                  />
-                ))}
-              {showOverlays &&
-                goalLines.map((goal) => (
-                  <ReferenceLine
-                    key={`goal-${goal.label}-${goal.y}`}
-                    y={goal.y}
-                    stroke={goal.color}
-                    strokeDasharray="5 5"
-                    strokeWidth={1.5}
-                    label={{
-                      value: goal.label,
-                      position: "insideTopLeft",
-                      fill: goal.color,
-                      fontSize: 10,
-                    }}
-                  />
-                ))}
-              {visibleLayers.map((layer) => renderSeries(layer, chartType))}
-            </ComposedChart>
-          </ChartContainer>
-        </div>
-      ) : (
-        <EmptyState
-          icon={<Icon icon={TrendingUp} size="lg" />}
-          title={
-            hasAnyLayerVisible
-              ? t("charts.emptyTitle")
-              : t("charts.allSeriesHidden")
-          }
-          description={
-            hasAnyLayerVisible
-              ? t("charts.emptyDescription")
-              : t("charts.allSeriesHiddenDesc")
-          }
-          iconClassName="from-blue-500/20 to-blue-500/10 text-blue-600 ring-blue-500/10 dark:from-blue-500/30 dark:to-blue-500/20 dark:text-blue-400"
-          action={
-            <Link
-              href="/dashboard/transactions/add"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+              <Icon icon={Settings2} className="size-3.5" />
+            </Button>
+          </div>
+        }
+      >
+        {hasData && hasAnyLayerVisible ? (
+          <div className="px-5 pb-6 sm:px-6">
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-72 w-full sm:h-80"
             >
-              {t("nav.newTransaction")}
-              <Icon icon={ChevronRight} className="size-3.5" />
-            </Link>
-          }
-        />
-      )}
-    </SectionCard>
+              <ComposedChart
+                data={data}
+                margin={{ left: 12, right: 12, top: 40, bottom: 12 }}
+              >
+                <CartesianGrid vertical={false} strokeDasharray="4 4" />
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  width={48}
+                  tickFormatter={(value: number) => compactFormatter(value)}
+                />
+                <ChartTooltip
+                  cursor
+                  content={<ChartTooltipContent formatter={tooltipFormatter} />}
+                />
+                <Legend
+                  verticalAlign="top"
+                  height={36}
+                  content={(props) => (
+                    <CashFlowLegend
+                      payload={props.payload}
+                      chartConfig={chartConfig}
+                    />
+                  )}
+                />
+                {showOverlays &&
+                  budgetLines.map((budget) => (
+                    <ReferenceLine
+                      key={`budget-${budget.label}-${budget.y}`}
+                      y={budget.y}
+                      stroke={budget.color}
+                      strokeDasharray="3 3"
+                      strokeWidth={1.5}
+                      label={{
+                        value: budget.label,
+                        position: "insideTopRight",
+                        fill: budget.color,
+                        fontSize: 10,
+                      }}
+                    />
+                  ))}
+                {showOverlays &&
+                  goalLines.map((goal) => (
+                    <ReferenceLine
+                      key={`goal-${goal.label}-${goal.y}`}
+                      y={goal.y}
+                      stroke={goal.color}
+                      strokeDasharray="5 5"
+                      strokeWidth={1.5}
+                      label={{
+                        value: goal.label,
+                        position: "insideTopLeft",
+                        fill: goal.color,
+                        fontSize: 10,
+                      }}
+                    />
+                  ))}
+                {visibleLayers.map((layer) => renderSeries(layer, chartType))}
+              </ComposedChart>
+            </ChartContainer>
+          </div>
+        ) : (
+          <EmptyState
+            icon={<Icon icon={TrendingUp} size="lg" />}
+            title={
+              hasAnyLayerVisible
+                ? t("charts.emptyTitle")
+                : t("charts.allSeriesHidden")
+            }
+            description={
+              hasAnyLayerVisible
+                ? t("charts.emptyDescription")
+                : t("charts.allSeriesHiddenDesc")
+            }
+            iconClassName="from-blue-500/20 to-blue-500/10 text-blue-600 ring-blue-500/10 dark:from-blue-500/30 dark:to-blue-500/20 dark:text-blue-400"
+            action={
+              <Link
+                href="/dashboard/transactions/add"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+              >
+                {t("nav.newTransaction")}
+                <Icon icon={ChevronRight} className="size-3.5" />
+              </Link>
+            }
+          />
+        )}
+      </SectionCard>
+
+      <CashFlowSettingsSheet
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        timePeriod={timePeriod}
+        onTimePeriodChange={(period) => {
+          setTimePeriod(period);
+          localStorage.setItem("flowy-time-period", period);
+        }}
+        layers={layers}
+        onLayerVisibilityChange={handleLayerVisibilityChange}
+        showOverlays={showOverlays}
+        onOverlaysChange={setShowOverlays}
+        onReset={resetSettings}
+      />
+    </>
   );
 }

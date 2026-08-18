@@ -265,19 +265,6 @@ export function SpaceCard({
             </Badge>
           </div>
 
-          <p className="mt-1 text-sm text-muted-foreground">
-            {isOwner ? (
-              <span className="inline-flex items-center gap-1.5">
-                <Icon icon={Crown} className="size-3.5 text-amber-500" />
-                {t("profile.spaces.owner")}
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5">
-                <Icon icon={Users} className="size-3.5" />
-                {t("profile.spaces.sharedSpace")}
-              </span>
-            )}
-          </p>
           <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground/70">
             <Icon icon={CalendarDays} className="size-3" />
             {t("profile.spaces.createdOn", {

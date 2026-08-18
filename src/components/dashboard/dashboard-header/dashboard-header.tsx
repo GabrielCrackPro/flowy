@@ -1,6 +1,13 @@
 "use client";
 
-import { Alert, Icon, RelativeTime, Skeleton, toast } from "@components/shared";
+import {
+  Alert,
+  Icon,
+  RelativeTime,
+  Skeleton,
+  toast,
+  useCardMotion,
+} from "@components/shared";
 import { Button } from "@components/ui";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
@@ -60,6 +67,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
   const profileFirstName = getFirstName(profile?.name);
   const GreetingIcon = getGreetingIcon(locale);
   const greetingGradient = getGreetingGradient();
+  const { item } = useCardMotion();
 
   // Show rate limit notification when error occurs
   useEffect(() => {
@@ -85,21 +93,17 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      variants={item}
+      initial="hidden"
+      animate="show"
       className="space-y-6"
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <Skeleton loading={isLoading && profileLoading}>
-            <motion.h1
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              className="flex items-center gap-3 text-2xl font-semibold tracking-tight sm:text-3xl"
-            >
+            <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight sm:text-3xl">
               <motion.div
+                variants={{ hidden: {}, show: {} }}
                 whileHover={{ scale: 1.1, rotate: 10 }}
                 transition={{ duration: 0.2 }}
                 className={cn(
@@ -117,27 +121,17 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
                   </span>
                 )}
               </span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              className="mt-1.5 text-sm text-muted-foreground/70"
-            >
+            </h1>
+            <p className="mt-1.5 text-sm text-muted-foreground/70">
               {todayLabel}
-            </motion.p>
+            </p>
             {/* Mobile: group the last-update feedback with the customize
                 button in one row so nothing floats alone top-right. The
                 status pill is desktop-only — pull-to-refresh and the header
                 sync dot cover mobile, but the user still sees when data last
                 refreshed. */}
             {isMobile && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.25 }}
-                className="mt-1 flex items-center gap-2"
-              >
+              <div className="mt-1 flex items-center gap-2">
                 {(isFetching || dataUpdatedAt) && (
                   <p
                     aria-live="polite"
@@ -162,7 +156,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
                   </p>
                 )}
                 <DashboardCustomize compact />
-              </motion.div>
+              </div>
             )}
           </Skeleton>
         </div>
@@ -172,10 +166,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
         <div className="hidden sm:block">
           <Skeleton loading={isLoading}>
             <div className="flex min-w-0 items-center gap-2">
-              <motion.div
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
+              <div
                 className={cn(
                   "flex min-w-0 items-center gap-2 rounded-full border py-1.5 pl-2 pr-1.5 text-sm shadow-[var(--shadow-card)] backdrop-blur-sm transition-colors",
                   isFetching
@@ -203,6 +194,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
                 <span aria-hidden className="h-4 w-px bg-border/70" />
                 <motion.button
                   type="button"
+                  variants={{ hidden: {}, show: {} }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={handleRefresh}
@@ -216,7 +208,7 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
                     className={cn("size-3.5", isFetching && "animate-spin")}
                   />
                 </motion.button>
-              </motion.div>
+              </div>
               <DashboardCustomize compact />
             </div>
           </Skeleton>

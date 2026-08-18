@@ -1,16 +1,20 @@
 "use client";
 
 import { Button, Switch } from "@components/ui";
+import { Reorder, useDragControls } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon, type IconProps } from "@/components/shared";
 import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { toast } from "@/components/shared/toast";
+import { useDashboardOrder } from "@/hooks/useDashboardOrder";
 import { useProfile } from "@/hooks/useProfile";
 import {
   ALL_DASHBOARD_CARDS,
-  DASHBOARD_CARD_GROUPS,
+  DASHBOARD_REGIONS,
   type DashboardCardId,
+  orderForRegion,
+  reorderRegion,
 } from "@/lib/dashboard-cards";
 import {
   BarChart3,
@@ -18,6 +22,7 @@ import {
   ChartArea,
   ChartLine,
   ChartPie,
+  GripVertical,
   Info,
   LayoutGrid,
   Lightbulb,
@@ -70,6 +75,85 @@ interface DashboardCustomizeProps {
   compact?: boolean;
 }
 
+interface CardReorderRowProps {
+  id: DashboardCardId;
+  checked: boolean;
+  pending: boolean;
+  disabled: boolean;
+  onToggle: (checked: boolean) => void;
+}
+
+function CardReorderRow({
+  id,
+  checked,
+  pending,
+  disabled,
+  onToggle,
+}: CardReorderRowProps) {
+  const { t } = useTranslation();
+  const controls = useDragControls();
+
+  return (
+    <Reorder.Item
+      value={id}
+      dragListener={false}
+      dragControls={controls}
+      className={cn(
+        "flex items-center gap-2.5 rounded-xl border border-border/40 bg-card/50 py-2.5 pl-2 pr-2.5 transition duration-200",
+        "hover:border-border/70 hover:bg-card hover:shadow-sm",
+        !checked && "opacity-70",
+      )}
+    >
+      <button
+        type="button"
+        onPointerDown={(event) => controls.start(event)}
+        className="flex size-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-muted hover:text-foreground active:cursor-grabbing"
+        aria-label={t("dashboard.customizeReorder")}
+      >
+        <Icon icon={GripVertical} className="size-4" />
+      </button>
+
+      <div
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+          checked
+            ? "bg-primary/10 text-primary"
+            : "bg-muted/60 text-muted-foreground",
+        )}
+      >
+        <Icon icon={CARD_ICONS[id]} className="size-4" />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p
+          className={cn(
+            "truncate text-sm font-medium",
+            !checked && "text-muted-foreground",
+          )}
+        >
+          {t(CARD_LABEL_KEYS[id])}
+        </p>
+      </div>
+
+      {pending ? (
+        <Icon
+          icon={Loader2}
+          className="size-4 shrink-0 animate-spin text-muted-foreground"
+          aria-hidden
+        />
+      ) : null}
+
+      <Switch
+        checked={checked}
+        onCheckedChange={onToggle}
+        disabled={disabled}
+        size="sm"
+        aria-label={t(CARD_LABEL_KEYS[id])}
+      />
+    </Reorder.Item>
+  );
+}
+
 export function DashboardCustomize({
   compact = false,
 }: DashboardCustomizeProps) {
@@ -81,6 +165,7 @@ export function DashboardCustomize({
   );
   const [pending, setPending] = useState<Set<DashboardCardId>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
+  const { order, setOrder, resetOrder } = useDashboardOrder();
 
   const baseVisibility = useMemo(
     () =>
@@ -139,14 +224,22 @@ export function DashboardCustomize({
     setBulkBusy(true);
     const defaults = defaultVisibility(null);
     setDraft(defaults);
+    resetOrder();
     try {
-      await update({ dashboardCards: null });
+      await update({ dashboardCards: null, dashboardOrder: null });
       toast.success(t("dashboard.customizeResetSuccess"));
     } catch {
       setDraft(visibility);
       toast.error(t("dashboard.customizeResetError"));
     }
     setBulkBusy(false);
+  };
+
+  const handleReorder = (
+    cards: readonly DashboardCardId[],
+    next: DashboardCardId[],
+  ) => {
+    setOrder(reorderRegion(order, cards, next));
   };
 
   return (
@@ -196,7 +289,7 @@ export function DashboardCustomize({
           >
             <Icon
               icon={bulkBusy ? Loader2 : RotateCcw}
-              className={cn("size-3.5", bulkBusy && "animate-spin")}
+              className={cn("size-4", bulkBusy && "animate-spin")}
             />
             {t("dashboard.customizeReset")}
           </Button>
@@ -244,78 +337,47 @@ export function DashboardCustomize({
             </div>
           ) : null}
 
-          {/* Card groups */}
-          {DASHBOARD_CARD_GROUPS.map((group) => {
-            const groupVisible = group.cards.filter(
+          {/* Card regions (drag to reorder within each) */}
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Icon icon={GripVertical} className="size-3.5 shrink-0" />
+            {t("dashboard.customizeReorderHint")}
+          </p>
+
+          {DASHBOARD_REGIONS.map((region) => {
+            const groupVisible = region.cards.filter(
               (id) => visibility[id],
             ).length;
+            const regionOrder = orderForRegion(order, region.cards);
             return (
-              <div key={group.id} className="flex flex-col gap-2">
+              <div key={region.id} className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <div className="h-px flex-1 bg-border/50" />
                   <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                    {t(group.labelKey)}
+                    {t(region.labelKey)}
                   </h3>
                   <span className="rounded-md bg-muted/70 px-1.5 py-0.5 text-[0.65rem] font-medium tabular-nums text-muted-foreground">
-                    {groupVisible}/{group.cards.length}
+                    {groupVisible}/{region.cards.length}
                   </span>
                   <div className="h-px flex-1 bg-border/50" />
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  {group.cards.map((id) => {
-                    const checked = visibility[id];
-                    const isPending = pending.has(id);
-                    return (
-                      <div
-                        key={id}
-                        className={cn(
-                          "flex items-center gap-3 rounded-xl border border-border/40 bg-card/50 p-2.5 pl-3 transition duration-200",
-                          "hover:border-border/70 hover:bg-card hover:shadow-sm",
-                          !checked && "opacity-70",
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors",
-                            checked
-                              ? "bg-primary/10 text-primary"
-                              : "bg-muted/60 text-muted-foreground",
-                          )}
-                        >
-                          <Icon icon={CARD_ICONS[id]} className="size-4" />
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <p
-                            className={cn(
-                              "truncate text-sm font-medium",
-                              !checked && "text-muted-foreground",
-                            )}
-                          >
-                            {t(CARD_LABEL_KEYS[id])}
-                          </p>
-                        </div>
-
-                        {isPending ? (
-                          <Icon
-                            icon={Loader2}
-                            className="size-4 shrink-0 animate-spin text-muted-foreground"
-                            aria-hidden
-                          />
-                        ) : null}
-
-                        <Switch
-                          checked={checked}
-                          onCheckedChange={(value) => handleToggle(id, value)}
-                          disabled={busy}
-                          size="sm"
-                          aria-label={t(CARD_LABEL_KEYS[id])}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
+                <Reorder.Group
+                  axis="y"
+                  values={regionOrder}
+                  onReorder={(next) => handleReorder(region.cards, next)}
+                  className="flex flex-col gap-1.5"
+                >
+                  {regionOrder.map((id) => (
+                    <CardReorderRow
+                      key={id}
+                      id={id}
+                      checked={visibility[id]}
+                      pending={pending.has(id)}
+                      disabled={busy}
+                      onToggle={(value) => handleToggle(id, value)}
+                    />
+                  ))}
+                </Reorder.Group>
               </div>
             );
           })}

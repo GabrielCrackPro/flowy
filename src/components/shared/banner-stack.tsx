@@ -22,8 +22,8 @@ import { cn } from "@/lib/utils";
  */
 export const BANNER_STAGGER_MS = 60;
 
-/** Shared mount/unmount slide (px) — kept subtle so strips read as settling. */
-export const BANNER_SLIDE_PX = -4;
+/** Shared mount/unmount slide (px) — a clear drop-down from behind the header. */
+export const BANNER_SLIDE_PX = -16;
 
 interface RegisteredBanner {
   /** Provided by dismissible banners; the dismiss-all control skips the rest. */
@@ -250,7 +250,7 @@ export function useBannerStackItem({
 }
 
 /**
- * Shared motion wrapper for stacked banner strips: a subtle slide + fade on
+ * Shared motion wrapper for stacked banner strips: a drop-down slide + fade on
  * mount/unmount, delayed by the caller's staggerDelay so simultaneous banners
  * cascade in/out instead of snapping together. Keeps the height collapse so
  * the strips below flow smoothly. Reduced-motion users get the height/opacity
@@ -270,7 +270,7 @@ export function BannerStripMotion({
       initial={{ height: 0, opacity: 0, y: BANNER_SLIDE_PX }}
       animate={{ height: "auto", opacity: 1, y: 0 }}
       exit={{ height: 0, opacity: 0, y: BANNER_SLIDE_PX }}
-      transition={{ duration: 0.2, ease: "easeInOut", delay }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1], delay }}
       className={cn("overflow-hidden", className)}
     >
       {children}

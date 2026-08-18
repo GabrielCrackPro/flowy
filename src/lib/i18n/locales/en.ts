@@ -282,7 +282,8 @@ export const app: AppTranslationMessages = {
     },
     security: {
       title: "Account security",
-      description: "Manage your password and account deletion",
+      description:
+        "Manage your password, authenticator app, active sessions, and account",
       changePassword: "Change password",
       changePasswordHint: "Enter your current password and a new one",
       currentPasswordLabel: "Current password",
@@ -579,6 +580,16 @@ export const app: AppTranslationMessages = {
       github: "GitHub",
       status: "System status",
     },
+    preferences: {
+      title: "Preferences",
+      description: "Theme, language, and currency",
+      themeLabel: "Theme",
+      themeHint: "Customize colors and appearance",
+      localeLabel: "Language",
+      localeHint: "Interface language",
+      currencyLabel: "Currency",
+      currencyHint: "Used to format amounts",
+    },
   },
   changelog: {
     title: "What's new",
@@ -700,6 +711,9 @@ export const app: AppTranslationMessages = {
     customizeError: "Couldn't update your dashboard. Please try again.",
     customizeResetSuccess: "Dashboard restored to defaults",
     customizeResetError: "Couldn't reset your dashboard. Please try again.",
+    customizeReorder: "Reorder card",
+    customizeReorderHint:
+      "Drag the handle to reorder cards within each section",
     cards: {
       stats: "Financial summary",
       cashFlow: "Cash flow",
@@ -713,9 +727,8 @@ export const app: AppTranslationMessages = {
       groups: {
         summary: "Financial summary",
         charts: "Charts",
-        spending: "Spending & activity",
-        budgetsGoals: "Budgets & goals",
-        subscriptions: "Subscriptions",
+        main: "Main column",
+        aside: "Side panel",
       },
     },
     recentTransactions: "Recent transactions",
@@ -748,6 +761,8 @@ export const app: AppTranslationMessages = {
     actionsLabel: "Actions",
     actions: {
       reviewBudgets: "Review budgets",
+      setBudgets: "Set budgets",
+      viewTransactions: "View transactions",
       viewSubscriptions: "View subscriptions",
       viewGoals: "View goals",
     },
@@ -857,6 +872,7 @@ export const app: AppTranslationMessages = {
     noPayments: "No recurring payments",
     payments: "recurring payments",
     activeBudgets: "Active budgets",
+    items: "items",
   },
   distribution: {
     title: "Monthly distribution",
@@ -884,7 +900,14 @@ export const app: AppTranslationMessages = {
     week: "Week",
     month: "Month",
     overlays: "Overlays",
+    overlaysDesc: "Show budget and goal reference lines",
     layers: "Layers",
+    settings: "Chart settings",
+    settingsDesc: "Customize how this chart looks",
+    chartType: "Chart type",
+    timePeriod: "Time period",
+    configure: "Configure",
+    reset: "Reset to defaults",
     budget: "Budget",
     goal: "Goal",
     expensesByCategory: "Expenses by category",

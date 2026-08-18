@@ -11,8 +11,6 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { toast } from "sonner";
-import { AlertBanner } from "@/components/notifications/alert-banner";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import {
@@ -91,7 +89,8 @@ function NotificationProviderImpl({
   const { user } = useAuth();
   const { profile } = useProfile();
   const queryClient = useQueryClient();
-  const isDashboardHome = pathname === "/dashboard";
+  const isDashboard =
+    pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 
   const userId = user?.id;
   const activeSpaceId = profile?.activeSpaceId ?? null;
@@ -103,12 +102,12 @@ function NotificationProviderImpl({
   const query = useQuery({
     queryKey,
     queryFn: notificationsApi.list,
-    enabled: !!userId && isDashboardHome,
+    enabled: !!userId && isDashboard,
     staleTime: 30000,
   });
 
   useEffect(() => {
-    if (!userId || !isDashboardHome) return;
+    if (!userId || !isDashboard) return;
 
     const channel = supabase
       .channel(`alerts-inbox-${userId}`)
@@ -143,22 +142,6 @@ function NotificationProviderImpl({
             alerts: sortByCreatedAtDesc([alert, ...current.alerts]),
             unreadCount: current.unreadCount + (alert.readAt ? 0 : 1),
           });
-
-          if (!alert.readAt && !alert.resolvedAt) {
-            toast.custom(
-              () => (
-                <AlertBanner
-                  alert={alert}
-                  onDismiss={() => toast.dismiss(alert.id)}
-                />
-              ),
-              {
-                id: alert.id,
-                duration: 6000,
-                className: "w-full max-w-sm",
-              },
-            );
-          }
         },
       )
       .on(
@@ -199,10 +182,6 @@ function NotificationProviderImpl({
             alerts,
             unreadCount,
           });
-
-          if (alert.readAt || alert.resolvedAt) {
-            toast.dismiss(alert.id);
-          }
         },
       )
       .on(
@@ -231,7 +210,6 @@ function NotificationProviderImpl({
                 alert.id !== row.id && !alert.readAt && !alert.resolvedAt,
             ).length,
           });
-          toast.dismiss(row.id);
         },
       )
       .subscribe();
@@ -239,7 +217,7 @@ function NotificationProviderImpl({
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [userId, activeSpaceId, isDashboardHome, queryClient, queryKey]);
+  }, [userId, activeSpaceId, isDashboard, queryClient, queryKey]);
 
   // Fallback when realtime is unavailable: the service worker messages the
   // client when a push arrives while the app is open, so refetch alerts.

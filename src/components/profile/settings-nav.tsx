@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Icon, type IconProps } from "@/components/shared";
-import { Bell, Droplet, Shield, UserRound, Users } from "@/lib/icons";
+import {
+  Bell,
+  Droplet,
+  Settings2,
+  Shield,
+  UserRound,
+  Users,
+} from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 const SECTIONS: Array<{
@@ -13,6 +20,11 @@ const SECTIONS: Array<{
   labelKey: string;
 }> = [
   { id: "profile", icon: UserRound, labelKey: "settings.profile.title" },
+  {
+    id: "preferences",
+    icon: Settings2,
+    labelKey: "settings.preferences.title",
+  },
   { id: "spaces", icon: Users, labelKey: "profile.spaces.title" },
   { id: "notifications", icon: Bell, labelKey: "settings.notifications.title" },
   { id: "security", icon: Shield, labelKey: "settings.security.title" },

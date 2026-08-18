@@ -45,7 +45,7 @@ export function SpaceMembersSheet({
       snapPoints={[0.5, 0.92]}
       footerRight={
         <SheetClose>
-          <Button variant="outline" className="h-10">
+          <Button variant="outline" className="h-11 sm:h-10">
             <X className="size-4" />
             {t("profile.spaces.close")}
           </Button>

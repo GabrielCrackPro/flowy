@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useHaptic } from "@/hooks/useHaptic";
 import { TriangleAlert } from "@/lib/icons";
 import { cn } from "@/lib/utils";
+import { CONFIRM_TINTS, type ConfirmTint } from "./confirm-tint";
 import { Icon } from "./icon";
 
 interface ConfirmDialogProps {
@@ -25,7 +26,9 @@ interface ConfirmDialogProps {
   confirmLabel?: ReactNode;
   cancelLabel?: string;
   onConfirm: () => void;
-  variant?: "destructive" | "default";
+  variant?: "destructive" | "primary";
+  /** Color tint for the `primary` confirm action. Defaults to `"primary"`. */
+  tint?: ConfirmTint;
   /** Icon glyph rendered inside the header tile (pass a `size-5` glyph). */
   icon?: ReactNode;
   /** Custom body rendered between the header and the footer. */
@@ -39,19 +42,10 @@ interface ConfirmDialogProps {
   closeOnConfirm?: boolean;
 }
 
-const VARIANT_STYLES = {
-  // AlertDialogAction already ships the canonical destructive gradient, so the
-  // destructive case is left unoverridden to stay in sync with the Button
-  // `destructive` variant.
-  destructive: "",
-  default:
-    "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-md shadow-primary/20 hover:from-primary/90 hover:to-primary/80 hover:shadow-lg",
-};
-
 const ICON_TILE_TONES = {
   destructive:
     "from-destructive/20 to-destructive/10 text-destructive shadow-destructive/20",
-  default: "from-primary/20 to-primary/10 text-primary shadow-primary/20",
+  primary: "from-primary/20 to-primary/10 text-primary shadow-primary/20",
 };
 
 export function ConfirmDialog({
@@ -63,6 +57,7 @@ export function ConfirmDialog({
   cancelLabel,
   onConfirm,
   variant = "destructive",
+  tint = "primary",
   icon,
   children,
   confirmDisabled = false,
@@ -74,7 +69,10 @@ export function ConfirmDialog({
   const confirmText = confirmLabel ?? t("common.delete");
   const cancelText = cancelLabel ?? t("common.cancel");
 
-  const actionClassName = VARIANT_STYLES[variant] ?? VARIANT_STYLES.default;
+  // The destructive case keeps the base AlertDialogAction gradient untouched;
+  // the primary case pulls its full override from the shared tint map.
+  const actionClassName =
+    variant === "destructive" ? "" : CONFIRM_TINTS[tint].action;
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
