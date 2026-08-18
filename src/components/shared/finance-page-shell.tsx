@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "./error-boundary";
-import { PageTransition } from "./page-transition";
 
 interface FinancePageShellProps {
   children: ReactNode;
@@ -16,10 +15,8 @@ export function FinancePageShell({
   className,
 }: FinancePageShellProps) {
   return (
-    <PageTransition>
-      <ErrorBoundary>
-        <div className={cn("space-y-6", className)}>{children}</div>
-      </ErrorBoundary>
-    </PageTransition>
+    <ErrorBoundary>
+      <div className={cn("space-y-6", className)}>{children}</div>
+    </ErrorBoundary>
   );
 }

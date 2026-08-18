@@ -231,12 +231,17 @@ export function ThemeCustomizationSheet({
         contentClassName="px-4 py-5 sm:px-6 sm:py-6"
         footerTertiary={
           <Button
+            type="button"
             variant="destructive"
             onClick={() => void handleResetToDefaults()}
             disabled={saving}
             className="h-11 w-full sm:h-10 sm:w-auto sm:px-3"
           >
-            <RotateCcw className="mr-2 size-4" />
+            {saving ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <RotateCcw className="size-4" />
+            )}
             {t("settings.theme.resetToDefaults")}
           </Button>
         }
@@ -247,7 +252,7 @@ export function ThemeCustomizationSheet({
             disabled={saving}
             className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
           >
-            <X className="mr-2 size-4" />
+            <X className="size-4" />
             {t("settings.theme.cancel")}
           </Button>
         }
@@ -255,7 +260,7 @@ export function ThemeCustomizationSheet({
           <Button
             onClick={() => void handleSave()}
             disabled={saving || !hasChanges}
-            className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 sm:h-10 sm:w-auto sm:min-w-[120px]"
+            className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 sm:h-10 sm:w-auto sm:min-w-28"
           >
             {saving ? (
               <Loader2 className="size-4 animate-spin" />

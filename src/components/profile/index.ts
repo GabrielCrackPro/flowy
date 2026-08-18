@@ -2,6 +2,7 @@ export * from "./account-security-actions";
 export * from "./avatar-uploader";
 export * from "./change-password-sheet";
 export * from "./color-picker";
+export * from "./preferences-section";
 export * from "./profile-form";
 export * from "./push-notifications";
 export * from "./settings-nav";

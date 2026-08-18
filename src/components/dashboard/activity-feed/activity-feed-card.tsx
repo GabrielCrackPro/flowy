@@ -7,6 +7,7 @@ import {
   RelativeTime,
   SectionCard,
   Skeleton,
+  useCardMotion,
 } from "@components/shared";
 import { Button } from "@components/ui";
 import { useDashboardData } from "@hooks/useDashboardData";
@@ -164,14 +165,18 @@ function getActivityAppearance(activity: Activity) {
 }
 
 export function ActivityFeedCardSkeleton() {
+  const { container, item } = useCardMotion();
   return (
-    <div className="relative px-5 pb-5 pt-2 sm:px-6">
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="relative px-5 pb-5 pt-2 sm:px-6"
+    >
       {[1, 2, 3, 4, 5].map((row, index) => (
         <motion.div
           key={row}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.05 }}
+          variants={item}
           className="relative flex gap-3.5 pb-5 last:pb-1"
         >
           {index < 4 && (
@@ -194,7 +199,7 @@ export function ActivityFeedCardSkeleton() {
           </div>
         </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
@@ -212,6 +217,7 @@ export function ActivityFeedCard({
   const { data, isLoading: loading } = useDashboardData(month, year);
   const activities = (data as { activities?: Activity[] })?.activities ?? [];
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const { container, item } = useCardMotion();
 
   const clearMutation = useMutation({
     mutationFn: clearActivities,
@@ -282,7 +288,12 @@ export function ActivityFeedCard({
             iconClassName="from-violet-500/20 to-violet-500/10 text-violet-600 ring-violet-500/10 dark:from-violet-500/30 dark:to-violet-500/20 dark:text-violet-400"
           />
         ) : (
-          <div className="relative px-5 pb-5 pt-2 sm:px-6">
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="relative px-5 pb-5 pt-2 sm:px-6"
+          >
             {activities.map((activity, index) => {
               const { Icon, className } = getActivityAppearance(activity);
               const isLast = index === activities.length - 1;
@@ -290,9 +301,7 @@ export function ActivityFeedCard({
               return (
                 <motion.div
                   key={activity.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  variants={item}
                   className="group relative flex gap-3.5 pb-5 last:pb-1"
                 >
                   {!isLast && (
@@ -325,7 +334,7 @@ export function ActivityFeedCard({
                 </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         )}
       </SectionCard>
     </>

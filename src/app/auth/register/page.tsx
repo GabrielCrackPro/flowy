@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Button,
-  Checkbox,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@components/ui";
+import { Button, Checkbox, Input } from "@components/ui";
 import {
   Form,
   FormAlert,
@@ -29,27 +20,23 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import { Icon } from "@/components/shared";
+import {
+  CurrencySelect,
+  LanguageSelect,
+} from "@/components/shared/preference-selects";
 import { updateProfile } from "@/lib/api/profile";
 import { translateAuthError } from "@/lib/auth/errors";
 import { getLocaleCookie, getLocaleStorage, normalizeLocale } from "@/lib/i18n";
 import {
   ArrowRight,
-  Coins,
   Eye,
   EyeOff,
-  Languages,
   Loader2,
   Lock,
   Mail,
   User,
 } from "@/lib/icons";
-import {
-  CURRENCIES,
-  currencyName,
-  detectCurrency,
-  LOCALES,
-  languageName,
-} from "@/lib/preferences";
+import { detectCurrency } from "@/lib/preferences";
 import { signUpWithEmail } from "@/lib/supabase";
 
 export default function RegisterPage() {
@@ -342,36 +329,12 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel required>{t("register.localeLabel")}</FormLabel>
                     <FormControl>
-                      <Select
+                      <LanguageSelect
                         value={field.value}
-                        onValueChange={(value) => {
-                          if (value !== null) field.onChange(value);
-                        }}
-                      >
-                        <SelectTrigger
-                          className="w-full"
-                          aria-label={t("register.localeLabel")}
-                        >
-                          <Icon
-                            icon={Languages}
-                            className="size-4 text-muted-foreground"
-                          />
-                          <SelectValue
-                            placeholder={form.values.locale}
-                            options={LOCALES.map((locale) => ({
-                              value: locale,
-                              label: languageName(locale, form.values.locale),
-                            }))}
-                          />
-                        </SelectTrigger>
-                        <SelectContent className="w-full">
-                          {LOCALES.map((locale) => (
-                            <SelectItem key={locale} value={locale}>
-                              {languageName(locale, form.values.locale)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        className="w-full"
+                        ariaLabel={t("register.localeLabel")}
+                        onValueChange={(value) => field.onChange(value)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -386,37 +349,12 @@ export default function RegisterPage() {
                       {t("register.currencyLabel")}
                     </FormLabel>
                     <FormControl>
-                      <Select
+                      <CurrencySelect
                         value={field.value}
-                        onValueChange={(value) => {
-                          if (value !== null) field.onChange(value);
-                        }}
-                      >
-                        <SelectTrigger
-                          className="w-full"
-                          aria-label={t("register.currencyLabel")}
-                        >
-                          <Icon
-                            icon={Coins}
-                            className="size-4 text-muted-foreground"
-                          />
-                          <SelectValue
-                            placeholder={form.values.currency}
-                            options={CURRENCIES.map((currency) => ({
-                              value: currency,
-                              label: `${currencyName(currency, form.values.locale)} (${currency})`,
-                            }))}
-                          />
-                        </SelectTrigger>
-                        <SelectContent className="w-full">
-                          {CURRENCIES.map((currency) => (
-                            <SelectItem key={currency} value={currency}>
-                              {currencyName(currency, form.values.locale)} (
-                              {currency})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        displayLocale={form.values.locale}
+                        ariaLabel={t("register.currencyLabel")}
+                        onValueChange={(value) => field.onChange(value)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -26,6 +26,9 @@ function Select<Value, Multiple extends boolean | undefined = false>({
     open,
     defaultOpen,
     onOpenChange,
+    // Selects dismiss on outside press; no system-back history interception
+    // (see useOverlayOpen's option docs for why menus/popovers opt out).
+    systemBackDismiss: false,
   });
 
   return <SelectPrimitive.Root {...overlay} {...props} />;

@@ -96,9 +96,9 @@ export function SpaceLeaveConfirm({
           className="h-11 w-full gap-1.5 sm:h-10 sm:w-auto"
         >
           {isPending ? (
-            <Icon icon={Loader2} className="size-4 animate-spin" />
+            <Icon icon={Loader2} className="size-3.5 animate-spin" />
           ) : (
-            <Icon icon={isOnlyMember ? Trash2 : LogOut} className="size-4" />
+            <Icon icon={isOnlyMember ? Trash2 : LogOut} className="size-3.5" />
           )}
           {isOnlyMember
             ? t("profile.spaces.deleteSpace")

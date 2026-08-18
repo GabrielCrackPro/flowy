@@ -16,11 +16,11 @@ import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Cell, Pie, PieChart } from "recharts";
 import { ArrowRight, ChartPie } from "@/lib/icons";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import type { DashboardData } from "@/types/Dashboard";
 import { OTHER_CATEGORY_KEY } from "@/types/Dashboard";
 import { ChartCardSkeleton } from "./chart-card";
@@ -48,6 +48,7 @@ export function ExpenseDistributionChart({
   const { profile } = useProfile();
   const { t } = useTranslation();
   const router = useRouter();
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
@@ -64,6 +65,25 @@ export function ExpenseDistributionChart({
   const hasData = data.some((item) => item.value > 0);
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
+
+  // Shrink the center amount as it grows so it stays inside the donut hole
+  // (inner radius 62px) instead of overlapping the rings; truncate is the
+  // last-resort guard for extreme amounts.
+  const sizeClassFor = (label: string) =>
+    label.length <= 10
+      ? "text-lg"
+      : label.length <= 12
+        ? "text-base"
+        : "text-sm";
+
+  const activeItem = activeIndex !== null ? data[activeIndex] : undefined;
+  const centerValue = activeItem?.value ?? total;
+  const centerLabel = formatCurrency(centerValue, locale, currency);
+  const centerSizeClass = sizeClassFor(centerLabel);
+  const activePercent =
+    activeItem && total > 0
+      ? Math.round((activeItem.value / total) * 100)
+      : null;
 
   const handleSliceClick = (categoryName: string) => {
     if (categoryName === t("charts.other")) return;
@@ -128,36 +148,61 @@ export function ExpenseDistributionChart({
                   paddingAngle={2}
                   cornerRadius={4}
                   onClick={(entry) => handleSliceClick(entry.name)}
+                  onMouseEnter={(_, index) => setActiveIndex(index)}
+                  onMouseLeave={() => setActiveIndex(null)}
                   className="cursor-pointer"
                 >
-                  {data.map((entry) => (
+                  {data.map((entry, index) => (
                     <Cell
                       key={entry.name}
                       fill={entry.fill}
-                      className="transition-opacity duration-200 hover:opacity-80 focus:opacity-80"
+                      className={cn(
+                        "transition-opacity duration-200",
+                        activeIndex !== null &&
+                          activeIndex !== index &&
+                          "opacity-40",
+                      )}
                     />
                   ))}
                 </Pie>
               </PieChart>
             </ChartContainer>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xs text-muted-foreground">
-                {t("charts.expenses")}
+              <span className="max-w-[7rem] truncate text-xs text-muted-foreground">
+                {activeItem ? activeItem.name : t("charts.expenses")}
               </span>
-              <span className="mt-0.5 text-lg font-semibold tabular-nums">
+              <span
+                title={centerLabel}
+                className={cn(
+                  "mt-0.5 max-w-[7rem] truncate font-semibold tabular-nums",
+                  centerSizeClass,
+                )}
+              >
                 <AnimatedNumber
-                  value={total}
+                  value={centerValue}
                   formatter={(v) => formatCurrency(v, locale, currency)}
                 />
               </span>
+              {activePercent !== null && (
+                <span className="mt-0.5 text-[10px] font-medium tabular-nums text-muted-foreground/70">
+                  {activePercent}%
+                </span>
+              )}
             </div>
           </div>
 
-          <div className="mt-5 space-y-2.5">
-            {data.map((item) => (
-              <div
+          <div className="mt-5 space-y-1">
+            {data.map((item, index) => (
+              <button
                 key={item.name}
-                className="flex items-center justify-between gap-3 text-sm"
+                type="button"
+                onClick={() => handleSliceClick(item.name)}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
+                className={cn(
+                  "flex w-full items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
+                  activeIndex === index ? "bg-muted/60" : "hover:bg-muted/40",
+                )}
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <span
@@ -181,7 +226,7 @@ export function ExpenseDistributionChart({
                     />
                   </span>
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         </div>

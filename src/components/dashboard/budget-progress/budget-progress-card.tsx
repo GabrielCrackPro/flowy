@@ -7,6 +7,7 @@ import {
   Icon,
   SectionCard,
   Skeleton,
+  useCardMotion,
 } from "@components/shared";
 import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
@@ -28,14 +29,18 @@ interface BudgetProgressCardProps {
 }
 
 export function BudgetProgressCardSkeleton() {
+  const { container, item } = useCardMotion();
   return (
-    <div className="space-y-3 px-5 pb-6 sm:px-6">
-      {[1, 2, 3].map((item, index) => (
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="space-y-3 px-5 pb-6 sm:px-6"
+    >
+      {[1, 2, 3].map((row) => (
         <motion.div
-          key={item}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.05 }}
+          key={row}
+          variants={item}
           className="rounded-xl border border-border/40 bg-gradient-to-br from-card to-card/50 p-4 shadow-sm"
         >
           <div className="mb-3 flex items-center gap-2">
@@ -62,7 +67,7 @@ export function BudgetProgressCardSkeleton() {
           </div>
         </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
@@ -74,6 +79,7 @@ export function BudgetProgressCard({ month, year }: BudgetProgressCardProps) {
 
   const locale = profile?.locale ?? "es-ES";
   const currency = profile?.currency ?? "USD";
+  const { container, item } = useCardMotion();
 
   return (
     <SectionCard
@@ -100,8 +106,13 @@ export function BudgetProgressCard({ month, year }: BudgetProgressCardProps) {
           }
         />
       ) : (
-        <div className="space-y-3 px-5 pb-6 sm:px-6">
-          {budgets.map((budget, index) => {
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="space-y-3 px-5 pb-6 sm:px-6"
+        >
+          {budgets.map((budget) => {
             const spent = budget.spent || 0;
             const pct =
               budget.budgetLimit > 0
@@ -114,13 +125,7 @@ export function BudgetProgressCard({ month, year }: BudgetProgressCardProps) {
             const CategoryIcon = resolveCategoryIcon(budget.category?.icon);
 
             return (
-              <motion.div
-                key={budget.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="group"
-              >
+              <motion.div key={budget.id} variants={item} className="group">
                 <div
                   className={cn(
                     "relative rounded-xl border bg-gradient-to-br p-4 shadow-sm transition hover:shadow-md",
@@ -289,7 +294,7 @@ export function BudgetProgressCard({ month, year }: BudgetProgressCardProps) {
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       )}
     </SectionCard>
   );

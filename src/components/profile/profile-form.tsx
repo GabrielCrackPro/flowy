@@ -2,36 +2,19 @@
 
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared";
+import {
+  CurrencySelect,
+  LanguageSelect,
+} from "@/components/shared/preference-selects";
 import { toast } from "@/components/shared/toast";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useReactForm } from "@/hooks/useReactForm";
-import {
-  AtSign,
-  Check,
-  Coins,
-  Languages,
-  Loader2,
-  UserRound,
-  X,
-} from "@/lib/icons";
-import {
-  CURRENCIES,
-  currencyName,
-  LOCALES,
-  languageName,
-} from "@/lib/preferences";
+import { AtSign, Check, Languages, Loader2, UserRound, X } from "@/lib/icons";
 import { updateProfileSchema } from "@/lib/schemas/profile";
 import type { Profile } from "@/types/Profile";
 import { AvatarUploader } from "./avatar-uploader";
@@ -115,69 +98,28 @@ export function ProfileForm({
             label={t("settings.profile.currencyLabel")}
             error={form.errors.currency}
           >
-            <Select
+            <CurrencySelect
               value={form.values.currency}
+              displayLocale={appLocale}
+              ariaLabel={t("settings.profile.currencyLabel")}
               onValueChange={(val) => {
-                if (val !== null) form.handleValueChange("currency")(val);
+                form.handleValueChange("currency")(val);
               }}
-            >
-              <SelectTrigger
-                className="w-full"
-                aria-label={t("settings.profile.currencyLabel")}
-              >
-                <Icon icon={Coins} className="size-4 text-muted-foreground" />
-                <SelectValue
-                  placeholder={form.values.currency || "USD"}
-                  options={CURRENCIES.map((currency) => ({
-                    value: currency,
-                    label: `${currencyName(currency, appLocale)} (${currency})`,
-                  }))}
-                />
-              </SelectTrigger>
-              <SelectContent className="w-full">
-                {CURRENCIES.map((currency) => (
-                  <SelectItem key={currency} value={currency}>
-                    {currencyName(currency, appLocale)} ({currency})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </FormField>
 
           <FormField
             label={t("settings.profile.localeLabel")}
             error={form.errors.locale}
           >
-            <Select
+            <LanguageSelect
               value={form.values.locale}
+              className="w-full"
+              ariaLabel={t("settings.profile.localeLabel")}
               onValueChange={(val) => {
-                if (val !== null) form.handleValueChange("locale")(val);
+                form.handleValueChange("locale")(val);
               }}
-            >
-              <SelectTrigger
-                className="w-full"
-                aria-label={t("settings.profile.localeLabel")}
-              >
-                <Icon
-                  icon={Languages}
-                  className="size-4 text-muted-foreground"
-                />
-                <SelectValue
-                  placeholder="es"
-                  options={LOCALES.map((locale) => ({
-                    value: locale,
-                    label: languageName(locale, appLocale),
-                  }))}
-                />
-              </SelectTrigger>
-              <SelectContent className="w-full">
-                {LOCALES.map((locale) => (
-                  <SelectItem key={locale} value={locale}>
-                    {languageName(locale, appLocale)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </FormField>
         </div>
 

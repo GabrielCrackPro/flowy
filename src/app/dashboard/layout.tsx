@@ -1,5 +1,6 @@
 import { Header, Sidebar } from "@components/dashboard";
 import { BannerStack } from "@components/shared/banner-stack";
+import { InboxAlertsBanner } from "@components/shared/inbox-alerts-banner";
 import { IncidentBanner } from "@components/shared/incident-banner";
 import { MfaSetupBanner } from "@components/shared/mfa-setup-banner";
 import { OfflineBanner } from "@components/shared/offline-banner";
@@ -34,11 +35,10 @@ export default function DashboardLayout({
           <BannerStack>
             <OfflineBanner />
             <PushNotificationsBanner />
+            <MfaSetupBanner />
             <IncidentBanner />
+            <InboxAlertsBanner />
           </BannerStack>
-        </Suspense>
-        <Suspense fallback={null}>
-          <MfaSetupBanner />
         </Suspense>
         <main
           id="main"

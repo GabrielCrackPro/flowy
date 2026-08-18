@@ -17,6 +17,10 @@ function DropdownMenu({
     open,
     defaultOpen,
     onOpenChange,
+    // Menus dismiss on outside press; the system-back history dance races
+    // with App Router navigations (a menu item that navigates while the
+    // menu closes can get its navigation silently cancelled).
+    systemBackDismiss: false,
   });
 
   return (
@@ -68,6 +72,34 @@ function DropdownMenuContent({
 
 function DropdownMenuGroup({ ...props }: MenuPrimitive.Group.Props) {
   return <MenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />;
+}
+
+/**
+ * A menu item that navigates. Renders via `Menu.LinkItem` (an `<a>` element
+ * with link semantics) so keyboard Enter and mouse clicks both follow the
+ * link, unlike a regular item wrapping a nested anchor.
+ */
+function DropdownMenuLinkItem({
+  className,
+  inset,
+  closeOnClick = true,
+  ...props
+}: MenuPrimitive.LinkItem.Props & {
+  inset?: boolean;
+  closeOnClick?: boolean;
+}) {
+  return (
+    <MenuPrimitive.LinkItem
+      data-slot="dropdown-menu-link-item"
+      data-inset={inset}
+      closeOnClick={closeOnClick}
+      className={cn(
+        "group/dropdown-menu-item relative flex cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-inset:pl-7 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 function DropdownMenuLabel({
@@ -275,6 +307,7 @@ export {
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuItem,
+  DropdownMenuLinkItem,
   DropdownMenuCheckboxItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,

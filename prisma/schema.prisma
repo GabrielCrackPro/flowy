@@ -17,6 +17,7 @@ model Profile {
   showLanguageSelector Boolean  @default(true) @map("show_language_selector")
   activeSpaceId        String?  @map("active_space_id") @db.Uuid
   dashboardCards       Json?    @map("dashboard_cards")
+  dashboardOrder       Json?    @map("dashboard_order")
   primaryColor         String?  @map("primary_color") @db.Text
   secondaryColor       String?  @map("secondary_color") @db.Text
   accentColor          String?  @map("accent_color") @db.Text

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import type { User } from "@supabase/supabase-js";
 
 import { prisma } from "@/lib/prisma/client";
@@ -7,6 +8,11 @@ import type {
 } from "@/lib/schemas/profile";
 import { CategoryService } from "./categories";
 import { SpaceService } from "./spaces/space-service";
+
+function nullableJson(value: string[] | null | undefined) {
+  if (value === undefined) return undefined;
+  return value === null ? Prisma.DbNull : value;
+}
 
 function profileNameFromUser(user: User) {
   const metadata = user.user_metadata as { full_name?: string } | undefined;
@@ -155,10 +161,12 @@ export const ProfileService = {
         currency: (data as UpdateProfileInput).currency,
         locale: (data as UpdateProfileInput).locale,
         showLanguageSelector: (data as UpdateProfileInput).showLanguageSelector,
-        dashboardCards:
-          (data as UpdateProfileInput).dashboardCards === undefined
-            ? undefined
-            : (data as UpdateProfileInput).dashboardCards,
+        dashboardCards: nullableJson(
+          (data as UpdateProfileInput).dashboardCards,
+        ),
+        dashboardOrder: nullableJson(
+          (data as UpdateProfileInput).dashboardOrder,
+        ),
         primaryColor: (data as UpdateThemeInput).primaryColor,
         secondaryColor: (data as UpdateThemeInput).secondaryColor,
         accentColor: (data as UpdateThemeInput).accentColor,

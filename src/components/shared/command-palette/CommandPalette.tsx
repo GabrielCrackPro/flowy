@@ -8,7 +8,6 @@ import { useChangelog } from "@/context/ChangelogContext";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useSignOut } from "@/hooks/useSignOut";
-import { useSystemBackDismiss } from "@/hooks/useSystemBackDismiss";
 import { useTheme } from "@/hooks/useTheme";
 import { search } from "@/lib/api/search";
 import { ArrowUpDown, Repeat2, Tag, Target, Wallet } from "@/lib/icons";
@@ -75,9 +74,11 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const { openChangelog } = useChangelog();
   const handleSignOut = useSignOut();
 
-  // Android system back / iOS swipe-back / browser back closes the palette
-  // instead of navigating away.
-  useSystemBackDismiss(open, () => onOpenChange(false));
+  // NOTE: the palette deliberately does NOT intercept system back via
+  // useSystemBackDismiss. Its synthetic history entries race with App Router
+  // navigations — a command that closes the palette and navigates would have
+  // its navigation silently cancelled by the marker entry's popstate. Escape
+  // and the backdrop already dismiss it.
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResultItem[]>([]);

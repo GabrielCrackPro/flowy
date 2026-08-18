@@ -6,6 +6,7 @@ import {
   Icon,
   SectionCard,
   Skeleton,
+  useCardMotion,
 } from "@components/shared";
 import { useSubscriptionApi } from "@hooks/api/useSubscriptionApi";
 import { cn } from "@lib/utils";
@@ -16,15 +17,16 @@ import { SubscriptionCard } from "@/components/subscriptions/subscription-card";
 import { ArrowRight, Repeat2 } from "@/lib/icons";
 
 export function SubscriptionCardListSkeleton() {
+  const { container, item } = useCardMotion();
   return (
-    <div className="pb-2">
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="pb-2"
+    >
       {[1, 2, 3, 4].map((row, index) => (
-        <motion.div
-          key={row}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.05 }}
-        >
+        <motion.div key={row} variants={item}>
           <div className="flex items-center justify-between gap-3 border-t border-border/30 px-5 py-3.5 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <Skeleton variant="circular" className="size-9 shrink-0" />
@@ -39,13 +41,14 @@ export function SubscriptionCardListSkeleton() {
           </div>
         </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
 export function SubscriptionCardList() {
   const { subscriptions, loading, error } = useSubscriptionApi();
   const { t } = useTranslation();
+  const { container, item } = useCardMotion();
 
   return (
     <SectionCard
@@ -89,18 +92,18 @@ export function SubscriptionCardList() {
           }
         />
       ) : (
-        <div className="pb-2">
-          {subscriptions.map((subscription, index) => (
-            <motion.div
-              key={subscription.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-            >
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="pb-2"
+        >
+          {subscriptions.map((subscription) => (
+            <motion.div key={subscription.id} variants={item}>
               <SubscriptionCard subscription={subscription} compact />
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </SectionCard>
   );

@@ -8,6 +8,7 @@ export interface Profile {
   showLanguageSelector: boolean;
   activeSpaceId: string | null;
   dashboardCards: string[] | null;
+  dashboardOrder: string[] | null;
   primaryColor: string | null;
   secondaryColor: string | null;
   accentColor: string | null;

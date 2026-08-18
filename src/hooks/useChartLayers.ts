@@ -56,6 +56,13 @@ export function useChartLayers(initialLayers: ChartLayer[]) {
     setLayers((prev) => prev.filter((layer) => layer.id !== layerId));
   }, []);
 
+  const resetLayers = useCallback(
+    (nextLayers: ChartLayer[] = initialLayers) => {
+      setLayers(nextLayers);
+    },
+    [initialLayers],
+  );
+
   return {
     layers,
     focusedLayer,
@@ -67,5 +74,6 @@ export function useChartLayers(initialLayers: ChartLayer[]) {
     updateLayer,
     addLayer,
     removeLayer,
+    resetLayers,
   };
 }

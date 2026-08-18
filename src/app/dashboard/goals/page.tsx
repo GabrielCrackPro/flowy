@@ -467,10 +467,10 @@ export default function GoalsPage() {
               ? "from-emerald-500/20 to-emerald-500/10"
               : "from-amber-500/20 to-amber-500/10"
           }
-          buttonColor={
+          tint={
             quickAddGoal.savedAmount >= quickAddGoal.targetAmount
-              ? "from-emerald-500 to-emerald-600"
-              : "from-amber-500 to-amber-600"
+              ? "emerald"
+              : "amber"
           }
           actionLabel={t("goals.quickAdd")}
           actionType="add"

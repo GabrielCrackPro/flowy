@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import type { DashboardData } from "@/types/Dashboard";
+import { useCardMotion } from "./card-motion";
 import { CARD_BG_GRADIENT, CARD_SHELL, CARD_TOP_ACCENT } from "./card-tokens";
 import { Skeleton } from "./skeleton";
 import { StatsCard, type StatsCardProps } from "./stats-card";
@@ -19,8 +20,13 @@ interface StatsCardGroupProps {
 
 const SKELETON_KEYS = Array.from({ length: 6 }, (_, i) => `stats-sk-${i}`);
 
-const GRID_CLASSES =
-  "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6";
+// Mobile: a full-bleed horizontal snap carousel (cards peek in from the
+// right so it reads as swipeable). From `sm` up it becomes the multi-column
+// grid. `pb-2` gives the card shadows room inside the scroll container.
+const CONTAINER_CLASSES =
+  "-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6";
+
+const CARD_WRAPPER_CLASSES = "w-[85%] shrink-0 snap-start sm:w-auto";
 
 function StatsCardSkeleton() {
   return (
@@ -98,26 +104,21 @@ export function StatsCardGroup({ month, year }: StatsCardGroupProps) {
   const { profile } = useProfile();
   const { t } = useTranslation();
   const locale = profile?.locale ?? "es-ES";
+  const { container, item } = useCardMotion();
 
   if (isLoading || !stats) {
     return (
       <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className={GRID_CLASSES}
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className={CONTAINER_CLASSES}
       >
-        {SKELETON_KEYS.map((key, index) => (
+        {SKELETON_KEYS.map((key) => (
           <motion.div
             key={key}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.35,
-              delay: index * 0.05,
-              type: "spring",
-              stiffness: 200,
-            }}
+            variants={item}
+            className={CARD_WRAPPER_CLASSES}
           >
             <StatsCardSkeleton />
           </motion.div>
@@ -136,22 +137,16 @@ export function StatsCardGroup({ month, year }: StatsCardGroupProps) {
 
   return (
     <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      className={GRID_CLASSES}
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className={CONTAINER_CLASSES}
     >
-      {cards.map((card, index) => (
+      {cards.map((card) => (
         <motion.div
           key={card.title}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.4,
-            delay: index * 0.06,
-            type: "spring",
-            stiffness: 200,
-          }}
+          variants={item}
+          className={CARD_WRAPPER_CLASSES}
         >
           <StatsCard
             title={card.title}

@@ -10,6 +10,7 @@ export type UpdateProfileInput = Partial<
     | "locale"
     | "showLanguageSelector"
     | "dashboardCards"
+    | "dashboardOrder"
     | "primaryColor"
     | "secondaryColor"
     | "accentColor"

@@ -259,16 +259,16 @@ export function DataFilters({
                 type="button"
                 variant="outline"
                 onClick={clearMobileDraft}
-                className="min-w-0 flex-1"
+                className="h-11 min-w-0 flex-1 sm:h-10"
               >
                 {resolvedClearLabel}
               </Button>
               <Button
                 type="button"
                 onClick={applyMobileDraft}
-                className="min-w-0 flex-1 gap-1.5"
+                className="h-11 min-w-0 flex-1 gap-1.5 sm:h-10"
               >
-                <Icon icon={Check} className="size-3.5" />
+                <Icon icon={Check} className="size-4" />
                 {t("filters.applyFilters")}
               </Button>
             </>

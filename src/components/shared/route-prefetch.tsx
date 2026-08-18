@@ -8,6 +8,7 @@ import { getBudgets } from "@/lib/api/budget";
 import { getCategories } from "@/lib/api/category";
 import { getDashboardData } from "@/lib/api/dashboard";
 import { getGoals } from "@/lib/api/goal";
+import { pushApi } from "@/lib/api/push";
 import { getSubscriptions } from "@/lib/api/subscription";
 import { getTransactions } from "@/lib/api/transaction";
 import { useRouteProgress } from "./route-progress";
@@ -34,6 +35,7 @@ function RoutePrefetchInner() {
   const prefetchedForRef = useRef<string | null>(null);
 
   const activeSpaceId = profile?.activeSpaceId ?? null;
+  const userId = profile?.id ?? "anonymous";
 
   useEffect(() => {
     // Offline: don't fire doomed requests — the cached page renders directly.
@@ -99,10 +101,29 @@ function RoutePrefetchInner() {
       prefetch(["subscriptions", activeSpaceId, undefined], () =>
         getSubscriptions(),
       );
+    } else if (target === "/dashboard/profile") {
+      // Profile + spaces are already warm from the global ProfileProvider and
+      // sidebar, so only the notifications card's push queries need warming.
+      // Keys and scope must match PushNotificationsCard (pushQueryScope).
+      prefetch(["push-subscriptions", userId], () => pushApi.status());
+      prefetch(["push-preferences", userId], () => pushApi.getPreferences());
+      prefetch(["status-preferences", userId], () =>
+        pushApi.getStatusPreferences(),
+      );
+      prefetch(["push-delivery-history", userId], () =>
+        pushApi.deliveryHistory(),
+      );
     } else if (target === "/dashboard/categories") {
       prefetch(["categories", activeSpaceId, undefined], () => getCategories());
     }
-  }, [isNavigating, isOnline, activeSpaceId, currentPathname, queryClient]);
+  }, [
+    isNavigating,
+    isOnline,
+    activeSpaceId,
+    userId,
+    currentPathname,
+    queryClient,
+  ]);
 
   return null;
 }

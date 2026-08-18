@@ -44,12 +44,12 @@ export function SpaceEditSheet({
       footerSecondary={
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           onClick={() => onOpenChange(false)}
           disabled={rename.isPending}
           className="h-11 w-full sm:h-10 sm:w-auto sm:px-4"
         >
-          <X className="mr-2 size-4" />
+          <X className="size-4" />
           {t("common.cancel")}
         </Button>
       }

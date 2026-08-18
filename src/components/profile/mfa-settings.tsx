@@ -548,7 +548,7 @@ export function MfaSettings() {
             ))}
           </div>
 
-          <div className="flex flex-col gap-3 rounded-xl bg-amber-500/[0.06] p-3.5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 rounded-xl bg-amber-500/[0.06] p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-start gap-2.5">
               <KeyRound className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
               <p className="text-xs leading-relaxed text-amber-700 dark:text-amber-400">

@@ -6,18 +6,24 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuLinkItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon, Skeleton, UserAvatar } from "@/components/shared";
+import { ConfirmDialog, Icon, Skeleton, UserAvatar } from "@/components/shared";
 import { useProfile } from "@/hooks/useProfile";
 import { useSignOut } from "@/hooks/useSignOut";
-import { ChevronUp, LogOut, Settings2, User as UserIcon } from "@/lib/icons";
+import {
+  ChevronUp,
+  LogOut,
+  Settings2,
+  TriangleAlert,
+  User as UserIcon,
+} from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { SidebarTooltip } from "./SidebarTooltip";
 
@@ -43,10 +49,11 @@ export function SidebarProfile({
   const [target, setTarget] = useState<HTMLElement | null>(null);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
 
-  // Menu-item shortcuts (P → profile, , → preferences), active only while the
-  // menu is open on desktop. Capture phase + stopImmediatePropagation so Radix
-  // typeahead doesn't also react to the key.
+  // Menu-item shortcut (P → profile), active only while the menu is open on
+  // desktop. Capture phase + stopImmediatePropagation so Base UI typeahead
+  // doesn't also react to the key.
   useEffect(() => {
     if (!open || variant !== "desktop") return;
 
@@ -65,11 +72,6 @@ export function SidebarProfile({
         e.stopImmediatePropagation();
         setOpen(false);
         router.push("/dashboard/profile");
-      } else if (e.key === ",") {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        setOpen(false);
-        router.push("/dashboard/profile#preferences");
       }
     };
 
@@ -207,47 +209,44 @@ export function SidebarProfile({
               {t("profile.actions")}
             </DropdownMenuLabel>
 
-            <DropdownMenuItem
-              className={cn("gap-2 rounded-md p-0", mobile ? "py-1" : "py-1.5")}
+            <DropdownMenuLinkItem
+              href="/dashboard/profile"
+              onClick={(event) => {
+                // Navigate imperatively so the menu's merged click handlers
+                // and the controlled open state can never swallow the link
+                // activation (closeOnClick alone closes the menu without
+                // guaranteeing the navigation fires).
+                event.preventDefault();
+                event.stopPropagation();
+                setOpen(false);
+                onNavigate?.();
+                router.push("/dashboard/profile");
+              }}
+              className={cn("gap-2", mobile ? "py-2.5" : "py-1.5")}
             >
-              <Link
-                href="/dashboard/profile"
-                onClick={onNavigate}
-                className={cn(
-                  "flex w-full items-center gap-2 px-1.5 rounded-md",
-                  mobile ? "py-2.5" : "py-1.5",
-                )}
-              >
-                <Icon icon={UserIcon} className="size-4" />
-                {t("profile.myProfile")}
-                {!mobile ? (
-                  <kbd className="ml-auto inline-flex items-center rounded border border-border/40 bg-background px-1.5 py-px text-[0.62rem] font-medium tabular-nums text-muted-foreground/80">
-                    P
-                  </kbd>
-                ) : null}
-              </Link>
-            </DropdownMenuItem>
+              <Icon icon={UserIcon} className="size-4" />
+              {t("profile.myProfile")}
+              {!mobile ? (
+                <kbd className="ml-auto inline-flex items-center rounded border border-border/40 bg-background px-1.5 py-px text-[0.62rem] font-medium tabular-nums text-muted-foreground/80">
+                  P
+                </kbd>
+              ) : null}
+            </DropdownMenuLinkItem>
 
-            <DropdownMenuItem
-              className={cn("gap-2 rounded-md p-0", mobile ? "py-1" : "py-1.5")}
+            <DropdownMenuLinkItem
+              href="/dashboard/profile#preferences"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setOpen(false);
+                onNavigate?.();
+                router.push("/dashboard/profile#preferences");
+              }}
+              className={cn("gap-2", mobile ? "py-2.5" : "py-1.5")}
             >
-              <Link
-                href="/dashboard/profile#preferences"
-                onClick={onNavigate}
-                className={cn(
-                  "flex w-full items-center gap-2 px-1.5 rounded-md",
-                  mobile ? "py-2.5" : "py-1.5",
-                )}
-              >
-                <Icon icon={Settings2} className="size-4" />
-                {t("profile.preferences")}
-                {!mobile ? (
-                  <kbd className="ml-auto inline-flex items-center rounded border border-border/40 bg-background px-1.5 py-px text-[0.62rem] font-medium tabular-nums text-muted-foreground/80">
-                    ,
-                  </kbd>
-                ) : null}
-              </Link>
-            </DropdownMenuItem>
+              <Icon icon={Settings2} className="size-4" />
+              {t("profile.preferences")}
+            </DropdownMenuLinkItem>
           </DropdownMenuGroup>
 
           <DropdownMenuSeparator />
@@ -255,8 +254,9 @@ export function SidebarProfile({
           <DropdownMenuItem
             variant="destructive"
             onClick={() => {
-              handleSignOut();
+              setOpen(false);
               onNavigate?.();
+              setSignOutConfirmOpen(true);
             }}
             className={cn(
               "gap-2 rounded-md font-medium",
@@ -280,6 +280,18 @@ export function SidebarProfile({
             </span>
           </span>
         }
+      />
+
+      <ConfirmDialog
+        open={signOutConfirmOpen}
+        onOpenChange={setSignOutConfirmOpen}
+        title={t("profile.signOutConfirmTitle")}
+        description={t("profile.signOutConfirmDescription")}
+        confirmLabel={t("profile.signOut")}
+        cancelLabel={t("common.cancel")}
+        onConfirm={() => void handleSignOut()}
+        variant="destructive"
+        icon={<Icon icon={TriangleAlert} className="size-5" />}
       />
     </div>
   );
