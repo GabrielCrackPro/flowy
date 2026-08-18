@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.39](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.38...flowy-v0.1.39) (2026-08-18)
+
+
+### Bug Fixes
+
+* **ui:** open desktop sheets as right-side drawers ([#190](https://github.com/GabrielCrackPro/flowy/issues/190)) ([06a574d](https://github.com/GabrielCrackPro/flowy/commit/06a574d5b9498b2aed6ca25d51488ecc27cc583e))
+
 ## [0.1.38](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.37...flowy-v0.1.38) (2026-08-16)
 
 
