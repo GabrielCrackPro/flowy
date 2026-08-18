@@ -7,6 +7,8 @@ tags: prepared-statements, connection-pooling, transaction-mode
 
 ## Use Prepared Statements Correctly with Pooling
 
+> **Flowy:** Prisma connects to Supabase's pooled endpoint (transaction-mode pgbouncer). Let the Prisma client manage statements, avoid named session-scoped `prepare` in raw SQL, and never use `pnpm db:push` (ship migrations instead).
+
 Prepared statements are tied to individual database connections. In transaction-mode pooling, connections are shared, causing conflicts.
 
 **Incorrect (named prepared statements with transaction pooling):**

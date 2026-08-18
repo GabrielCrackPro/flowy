@@ -18,6 +18,8 @@ description: >
 
 # Flags SDK
 
+> **Flowy specifics:** flags are already declared in `src/lib/flags.ts` (`oauthEnabled`, gating OAuth sign-in). Add new flags to that file with `vercelAdapter` rather than creating a new `flags.ts`; the "Before you start" checks below otherwise apply.
+
 The Flags SDK (`flags` npm package) is a feature flags toolkit for Next.js. It turns each feature flag into a callable function, works with any flag provider via adapters, and keeps pages static using the precompute pattern. Vercel Flags is the first-party provider, letting you manage flags from the Vercel dashboard or the `vercel flags` CLI.
 
 - Docs: https://flags-sdk.dev

@@ -10,6 +10,15 @@ date_added: 2026-02-27
 
 Expert integration of Supabase Auth with Next.js App Router
 
+## Flowy specifics (read first)
+
+This skill is generic upstream reference material. In **this** repo, follow these concrete paths instead of the generic examples below:
+
+- **Clients** live in `src/lib/supabase/`: `server.ts` (SSR `createServerClient` + cookies), `client.ts` (browser, PKCE flow), `admin.ts` (service-role), plus `auth.ts` and `mfa.ts`.
+- **Auth routes** are `/auth/login`, `/auth/register`, `/auth/forgot-password`, `/auth/reset-password`, `/auth/mfa`, and `/auth/callback` (the OAuth callback already exists — do not recreate it).
+- **Route protection** is the root `middleware.ts` (not `src/middleware.ts`); it uses `supabase.auth.getUser()` and treats `/auth/login`, `/auth/register`, `/auth/forgot` as public.
+- The "Required skills", "Related Skills", and "Delegation Triggers" sections below reference skills that do not exist in this repo (`nextjs-app-router`, `supabase-backend`, `stripe-integration`, `vercel-deployment`). Ignore them; Flowy's actual conventions are in `AGENTS.md`.
+
 ## Capabilities
 
 - nextjs-auth

@@ -36,6 +36,7 @@ Flowy is a **solo project** developed in spare time with **variable availability
 
 - **Respect the WIP limit:** never spread work across multiple board items; take the current `In Progress` item or pull exactly one new one.
 - **Prefer finishing over starting:** complete one item end-to-end (code, i18n, docs, board status) rather than partially touching several.
+- **Use one dedicated agent per task:** spawn `frontend-engineer`, `backend-engineer`, `reviewer`, or `shipper` first (see Skills & agents) so context stays focused on one layer.
 - **Follow the relaxed cadence:** no artificial deadlines, no sprint framing — reference `Cycle N` only as a focus window.
 - **Keep context cheap:** when a session is interrupted, record the next action in an issue comment so the next session (human or agent) resumes in minutes.
 - Board writes and issue writes still require explicit user confirmation.
@@ -68,7 +69,7 @@ src/context         Providers (auth, theme, locale, offline, realtime, notificat
 prisma/schema.prisma  Prisma schema (mirrors the SQL schema)
 supabase/migrations   SQL migrations: RLS, triggers, realtime, indexes
 .githooks           pre-commit (Biome + typecheck on TS changes) and commit-msg (commitlint) hooks
-.agents/skills      Agent skills (load by name)
+.agents             Dedicated agents (*.ts) + skills (skills/) — load by name
 ```
 
 ## Architecture & data flow
@@ -167,9 +168,34 @@ Repo: `GabrielCrackPro/flowy` (public). The `gh` CLI is authenticated on this ma
 - `Migrate production` (`.github/workflows/migrate-production.yml`): approval-gated `pnpm prisma migrate deploy` from `main`; configure `DATABASE_URL` as a secret on the protected `deploy-production` environment and apply required Supabase SQL migrations in their controlled order before dependent code.
 - `Production smoke` (`.github/workflows/production-smoke.yml`): checks the database-backed `/api/health` endpoint after successful Vercel Production deployments.
 
-## Skills
+## Skills & agents
 
-Skills in `.agents/skills/` are loadable by name: `write-issues` (draft an issue in chat), `github-issues` (create/update issues on GitHub), `github-project-board` (read/triage the Flowy board), `github-workflow` (the full ship cycle: branch → commit → PR → ask-before-merge → release/deploy verification, with the `[skip deploy]` rule and migration fallbacks), plus the standard web/frontend/database review skills.
+Instructions live in `.agents/` in two forms: **agents** (`.agents/*.ts`, spawnable by name) and **skills** (`.agents/skills/*`, loadable by name). Pick one agent for a task, then let it load its reference skills on demand — don't load everything up front.
+
+**Dedicated agents** (`.agents/*.ts` — role + end-to-end workflow):
+- `frontend-engineer` — components, styling, i18n, a11y, mobile/PWA, offline/realtime client.
+- `backend-engineer` — API routes, services, Prisma, Supabase migrations, rate limiting, errors.
+- `reviewer` — pre-merge review against project conventions (i18n, a11y, offline/realtime, security).
+- `shipper` — ships a change end-to-end: branch → PR → ask-before-merge → release/deploy verification.
+
+**Workflow skills** (task-specific processes):
+- `github-workflow` — the ship path: branch → commit → PR → ask-before-merge.
+- `release-deploy` — the post-merge half: release-please, the deploy chain, manual deploy/migration fallbacks, the `[skip deploy]` rule.
+- `github-issues` — create/update issues on GitHub (template, labels, `gh` commands).
+- `github-project-board` — read/triage the Flowy board (field/option IDs).
+- `write-issues` — draft an issue in chat without GitHub writes.
+
+**Reference skills** (domain knowledge, loaded as needed):
+- `flowy-ui` — Flowy's design system, shared components, mobile/PWA chrome.
+- `shadcn` — shadcn/ui CLI usage.
+- `supabase-postgres-best-practices` — Postgres, RLS, migrations, indexes, query tuning.
+- `nextjs-supabase-auth` — Supabase Auth + Next.js App Router patterns.
+- `vercel-composition-patterns` — React composition/component-API patterns.
+- `vercel-react-best-practices` — React/Next.js performance rules.
+- `web-design-guidelines` — accessibility/UI review.
+- `frontend-design` — visual design direction.
+- `writing-guidelines` — docs/prose review.
+- `flags-sdk` — feature flags (Vercel Flags SDK).
 
 ## Machine gotchas
 

@@ -11,6 +11,8 @@ metadata:
 
 Create and maintain GitHub issues in `GabrielCrackPro/flowy` with descriptions that are grounded in the actual codebase, using the project's conventions. The quality bar: every issue leads with the user-visible outcome, has verifiable acceptance criteria, and points at the real files involved.
 
+To draft an issue in chat without any GitHub writes, use the `write-issues` skill instead.
+
 ## Preflight
 
 ```bash
