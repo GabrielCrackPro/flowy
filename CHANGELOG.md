@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.40](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.39...flowy-v0.1.40) (2026-08-18)
+
+
+### Features
+
+* **dashboard:** chart settings, card reorder, and preference polish ([#195](https://github.com/GabrielCrackPro/flowy/issues/195)) ([7221be1](https://github.com/GabrielCrackPro/flowy/commit/7221be12a47169dac790edd35514bd09014b3375))
+
 ## [0.1.39](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.38...flowy-v0.1.39) (2026-08-18)
 
 
