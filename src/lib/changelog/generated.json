@@ -2,6 +2,21 @@
   "currentVersion": "0.1.40",
   "entries": [
     {
+      "version": "0.1.40",
+      "date": "2026-08-18",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "chart settings, card reorder, and preference polish (#195)",
+              "scope": "dashboard"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.39",
       "date": "2026-08-18",
       "sections": [
