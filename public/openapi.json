@@ -7168,9 +7168,32 @@
             "maxLength": 10,
             "description": "BCP 47 language tag (e.g. en, es)"
           },
-          "showLanguageSelector": {
-            "type": "boolean",
-            "description": "Whether to show the in-app language switcher"
+          "preferences": {
+            "type": "object",
+            "properties": {
+              "showLanguageSelector": {
+                "type": "boolean"
+              },
+              "sidebarHoverExpand": {
+                "type": "boolean"
+              },
+              "statusAlertsEnabled": {
+                "type": "boolean"
+              },
+              "statusAlertComponents": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "statusAlertSeverities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
           },
           "dashboardCards": {
             "anyOf": [
