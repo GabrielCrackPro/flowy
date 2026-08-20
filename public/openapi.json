@@ -3181,6 +3181,48 @@
           }
         },
         "description": "Returns the authenticated user's recent push delivery attempts, including device status and failure details."
+      },
+      "delete": {
+        "operationId": "pushDeliveries.clear",
+        "summary": "Clear push delivery history",
+        "tags": [
+          "Push"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "History cleared",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Deletes all push delivery records for the authenticated user."
       }
     },
     "/api/push-preferences": {
