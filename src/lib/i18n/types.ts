@@ -1466,6 +1466,7 @@ export type AppTranslationMessages = {
     deleting: string;
     unexpectedError: string;
     back: string;
+    next: string;
     lightMode: string;
     darkMode: string;
     toggleTheme: string;
@@ -1476,6 +1477,27 @@ export type AppTranslationMessages = {
       tomorrow: string;
       nextWeek: string;
     };
+  };
+  onboarding: {
+    welcomeTitle: string;
+    welcomeDescription: string;
+    featureAnalyticsTitle: string;
+    featureAnalyticsDesc: string;
+    featureBudgetTitle: string;
+    featureBudgetDesc: string;
+    featureGoalsTitle: string;
+    featureGoalsDesc: string;
+    notificationTitle: string;
+    notificationDescription: string;
+    notificationEnable: string;
+    notificationLater: string;
+    notificationNotSupported: string;
+    completeTitle: string;
+    completeDescription: string;
+    completeCta: string;
+    completeExplore: string;
+    skip: string;
+    stepOf: string;
   };
 };
 

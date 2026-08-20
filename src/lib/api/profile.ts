@@ -14,6 +14,7 @@ export type UpdateProfileInput = Partial<
     | "primaryColor"
     | "secondaryColor"
     | "accentColor"
+    | "onboardingCompletedAt"
   >
 >;
 

@@ -1592,6 +1592,7 @@ export const app: AppTranslationMessages = {
     viewGrid: "Vista de cuadrícula",
     viewTable: "Vista de tabla",
     close: "Cerrar",
+    next: "Siguiente",
     yes: "Sí",
     no: "No",
     element: "Elemento",
@@ -1618,6 +1619,30 @@ export const app: AppTranslationMessages = {
       tomorrow: "Mañana",
       nextWeek: "Próxima semana",
     },
+  },
+  onboarding: {
+    welcomeTitle: "¡Bienvenido a Flowy, {{name}}!",
+    welcomeDescription: "Controla tus finanzas con claridad y calma.",
+    featureAnalyticsTitle: "Análisis inteligente",
+    featureAnalyticsDesc: "Registra ingresos y gastos con gráficos claros",
+    featureBudgetTitle: "Control de presupuesto",
+    featureBudgetDesc:
+      "Establece límites y recibe notificaciones antes de excederte",
+    featureGoalsTitle: "Metas de ahorro",
+    featureGoalsDesc: "Fija objetivos y monitorea tu progreso",
+    notificationTitle: "Mantente al día con tus finanzas",
+    notificationDescription:
+      "Recibe alertas sobre presupuestos, suscripciones y metas — incluso cuando Flowy esté cerrado.",
+    notificationEnable: "Activar notificaciones",
+    notificationLater: "Quizás después",
+    notificationNotSupported:
+      "Las notificaciones push no son compatibles con este navegador",
+    completeTitle: "¡Todo listo!",
+    completeDescription: "Empieza a controlar tus finanzas ahora mismo.",
+    completeCta: "Añadir primera transacción",
+    completeExplore: "Explorar el panel",
+    skip: "Omitir",
+    stepOf: "Paso {{current}} de {{total}}",
   },
 };
 
