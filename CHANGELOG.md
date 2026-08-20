@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.43](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.42...flowy-v0.1.43) (2026-08-20)
+
+
+### Features
+
+* **ui:** morph icons, sidebar hover-expand, consolidated preferences ([#207](https://github.com/GabrielCrackPro/flowy/issues/207)) ([82ec90d](https://github.com/GabrielCrackPro/flowy/commit/82ec90d28115261c7a29b7c9c98251223d2ae7c3))
+
 ## [0.1.42](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.41...flowy-v0.1.42) (2026-08-20)
 
 
