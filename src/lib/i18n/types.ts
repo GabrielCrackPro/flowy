@@ -542,6 +542,9 @@ export type AppTranslationMessages = {
       localeHint: string;
       currencyLabel: string;
       currencyHint: string;
+      replayOnboarding: string;
+      replayOnboardingHint: string;
+      replayOnboardingConfirm: string;
     };
   };
   changelog: {
@@ -1466,6 +1469,8 @@ export type AppTranslationMessages = {
     deleting: string;
     unexpectedError: string;
     back: string;
+    next: string;
+    getStarted: string;
     lightMode: string;
     darkMode: string;
     toggleTheme: string;
@@ -1476,6 +1481,31 @@ export type AppTranslationMessages = {
       tomorrow: string;
       nextWeek: string;
     };
+  };
+  onboarding: {
+    welcomeTitle: string;
+    welcomeDescription: string;
+    featuresTitle: string;
+    featuresDescription: string;
+    featureAnalyticsTitle: string;
+    featureAnalyticsDesc: string;
+    featureBudgetTitle: string;
+    featureBudgetDesc: string;
+    featureGoalsTitle: string;
+    featureGoalsDesc: string;
+    notificationTitle: string;
+    notificationDescription: string;
+    notificationEnable: string;
+    notificationLater: string;
+    notificationNotSupported: string;
+    notificationAlreadyEnabled: string;
+    completeTitle: string;
+    completeDescription: string;
+    completeCta: string;
+    completeExplore: string;
+    completeReplayHint: string;
+    skip: string;
+    stepOf: string;
   };
 };
 

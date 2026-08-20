@@ -27,6 +27,7 @@ export interface CommandContext {
   navigate: (url: string) => void;
   toggleTheme: () => void;
   openChangelog: () => void;
+  resetOnboarding: () => void | Promise<void>;
   signOut: () => void | Promise<void>;
 }
 
@@ -211,6 +212,19 @@ function registerBuiltInCommands() {
         isDark ? t("search.themeLight") : t("search.themeDark"),
       keywordKeys: ["search.themeLight", "search.themeDark"],
       execute: ({ toggleTheme }) => toggleTheme(),
+      showChevron: true,
+    },
+    {
+      id: "replay-onboarding",
+      group: "system",
+      icon: Sparkles,
+      labelKey: "settings.preferences.replayOnboarding",
+      keywordKeys: [
+        "settings.preferences.replayOnboarding",
+        "settings.preferences.replayOnboardingHint",
+        "onboarding.welcomeTitle",
+      ],
+      execute: ({ resetOnboarding }) => void resetOnboarding(),
       showChevron: true,
     },
     {

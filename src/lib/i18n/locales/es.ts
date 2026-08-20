@@ -596,13 +596,17 @@ export const app: AppTranslationMessages = {
     },
     preferences: {
       title: "Preferencias",
-      description: "Tema, idioma y moneda",
+      description: "Tema, idioma, moneda y introducción",
       themeLabel: "Tema",
       themeHint: "Personaliza colores y apariencia",
       localeLabel: "Idioma",
       localeHint: "Idioma de la interfaz",
       currencyLabel: "Moneda",
       currencyHint: "Se usa para formatear los importes",
+      replayOnboarding: "Reiniciar introducción",
+      replayOnboardingHint: "Volver a ver el tour de bienvenida",
+      replayOnboardingConfirm:
+        "Esto reiniciará el tour de introducción para que puedas verlo de nuevo al momento.",
     },
   },
   changelog: {
@@ -1592,6 +1596,8 @@ export const app: AppTranslationMessages = {
     viewGrid: "Vista de cuadrícula",
     viewTable: "Vista de tabla",
     close: "Cerrar",
+    next: "Siguiente",
+    getStarted: "Comenzar",
     yes: "Sí",
     no: "No",
     element: "Elemento",
@@ -1618,6 +1624,35 @@ export const app: AppTranslationMessages = {
       tomorrow: "Mañana",
       nextWeek: "Próxima semana",
     },
+  },
+  onboarding: {
+    welcomeTitle: "¡Bienvenido a Flowy, {{name}}!",
+    welcomeDescription: "Controla tus finanzas con claridad y calma.",
+    featuresTitle: "Todo lo que necesitas",
+    featuresDescription:
+      "Registra ingresos y gastos, planifica presupuestos y ahorra para tus metas.",
+    featureAnalyticsTitle: "Análisis inteligente",
+    featureAnalyticsDesc: "Registra ingresos y gastos con gráficos claros",
+    featureBudgetTitle: "Control de presupuesto",
+    featureBudgetDesc:
+      "Establece límites y recibe notificaciones antes de excederte",
+    featureGoalsTitle: "Metas de ahorro",
+    featureGoalsDesc: "Fija objetivos y monitorea tu progreso",
+    notificationTitle: "Mantente al día con tus finanzas",
+    notificationDescription:
+      "Recibe alertas sobre presupuestos, suscripciones y metas — incluso cuando Flowy esté cerrado.",
+    notificationEnable: "Activar notificaciones",
+    notificationLater: "Quizás después",
+    notificationNotSupported:
+      "Las notificaciones push no son compatibles con este navegador",
+    notificationAlreadyEnabled: "Las notificaciones ya están activadas.",
+    completeTitle: "¡Todo listo!",
+    completeDescription: "Empieza a controlar tus finanzas ahora mismo.",
+    completeCta: "Añadir primera transacción",
+    completeExplore: "Explorar el panel",
+    completeReplayHint: "Puedes repetir este tour desde Preferencias.",
+    skip: "Omitir",
+    stepOf: "Paso {{current}} de {{total}}",
   },
 };
 

@@ -14,6 +14,14 @@ import { useProfile } from "@/hooks/useProfile";
 import { enqueueOfflineMutation, PENDING_SYNC_FLAG } from "@/lib/offline";
 import { invalidateEntityQueries as invalidateRegisteredEntityQueries } from "@/lib/query-invalidation";
 
+function isRateLimitError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    "isRateLimit" in error &&
+    (error as { isRateLimit: boolean }).isRateLimit === true
+  );
+}
+
 interface EntityApiConfig<T, F, C, U> {
   queryKey: string;
   listApi: (filters?: F) => Promise<ListResponse<T> | T[]>;
@@ -189,6 +197,10 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
           },
         );
         toast.error(t("offline.queueFailed"));
+        return;
+      }
+      if (isRateLimitError(error)) {
+        toast.warning(t("errors.rateLimit.message"));
         return;
       }
       toast.error(
@@ -408,6 +420,10 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
       }
       if (context?.offline) {
         toast.error(t("offline.queueFailed"));
+        return;
+      }
+      if (isRateLimitError(error)) {
+        toast.warning(t("errors.rateLimit.message"));
         return;
       }
       toast.error(

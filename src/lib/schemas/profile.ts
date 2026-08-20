@@ -8,6 +8,7 @@ export const updateProfileSchema = z.object({
   showLanguageSelector: z.boolean().optional(),
   dashboardCards: z.array(z.string()).optional().nullable(),
   dashboardOrder: z.array(z.string()).optional().nullable(),
+  onboardingCompletedAt: z.string().datetime().optional().nullable(),
 });
 
 export const updateThemeSchema = z.object({

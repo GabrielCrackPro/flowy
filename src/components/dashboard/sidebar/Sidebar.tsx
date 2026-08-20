@@ -141,9 +141,7 @@ export function SidebarContent({
   };
 
   return (
-    <div
-      className={cn("flex h-full w-full flex-col bg-background/75", className)}
-    >
+    <div className={cn("flex h-full w-full flex-col bg-card", className)}>
       <div
         className={cn(
           "flex shrink-0 items-center border-b border-border/30 transition-[padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
@@ -363,9 +361,18 @@ export function SidebarContent({
   );
 }
 
+function getInitialCollapsed(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem("sidebar-collapsed") === "true";
+  } catch {
+    return false;
+  }
+}
+
 export function Sidebar() {
   const { t } = useTranslation();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(getInitialCollapsed);
   const toggleCollapsed = useCallback(() => {
     setCollapsed((c) => {
       const next = !c;
@@ -376,16 +383,6 @@ export function Sidebar() {
       }
       return next;
     });
-  }, []);
-
-  useEffect(() => {
-    try {
-      if (window.localStorage.getItem("sidebar-collapsed") === "true") {
-        setCollapsed(true);
-      }
-    } catch {
-      /* ignore storage errors */
-    }
   }, []);
 
   // Cmd/Ctrl + B toggles the sidebar (standard dashboard shortcut)
@@ -417,7 +414,7 @@ export function Sidebar() {
         id="sidebar"
         style={{ width: collapsed ? "4.5rem" : "18rem" }}
         className={cn(
-          "hidden h-screen shrink-0 border-r border-border/50 bg-background/80 shadow-[8px_0_24px_-24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex",
+          "hidden h-screen shrink-0 border-r border-border/50 bg-card shadow-[8px_0_24px_-24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex",
         )}
         aria-label={t("nav.mainAriaLabel")}
       >

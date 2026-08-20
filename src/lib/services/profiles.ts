@@ -170,6 +170,8 @@ export const ProfileService = {
         primaryColor: (data as UpdateThemeInput).primaryColor,
         secondaryColor: (data as UpdateThemeInput).secondaryColor,
         accentColor: (data as UpdateThemeInput).accentColor,
+        onboardingCompletedAt: (data as UpdateProfileInput)
+          .onboardingCompletedAt,
       },
     });
   },

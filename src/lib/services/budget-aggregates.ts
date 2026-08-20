@@ -33,12 +33,12 @@ export async function getBudgetAggregates(params: {
         THEN t.amount ELSE 0 END), 0) AS income
     FROM budgets b
     LEFT JOIN transactions t
-      ON t.space_id IS NOT DISTINCT FROM ${params.spaceId}
+      ON t.space_id::text IS NOT DISTINCT FROM ${params.spaceId}
       AND t.date >= ${params.start}
       AND t.date < ${params.end}
     LEFT JOIN transaction_categories tc ON tc.transaction_id = t.id
-    WHERE b.space_id IS NOT DISTINCT FROM ${params.spaceId}
-      AND b.id IN (${Prisma.join(params.budgetIds)})
+    WHERE b.space_id::text IS NOT DISTINCT FROM ${params.spaceId}
+      AND b.id::text IN (${Prisma.join(params.budgetIds)})
     GROUP BY b.id
   `;
 
