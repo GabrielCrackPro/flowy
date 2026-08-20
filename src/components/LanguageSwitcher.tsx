@@ -4,15 +4,15 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { LanguageSelect } from "@/components/shared/preference-selects";
 import { useLocaleContext } from "@/context/LocaleContext";
-import { useProfile } from "@/hooks/useProfile";
+import { usePreferences } from "@/hooks/usePreferences";
 
 export function LanguageSwitcher() {
   const { locale, setLocale } = useLocaleContext();
-  const { profile } = useProfile();
+  const { get } = usePreferences();
   const { t } = useTranslation();
   const router = useRouter();
 
-  if (profile?.showLanguageSelector === false) {
+  if (get("showLanguageSelector") === false) {
     return null;
   }
 

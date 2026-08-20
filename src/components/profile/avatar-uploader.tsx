@@ -1,11 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Camera as CameraData } from "lucide";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared";
+import { Icon, LoadingIcon } from "@/components/shared";
 import { uploadImage } from "@/lib/api/upload";
-import { Camera, Loader2, Trash2 } from "@/lib/icons";
+import { Camera, Trash2 } from "@/lib/icons";
 import { cn, getUserInitials } from "@/lib/utils";
 import type { Profile } from "@/types/Profile";
 
@@ -92,9 +93,11 @@ export function AvatarUploader({
 
           {uploading ? (
             <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm">
-              <Icon
-                icon={Loader2}
-                className="size-6 animate-spin text-primary"
+              <LoadingIcon
+                icon={CameraData}
+                loading
+                size={24}
+                className="text-primary"
               />
             </div>
           ) : !disabled ? (

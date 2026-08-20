@@ -1,15 +1,16 @@
 "use client";
 
+import { KeyRound as KeyData } from "lucide";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared/icon";
+import { Icon, LoadingIcon } from "@/components/shared";
 import {
   JOIN_CODE_LENGTH,
   SegmentedCodeInput,
 } from "@/components/shared/segmented-code-input";
 import { Button } from "@/components/ui";
 import { useSpaces } from "@/hooks/useSpaces";
-import { KeyRound, Loader2, X } from "@/lib/icons";
+import { KeyRound, X } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface SpaceJoinFormProps {
@@ -74,11 +75,7 @@ export function SpaceJoinForm({
       disabled={!joinCode.trim() || join.isPending}
       className="h-11 w-full gap-1.5"
     >
-      {join.isPending ? (
-        <Icon icon={Loader2} className="size-4 animate-spin" />
-      ) : (
-        <Icon icon={KeyRound} className="size-4" />
-      )}
+      <LoadingIcon icon={KeyData} loading={join.isPending} size={16} />
       {t("profile.spaces.join")}
     </Button>
   );

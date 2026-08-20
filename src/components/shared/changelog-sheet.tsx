@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronDown, ChevronUp } from "lucide";
+import { MorphIcon } from "morphicons/react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BottomSheet } from "@/components/shared/bottom-sheet";
@@ -16,13 +18,7 @@ import {
 } from "@/lib/changelog";
 import { scopeColor } from "@/lib/changelog/scope";
 import { getLastSeenChangelogVersion } from "@/lib/changelog/storage";
-import {
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  ExternalLink,
-  Sparkles,
-} from "@/lib/icons";
+import { CheckCircle2, ExternalLink, Sparkles } from "@/lib/icons";
 
 const DEFAULT_VISIBLE_OLDER = 3;
 
@@ -389,17 +385,12 @@ export function ChangelogContent({ open }: { open: boolean }) {
               className="w-full text-muted-foreground"
               onClick={() => setShowAll((value) => !value)}
             >
-              {showAll ? (
-                <>
-                  {t("changelog.showLess")}
-                  <ChevronUp />
-                </>
-              ) : (
-                <>
-                  {t("changelog.showAll")}
-                  <ChevronDown />
-                </>
-              )}
+              {showAll ? t("changelog.showLess") : t("changelog.showAll")}
+              <MorphIcon
+                icon={showAll ? ChevronUp : ChevronDown}
+                size={14}
+                reducedMotion="user"
+              />
             </Button>
           )}
         </div>

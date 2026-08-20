@@ -139,4 +139,9 @@ export const pushApi = {
       "/api/push-delivery-history",
       { method: "GET" },
     ),
+
+  clearDeliveryHistory: () =>
+    authenticatedRequest<{ ok: boolean }>("/api/push-delivery-history", {
+      method: "DELETE",
+    }),
 };

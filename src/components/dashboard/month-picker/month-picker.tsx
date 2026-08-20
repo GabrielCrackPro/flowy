@@ -8,12 +8,17 @@ import {
 } from "@components/ui";
 import { useProfile } from "@hooks/useProfile";
 import { motion } from "framer-motion";
+import {
+  ChevronDown as ChevronDownData,
+  ChevronUp as ChevronUpData,
+} from "lucide";
+import { MorphIcon } from "morphicons/react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared";
 import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { Calendar, ChevronDown, ChevronLeft, ChevronRight } from "@/lib/icons";
+import { Calendar, ChevronLeft, ChevronRight } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface MonthPickerProps {
@@ -224,13 +229,11 @@ function PanelGrid(props: PanelGridProps) {
           {panel === "months"
             ? t("dashboard.selectMonth")
             : t("dashboard.years")}
-          <motion.span
-            animate={{ rotate: panel === "years" ? 180 : 0 }}
-            transition={{ duration: 0.18 }}
-            className="flex size-3.5 items-center justify-center"
-          >
-            <Icon icon={ChevronDown} className="size-3" />
-          </motion.span>
+          <MorphIcon
+            icon={panel === "years" ? ChevronUpData : ChevronDownData}
+            size={12}
+            reducedMotion="user"
+          />
         </Button>
         <div className="flex items-center gap-0.5">
           {panel === "months" ? (
@@ -407,13 +410,12 @@ export function MonthPicker({
               aria-hidden
             />
           )}
-          <motion.span
-            animate={{ rotate: open ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-            className="ml-0.5 flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground/60 transition-colors group-hover:text-foreground"
-          >
-            <Icon icon={ChevronDown} className="size-3.5" />
-          </motion.span>
+          <MorphIcon
+            icon={open ? ChevronUpData : ChevronDownData}
+            size={14}
+            reducedMotion="user"
+            className="ml-0.5 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-foreground"
+          />
         </PopoverTrigger>
 
         {/* Desktop: anchored popover with a selected-month header. */}

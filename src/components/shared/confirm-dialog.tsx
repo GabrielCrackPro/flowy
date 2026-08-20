@@ -10,13 +10,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@components/ui";
+import { Loader2 as Loader2Data } from "lucide";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useHaptic } from "@/hooks/useHaptic";
-import { Loader2, TriangleAlert } from "@/lib/icons";
+import { TriangleAlert } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { CONFIRM_TINTS, type ConfirmTint } from "./confirm-tint";
 import { Icon } from "./icon";
+import { LoadingIcon } from "./loading-icon";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -125,14 +127,10 @@ export function ConfirmDialog({
             disabled={confirmDisabled || loading}
             className={cn("gap-1.5 [&_svg]:size-4", actionClassName)}
           >
-            {loading ? (
-              <span className="inline-flex items-center gap-2">
-                <Loader2 className="size-4 animate-spin" />
-                {loadingLabel ?? t("common.deleting")}
-              </span>
-            ) : (
-              confirmText
-            )}
+            <span className="inline-flex items-center gap-2">
+              {loading && <LoadingIcon icon={Loader2Data} loading size={16} />}
+              {loading ? (loadingLabel ?? t("common.deleting")) : confirmText}
+            </span>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

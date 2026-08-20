@@ -1,12 +1,13 @@
 "use client";
 
+import { Check as CheckData } from "lucide";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared/icon";
+import { Icon, LoadingIcon } from "@/components/shared";
 import { Button, Input, Switch } from "@/components/ui";
 import { useSpaces } from "@/hooks/useSpaces";
 import type { SpaceSummary } from "@/lib/api/space";
-import { Check, Loader2, Pencil, X } from "@/lib/icons";
+import { Pencil, X } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { SpaceAvatarUploader } from "./space-avatar-uploader";
 
@@ -144,11 +145,7 @@ export function SpaceEditForm({
           disabled={!editName.trim() || rename.isPending}
           className="h-11 w-full gap-1.5"
         >
-          {rename.isPending ? (
-            <Icon icon={Loader2} className="size-4 animate-spin" />
-          ) : (
-            <Icon icon={Check} className="size-4" />
-          )}
+          <LoadingIcon icon={CheckData} loading={rename.isPending} size={16} />
           {t("profile.spaces.save")}
         </Button>
       </form>

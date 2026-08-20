@@ -1,12 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { Check as CheckData } from "lucide";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Icon, LoadingIcon } from "@/components/shared";
 import { BottomSheet } from "@/components/shared/bottom-sheet";
-import { Icon } from "@/components/shared/icon";
 import { SpaceCreateForm } from "@/components/shared/space-create-form";
 import { SpaceEditForm } from "@/components/shared/space-edit-form";
 import { SpaceGlyph } from "@/components/shared/space-glyph";
@@ -30,7 +31,6 @@ import {
   Copy,
   KeyRound,
   Layers,
-  Loader2,
   LogOut,
   MoreHorizontal,
   Pencil,
@@ -195,9 +195,11 @@ export function SpaceSwitcherPill({
                 <Icon icon={Check} className="size-4" />
               </span>
             ) : isPending ? (
-              <Icon
-                icon={Loader2}
-                className="size-4 shrink-0 animate-spin text-muted-foreground"
+              <LoadingIcon
+                icon={CheckData}
+                loading
+                size={16}
+                className="shrink-0 text-muted-foreground"
               />
             ) : null}
           </button>

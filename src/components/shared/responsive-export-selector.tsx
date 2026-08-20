@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@components/ui";
+import { Download } from "lucide";
 import { useState } from "react";
 import {
   CONTROL_DISABLED,
@@ -13,13 +14,14 @@ import {
   CONTROL_SURFACE,
 } from "@/components/ui/control-styles";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { Download, FileText, Loader2 } from "@/lib/icons";
+import { Download as DlComponent, FileText as FtComponent } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import {
   type ExportFormatOption,
   ExportFormatPicker,
 } from "./export-format-picker";
 import { Icon } from "./icon";
+import { LoadingIcon } from "./loading-icon";
 
 interface ResponsiveExportSelectorProps {
   label: string;
@@ -64,10 +66,7 @@ export function ResponsiveExportSelector({
         "max-sm:border-border/50 max-sm:bg-secondary/80 max-sm:text-secondary-foreground max-sm:hover:border-border max-sm:hover:bg-secondary",
       )}
     >
-      <Icon
-        icon={busy ? Loader2 : Download}
-        className={cn("size-4", busy && "animate-spin")}
-      />
+      <LoadingIcon icon={Download} loading={busy} size={16} />
     </button>
   );
 
@@ -97,7 +96,7 @@ export function ResponsiveExportSelector({
           onClick={() => onSelect("csv")}
           className="min-h-9"
         >
-          <Icon icon={Download} className="size-3.5" />
+          <Icon icon={DlComponent} className="size-3.5" />
           {csvLabel}
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -105,7 +104,7 @@ export function ResponsiveExportSelector({
           onClick={() => onSelect("pdf")}
           className="min-h-9"
         >
-          <Icon icon={FileText} className="size-3.5" />
+          <Icon icon={FtComponent} className="size-3.5" />
           {pdfLabel}
         </DropdownMenuItem>
       </DropdownMenuContent>

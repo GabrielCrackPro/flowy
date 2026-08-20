@@ -1,13 +1,15 @@
 "use client";
 
+import { Crown as CrownData } from "lucide";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { LoadingIcon } from "@/components/shared";
 import { toast } from "@/components/shared/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { authenticatedRequest } from "@/lib/api/client";
-import { Crown, KeyRound, Loader2 } from "@/lib/icons";
+import { Crown, KeyRound } from "@/lib/icons";
 
 interface BootstrapStatus {
   enabled: boolean;
@@ -116,11 +118,7 @@ export function ClaimAdminAccessCard() {
           disabled={busy || !secret.trim()}
           className="h-9 shrink-0 gap-1.5 px-3"
         >
-          {busy ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <Crown className="size-3.5" />
-          )}
+          <LoadingIcon icon={CrownData} loading={busy} size={14} />
           {busy ? t("status.admin.claiming") : t("status.admin.claim")}
         </Button>
       </div>

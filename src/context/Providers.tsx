@@ -8,6 +8,7 @@ import { ThemeProvider } from "@context/ThemeContext";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { MotionConfig } from "framer-motion";
 import { ThemeProvider as NextThemeProvider } from "next-themes";
+import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { RoutePrefetch } from "@/components/shared/route-prefetch";
 import { RouteProgress } from "@/components/shared/route-progress";
 import { queryClient } from "@/lib/react-query";
@@ -29,7 +30,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   <OfflineProvider>
                     <PhantomProvider>
                       <NotificationProvider>
-                        <RealtimeSyncProvider>{children}</RealtimeSyncProvider>
+                        <RealtimeSyncProvider>
+                          <ErrorBoundary>{children}</ErrorBoundary>
+                        </RealtimeSyncProvider>
                       </NotificationProvider>
                     </PhantomProvider>
                   </OfflineProvider>

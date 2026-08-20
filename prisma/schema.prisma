@@ -14,7 +14,7 @@ model Profile {
   avatarUrl            String?  @map("avatar_url") @db.Text
   currency             String   @default("USD") @db.VarChar(8)
   locale               String   @default("es") @db.VarChar(10)
-  showLanguageSelector Boolean  @default(true) @map("show_language_selector")
+  preferences          Json     @default("{}") @db.Json
   activeSpaceId        String?  @map("active_space_id") @db.Uuid
   dashboardCards       Json?    @map("dashboard_cards")
   dashboardOrder       Json?    @map("dashboard_order")
@@ -23,9 +23,6 @@ model Profile {
   accentColor          String?  @map("accent_color") @db.Text
   categoriesSeeded     Boolean  @default(false) @map("categories_seeded")
   pushPreferences      String[] @default([]) @map("push_preferences")
-  statusAlertsEnabled   Boolean  @default(true) @map("status_alerts_enabled")
-  statusAlertComponents String[] @default([]) @map("status_alert_components")
-  statusAlertSeverities String[] @default([]) @map("status_alert_severities")
   role                  String   @default("user") @db.VarChar(20) // user | admin
   onboardingCompletedAt DateTime? @map("onboarding_completed_at") @db.Timestamptz
   createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz

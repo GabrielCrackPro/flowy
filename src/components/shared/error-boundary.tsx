@@ -3,6 +3,7 @@
 import { Button } from "@components/ui";
 import { motion } from "framer-motion";
 import { Component, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   type AppError,
   classifyError,
@@ -10,14 +11,15 @@ import {
   getUserFriendlyMessage,
   type RecoveryAction,
 } from "@/lib/errors/error-types";
-import { AlertCircle, ArrowLeft, Home, RefreshCw } from "@/lib/icons";
+import { AlertTriangle, ArrowLeft, Home, RefreshCw, Wifi } from "@/lib/icons";
+import { cn } from "@/lib/utils";
 import { Icon } from "./icon";
 
-interface Props {
+interface ErrorBoundaryInnerProps {
   children: ReactNode;
   fallback?: ReactNode;
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
-  t?: (key: string) => string; // Translation function
+  t: (key: string) => string;
 }
 
 interface State {
@@ -26,8 +28,8 @@ interface State {
   classifiedError?: AppError;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
+class ErrorBoundaryInner extends Component<ErrorBoundaryInnerProps, State> {
+  constructor(props: ErrorBoundaryInnerProps) {
     super(props);
     this.state = { hasError: false };
   }
@@ -55,14 +57,6 @@ export class ErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
-  handleGoBack = () => {
-    window.history.back();
-  };
-
-  handleGoHome = () => {
-    window.location.href = "/dashboard";
-  };
-
   executeRecoveryAction = (action: RecoveryAction) => {
     try {
       action.action();
@@ -72,18 +66,26 @@ export class ErrorBoundary extends Component<Props, State> {
     }
   };
 
-  getSeverityColor = (error: AppError) => {
+  getErrorIcon = (error: AppError) => {
+    switch (error.category) {
+      case "network":
+        return Wifi;
+      default:
+        return AlertTriangle;
+    }
+  };
+
+  getSeverityClasses = (error: AppError) => {
     switch (error.severity) {
       case "low":
-        return "bg-warning/10 text-warning border-warning/30";
+        return "border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-amber-500/5 text-amber-600 dark:text-amber-400";
       case "medium":
-        return "bg-destructive/10 text-destructive border-destructive/30";
+        return "border-destructive/30 bg-gradient-to-br from-destructive/10 to-destructive/5 text-destructive";
       case "high":
-        return "bg-destructive/20 text-destructive border-destructive/50";
       case "critical":
-        return "bg-destructive/30 text-destructive border-destructive/70";
+        return "border-destructive/50 bg-gradient-to-br from-destructive/20 to-destructive/10 text-destructive";
       default:
-        return "bg-destructive/10 text-destructive border-destructive/30";
+        return "border-destructive/30 bg-gradient-to-br from-destructive/10 to-destructive/5 text-destructive";
     }
   };
 
@@ -95,9 +97,11 @@ export class ErrorBoundary extends Component<Props, State> {
 
       const error =
         this.state.classifiedError || classifyError(this.state.error);
-      const t = this.props.t || ((key: string) => key); // Fallback to key if no translation function
+      const { t } = this.props;
       const userMessage = t(getUserFriendlyMessage(error));
-      const severityColor = this.getSeverityColor(error);
+      const ErrorIcon = this.getErrorIcon(error);
+      const severityClasses = this.getSeverityClasses(error);
+      const canRetry = error.isRetryable;
 
       return (
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-6 p-8">
@@ -105,13 +109,16 @@ export class ErrorBoundary extends Component<Props, State> {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className={`flex size-20 items-center justify-center rounded-full border ${severityColor}`}
+            className={cn(
+              "relative flex size-20 items-center justify-center rounded-2xl border shadow-lg",
+              severityClasses,
+            )}
           >
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             >
-              <Icon icon={AlertCircle} className="size-10" />
+              <Icon icon={ErrorIcon} className="size-10" />
             </motion.div>
           </motion.div>
 
@@ -129,7 +136,7 @@ export class ErrorBoundary extends Component<Props, State> {
               this.state.error?.message && (
                 <details className="mt-4 text-left">
                   <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
-                    Technical details
+                    {t("errors.technicalDetails")}
                   </summary>
                   <pre className="mt-2 max-h-32 overflow-auto rounded-lg border border-border/30 bg-muted/50 p-3 text-xs text-muted-foreground">
                     {this.state.error.message}
@@ -144,24 +151,22 @@ export class ErrorBoundary extends Component<Props, State> {
             transition={{ duration: 0.3, delay: 0.2 }}
             className="flex flex-col sm:flex-row gap-3 flex-wrap justify-center"
           >
-            {/* Primary recovery action */}
-            {error.recoveryActions &&
-              error.recoveryActions.length > 0 &&
-              error.recoveryActions.map((action) => (
-                <Button
-                  key={action.label}
-                  onClick={() => this.executeRecoveryAction(action)}
-                  variant={action.primary ? "default" : "outline"}
-                  size="sm"
-                >
-                  {t(action.label)}
-                </Button>
-              ))}
+            {error.recoveryActions && error.recoveryActions.length > 0
+              ? error.recoveryActions.map((action) => (
+                  <Button
+                    key={action.label}
+                    onClick={() => this.executeRecoveryAction(action)}
+                    variant={action.primary ? "default" : "outline"}
+                    size="sm"
+                  >
+                    {t(action.label)}
+                  </Button>
+                ))
+              : null}
 
-            {/* Default fallback actions */}
             {(!error.recoveryActions || error.recoveryActions.length === 0) && (
               <>
-                {error.isRetryable && (
+                {canRetry && (
                   <Button
                     onClick={this.handleRetry}
                     variant="default"
@@ -171,11 +176,21 @@ export class ErrorBoundary extends Component<Props, State> {
                     {t(ErrorTranslationKeys.RETRY)}
                   </Button>
                 )}
-                <Button onClick={this.handleGoBack} variant="outline" size="sm">
+                <Button
+                  onClick={() => window.history.back()}
+                  variant="outline"
+                  size="sm"
+                >
                   <Icon icon={ArrowLeft} className="size-4 mr-2" />
                   {t(ErrorTranslationKeys.GO_BACK)}
                 </Button>
-                <Button onClick={this.handleGoHome} variant="outline" size="sm">
+                <Button
+                  onClick={() => {
+                    window.location.href = "/dashboard";
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
                   <Icon icon={Home} className="size-4 mr-2" />
                   {t(ErrorTranslationKeys.GO_HOME)}
                 </Button>
@@ -190,7 +205,7 @@ export class ErrorBoundary extends Component<Props, State> {
               transition={{ duration: 0.3, delay: 0.3 }}
               className="text-xs text-muted-foreground text-center"
             >
-              Check your internet connection and try again
+              {t(ErrorTranslationKeys.NETWORK_HINT)}
             </motion.p>
           )}
         </div>
@@ -199,4 +214,30 @@ export class ErrorBoundary extends Component<Props, State> {
 
     return this.props.children;
   }
+}
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  /** @deprecated No longer needed — translation is handled internally. */
+  t?: (key: string) => string;
+}
+
+/**
+ * Error boundary that catches render errors and displays a styled fallback.
+ * Translation is handled automatically via `useTranslation()`.
+ */
+export function ErrorBoundary({
+  children,
+  fallback,
+  onError,
+}: ErrorBoundaryProps) {
+  const { t } = useTranslation();
+
+  return (
+    <ErrorBoundaryInner t={t} fallback={fallback} onError={onError}>
+      {children}
+    </ErrorBoundaryInner>
+  );
 }

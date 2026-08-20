@@ -1,14 +1,16 @@
 "use client";
 
+import { ChevronRight } from "lucide";
 import {
   CONTROL_FOCUS,
   OPTION_ROW_BASE,
   OPTION_ROW_INTERACTION,
 } from "@/components/ui/control-styles";
-import { ChevronRight, Download, FileText, Loader2 } from "@/lib/icons";
+import { Download, FileText } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { BottomSheet } from "./bottom-sheet";
 import { Icon } from "./icon";
+import { LoadingIcon } from "./loading-icon";
 
 export type ExportFormatOption = "csv" | "pdf";
 
@@ -88,12 +90,11 @@ export function ExportFormatPicker({
             <span className="rounded-md bg-muted/60 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-muted-foreground">
               {option.extension}
             </span>
-            <Icon
-              icon={isBusy ? Loader2 : ChevronRight}
-              className={cn(
-                "size-4 shrink-0 text-muted-foreground/60",
-                isBusy && "animate-spin",
-              )}
+            <LoadingIcon
+              icon={ChevronRight}
+              loading={isBusy}
+              size={16}
+              className="shrink-0 text-muted-foreground/60"
             />
           </button>
         ))}

@@ -2,10 +2,15 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { TFunction } from "i18next";
+import { RefreshCw as RefreshData, Send as SendData } from "lucide";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import { ConfirmDialog, Icon, RelativeTime } from "@/components/shared";
+import {
+  ConfirmDialog,
+  Icon,
+  LoadingIcon,
+  RelativeTime,
+} from "@/components/shared";
 import { toast } from "@/components/shared/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,7 +37,6 @@ import {
   HardDrive,
   Info,
   ListChecks,
-  Loader2,
   Monitor,
   Pencil,
   RefreshCw,
@@ -749,7 +753,7 @@ export function PushNotificationsCard() {
                 </div>
                 {!prefsLoaded ? (
                   <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
-                    <Icon icon={Loader2} className="size-3.5 animate-spin" />
+                    <LoadingIcon icon={RefreshData} loading size={14} />
                     {t("common.saving")}
                   </div>
                 ) : (
@@ -1276,11 +1280,11 @@ export function PushNotificationsCard() {
                                     "settings.notifications.testDevice",
                                   )}
                                 >
-                                  {testingDeviceId === device.id ? (
-                                    <Loader2 className="size-3 animate-spin" />
-                                  ) : (
-                                    <Send className="size-3" />
-                                  )}
+                                  <LoadingIcon
+                                    icon={SendData}
+                                    loading={testingDeviceId === device.id}
+                                    size={12}
+                                  />
                                   <span className="hidden sm:inline">
                                     {t("settings.notifications.test")}
                                   </span>
@@ -1324,9 +1328,38 @@ export function PushNotificationsCard() {
               {/* Delivery history */}
               {deliveryHistory.length > 0 && (
                 <div className="space-y-2.5 rounded-xl bg-muted/20 p-3 sm:p-3.5">
-                  <SectionLabel icon={Clock}>
-                    {t("settings.notifications.deliveryHistoryTitle")}
-                  </SectionLabel>
+                  <div className="flex items-center justify-between">
+                    <SectionLabel icon={Clock}>
+                      {t("settings.notifications.deliveryHistoryTitle")}
+                    </SectionLabel>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 gap-1.5 text-xs text-muted-foreground hover:text-destructive"
+                      onClick={() => {
+                        void (async () => {
+                          try {
+                            await pushApi.clearDeliveryHistory();
+                            setDeliveryHistory([]);
+                            toast.success(
+                              t(
+                                "settings.notifications.clearDeliveryHistorySuccess",
+                              ),
+                            );
+                          } catch {
+                            toast.error(
+                              t(
+                                "settings.notifications.clearDeliveryHistoryError",
+                              ),
+                            );
+                          }
+                        })();
+                      }}
+                    >
+                      <Trash2 className="size-3.5" />
+                      {t("common.delete")}
+                    </Button>
+                  </div>
                   <ul className="space-y-1.5">
                     {deliveryHistory.slice(0, 5).map((delivery) => {
                       const device = devices.find(
@@ -1391,10 +1424,7 @@ export function PushNotificationsCard() {
                     disabled={sending}
                     onClick={() => void sendTest()}
                   >
-                    <Icon
-                      icon={sending ? Loader2 : Send}
-                      className={cn("size-3.5", sending && "animate-spin")}
-                    />
+                    <LoadingIcon icon={SendData} loading={sending} size={14} />
                     {sending
                       ? t("settings.notifications.sending")
                       : t("settings.notifications.test")}

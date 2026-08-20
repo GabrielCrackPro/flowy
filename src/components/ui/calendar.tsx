@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronDown } from "lucide";
+import { MorphIcon } from "morphicons/react";
 import * as React from "react";
 import {
   type DayButton,
@@ -9,11 +11,7 @@ import {
 } from "react-day-picker";
 import { Icon } from "@/components/shared/icon";
 import { type Button, buttonVariants } from "@/components/ui/button";
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "@/lib/icons";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 function Calendar({
@@ -166,7 +164,16 @@ function Calendar({
             return <Icon icon={ChevronRightIcon} {...iconProps} />;
           }
 
-          return <Icon icon={ChevronDownIcon} {...iconProps} />;
+          return (
+            <MorphIcon
+              icon={ChevronDown}
+              size={16}
+              reducedMotion="user"
+              className={cn("size-4", className)}
+              style={style}
+              {...props}
+            />
+          );
         },
         DayButton: ({ ...props }) => (
           <CalendarDayButton locale={locale} {...props} />

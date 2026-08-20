@@ -1,12 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Camera as CameraData } from "lucide";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared";
+import { Icon, LoadingIcon } from "@/components/shared";
 import { toast } from "@/components/shared/toast";
 import { uploadImage } from "@/lib/api/upload";
-import { Camera, Loader2, Trash2 } from "@/lib/icons";
+import { Camera, Trash2 } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
@@ -85,7 +86,12 @@ export function SpaceAvatarUploader({
 
         {uploading ? (
           <span className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm">
-            <Icon icon={Loader2} className="size-5 animate-spin text-primary" />
+            <LoadingIcon
+              icon={CameraData}
+              loading
+              size={20}
+              className="text-primary"
+            />
           </span>
         ) : !disabled ? (
           <span className="absolute inset-0 flex items-center justify-center bg-black/45 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">

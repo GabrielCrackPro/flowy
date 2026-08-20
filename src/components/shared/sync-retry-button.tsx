@@ -1,8 +1,9 @@
 "use client";
 
+import { RotateCcw } from "lucide";
 import { useTranslation } from "react-i18next";
-import { Loader2, RotateCcw } from "@/lib/icons";
 import { cn } from "@/lib/utils";
+import { LoadingIcon } from "./loading-icon";
 
 interface SyncRetryButtonProps {
   onClick: () => void;
@@ -35,11 +36,7 @@ export function SyncRetryButton({
         className,
       )}
     >
-      {flushing ? (
-        <Loader2 aria-hidden className="size-3 animate-spin" />
-      ) : (
-        <RotateCcw aria-hidden className="size-3" />
-      )}
+      <LoadingIcon icon={RotateCcw} loading={flushing} size={12} aria-hidden />
       <span>{label ?? t("offline.retry")}</span>
     </button>
   );

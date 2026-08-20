@@ -1,16 +1,18 @@
 "use client";
 
+import { KeyRound as KeyData } from "lucide";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/shared";
 import { BottomSheet } from "@/components/shared/bottom-sheet";
+import { LoadingIcon } from "@/components/shared/loading-icon";
 import { toast } from "@/components/shared/toast";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form/FormField";
 import { Input } from "@/components/ui/input";
 import { useReactForm } from "@/hooks/useReactForm";
 import { changePassword } from "@/lib/api/account";
-import { Eye, EyeOff, KeyRound, Loader2, Lock, X } from "@/lib/icons";
+import { Eye, EyeOff, KeyRound, Lock, X } from "@/lib/icons";
 import { createChangePasswordSchema } from "@/lib/schemas/auth";
 import supabase from "@/lib/supabase/client";
 
@@ -106,17 +108,10 @@ export function ChangePasswordSheet({
           disabled={form.busy}
           className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 sm:h-10 sm:w-auto sm:min-w-28"
         >
-          {form.busy ? (
-            <>
-              <Loader2 className="size-4 animate-spin" />
-              {t("common.saving")}
-            </>
-          ) : (
-            <>
-              {t("settings.security.changePassword")}
-              <KeyRound className="size-4" />
-            </>
-          )}
+          <LoadingIcon icon={KeyData} loading={form.busy} size={16} />
+          {form.busy
+            ? t("common.saving")
+            : t("settings.security.changePassword")}
         </Button>
       }
     >

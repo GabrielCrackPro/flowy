@@ -10,3 +10,12 @@ export const GET = withAuthenticatedRoute({
     return NextResponse.json({ deliveries });
   },
 });
+
+export const DELETE = withAuthenticatedRoute({
+  routeName: "pushDeliveryHistory",
+  fallbackMessage: "Could not clear push delivery history",
+  handler: async ({ auth }) => {
+    const result = await PushService.clearDeliveryHistory(auth.id);
+    return NextResponse.json(result);
+  },
+});

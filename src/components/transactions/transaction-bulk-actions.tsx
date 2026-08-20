@@ -2,8 +2,8 @@
 
 import { Button } from "@components/ui";
 import { AnimatePresence, motion } from "framer-motion";
-import { Icon } from "@/components/shared";
-import { Loader2, Trash2 } from "@/lib/icons";
+import { Trash2 } from "lucide";
+import { LoadingIcon } from "@/components/shared/loading-icon";
 
 interface TransactionBulkActionsProps {
   selectedCount: number;
@@ -39,10 +39,7 @@ export function TransactionBulkActions({
               disabled={deleting}
               className="text-destructive/80 hover:text-destructive disabled:opacity-50"
             >
-              <Icon
-                icon={deleting ? Loader2 : Trash2}
-                className={deleting ? "size-3.5 animate-spin" : "size-3.5"}
-              />{" "}
+              <LoadingIcon icon={Trash2} loading={deleting} size={14} />{" "}
               {deleting ? t("common.deleting") : t("transactions.delete")}
             </Button>
           </div>

@@ -7,8 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@components/ui/card";
+import { Switch } from "@components/ui/switch";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfirmDialog, Icon, type IconProps } from "@/components/shared";
 import {
@@ -18,26 +19,49 @@ import {
 import { Button } from "@/components/ui/button";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useOnboarding } from "@/context/OnboardingContext";
+import { usePreferences } from "@/hooks/usePreferences";
 import { useProfile } from "@/hooks/useProfile";
-import { Coins, Languages, Palette, RotateCcw, Settings2 } from "@/lib/icons";
+import {
+  Coins,
+  Languages,
+  Loader2,
+  Palette,
+  PanelLeftClose,
+  RotateCcw,
+  Settings2,
+} from "@/lib/icons";
+import { cn } from "@/lib/utils";
 import { ThemeCustomizationSheet } from "./theme-customization-modal";
+
+type SavingField = "preference" | "currency" | "locale" | null;
 
 function PreferenceRow({
   icon,
   title,
   hint,
   control,
+  saving,
 }: {
   icon: IconProps["icon"];
   title: string;
   hint: string;
   control: React.ReactNode;
+  saving?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-border/40 bg-muted/20 px-4 py-3">
+    <div
+      className={cn(
+        "flex items-center justify-between gap-4 rounded-xl border border-border/40 bg-muted/20 px-4 py-3 transition-opacity duration-200",
+        saving && "opacity-70",
+      )}
+    >
       <div className="flex min-w-0 items-center gap-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Icon icon={icon} className="size-4" />
+          {saving ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Icon icon={icon} className="size-4" />
+          )}
         </span>
         <div className="min-w-0">
           <p className="text-sm font-medium text-foreground">{title}</p>
@@ -58,9 +82,29 @@ export function PreferencesSection() {
   const { t } = useTranslation();
   const { locale, setLocale } = useLocaleContext();
   const { profile, update } = useProfile();
+  const {
+    preferences,
+    updatePreferences,
+    saving: prefSaving,
+  } = usePreferences();
   const { resetOnboarding } = useOnboarding();
   const router = useRouter();
   const [replayOpen, setReplayOpen] = useState(false);
+  const [saving, setSaving] = useState<SavingField>(null);
+
+  const withSaving = useCallback(
+    async (field: SavingField, fn: () => Promise<void>) => {
+      setSaving(field);
+      try {
+        await fn();
+      } finally {
+        setSaving(null);
+      }
+    },
+    [],
+  );
+
+  const isSaving = saving !== null || prefSaving;
 
   return (
     <Card>
@@ -106,8 +150,47 @@ export function PreferencesSection() {
 
         <PreferenceRow
           icon={Languages}
+          title={t("settings.preferences.showLanguageSelectorLabel")}
+          hint={t("settings.preferences.showLanguageSelectorHint")}
+          saving={saving === "preference" && prefSaving}
+          control={
+            <Switch
+              checked={preferences.showLanguageSelector}
+              disabled={isSaving}
+              onCheckedChange={(checked) => {
+                void withSaving("preference", () =>
+                  updatePreferences({ showLanguageSelector: checked }),
+                );
+              }}
+              aria-label={t("settings.preferences.showLanguageSelectorLabel")}
+            />
+          }
+        />
+
+        <PreferenceRow
+          icon={PanelLeftClose}
+          title={t("settings.preferences.sidebarHoverExpandLabel")}
+          hint={t("settings.preferences.sidebarHoverExpandHint")}
+          saving={saving === "preference" && prefSaving}
+          control={
+            <Switch
+              checked={preferences.sidebarHoverExpand}
+              disabled={isSaving}
+              onCheckedChange={(checked) => {
+                void withSaving("preference", () =>
+                  updatePreferences({ sidebarHoverExpand: checked }),
+                );
+              }}
+              aria-label={t("settings.preferences.sidebarHoverExpandLabel")}
+            />
+          }
+        />
+
+        <PreferenceRow
+          icon={Languages}
           title={t("settings.preferences.localeLabel")}
           hint={t("settings.preferences.localeHint")}
+          saving={saving === "locale"}
           control={
             <LanguageSelect
               withIcon={false}
@@ -115,10 +198,10 @@ export function PreferencesSection() {
               value={locale}
               ariaLabel={t("settings.preferences.localeLabel")}
               onValueChange={(value) => {
-                void (async () => {
+                void withSaving("locale", async () => {
                   await setLocale(value);
                   router.refresh();
-                })();
+                });
               }}
             />
           }
@@ -128,6 +211,7 @@ export function PreferencesSection() {
           icon={Coins}
           title={t("settings.preferences.currencyLabel")}
           hint={t("settings.preferences.currencyHint")}
+          saving={saving === "currency"}
           control={
             <CurrencySelect
               compact
@@ -136,7 +220,7 @@ export function PreferencesSection() {
               displayLocale={locale}
               ariaLabel={t("settings.preferences.currencyLabel")}
               onValueChange={(value) => {
-                void update({ currency: value });
+                void withSaving("currency", () => update({ currency: value }));
               }}
             />
           }

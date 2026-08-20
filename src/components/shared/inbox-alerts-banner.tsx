@@ -43,6 +43,7 @@ function InboxAlertStrip({
         description={alert.description ?? undefined}
         actionLabel={action ? t(action.labelKey) : undefined}
         actionIcon={action?.icon}
+        actionIconData={action?.iconData}
         onAction={action ? handleAction : undefined}
         onDismiss={ownDismissHidden ? undefined : onDismiss}
         dismissLabel={t("alerts.dismiss")}

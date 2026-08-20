@@ -1,11 +1,12 @@
 "use client";
 
+import { LogOut as LogOutData, Trash2 as TrashData } from "lucide";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared/icon";
+import { Icon, LoadingIcon } from "@/components/shared";
 import { Button } from "@/components/ui";
 import { useSpaceLeave } from "@/hooks/useSpaceLeave";
 import type { SpaceSummary } from "@/lib/api/space";
-import { Loader2, LogOut, Trash2, X } from "@/lib/icons";
+import { LogOut, Trash2, X } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface SpaceLeaveConfirmProps {
@@ -95,11 +96,11 @@ export function SpaceLeaveConfirm({
           disabled={isPending}
           className="h-11 w-full gap-1.5 sm:h-10 sm:w-auto"
         >
-          {isPending ? (
-            <Icon icon={Loader2} className="size-3.5 animate-spin" />
-          ) : (
-            <Icon icon={isOnlyMember ? Trash2 : LogOut} className="size-3.5" />
-          )}
+          <LoadingIcon
+            icon={isOnlyMember ? TrashData : LogOutData}
+            loading={isPending}
+            size={14}
+          />
           {isOnlyMember
             ? t("profile.spaces.deleteSpace")
             : t("profile.spaces.leaveSpace")}

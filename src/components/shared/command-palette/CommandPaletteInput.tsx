@@ -1,10 +1,12 @@
 "use client";
 
 import { Command } from "cmdk";
+import { Search as SearchData } from "lucide";
 import { useTranslation } from "react-i18next";
-import { Loader2, SearchIcon, X } from "@/lib/icons";
+import { SearchIcon, X } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { Icon } from "../icon";
+import { LoadingIcon } from "../loading-icon";
 
 interface CommandPaletteInputProps {
   value: string;
@@ -37,9 +39,11 @@ export function CommandPaletteInput({
         autoFocus
       />
       {loading && (
-        <Icon
-          icon={Loader2}
-          className="size-4 shrink-0 animate-spin text-primary"
+        <LoadingIcon
+          icon={SearchData}
+          loading
+          size={16}
+          className="shrink-0 text-primary"
         />
       )}
       {!loading && value.length > 0 && (

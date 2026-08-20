@@ -1,12 +1,14 @@
 "use client";
 
+import { Check as CheckData } from "lucide";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { Button } from "@/components/ui";
 import { useSpaces } from "@/hooks/useSpaces";
 import type { SpaceSummary } from "@/lib/api/space";
-import { Check, Loader2, Pencil, X } from "@/lib/icons";
+import { Pencil, X } from "@/lib/icons";
+import { LoadingIcon } from "./loading-icon";
 import { SpaceEditForm } from "./space-edit-form";
 
 interface SpaceEditSheetProps {
@@ -60,17 +62,8 @@ export function SpaceEditSheet({
           disabled={!space || rename.isPending}
           className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 sm:h-10 sm:w-auto sm:min-w-28"
         >
-          {rename.isPending ? (
-            <>
-              <Loader2 className="size-4 animate-spin" />
-              {t("common.saving")}
-            </>
-          ) : (
-            <>
-              {t("profile.spaces.save")}
-              <Check className="size-4" />
-            </>
-          )}
+          <LoadingIcon icon={CheckData} loading={rename.isPending} size={16} />
+          {rename.isPending ? t("common.saving") : t("profile.spaces.save")}
         </Button>
       }
     >

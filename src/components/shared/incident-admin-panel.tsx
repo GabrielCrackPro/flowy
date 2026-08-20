@@ -1,6 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
+import {
+  ChevronDown as ChevronDownData,
+  ChevronUp as ChevronUpData,
+} from "lucide";
+import { MorphIcon } from "morphicons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -28,7 +33,6 @@ import {
   BellRing,
   CalendarClock,
   CheckCircle2,
-  ChevronDown,
   Clock,
   Database,
   HardDrive,
@@ -700,11 +704,10 @@ export function IncidentAdminPanel() {
                     {incident.scheduledStart && incident.type === "maintenance"
                       ? `${new Date(incident.scheduledStart).toLocaleString()} → ${new Date(incident.scheduledEnd ?? incident.scheduledStart).toLocaleString()}`
                       : new Date(incident.createdAt).toLocaleDateString()}
-                    <ChevronDown
-                      className={cn(
-                        "size-3.5 transition-transform",
-                        expanded && "rotate-180",
-                      )}
+                    <MorphIcon
+                      icon={expanded ? ChevronUpData : ChevronDownData}
+                      size={14}
+                      reducedMotion="user"
                     />
                   </span>
                 </button>
