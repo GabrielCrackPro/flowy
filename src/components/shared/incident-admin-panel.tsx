@@ -863,12 +863,11 @@ export function IncidentAdminPanel() {
               })
             : ""
         }
-        confirmLabel={
-          deleting
-            ? t("status.incidents.deleting")
-            : t("status.incidents.delete")
-        }
+        confirmLabel={t("status.incidents.delete")}
         onConfirm={() => void confirmDelete()}
+        closeOnConfirm={false}
+        loading={deleting}
+        loadingLabel={t("status.incidents.deleting")}
       />
 
       {/* Draft preview before publishing publicly */}

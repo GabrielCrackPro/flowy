@@ -71,11 +71,13 @@ export function ListPageLoading({
     >
       {/* Page header — mirrors BackHeader + description */}
       <motion.div variants={itemVariants} className="space-y-3">
+        {/* Mirrors BackHeader: back button + title on desktop, compact
+            title-only row on mobile. */}
         <div className="flex items-center gap-3">
-          <Skeleton variant="rounded" className="size-10" />
-          <Skeleton className="h-6 w-44" />
+          <Skeleton variant="rounded" className="hidden size-10 sm:block" />
+          <Skeleton className="h-6 w-44 max-sm:h-5 max-sm:w-32" />
         </div>
-        <Skeleton className="h-4 w-64" />
+        <Skeleton className="h-4 w-64 max-sm:w-44" />
       </motion.div>
 
       {/* Summary metric cards */}

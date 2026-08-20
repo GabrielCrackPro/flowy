@@ -1,13 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import {
-  applyRateLimitHeaders,
-  handleApiError,
-  isAuthResponse,
-  requireAdmin,
-  withRateLimit,
-} from "@/lib/api/route-utils";
+import { withAdminRoute } from "@/lib/api/route-utils";
 import { prisma } from "@/lib/prisma/client";
 import { ActivityService } from "@/lib/services/activities";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -20,25 +14,24 @@ const demoteSchema = z.object({
  * Lists current admins (id, name, email, role). Admin-only; powers the
  * admin-management card in the status page admin panel.
  */
-export async function GET() {
-  const auth = await requireAdmin();
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
+export const GET = withAdminRoute({
+  routeName: "adminDemote",
+  fallbackMessage: "Could not list admins",
+  handler: async () => {
+    const admins = await prisma.profile.findMany({
+      where: { role: "admin" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+      orderBy: { createdAt: "asc" },
+    });
 
-  const admins = await prisma.profile.findMany({
-    where: { role: "admin" },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-    },
-    orderBy: { createdAt: "asc" },
-  });
-
-  return NextResponse.json({ admins });
-}
+    return NextResponse.json({ admins });
+  },
+});
 
 /**
  * Demotes a user from the admin role. Admin-only. Refuses to demote the LAST
@@ -46,18 +39,10 @@ export async function GET() {
  * path is closed once an admin exists, so losing the last one would lock the
  * app out of admin features permanently).
  */
-export async function POST(request: Request) {
-  const auth = await requireAdmin();
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  const rateLimitResponse = await withRateLimit(auth.id, "adminDemote");
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
-  try {
+export const POST = withAdminRoute({
+  routeName: "adminDemote",
+  fallbackMessage: "Could not demote user",
+  handler: async ({ auth, request }) => {
     const body = (await request.json()) as unknown;
     const { email } = demoteSchema.parse(body);
 
@@ -126,9 +111,6 @@ export async function POST(request: Request) {
       skipSpaceFilter: true,
     });
 
-    const response = NextResponse.json({ message: "Admin role removed" });
-    return applyRateLimitHeaders(response, auth.id, "adminDemote");
-  } catch (error) {
-    return handleApiError(error, "Could not demote user");
-  }
-}
+    return NextResponse.json({ message: "Admin role removed" });
+  },
+});

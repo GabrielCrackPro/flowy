@@ -1,14 +1,8 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import {
-  applyRateLimitHeaders,
-  handleApiError,
-  isAuthResponse,
-  requireAuth,
-  withRateLimit,
-} from "@/lib/api/route-utils";
-import { prisma } from "@/lib/prisma/client";
+import { withAuthenticatedRoute } from "@/lib/api/route-utils";
+import { PushService } from "@/lib/services/push";
 
 const subscriptionSchema = z.object({
   endpoint: z.string().url(),
@@ -23,169 +17,89 @@ const renameSchema = z.object({
   deviceName: z.string().trim().min(1).max(80),
 });
 
-export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-  const rateLimitResponse = await withRateLimit(auth.id, "pushSubscription");
-  if (rateLimitResponse) return rateLimitResponse;
-
-  try {
+export const POST = withAuthenticatedRoute({
+  routeName: "pushSubscription",
+  fallbackMessage: "Failed to save push subscription",
+  handler: async ({ auth, request }) => {
     const body = await request.json().catch(() => null);
     const parsed = subscriptionSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ message: "Datos inválidos" }, { status: 400 });
     }
 
-    const existing = await prisma.pushSubscription.findFirst({
-      where: { endpoint: parsed.data.endpoint },
-      select: { userId: true },
-    });
-    if (existing && existing.userId !== auth.id) {
+    const userAgent = request.headers.get("user-agent");
+    const result = await PushService.saveSubscription(
+      auth.id,
+      parsed.data,
+      userAgent,
+    );
+    if (result.conflict) {
       return NextResponse.json(
         { message: "La suscripción ya pertenece a otro usuario" },
         { status: 409 },
       );
     }
 
-    const userAgent = request.headers.get("user-agent");
-    const subscription = await prisma.pushSubscription.upsert({
-      where: { endpoint: parsed.data.endpoint },
-      create: {
-        userId: auth.id,
-        endpoint: parsed.data.endpoint,
-        p256dh: parsed.data.p256dh,
-        auth: parsed.data.auth,
-        userAgent: userAgent?.slice(0, 300) ?? null,
-        deviceName: parsed.data.deviceName ?? null,
-        installationType: parsed.data.installationType ?? null,
-        lastSeenAt: new Date(),
-      },
-      update: {
-        userId: auth.id,
-        p256dh: parsed.data.p256dh,
-        auth: parsed.data.auth,
-        userAgent: userAgent?.slice(0, 300) ?? null,
-        ...(parsed.data.deviceName
-          ? { deviceName: parsed.data.deviceName }
-          : {}),
-        ...(parsed.data.installationType
-          ? { installationType: parsed.data.installationType }
-          : {}),
-        lastSeenAt: new Date(),
-      },
-    });
+    return NextResponse.json({ ok: true, id: result.id });
+  },
+});
 
-    const response = NextResponse.json({ ok: true, id: subscription.id });
-    return applyRateLimitHeaders(response, auth.id, "pushSubscription");
-  } catch (error) {
-    return handleApiError(error, "Failed to save push subscription");
-  }
-}
-
-export async function GET() {
-  const auth = await requireAuth();
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-  const rateLimitResponse = await withRateLimit(auth.id, "pushSubscription");
-  if (rateLimitResponse) return rateLimitResponse;
-
-  try {
-    const subscriptions = await prisma.pushSubscription.findMany({
-      where: { userId: auth.id },
-      select: {
-        id: true,
-        endpoint: true,
-        userAgent: true,
-        deviceName: true,
-        installationType: true,
-        createdAt: true,
-        updatedAt: true,
-        lastSeenAt: true,
-        lastDeliveryAt: true,
-        lastDeliveryStatus: true,
-        failureCount: true,
-        lastFailureReason: true,
-      },
-      orderBy: { createdAt: "asc" },
-    });
-    const response = NextResponse.json({
+export const GET = withAuthenticatedRoute({
+  routeName: "pushSubscription",
+  fallbackMessage: "Failed to load push subscription status",
+  handler: async ({ auth }) => {
+    const subscriptions = await PushService.listSubscriptions(auth.id);
+    return NextResponse.json({
       ok: true,
       subscribed: subscriptions.length > 0,
       count: subscriptions.length,
       subscriptions,
     });
-    return applyRateLimitHeaders(response, auth.id, "pushSubscription");
-  } catch (error) {
-    return handleApiError(error, "Failed to load push subscription status");
-  }
-}
+  },
+});
 
-export async function PATCH(request: NextRequest) {
-  const auth = await requireAuth();
-  if (isAuthResponse(auth)) return auth;
-  const rateLimitResponse = await withRateLimit(auth.id, "pushSubscription");
-  if (rateLimitResponse) return rateLimitResponse;
-
-  try {
+export const PATCH = withAuthenticatedRoute({
+  routeName: "pushSubscription",
+  fallbackMessage: "Failed to rename push device",
+  handler: async ({ auth, request }) => {
     const body = await request.json().catch(() => null);
     const parsed = renameSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ message: "Datos inválidos" }, { status: 400 });
     }
-    const updated = await prisma.pushSubscription.updateMany({
-      where: { id: parsed.data.id, userId: auth.id },
-      data: { deviceName: parsed.data.deviceName },
-    });
-    if (updated.count === 0) {
+    const renamed = await PushService.renameSubscription(
+      auth.id,
+      parsed.data.id,
+      parsed.data.deviceName,
+    );
+    if (!renamed) {
       return NextResponse.json(
         { message: "Dispositivo no encontrado" },
         { status: 404 },
       );
     }
-    const response = NextResponse.json({
+    return NextResponse.json({
       ok: true,
       deviceName: parsed.data.deviceName,
     });
-    return applyRateLimitHeaders(response, auth.id, "pushSubscription");
-  } catch (error) {
-    return handleApiError(error, "Failed to rename push device");
-  }
-}
+  },
+});
 
-export async function DELETE(request: NextRequest) {
-  const auth = await requireAuth();
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-  const rateLimitResponse = await withRateLimit(auth.id, "pushSubscription");
-  if (rateLimitResponse) return rateLimitResponse;
-
-  try {
+export const DELETE = withAuthenticatedRoute({
+  routeName: "pushSubscription",
+  fallbackMessage: "Failed to delete push subscription",
+  handler: async ({ auth, request }) => {
     const body = await request.json().catch(() => null);
     if (body?.all === true) {
-      await prisma.pushSubscription.deleteMany({
-        where: { userId: auth.id },
-      });
-      const response = NextResponse.json({ ok: true });
-      return applyRateLimitHeaders(response, auth.id, "pushSubscription");
+      await PushService.deleteSubscriptions(auth.id, { all: true });
+      return NextResponse.json({ ok: true });
     }
 
     if (body?.stale === true) {
-      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const result = await prisma.pushSubscription.deleteMany({
-        where: {
-          userId: auth.id,
-          OR: [
-            { lastSeenAt: { lt: cutoff } },
-            { lastSeenAt: null, updatedAt: { lt: cutoff } },
-          ],
-        },
+      const removed = await PushService.deleteSubscriptions(auth.id, {
+        stale: true,
       });
-      const response = NextResponse.json({ ok: true, removed: result.count });
-      return applyRateLimitHeaders(response, auth.id, "pushSubscription");
+      return NextResponse.json({ ok: true, removed });
     }
 
     const endpoint = typeof body?.endpoint === "string" ? body.endpoint : null;
@@ -193,13 +107,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ message: "Datos inválidos" }, { status: 400 });
     }
 
-    await prisma.pushSubscription.deleteMany({
-      where: { endpoint, userId: auth.id },
-    });
-
-    const response = NextResponse.json({ ok: true });
-    return applyRateLimitHeaders(response, auth.id, "pushSubscription");
-  } catch (error) {
-    return handleApiError(error, "Failed to delete push subscription");
-  }
-}
+    await PushService.deleteSubscriptions(auth.id, { endpoint });
+    return NextResponse.json({ ok: true });
+  },
+});

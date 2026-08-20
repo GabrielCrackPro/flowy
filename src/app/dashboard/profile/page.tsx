@@ -154,7 +154,7 @@ export default function SettingsPage() {
     <div className="mx-auto min-w-0 max-w-6xl space-y-5 sm:space-y-6">
       <div className="space-y-2">
         <BackHeader title={t("nav.settings")} href="/dashboard" />
-        <p className="pl-12 text-sm text-muted-foreground sm:pl-14">
+        <p className="text-sm text-muted-foreground sm:pl-14">
           {t("settings.description")}
         </p>
       </div>

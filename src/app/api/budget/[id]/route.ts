@@ -1,84 +1,50 @@
-import { type NextRequest, NextResponse } from "next/server";
-
-import {
-  handleApiError,
-  isAuthResponse,
-  noContent,
-  requireAuth,
-} from "@/lib/api/route-utils";
+import { NextResponse } from "next/server";
+import { noContent, withAuthenticatedRoute } from "@/lib/api/route-utils";
 import { updateBudgetSchema } from "@/lib/schemas";
 import { AlertsService } from "@/lib/services/alerts";
 import { BudgetService } from "@/lib/services/budgets";
 
 interface Params {
-  params: Promise<{
-    id: string;
-  }>;
+  id: string;
 }
 
-export async function GET(_: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
-    const budget = await BudgetService.get(auth.id, id);
-
+export const GET = withAuthenticatedRoute<Params>({
+  routeName: "budget",
+  handler: async ({ auth, params, getContext }) => {
+    const budget = await BudgetService.get(
+      auth.id,
+      params.id,
+      await getContext(),
+    );
     if (!budget) {
       return NextResponse.json(
         { message: "Budget not found" },
         { status: 404 },
       );
     }
-
     return NextResponse.json(budget);
-  } catch (error) {
-    return handleApiError(error, "Could not get budget");
-  }
-}
+  },
+});
 
-export async function PATCH(request: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
-    const body = updateBudgetSchema.parse(await request.json());
-    const budget = await BudgetService.update(auth.id, id, body);
-
-    await AlertsService.evaluateForUser(auth.id).catch((error) => {
-      console.error("Failed to evaluate alerts:", error);
-    });
-
+export const PATCH = withAuthenticatedRoute<Params>({
+  routeName: "budget",
+  handler: async ({ auth, request, params, getContext }) => {
+    const budget = await BudgetService.update(
+      auth.id,
+      params.id,
+      updateBudgetSchema.parse(await request.json()),
+      await getContext(),
+    );
+    await AlertsService.evaluateForUser(auth.id).catch(() => undefined);
     return NextResponse.json(budget);
-  } catch (error) {
-    return handleApiError(error, "Could not update budget");
-  }
-}
+  },
+});
 
-export async function DELETE(_: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
-    await BudgetService.delete(auth.id, id);
-
-    await AlertsService.evaluateForUser(auth.id).catch((error) => {
-      console.error("Failed to evaluate alerts:", error);
-    });
-
+export const DELETE = withAuthenticatedRoute<Params>({
+  routeName: "budget",
+  handler: async ({ auth, params, getContext }) => {
+    await BudgetService.delete(auth.id, params.id, await getContext());
+    await AlertsService.evaluateForUser(auth.id).catch(() => undefined);
     return noContent();
-  } catch (error) {
-    return handleApiError(error, "Could not delete budget");
-  }
-}
+  },
+});

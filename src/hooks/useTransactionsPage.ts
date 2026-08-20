@@ -7,6 +7,7 @@ import { EXPENSE_TYPE_KEY, PAYMENT_METHOD_KEY } from "@utils/constants";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "@/components/shared/toast";
 import { bulkDeleteTransactions } from "@/lib/api/transaction";
 import { parseDateOnly } from "@/lib/date-only";
 import {
@@ -114,7 +115,7 @@ export function useTransactionsPage() {
     [debouncedFilters, pagination],
   );
 
-  const { transactions, loading, refresh, update, remove } =
+  const { transactions, loading, refresh, update, remove, isDeleting } =
     useTransactionApi(queryFilters);
 
   const [detailTx, setDetailTx] = useState<
@@ -124,6 +125,7 @@ export function useTransactionsPage() {
     (typeof transactions)[number] | null
   >(null);
   const [bulkDeleteTx, setBulkDeleteTx] = useState<boolean>(false);
+  const [bulkDeleting, setBulkDeleting] = useState<boolean>(false);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -198,18 +200,22 @@ export function useTransactionsPage() {
   }, [refresh]);
 
   const handleBulkDelete = useCallback(async () => {
+    if (selectedIds.size === 0 || bulkDeleting) return;
+    setBulkDeleting(true);
     try {
       await bulkDeleteTransactions(Array.from(selectedIds));
       clearSelection();
       setBulkDeleteTx(false);
       refresh();
       setLastRefreshedAt(new Date());
+      toast.success(t("transactions.bulkDeleteSuccess"));
     } catch (error) {
       console.error("Failed to delete transactions:", error);
-      // Handle error appropriately (could add toast notification here)
-      return;
+      toast.error(t("transactions.bulkDeleteError"));
+    } finally {
+      setBulkDeleting(false);
     }
-  }, [selectedIds, clearSelection, refresh]);
+  }, [selectedIds, bulkDeleting, clearSelection, refresh, t]);
 
   const formatFilterValue = useCallback(
     (key: string, value: string) => {
@@ -310,6 +316,7 @@ export function useTransactionsPage() {
     detailTx,
     deleteTx,
     bulkDeleteTx,
+    bulkDeleting,
     selectedIds,
     lastRefreshedAt,
     filters,
@@ -334,6 +341,7 @@ export function useTransactionsPage() {
     setDeleteTx,
     setBulkDeleteTx,
     setSelectedIds,
+    setBulkDeleting,
     setFilterOpen,
     setPagination: setPage,
     handleFilterChange: handleFilterChangeWithReset,
@@ -350,5 +358,6 @@ export function useTransactionsPage() {
     refresh,
     update,
     remove,
+    isDeleting,
   };
 }

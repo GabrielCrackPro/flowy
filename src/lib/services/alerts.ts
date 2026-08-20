@@ -120,4 +120,60 @@ export const AlertsService = {
 
     return { created, alerts: createdAlerts };
   },
+
+  /**
+   * Lists the user's alerts in the given space (unresolved first, then
+   * newest) capped at 50, plus the count of unread alerts.
+   */
+  async listForUser(userId: string, spaceId: string) {
+    const [alerts, unreadCount] = await Promise.all([
+      prisma.alert.findMany({
+        where: { userId, spaceId },
+        orderBy: [{ resolvedAt: "asc" }, { createdAt: "desc" }],
+        take: 50,
+      }),
+      prisma.alert.count({
+        where: { userId, spaceId, readAt: null, resolvedAt: null },
+      }),
+    ]);
+
+    return { alerts, unreadCount };
+  },
+
+  /**
+   * Marks alerts as read for the user in the given space: either the
+   * provided ids or (when `all` is true) every unread alert.
+   */
+  async markAsRead(
+    userId: string,
+    spaceId: string,
+    params: { ids?: string[]; all?: boolean },
+  ) {
+    const now = new Date();
+
+    if (params.all) {
+      await prisma.alert.updateMany({
+        where: { userId, spaceId, readAt: null },
+        data: { readAt: now },
+      });
+    } else if (params.ids?.length) {
+      await prisma.alert.updateMany({
+        where: { userId, spaceId, id: { in: params.ids } },
+        data: { readAt: now },
+      });
+    }
+
+    return { success: true };
+  },
+
+  /**
+   * Deletes every alert for the user in the given space (read and unread).
+   * Returns the number of alerts removed.
+   */
+  async clearAll(userId: string, spaceId: string): Promise<number> {
+    const { count } = await prisma.alert.deleteMany({
+      where: { userId, spaceId },
+    });
+    return count;
+  },
 };

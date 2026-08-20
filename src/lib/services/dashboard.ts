@@ -138,6 +138,10 @@ export const DashboardService = {
       prisma.activity.findMany({
         where: {
           spaceId: activeSpace?.id ?? null,
+          createdAt: {
+            gte: startOfMonth,
+            lt: startOfNextMonth,
+          },
         },
         orderBy: {
           createdAt: "desc",

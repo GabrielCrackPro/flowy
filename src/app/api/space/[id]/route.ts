@@ -1,36 +1,27 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-import {
-  handleApiError,
-  isAuthResponse,
-  requireAuth,
-} from "@/lib/api/route-utils";
+import { withAuthenticatedRoute } from "@/lib/api/route-utils";
 import { SpaceService } from "@/lib/services/spaces/space-service";
 
 interface Params {
-  params: Promise<{ id: string }>;
+  id: string;
 }
 
-export async function PATCH(request: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
+export const PATCH = withAuthenticatedRoute<Params>({
+  routeName: "space",
+  fallbackMessage: "Could not update space",
+  handler: async ({ auth, request, params }) => {
     const body = await request.json();
 
     if (body?.action === "setActive") {
-      const activeSpaceId = await SpaceService.setActive(auth.id, id);
+      const activeSpaceId = await SpaceService.setActive(auth.id, params.id);
       return NextResponse.json({ activeSpaceId });
     }
 
     if (body?.action === "rename") {
       const space = await SpaceService.update(
         auth.id,
-        id,
+        params.id,
         body.name,
         body.isPersonal,
         body.avatarUrl,
@@ -39,14 +30,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
 
     if (body?.action === "leave") {
-      const result = await SpaceService.leave(auth.id, id);
+      const result = await SpaceService.leave(auth.id, params.id);
       return NextResponse.json(result);
     }
 
     if (body?.action === "removeMember") {
       const result = await SpaceService.removeMember(
         auth.id,
-        id,
+        params.id,
         body.memberUserId,
       );
       return NextResponse.json(result);
@@ -56,45 +47,29 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       { message: "Acción no soportada" },
       { status: 400 },
     );
-  } catch (error) {
-    return handleApiError(error, "Could not update space");
-  }
-}
+  },
+});
 
-export async function DELETE(_: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
-    const result = await SpaceService.delete(auth.id, id);
+export const DELETE = withAuthenticatedRoute<Params>({
+  routeName: "space",
+  fallbackMessage: "Could not delete space",
+  handler: async ({ auth, params }) => {
+    const result = await SpaceService.delete(auth.id, params.id);
     return NextResponse.json(result);
-  } catch (error) {
-    return handleApiError(error, "Could not delete space");
-  }
-}
+  },
+});
 
-export async function GET(_: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
+export const GET = withAuthenticatedRoute<Params>({
+  routeName: "space",
+  fallbackMessage: "Could not get space",
+  handler: async ({ auth, params }) => {
     const spaces = await SpaceService.listForUser(auth.id);
-    const space = spaces.find((item) => item.id === id);
+    const space = spaces.find((item) => item.id === params.id);
 
     if (!space) {
       return NextResponse.json({ message: "Space not found" }, { status: 404 });
     }
 
     return NextResponse.json(space);
-  } catch (error) {
-    return handleApiError(error, "Could not get space");
-  }
-}
+  },
+});

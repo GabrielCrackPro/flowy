@@ -1,13 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import {
-  applyRateLimitHeaders,
-  handleApiError,
-  isAuthResponse,
-  requireAuth,
-  withRateLimit,
-} from "@/lib/api/route-utils";
+import { withAuthenticatedRoute } from "@/lib/api/route-utils";
 import { prisma } from "@/lib/prisma/client";
 import { ActivityService } from "@/lib/services/activities";
 
@@ -36,31 +30,24 @@ async function hasAnyAdmin(): Promise<boolean> {
  * POST → promote the authenticated caller to admin if the secret matches and
  *        no admin exists yet.
  */
-export async function GET() {
-  const auth = await requireAuth();
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
+export const GET = withAuthenticatedRoute({
+  // The status check is a cheap read — keep it off the strict bootstrap
+  // bucket so the secret-guarded POST keeps the brute-force headroom.
+  routeName: "default",
+  fallbackMessage: "Could not check admin bootstrap status",
+  handler: async () => {
+    const hasAdmin = await hasAnyAdmin();
+    return NextResponse.json({
+      enabled: Boolean(bootstrapSecret) && !hasAdmin,
+      hasAdmin,
+    });
+  },
+});
 
-  const hasAdmin = await hasAnyAdmin();
-  return NextResponse.json({
-    enabled: Boolean(bootstrapSecret) && !hasAdmin,
-    hasAdmin,
-  });
-}
-
-export async function POST(request: Request) {
-  const auth = await requireAuth();
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  const rateLimitResponse = await withRateLimit(auth.id, "adminBootstrap");
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
-  try {
+export const POST = withAuthenticatedRoute({
+  routeName: "adminBootstrap",
+  fallbackMessage: "Could not claim admin access",
+  handler: async ({ auth, request }) => {
     if (!bootstrapSecret) {
       return NextResponse.json(
         { message: "Bootstrap not configured" },
@@ -115,12 +102,9 @@ export async function POST(request: Request) {
       skipSpaceFilter: true,
     });
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       message: "You are now an admin",
       role: "admin",
     });
-    return applyRateLimitHeaders(response, auth.id, "adminBootstrap");
-  } catch (error) {
-    return handleApiError(error, "Could not claim admin access");
-  }
-}
+  },
+});

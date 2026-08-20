@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
+import { useCloseWhenSettled } from "@/hooks/useCloseWhenSettled";
 import { useSpaceLeave } from "@/hooks/useSpaceLeave";
 import type { SpaceSummary } from "@/lib/api/space";
 import { ConfirmDialog } from "./confirm-dialog";
@@ -24,11 +25,13 @@ export function SpaceLeaveDialog({
   onOpenChange,
 }: SpaceLeaveDialogProps) {
   const { t } = useTranslation();
-  const { isOnlyMember, handleConfirm } = useSpaceLeave(space);
+  const { isOnlyMember, isPending, handleConfirm } = useSpaceLeave(space);
+  const markStarted = useCloseWhenSettled(isPending, () => onOpenChange(false));
 
   const confirm = () => {
+    if (!space) return;
+    markStarted();
     handleConfirm();
-    onOpenChange(false);
   };
 
   return (
@@ -51,6 +54,8 @@ export function SpaceLeaveDialog({
           : t("profile.spaces.leaveSpace")
       }
       cancelLabel={t("profile.spaces.cancel")}
+      loading={isPending}
+      closeOnConfirm={false}
       onConfirm={confirm}
       variant="destructive"
     />

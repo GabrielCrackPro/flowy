@@ -1,73 +1,41 @@
-import { type NextRequest, NextResponse } from "next/server";
-
-import {
-  applyRateLimitHeaders,
-  handleApiError,
-  isAuthResponse,
-  requireAuth,
-  withRateLimit,
-} from "@/lib/api/route-utils";
+import { NextResponse } from "next/server";
+import { withAuthenticatedRoute } from "@/lib/api/route-utils";
 import { billingCycleSchema, createSubscriptionSchema } from "@/lib/schemas";
 import { AlertsService } from "@/lib/services/alerts";
 import { SubscriptionService } from "@/lib/services/subscriptions";
 
-export async function GET(request: NextRequest) {
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  // Apply rate limiting
-  const rateLimitResponse = await withRateLimit(auth.id, "subscription");
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
-  try {
-    const searchParams = request.nextUrl.searchParams;
-
-    const active = searchParams.get("active");
+export const GET = withAuthenticatedRoute({
+  routeName: "subscription",
+  handler: async ({ auth, request, getContext }) => {
+    const searchParams = new URL(request.url).searchParams;
     const billingCycle = searchParams.get("billingCycle");
+    return NextResponse.json(
+      await SubscriptionService.list(
+        auth.id,
+        {
+          active:
+            searchParams.get("active") === null
+              ? undefined
+              : searchParams.get("active") === "true",
+          billingCycle: billingCycle
+            ? billingCycleSchema.parse(billingCycle)
+            : undefined,
+        },
+        await getContext(),
+      ),
+    );
+  },
+});
 
-    const subscriptions = await SubscriptionService.list(auth.id, {
-      active: active === null ? undefined : active === "true",
-      billingCycle: billingCycle
-        ? billingCycleSchema.parse(billingCycle)
-        : undefined,
-    });
-
-    const response = NextResponse.json(subscriptions);
-    return applyRateLimitHeaders(response, auth.id, "subscription");
-  } catch (error) {
-    return handleApiError(error, "Failed to load subscriptions");
-  }
-}
-
-export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  // Apply rate limiting
-  const rateLimitResponse = await withRateLimit(auth.id, "subscription");
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
-  try {
-    const body = createSubscriptionSchema.parse(await request.json());
-    const subscription = await SubscriptionService.create(auth.id, body);
-
-    await AlertsService.evaluateForUser(auth.id).catch((error) => {
-      console.error("Failed to evaluate alerts:", error);
-    });
-
-    const response = NextResponse.json(subscription, { status: 201 });
-    return applyRateLimitHeaders(response, auth.id, "subscription");
-  } catch (error) {
-    return handleApiError(error, "Could not create subscription");
-  }
-}
+export const POST = withAuthenticatedRoute({
+  routeName: "subscription",
+  handler: async ({ auth, request, getContext }) => {
+    const subscription = await SubscriptionService.create(
+      auth.id,
+      createSubscriptionSchema.parse(await request.json()),
+      await getContext(),
+    );
+    await AlertsService.evaluateForUser(auth.id).catch(() => undefined);
+    return NextResponse.json(subscription, { status: 201 });
+  },
+});

@@ -1,36 +1,24 @@
 import { NextResponse } from "next/server";
-import {
-  handleApiError,
-  isAuthResponse,
-  requireAuth,
-} from "@/lib/api/route-utils";
-import { prisma } from "@/lib/prisma/client";
-import { SpaceService } from "@/lib/services/spaces/space-service";
+import { withAuthenticatedRoute } from "@/lib/api/route-utils";
+import { AlertsService } from "@/lib/services/alerts";
 
-export async function GET() {
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
-    const activeSpace = await SpaceService.getCurrent(auth.id);
-    const spaceId = activeSpace?.id ?? null;
-
-    const [alerts, unreadCount] = await Promise.all([
-      prisma.alert.findMany({
-        where: { userId: auth.id, spaceId },
-        orderBy: [{ resolvedAt: "asc" }, { createdAt: "desc" }],
-        take: 50,
-      }),
-      prisma.alert.count({
-        where: { userId: auth.id, spaceId, readAt: null, resolvedAt: null },
-      }),
-    ]);
-
+export const GET = withAuthenticatedRoute({
+  routeName: "default",
+  handler: async ({ auth, getContext }) => {
+    const context = await getContext();
+    const { alerts, unreadCount } = await AlertsService.listForUser(
+      auth.id,
+      context.spaceId,
+    );
     return NextResponse.json({ alerts, unreadCount });
-  } catch (error) {
-    return handleApiError(error, "No se pudieron obtener las notificaciones");
-  }
-}
+  },
+});
+
+export const DELETE = withAuthenticatedRoute({
+  routeName: "default",
+  handler: async ({ auth, getContext }) => {
+    const context = await getContext();
+    const deletedCount = await AlertsService.clearAll(auth.id, context.spaceId);
+    return NextResponse.json({ deletedCount });
+  },
+});

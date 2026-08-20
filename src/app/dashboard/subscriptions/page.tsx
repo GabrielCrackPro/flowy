@@ -63,6 +63,7 @@ export default function SubscriptionsPage() {
     refresh,
     isCreating,
     isUpdating,
+    isDeleting,
   } = useSubscriptionApi();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,6 +82,7 @@ export default function SubscriptionsPage() {
     handleSubmit,
     handleDelete,
     isSubmitting,
+    isDeleting: deletingInProgress,
   } = useEntityFormModal<
     Subscription,
     CreateSubscriptionInput,
@@ -91,6 +93,7 @@ export default function SubscriptionsPage() {
     remove,
     isCreating,
     isUpdating,
+    isDeleting,
   });
 
   useCreateEntityFromQuery(openCreate);
@@ -445,10 +448,14 @@ export default function SubscriptionsPage() {
 
       <ConfirmDialog
         open={!!deleting}
-        onOpenChange={() => setDeleting(null)}
+        onOpenChange={(open) => {
+          if (!open) setDeleting(null);
+        }}
         title={t("subscriptions.deleteTitle")}
         description={t("subscriptions.deleteDescription")}
-        onConfirm={handleDelete}
+        loading={deletingInProgress}
+        closeOnConfirm={false}
+        onConfirm={() => void handleDelete()}
       />
 
       <ConfirmDialog

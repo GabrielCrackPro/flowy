@@ -21,9 +21,19 @@ export function BackHeader({ title, href, actions }: BackHeaderProps) {
   const isMobile = useIsMobile();
 
   if (isMobile) {
-    return actions ? (
-      <div className="flex justify-end gap-1">{actions}</div>
-    ) : null;
+    // Compact title row: navigation lives in the bottom nav and browser back,
+    // so mobile gets just the page title (plus any actions) — users always
+    // know where they are without relying on the nav highlight.
+    return (
+      <div className="flex min-w-0 items-center justify-between gap-2">
+        <h1 className="min-w-0 truncate text-base font-semibold tracking-tight text-foreground">
+          {title}
+        </h1>
+        {actions ? (
+          <div className="flex shrink-0 items-center gap-1">{actions}</div>
+        ) : null}
+      </div>
+    );
   }
 
   return (

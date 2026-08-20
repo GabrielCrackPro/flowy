@@ -1,13 +1,7 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import {
-  applyRateLimitHeaders,
-  handleApiError,
-  isAuthResponse,
-  requireAuth,
-  withRateLimit,
-} from "@/lib/api/route-utils";
+import { withAuthenticatedRoute } from "@/lib/api/route-utils";
 import { PushService } from "@/lib/services/push";
 
 const testSchema = z.object({
@@ -20,15 +14,10 @@ const testSchema = z.object({
  * Sends a test push notification to the authenticated user's devices so they
  * can confirm push delivery works after enabling notifications.
  */
-export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-  const rateLimitResponse = await withRateLimit(auth.id, "pushSubscription");
-  if (rateLimitResponse) return rateLimitResponse;
-
-  try {
+export const POST = withAuthenticatedRoute({
+  routeName: "pushSubscription",
+  fallbackMessage: "Failed to send test notification",
+  handler: async ({ auth, request }) => {
     const body = await request.json().catch(() => null);
     const parsed = testSchema.safeParse(body);
     if (!parsed.success) {
@@ -45,9 +34,6 @@ export async function POST(request: NextRequest) {
       parsed.data.subscriptionId,
     );
 
-    const response = NextResponse.json({ ok: true, sent: delivery.sent });
-    return applyRateLimitHeaders(response, auth.id, "pushSubscription");
-  } catch (error) {
-    return handleApiError(error, "Failed to send test notification");
-  }
-}
+    return NextResponse.json({ ok: true, sent: delivery.sent });
+  },
+});

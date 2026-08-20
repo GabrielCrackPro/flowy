@@ -16,7 +16,7 @@ import {
   deleteTransaction,
   updateTransaction,
 } from "@/lib/api/transaction";
-import { DEPENDENT_QUERY_KEYS } from "@/lib/entity-query-keys";
+import { invalidateEntityQueries } from "@/lib/query-invalidation";
 import {
   incrementMutationAttempt,
   listPendingMutations,
@@ -185,10 +185,7 @@ function invalidateEntityKeys(
   queryClient: QueryClient,
   entityKey: string,
 ): void {
-  queryClient.invalidateQueries({ queryKey: [entityKey] });
-  for (const dependent of DEPENDENT_QUERY_KEYS[entityKey] ?? []) {
-    queryClient.invalidateQueries({ queryKey: [dependent] });
-  }
+  invalidateEntityQueries(queryClient, entityKey);
 }
 
 async function replay(

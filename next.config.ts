@@ -1,14 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
-
-  // Keep the development UI focused on the app itself.
   devIndicators: false,
-
-  // Compiler optimizations
+  reactStrictMode: true,
   compiler: {
-    // Remove console logs in production
     removeConsole:
       process.env.NODE_ENV === "production"
         ? {
@@ -16,9 +11,6 @@ const nextConfig: NextConfig = {
           }
         : false,
   },
-
-  // Enable React features
-  reactStrictMode: true,
 };
 
 export default nextConfig;

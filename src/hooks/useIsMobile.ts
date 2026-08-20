@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MOBILE_MEDIA_QUERY } from "@/lib/breakpoints";
 
 /**
  * True when the viewport is narrower than the Tailwind `md` breakpoint
@@ -10,17 +11,10 @@ import { useEffect, useState } from "react";
  * floating action button, header layout and spacing that render identically
  * for mobile browsers and installed PWAs. Desktop layouts (sidebar) use the
  * CSS `md:` breakpoints, so both stay in sync by construction.
+ *
+ * Implemented via the shared `useMediaQuery` hook with the contract query
+ * from `src/lib/breakpoints.ts` — never hand-write a mobile query string.
  */
 export function useIsMobile(): boolean {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 767px)");
-    const update = () => setIsMobile(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-
-  return isMobile;
+  return useMediaQuery(MOBILE_MEDIA_QUERY);
 }

@@ -5,6 +5,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Extra-narrow phones (<420px) — mirrors COMPACT_MAX_WIDTH in src/lib/breakpoints.ts */
+@custom-variant max-compact {
+  @media (max-width: 420px) {
+    @slot;
+  }
+}
+
 :root {
   color-scheme: light;
   /* Flowy surface palette: quiet canvas, crisp cards, and readable ink. */
@@ -301,7 +308,8 @@ phantom-ui {
   }
 }
 
-/* Mobile toasts: bottom-centered compact cards instead of full-width top bars */
+/* Mobile toasts: bottom-centered compact cards instead of full-width top bars.
+   Width mirrors TOAST_COMPACT_MAX_WIDTH in src/lib/breakpoints.ts. */
 @media (max-width: 600px) {
   [data-sonner-toaster][data-y-position="bottom"] {
     right: 0;

@@ -409,12 +409,12 @@ export function DataTable<T>({
       {data.length > 0 && (
         <div
           className={cn(
-            "flex items-center justify-between border-t border-border/30 bg-gradient-to-r from-muted/10 to-muted/5 px-4 py-3",
+            "flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border/30 bg-gradient-to-r from-muted/10 to-muted/5 px-3 py-3 sm:px-4",
             bare ? "" : "rounded-b-xl",
           )}
         >
-          <div className="flex items-center gap-3">
-            <p className="text-xs text-muted-foreground/70">
+          <div className="flex min-w-0 items-center gap-3">
+            <p className="min-w-0 truncate text-xs text-muted-foreground/70">
               {(page - 1) * pageSize + 1}–
               {Math.min(page * pageSize, sorted.length)} {t("pagination.of")}{" "}
               {sorted.length}
@@ -478,7 +478,7 @@ export function DataTable<T>({
               </AnimatePresence>
             </div>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             <motion.button
               type="button"
               disabled={page <= 1}

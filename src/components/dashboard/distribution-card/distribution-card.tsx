@@ -249,7 +249,9 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
                 <span
                   className={cn("size-2 shrink-0 rounded-full", savingsDot)}
                 />
-                {t("distribution.savings")}{" "}
+                {savingsTone === "over"
+                  ? t("distribution.overspent")
+                  : t("distribution.savings")}
                 {formatPercentage(savingsPct, locale, 0)}
               </span>
             </div>
@@ -327,13 +329,23 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-foreground/90">
-                  {t("distribution.savings")}
+                  {savingsTone === "over"
+                    ? t("distribution.overspent")
+                    : t("distribution.savings")}
                 </p>
                 <p className="truncate text-[11px] text-muted-foreground/60">
-                  {t("distribution.savingsRate")}
-                  {savingsRate !== null
-                    ? `: ${formatPercentage(savingsRate, locale, 1)}`
-                    : ""}
+                  {savingsTone === "over" ? (
+                    t("distribution.overspentBy", {
+                      amount: formatCurrency(-savings, locale, currency),
+                    })
+                  ) : (
+                    <>
+                      {t("distribution.savingsRate")}
+                      {savingsRate !== null
+                        ? `: ${formatPercentage(savingsRate, locale, 1)}`
+                        : ""}
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -344,7 +356,7 @@ export function DistributionCard({ month, year }: DistributionCardProps) {
               )}
             >
               <AnimatedNumber
-                value={savings}
+                value={savingsTone === "over" ? -savings : savings}
                 formatter={(v) => formatCurrency(v, locale, currency)}
               />
             </span>

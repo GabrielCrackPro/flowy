@@ -637,6 +637,12 @@ export type AppTranslationMessages = {
     nextYear: string;
     backToToday: string;
     selectMonth: string;
+    currentMonthHint: string;
+    years: string;
+    prevDecade: string;
+    nextDecade: string;
+    jumpToCurrentYear: string;
+    toggleYearRange: string;
     customize: string;
     customizeTitle: string;
     customizeDescription: string;
@@ -689,6 +695,7 @@ export type AppTranslationMessages = {
     barTitle: string;
     allClear: string;
     noAlerts: string;
+    viewAll: string;
     show: string;
     hide: string;
     actionsLabel: string;
@@ -743,6 +750,35 @@ export type AppTranslationMessages = {
     quickAdd: string;
     quickAddTitle: string;
     addMore: string;
+  };
+  notifications: {
+    title: string;
+    description: string;
+    total: string;
+    unread: string;
+    tabAll: string;
+    tabUnread: string;
+    tabRead: string;
+    tabsLabel: string;
+    markAllRead: string;
+    markRead: string;
+    unreadBadge: string;
+    resolved: string;
+    empty: string;
+    emptyDescription: string;
+    noFiltered: string;
+    clearAll: string;
+    clearing: string;
+    clearConfirmTitle: string;
+    clearConfirmDescription: string;
+    clearSuccess: string;
+    clearError: string;
+    groups: {
+      today: string;
+      yesterday: string;
+      thisWeek: string;
+      earlier: string;
+    };
   };
   activity: {
     title: string;
@@ -800,6 +836,8 @@ export type AppTranslationMessages = {
     income: string;
     expenses: string;
     savings: string;
+    overspent: string;
+    overspentBy: string;
     savingsRate: string;
     ofIncome: string;
     emptyTitle: string;
@@ -985,6 +1023,9 @@ export type AppTranslationMessages = {
     edit: string;
     delete: string;
     deleteConfirm: string;
+    deleteConfirmBulk: string;
+    bulkDeleteSuccess: string;
+    bulkDeleteError: string;
     export: string;
     exportCSV: string;
     exportPDF: string;
@@ -1422,6 +1463,7 @@ export type AppTranslationMessages = {
     entityDeleted: string;
     errorCreating: string;
     errorDeleting: string;
+    deleting: string;
     unexpectedError: string;
     back: string;
     lightMode: string;

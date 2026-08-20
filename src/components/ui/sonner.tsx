@@ -1,22 +1,15 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { type ComponentProps, useEffect, useState } from "react";
+import type { ComponentProps } from "react";
 import { Toaster as SonnerToaster } from "sonner";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 type ToasterProps = ComponentProps<typeof SonnerToaster>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px)");
-    const update = () => setIsMobile(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
+  const isMobile = useIsMobile();
 
   return (
     <SonnerToaster

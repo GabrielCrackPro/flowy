@@ -1,15 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/api/route-utils";
+import { withAuthenticatedRoute } from "@/lib/api/route-utils";
 import { createClient } from "@/lib/supabase/server";
 
-export async function POST(request: Request) {
-  const auth = await requireAuth();
-
-  if (auth instanceof NextResponse) {
-    return auth;
-  }
-
-  try {
+export const POST = withAuthenticatedRoute({
+  routeName: "account",
+  fallbackMessage: "Could not update password",
+  handler: async ({ auth, request }) => {
     const { currentPassword, newPassword } = await request.json();
 
     if (!currentPassword || !newPassword) {
@@ -49,11 +45,5 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ message: "Contraseña actualizada" });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { message: "Could not update password" },
-      { status: 500 },
-    );
-  }
-}
+  },
+});

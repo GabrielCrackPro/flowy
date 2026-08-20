@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { toast } from "@/components/shared/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useCloseWhenSettled } from "@/hooks/useCloseWhenSettled";
 import { useProfile } from "@/hooks/useProfile";
 import type { SpaceSummary } from "@/lib/api/space";
 import {
@@ -77,10 +78,16 @@ export function SpaceMembersList({
     toast.success(t("profile.spaces.codeCopied"));
   };
 
+  // Keep the confirm open (spinner + disabled buttons) while the removal is
+  // in flight, then close once it settles — the parent toasts the outcome.
+  const markRemovalStarted = useCloseWhenSettled(removePending, () =>
+    setRemoveTarget(null),
+  );
+
   const handleRemoveMember = () => {
     if (removeTarget) {
+      markRemovalStarted();
       onRemoveMember(removeTarget.userId);
-      setRemoveTarget(null);
     }
   };
 
@@ -256,6 +263,8 @@ export function SpaceMembersList({
         description={t("profile.spaces.removeMemberDescription")}
         confirmLabel={t("profile.spaces.removeMember")}
         cancelLabel={t("profile.spaces.cancel")}
+        loading={removePending}
+        closeOnConfirm={false}
         onConfirm={handleRemoveMember}
         variant="destructive"
       />

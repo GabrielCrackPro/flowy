@@ -1,31 +1,19 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-import {
-  handleApiError,
-  isAuthResponse,
-  noContent,
-  requireAuth,
-} from "@/lib/api/route-utils";
+import { noContent, withAuthenticatedRoute } from "@/lib/api/route-utils";
 import { updateProfileSchema, updateThemeSchema } from "@/lib/schemas/profile";
 import { ProfileService } from "@/lib/services/profiles";
 import { deleteAvatar } from "@/lib/services/storage";
 
 interface Params {
-  params: Promise<{
-    id: string;
-  }>;
+  id: string;
 }
 
-export async function GET(_: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
-    const profile = await ProfileService.getById(auth.id, id);
+export const GET = withAuthenticatedRoute<Params>({
+  routeName: "profile",
+  fallbackMessage: "Could not get profile",
+  handler: async ({ auth, params }) => {
+    const profile = await ProfileService.getById(auth.id, params.id);
 
     if (!profile) {
       return NextResponse.json(
@@ -35,20 +23,13 @@ export async function GET(_: NextRequest, { params }: Params) {
     }
 
     return NextResponse.json(profile);
-  } catch (error) {
-    return handleApiError(error, "Could not get profile");
-  }
-}
+  },
+});
 
-export async function PATCH(request: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
+export const PATCH = withAuthenticatedRoute<Params>({
+  routeName: "profile",
+  fallbackMessage: "Could not update profile",
+  handler: async ({ auth, request, params }) => {
     const body = await request.json();
 
     // Validate with the appropriate schema based on what fields are present
@@ -61,32 +42,27 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       ? updateThemeSchema.parse(body)
       : updateProfileSchema.parse(body);
 
-    const previous = await ProfileService.getById(auth.id, id);
-    const profile = await ProfileService.update(auth.id, id, validatedBody);
+    const previous = await ProfileService.getById(auth.id, params.id);
+    const profile = await ProfileService.update(
+      auth.id,
+      params.id,
+      validatedBody,
+    );
 
     if (previous?.avatarUrl && previous.avatarUrl !== profile.avatarUrl) {
       await deleteAvatar(previous.avatarUrl);
     }
 
     return NextResponse.json(profile);
-  } catch (error) {
-    return handleApiError(error, "Could not update profile");
-  }
-}
+  },
+});
 
-export async function DELETE(_: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
-    await ProfileService.delete(auth.id, id);
+export const DELETE = withAuthenticatedRoute<Params>({
+  routeName: "profile",
+  fallbackMessage: "Could not delete profile",
+  handler: async ({ auth, params }) => {
+    await ProfileService.delete(auth.id, params.id);
 
     return noContent();
-  } catch (error) {
-    return handleApiError(error, "Could not delete profile");
-  }
-}
+  },
+});

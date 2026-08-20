@@ -1,12 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
-import {
-  applyRateLimitHeaders,
-  handleApiError,
-  isAuthResponse,
-  requireAdmin,
-  withRateLimit,
-} from "@/lib/api/route-utils";
+import { withAdminRoute } from "@/lib/api/route-utils";
 import { StatusService } from "@/lib/services/status";
 
 const COMPONENT_IDS = ["api", "database", "auth", "push", "storage"] as const;
@@ -26,36 +20,22 @@ const createIncidentSchema = z.object({
  * Incident management for the status page. Admin-only (profile.role ===
  * "admin") — the status page itself stays public.
  */
-export async function GET(_request: NextRequest) {
-  const auth = await requireAdmin();
-  if (isAuthResponse(auth)) return auth;
-
-  const rateLimitResponse = await withRateLimit(auth.id, "statusIncident");
-  if (rateLimitResponse) return rateLimitResponse;
-
-  try {
+export const GET = withAdminRoute({
+  routeName: "statusIncident",
+  fallbackMessage: "Could not load incidents",
+  handler: async () => {
     const incidents = await StatusService.listIncidents();
-    const response = NextResponse.json({ incidents });
-    return applyRateLimitHeaders(response, auth.id, "statusIncident");
-  } catch (error) {
-    return handleApiError(error, "Could not load incidents");
-  }
-}
+    return NextResponse.json({ incidents });
+  },
+});
 
-export async function POST(request: NextRequest) {
-  const auth = await requireAdmin();
-  if (isAuthResponse(auth)) return auth;
-
-  const rateLimitResponse = await withRateLimit(auth.id, "statusIncident");
-  if (rateLimitResponse) return rateLimitResponse;
-
-  try {
+export const POST = withAdminRoute({
+  routeName: "statusIncident",
+  fallbackMessage: "Could not create incident",
+  handler: async ({ request }) => {
     const body = await request.json();
     const data = createIncidentSchema.parse(body);
     const incident = await StatusService.createIncident(data);
-    const response = NextResponse.json({ incident }, { status: 201 });
-    return applyRateLimitHeaders(response, auth.id, "statusIncident");
-  } catch (error) {
-    return handleApiError(error, "Could not create incident");
-  }
-}
+    return NextResponse.json({ incident }, { status: 201 });
+  },
+});

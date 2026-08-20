@@ -85,20 +85,26 @@ Every entity (transactions, budgets, goals, subscriptions, categories, comments,
 
 ### API route template (`src/app/api/{entity}/route.ts`)
 
-Every route handler follows this exact shape (see `src/app/api/transaction/route.ts`):
+Every authenticated route is wrapped by a shared boundary in `src/lib/api/route-utils.ts` that handles auth, rate limiting, error mapping, and rate-limit response headers — handlers never touch those concerns. Two wrappers exist:
 
-1. `const auth = await requireAuth();` then guard with `if (isAuthResponse(auth)) return auth;`
-2. `const rateLimitResponse = await withRateLimit(auth.id, "routeName");` — return it if non-null. Route name must exist in `src/lib/rate-limit.ts` `DEFAULT_RATE_LIMITS` (add one for new routes).
-3. Parse query/body and validate with the entity's Zod schema (`src/lib/schemas/*`); a `ZodError` → 400 with `error.issues`.
-4. Delegate to the service (`TransactionService.create(auth.id, data)`).
-5. Success responses get `applyRateLimitHeaders(response, auth.id, "routeName")`.
-6. All other errors → `handleApiError(error, fallbackMessage)`.
+- `withAuthenticatedRoute({ routeName, fallbackMessage?, handler })` — any logged-in user (see `src/app/api/transaction/route.ts`).
+- `withAdminRoute(...)` — same boundary but requires `profile.role === "admin"` (see `src/app/api/status/incidents/route.ts`).
 
-Error-to-status mapping for common domain messages lives in `DOMAIN_ERROR_STATUS` in `src/lib/api/route-utils.ts` (e.g. `"Transaction not found"` → 404). **Note:** many service error strings are hardcoded Spanish (e.g. `"Transacción no encontrada"`) while route fallbacks mix en/es — keep new user-facing strings in i18n resources, and add new domain messages to `DOMAIN_ERROR_STATUS` if they should map to a specific status.
+A handler's context is `{ auth, request, params, getContext }`:
+
+1. `auth` — the validated Supabase user (`User`).
+2. Parse query/body and validate with the entity's Zod schema (`src/lib/schemas/*`); a `ZodError` → 400 with `error.issues`. For dynamic routes, `params` is already resolved (typed via `withAuthenticatedRoute<{ id: string }>`).
+3. `getContext()` — lazily resolves the active-space membership (`RequestContext` with `userId`/`spaceId`/`spaceRole`) for space-scoped work. Call it only when the handler needs space context; every user has a personal space, so it never throws in practice.
+4. Delegate to the service (`TransactionService.create(auth.id, data, await getContext())`).
+5. Return a `NextResponse`; the wrapper adds rate-limit headers. Any thrown error (typed `AppError` or legacy domain string) is mapped by `handleApiError` using `fallbackMessage`.
+
+`routeName` must exist in `src/lib/rate-limit.ts` `DEFAULT_RATE_LIMITS` (add one for new routes; `default` is the permissive fallback bucket). Error-to-status mapping for common domain messages lives in `DOMAIN_ERROR_STATUS` in `src/lib/api/route-utils.ts` (e.g. `"Transaction not found"` → 404). **Note:** many service error strings are hardcoded Spanish (e.g. `"Transacción no encontrada"`) while route fallbacks mix en/es — keep new user-facing strings in i18n resources, and add new domain messages to `DOMAIN_ERROR_STATUS` if they should map to a specific status.
+
+Routes that don't fit the user boundary: **cron** routes (`cron/*`, CRON_SECRET bearer auth), **public** routes (`health`, `docs`, `status*` — IP rate-limited), and the **admin** routes (`admin/bootstrap|promote|demote` — wrapped, but still touch Prisma directly pending a shared `AdminService`).
 
 ### Services layer (`src/lib/services/*`)
 
-- Prisma client from `@/lib/prisma/client`; raw DB access only through services — routes never call Prisma directly.
+- Prisma client from `@/lib/prisma/client`; raw DB access only through services — entity routes never call Prisma directly (known exceptions: `admin/bootstrap|promote|demote` pending an `AdminService`, plus `cron/*`, `health`, and `status/summary`).
 - **Multi-tenancy is mandatory:** every query scopes by the user's active space via `SpaceService.getCurrent(userId)` → `spaceId` filter (personal data uses `spaceId: null`). Never query by `userId` alone.
 - Mutations set `updatedBy: userId` and record an audit entry: `ActivityService.record({ userId, type: "entity.action", entityType, entityId, metadata })` — types use lowercase snake (`transaction.created`, `transaction.updated`, `transaction.deleted`, `budget.created`, ...). Use `replaceEntityHistoryWithDeletion` on deletes.
 - Cross-entity validation lives in `src/lib/services/validators.ts` (e.g. `ensureUserCategory`).
@@ -123,7 +129,7 @@ Supabase `postgres_changes` channels per table, filtered by `space_id`. **Realti
 ### Auth
 
 - `middleware.ts` protects routes and uses `supabase.auth.getUser()` (server-side JWT validation) — **never switch to `getSession()`** for protection, it trusts the client token. Auth paths: `/auth/login`, `/auth/register`, `/auth/forgot`.
-- Route handlers re-validate via `requireAuth()` → `getCurrentUser()`.
+- Route handlers re-validate through the shared wrappers (`withAuthenticatedRoute`/`withAdminRoute`), which call `requireAuth()` → `getCurrentUser()` and `requireAdmin()` → profile role check.
 - Server clients: `src/lib/supabase/server.ts` (SSR cookie client), `src/lib/supabase/admin.ts` (service-role, server-only, no session persistence). Browser client in `src/lib/supabase/client.ts`.
 
 ### Errors & degradation (`src/lib/errors/*`)

@@ -1,50 +1,29 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-import {
-  handleApiError,
-  isAuthResponse,
-  noContent,
-  requireAuth,
-} from "@/lib/api/route-utils";
+import { noContent, withAuthenticatedRoute } from "@/lib/api/route-utils";
 import { updateCommentSchema } from "@/lib/schemas/comment";
 import { CommentService } from "@/lib/services/comments";
 
 interface Params {
-  params: Promise<{
-    id: string;
-  }>;
+  id: string;
 }
 
-export async function PATCH(request: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
+export const PATCH = withAuthenticatedRoute<Params>({
+  routeName: "comment",
+  fallbackMessage: "Could not update comment",
+  handler: async ({ auth, request, params }) => {
     const body = updateCommentSchema.parse(await request.json());
-    const comment = await CommentService.update(auth.id, id, body);
+    const comment = await CommentService.update(auth.id, params.id, body);
 
     return NextResponse.json(comment);
-  } catch (error) {
-    return handleApiError(error, "Could not update comment");
-  }
-}
+  },
+});
 
-export async function DELETE(_: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  try {
-    await CommentService.delete(auth.id, id);
+export const DELETE = withAuthenticatedRoute<Params>({
+  routeName: "comment",
+  fallbackMessage: "Could not delete comment",
+  handler: async ({ auth, params }) => {
+    await CommentService.delete(auth.id, params.id);
     return noContent();
-  } catch (error) {
-    return handleApiError(error, "Could not delete comment");
-  }
-}
+  },
+});
