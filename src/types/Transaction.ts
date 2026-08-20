@@ -57,6 +57,7 @@ export interface TransactionFilters {
   search?: string;
   page?: number;
   limit?: number;
+  cursor?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
@@ -67,4 +68,5 @@ export interface TransactionList {
   page: number;
   limit: number;
   totalPages: number;
+  nextCursor?: string;
 }

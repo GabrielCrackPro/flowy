@@ -77,6 +77,7 @@ export interface ErrorContext {
 }
 
 export class AppError extends Error {
+  public readonly code?: string;
   constructor(
     message: string,
     public category: ErrorCategory,
@@ -85,8 +86,10 @@ export class AppError extends Error {
     public context?: ErrorContext,
     public recoveryActions?: RecoveryAction[],
     public isRetryable: boolean = false,
+    code?: string,
   ) {
     super(message);
+    this.code = code;
     this.name = this.constructor.name;
     Error.captureStackTrace(this, this.constructor);
   }
@@ -94,6 +97,7 @@ export class AppError extends Error {
   toResponse() {
     return {
       message: this.message,
+      code: this.code,
       category: this.category,
       severity: this.severity,
       statusCode: this.statusCode,
@@ -103,6 +107,30 @@ export class AppError extends Error {
         primary: action.primary,
       })),
     };
+  }
+}
+
+export class DomainError extends AppError {
+  constructor(
+    code: string,
+    message: string,
+    statusCode: number,
+    category: ErrorCategory = statusCode === 404
+      ? ErrorCategory.NOT_FOUND
+      : statusCode === 403
+        ? ErrorCategory.AUTHORIZATION
+        : ErrorCategory.VALIDATION,
+  ) {
+    super(
+      message,
+      category,
+      ErrorSeverity.MEDIUM,
+      statusCode,
+      undefined,
+      undefined,
+      false,
+      code,
+    );
   }
 }
 

@@ -89,6 +89,14 @@ function getWebPushClient(): typeof webpush | null {
   return webpush;
 }
 
+export interface SaveSubscriptionInput {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  deviceName?: string;
+  installationType?: "pwa" | "browser";
+}
+
 export const PushService = {
   /** Whether VAPID keys are configured (used by the status page). */
   isConfigured(): boolean {
@@ -345,5 +353,137 @@ export const PushService = {
     }
 
     return { sent, removed };
+  },
+
+  /**
+   * Registers or refreshes a push subscription, transferring ownership if
+   * the endpoint was previously registered by another user.
+   */
+  async saveSubscription(
+    userId: string,
+    input: SaveSubscriptionInput,
+    userAgent: string | null,
+  ) {
+    const existing = await prisma.pushSubscription.findFirst({
+      where: { endpoint: input.endpoint },
+      select: { userId: true },
+    });
+    if (existing && existing.userId !== userId) {
+      return { conflict: true };
+    }
+
+    const subscription = await prisma.pushSubscription.upsert({
+      where: { endpoint: input.endpoint },
+      create: {
+        userId,
+        endpoint: input.endpoint,
+        p256dh: input.p256dh,
+        auth: input.auth,
+        userAgent: userAgent?.slice(0, 300) ?? null,
+        deviceName: input.deviceName ?? null,
+        installationType: input.installationType ?? null,
+        lastSeenAt: new Date(),
+      },
+      update: {
+        userId,
+        p256dh: input.p256dh,
+        auth: input.auth,
+        userAgent: userAgent?.slice(0, 300) ?? null,
+        ...(input.deviceName ? { deviceName: input.deviceName } : {}),
+        ...(input.installationType
+          ? { installationType: input.installationType }
+          : {}),
+        lastSeenAt: new Date(),
+      },
+    });
+
+    return { conflict: false, id: subscription.id };
+  },
+
+  async listSubscriptions(userId: string) {
+    return prisma.pushSubscription.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        endpoint: true,
+        userAgent: true,
+        deviceName: true,
+        installationType: true,
+        createdAt: true,
+        updatedAt: true,
+        lastSeenAt: true,
+        lastDeliveryAt: true,
+        lastDeliveryStatus: true,
+        failureCount: true,
+        lastFailureReason: true,
+      },
+      orderBy: { createdAt: "asc" },
+    });
+  },
+
+  async renameSubscription(
+    userId: string,
+    id: string,
+    deviceName: string,
+  ): Promise<boolean> {
+    const updated = await prisma.pushSubscription.updateMany({
+      where: { id, userId },
+      data: { deviceName },
+    });
+    return updated.count > 0;
+  },
+
+  async deleteSubscriptions(
+    userId: string,
+    options: { all?: boolean; stale?: boolean; endpoint?: string },
+  ) {
+    if (options.all) {
+      await prisma.pushSubscription.deleteMany({ where: { userId } });
+      return;
+    }
+
+    if (options.stale) {
+      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const result = await prisma.pushSubscription.deleteMany({
+        where: {
+          userId,
+          OR: [
+            { lastSeenAt: { lt: cutoff } },
+            { lastSeenAt: null, updatedAt: { lt: cutoff } },
+          ],
+        },
+      });
+      return result.count;
+    }
+
+    if (options.endpoint) {
+      await prisma.pushSubscription.deleteMany({
+        where: { endpoint: options.endpoint, userId },
+      });
+    }
+  },
+
+  async getDeliveryHistory(userId: string) {
+    const deliveries = await prisma.pushDelivery.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      select: {
+        id: true,
+        subscriptionId: true,
+        type: true,
+        component: true,
+        severity: true,
+        title: true,
+        status: true,
+        error: true,
+        createdAt: true,
+      },
+    });
+
+    return deliveries.map((delivery) => ({
+      ...delivery,
+      createdAt: delivery.createdAt.toISOString(),
+    }));
   },
 };

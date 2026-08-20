@@ -8,25 +8,24 @@ import type {
   UpdateSubscriptionInput,
 } from "@/types/Subscription";
 import { ActivityService } from "./activities";
+import type { RequestContext } from "./request-context";
+import { profileIdentity, subscriptionInclude } from "./selects";
 import { SpaceService } from "./spaces/space-service";
-
-const profileIdentity = {
-  id: true,
-  name: true,
-  email: true,
-  avatarUrl: true,
-} satisfies Prisma.ProfileSelect;
+import { SubscriptionRepository } from "./subscriptions/subscription-repository";
 
 export const SubscriptionService = {
-  async list(userId: string, filters?: SubscriptionFilters) {
+  async list(
+    userId: string,
+    filters?: SubscriptionFilters,
+    context?: RequestContext,
+  ) {
     const page = filters?.page ?? 1;
     const limit = filters?.limit ?? 50;
     const skip = (page - 1) * limit;
 
-    const activeSpace = await SpaceService.getCurrent(userId);
-    const where: Prisma.SubscriptionWhereInput = {
-      spaceId: activeSpace?.id ?? null,
-    };
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
+    const where: Prisma.SubscriptionWhereInput = { spaceId };
 
     if (filters?.active !== undefined) {
       where.active = filters.active;
@@ -39,14 +38,7 @@ export const SubscriptionService = {
     const [data, total] = await Promise.all([
       prisma.subscription.findMany({
         where,
-        include: {
-          user: {
-            select: profileIdentity,
-          },
-          updatedByProfile: {
-            select: profileIdentity,
-          },
-        },
+        include: subscriptionInclude,
         orderBy: {
           nextPayment: "asc",
         },
@@ -65,13 +57,11 @@ export const SubscriptionService = {
     };
   },
 
-  async get(userId: string, id: string) {
-    const activeSpace = await SpaceService.getCurrent(userId);
+  async get(userId: string, id: string, context?: RequestContext) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
     return prisma.subscription.findFirst({
-      where: {
-        id,
-        spaceId: activeSpace?.id ?? null,
-      },
+      where: { id, spaceId },
       include: {
         user: {
           select: profileIdentity,
@@ -83,13 +73,18 @@ export const SubscriptionService = {
     });
   },
 
-  async create(userId: string, data: CreateSubscriptionInput) {
-    const activeSpace = await SpaceService.getCurrent(userId);
+  async create(
+    userId: string,
+    data: CreateSubscriptionInput,
+    context?: RequestContext,
+  ) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
     const subscription = await prisma.subscription.create({
       data: {
         userId,
         updatedBy: userId,
-        spaceId: activeSpace?.id ?? null,
+        spaceId,
         merchant: data.merchant,
         amount: data.amount,
         billingCycle: data.billingCycle,
@@ -120,34 +115,39 @@ export const SubscriptionService = {
     return subscription;
   },
 
-  async update(userId: string, id: string, data: UpdateSubscriptionInput) {
-    const subscription = await this.get(userId, id);
+  async update(
+    userId: string,
+    id: string,
+    data: UpdateSubscriptionInput,
+    context?: RequestContext,
+  ) {
+    const subscription = await this.get(userId, id, context);
 
     if (!subscription) {
       throw new NotFoundError("Subscription not found");
     }
 
-    const updatedSubscription = await prisma.subscription.update({
-      where: {
-        id,
-      },
-      data: {
-        updatedBy: userId,
-        merchant: data.merchant,
-        amount: data.amount,
-        billingCycle: data.billingCycle,
-        nextPayment: toDateOnlyDatabaseValue(data.nextPayment),
-        active: data.active,
-      },
-      include: {
-        user: {
-          select: profileIdentity,
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
+    const updatedSubscription = await SubscriptionRepository.updateInSpace(
+      id,
+      spaceId,
+      {
+        data: {
+          updatedBy: userId,
+          merchant: data.merchant,
+          amount: data.amount,
+          billingCycle: data.billingCycle,
+          nextPayment: toDateOnlyDatabaseValue(data.nextPayment),
+          active: data.active,
         },
-        updatedByProfile: {
-          select: profileIdentity,
-        },
+        include: subscriptionInclude,
       },
-    });
+    );
+
+    if (!updatedSubscription) {
+      throw new NotFoundError("Subscription not found");
+    }
 
     await ActivityService.record({
       userId,
@@ -163,18 +163,19 @@ export const SubscriptionService = {
     return updatedSubscription;
   },
 
-  async delete(userId: string, id: string) {
-    const subscription = await this.get(userId, id);
+  async delete(userId: string, id: string, context?: RequestContext) {
+    const subscription = await this.get(userId, id, context);
 
     if (!subscription) {
       throw new NotFoundError("Subscription not found");
     }
 
-    await prisma.subscription.delete({
-      where: {
-        id,
-      },
-    });
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
+    const deleted = await SubscriptionRepository.deleteInSpace(id, spaceId);
+    if (!deleted) {
+      throw new NotFoundError("Subscription not found");
+    }
 
     await ActivityService.replaceEntityHistoryWithDeletion({
       userId,

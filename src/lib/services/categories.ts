@@ -1,4 +1,3 @@
-import type { Prisma } from "@prisma/client";
 import { NotFoundError } from "@/lib/errors/error-types";
 import { prisma } from "@/lib/prisma/client";
 import type {
@@ -6,14 +5,10 @@ import type {
   UpdateCategoryInput,
 } from "@/types/Category";
 import { ActivityService } from "./activities";
+import { CategoryRepository } from "./categories/category-repository";
+import type { RequestContext } from "./request-context";
+import { categoryInclude, profileIdentity } from "./selects";
 import { SpaceService } from "./spaces/space-service";
-
-const profileIdentity = {
-  id: true,
-  name: true,
-  email: true,
-  avatarUrl: true,
-} satisfies Prisma.ProfileSelect;
 
 /**
  * Default categories seeded on first signup so new users don't land on
@@ -104,13 +99,9 @@ const DEFAULT_CATEGORIES: Record<
   ],
 };
 
-async function ensureCategory(userId: string, id: string) {
-  const activeSpace = await SpaceService.getCurrent(userId);
+async function ensureCategory(id: string, spaceId: string | null) {
   const category = await prisma.category.findFirst({
-    where: {
-      id,
-      spaceId: activeSpace?.id ?? null,
-    },
+    where: { id, spaceId },
   });
 
   if (!category) {
@@ -163,19 +154,13 @@ export const CategoryService = {
     return { seeded: true, count: defaults.length };
   },
 
-  async list(userId: string) {
-    const activeSpace = await SpaceService.getCurrent(userId);
+  async list(userId: string, context?: RequestContext) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
     return prisma.category.findMany({
-      where: {
-        spaceId: activeSpace?.id ?? null,
-      },
+      where: { spaceId },
       include: {
-        user: {
-          select: profileIdentity,
-        },
-        updatedByProfile: {
-          select: profileIdentity,
-        },
+        ...categoryInclude,
       },
       orderBy: {
         name: "asc",
@@ -183,31 +168,26 @@ export const CategoryService = {
     });
   },
 
-  async getById(userId: string, id: string) {
-    const activeSpace = await SpaceService.getCurrent(userId);
+  async getById(userId: string, id: string, context?: RequestContext) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
     return prisma.category.findFirst({
-      where: {
-        id,
-        spaceId: activeSpace?.id ?? null,
-      },
+      where: { id, spaceId },
       include: {
-        user: {
-          select: profileIdentity,
-        },
-        updatedByProfile: {
-          select: profileIdentity,
-        },
+        ...categoryInclude,
       },
     });
   },
 
-  async create(userId: string, data: CreateCategoryInput) {
-    const activeSpace = await SpaceService.getCurrent(userId);
+  async create(
+    userId: string,
+    data: CreateCategoryInput,
+    context?: RequestContext,
+  ) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
     const exists = await prisma.category.findFirst({
-      where: {
-        spaceId: activeSpace?.id ?? null,
-        name: data.name,
-      },
+      where: { spaceId, name: data.name },
     });
 
     if (exists) {
@@ -218,19 +198,14 @@ export const CategoryService = {
       data: {
         userId,
         updatedBy: userId,
-        spaceId: activeSpace?.id ?? null,
+        spaceId,
         name: data.name,
         icon: data.icon,
         color: data.color,
         type: data.type,
       },
       include: {
-        user: {
-          select: profileIdentity,
-        },
-        updatedByProfile: {
-          select: profileIdentity,
-        },
+        ...categoryInclude,
       },
     });
 
@@ -248,18 +223,19 @@ export const CategoryService = {
     return category;
   },
 
-  async update(userId: string, id: string, data: UpdateCategoryInput) {
-    await ensureCategory(userId, id);
+  async update(
+    userId: string,
+    id: string,
+    data: UpdateCategoryInput,
+    context?: RequestContext,
+  ) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
+    await ensureCategory(id, spaceId);
 
     if (data.name) {
       const duplicated = await prisma.category.findFirst({
-        where: {
-          spaceId: (await SpaceService.getCurrent(userId))?.id ?? null,
-          name: data.name,
-          NOT: {
-            id,
-          },
-        },
+        where: { spaceId, name: data.name, NOT: { id } },
       });
 
       if (duplicated) {
@@ -267,10 +243,7 @@ export const CategoryService = {
       }
     }
 
-    const category = await prisma.category.update({
-      where: {
-        id,
-      },
+    const category = await CategoryRepository.updateInSpace(id, spaceId, {
       data: {
         ...data,
         updatedBy: userId,
@@ -284,6 +257,10 @@ export const CategoryService = {
         },
       },
     });
+
+    if (!category) {
+      throw new NotFoundError("Category not found");
+    }
 
     await ActivityService.record({
       userId,
@@ -299,14 +276,15 @@ export const CategoryService = {
     return category;
   },
 
-  async delete(userId: string, id: string) {
-    const category = await ensureCategory(userId, id);
+  async delete(userId: string, id: string, context?: RequestContext) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
+    const category = await ensureCategory(id, spaceId);
 
-    await prisma.category.delete({
-      where: {
-        id,
-      },
-    });
+    const deleted = await CategoryRepository.deleteInSpace(id, spaceId);
+    if (!deleted) {
+      throw new NotFoundError("Category not found");
+    }
 
     await ActivityService.replaceEntityHistoryWithDeletion({
       userId,

@@ -13,4 +13,5 @@ export interface ActivityFilters {
   type?: string;
   entityType?: string;
   limit?: number;
+  cursor?: string;
 }

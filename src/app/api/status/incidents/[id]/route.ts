@@ -1,12 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
-import {
-  applyRateLimitHeaders,
-  handleApiError,
-  isAuthResponse,
-  requireAdmin,
-  withRateLimit,
-} from "@/lib/api/route-utils";
+import { noContent, withAdminRoute } from "@/lib/api/route-utils";
 import { StatusService } from "@/lib/services/status";
 
 const updateIncidentSchema = z.object({
@@ -14,67 +8,38 @@ const updateIncidentSchema = z.object({
   message: z.string().max(2000).optional().nullable(),
 });
 
+interface Params {
+  id: string;
+}
+
 /** Updates an incident's status and appends a timeline entry. */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const auth = await requireAdmin();
-  if (isAuthResponse(auth)) return auth;
-
-  const rateLimitResponse = await withRateLimit(auth.id, "statusIncident");
-  if (rateLimitResponse) return rateLimitResponse;
-
-  try {
-    const { id } = await params;
+export const PATCH = withAdminRoute<Params>({
+  routeName: "statusIncident",
+  fallbackMessage: "Could not update incident",
+  handler: async ({ request, params }) => {
     const body = await request.json();
     const data = updateIncidentSchema.parse(body);
-    const incident = await StatusService.updateIncident(id, data);
-    const response = NextResponse.json({ incident });
-    return applyRateLimitHeaders(response, auth.id, "statusIncident");
-  } catch (error) {
-    return handleApiError(error, "Could not update incident");
-  }
-}
+    const incident = await StatusService.updateIncident(params.id, data);
+    return NextResponse.json({ incident });
+  },
+});
 
 /** Publishes a draft incident so it appears on the public status page. */
-export async function POST(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const auth = await requireAdmin();
-  if (isAuthResponse(auth)) return auth;
-
-  const rateLimitResponse = await withRateLimit(auth.id, "statusIncident");
-  if (rateLimitResponse) return rateLimitResponse;
-
-  try {
-    const { id } = await params;
-    const incident = await StatusService.publishIncident(id);
-    const response = NextResponse.json({ incident });
-    return applyRateLimitHeaders(response, auth.id, "statusIncident");
-  } catch (error) {
-    return handleApiError(error, "Could not publish incident");
-  }
-}
+export const POST = withAdminRoute<Params>({
+  routeName: "statusIncident",
+  fallbackMessage: "Could not publish incident",
+  handler: async ({ params }) => {
+    const incident = await StatusService.publishIncident(params.id);
+    return NextResponse.json({ incident });
+  },
+});
 
 /** Deletes an incident entirely (including its timeline). */
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const auth = await requireAdmin();
-  if (isAuthResponse(auth)) return auth;
-
-  const rateLimitResponse = await withRateLimit(auth.id, "statusIncident");
-  if (rateLimitResponse) return rateLimitResponse;
-
-  try {
-    const { id } = await params;
-    await StatusService.deleteIncident(id);
-    const response = new NextResponse(null, { status: 204 });
-    return applyRateLimitHeaders(response, auth.id, "statusIncident");
-  } catch (error) {
-    return handleApiError(error, "Could not delete incident");
-  }
-}
+export const DELETE = withAdminRoute<Params>({
+  routeName: "statusIncident",
+  fallbackMessage: "Could not delete incident",
+  handler: async ({ params }) => {
+    await StatusService.deleteIncident(params.id);
+    return noContent();
+  },
+});

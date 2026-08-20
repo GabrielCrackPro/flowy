@@ -11,4 +11,5 @@ export interface SearchResponse {
   query: string;
   results: SearchResultItem[];
   total: number;
+  nextCursor?: string;
 }

@@ -98,6 +98,12 @@ export const DEFAULT_RATE_LIMITS: Record<string, RateLimitConfig> = {
     window: getEnvNumber("RATE_LIMIT_PUSH_SUBSCRIPTION_WINDOW", 120 * 1000),
   },
 
+  // Space management — create/join/rename/delete are sensitive writes
+  space: {
+    requests: getEnvNumber("RATE_LIMIT_SPACE_REQUESTS", 20),
+    window: getEnvNumber("RATE_LIMIT_SPACE_WINDOW", 120 * 1000),
+  },
+
   // File uploads are heavier payloads — stricter than plain writes
   upload: {
     requests: getEnvNumber("RATE_LIMIT_UPLOAD_REQUESTS", 10),

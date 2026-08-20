@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import {
   AuthorizationError,
   NotFoundError,
@@ -17,7 +18,7 @@ function slugify(value: string) {
 }
 
 function buildJoinCode() {
-  return Math.random().toString(36).slice(2, 8).toUpperCase();
+  return randomBytes(4).toString("hex").slice(0, 6).toUpperCase();
 }
 
 export const SpaceService = {

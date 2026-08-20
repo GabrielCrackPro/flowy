@@ -194,6 +194,61 @@ export const ProfileService = {
     });
   },
 
+  async getPushPreferences(userId: string) {
+    const profile = await prisma.profile.findUnique({
+      where: { id: userId },
+      select: { pushPreferences: true },
+    });
+
+    return { preferences: profile?.pushPreferences ?? [] };
+  },
+
+  async updatePushPreferences(userId: string, preferences: string[]) {
+    await prisma.profile.update({
+      where: { id: userId },
+      data: { pushPreferences: preferences },
+    });
+
+    return { ok: true, preferences };
+  },
+
+  async getStatusPreferences(userId: string) {
+    const profile = await prisma.profile.findUnique({
+      where: { id: userId },
+      select: {
+        statusAlertsEnabled: true,
+        statusAlertComponents: true,
+        statusAlertSeverities: true,
+      },
+    });
+
+    return {
+      enabled: profile?.statusAlertsEnabled ?? true,
+      components: profile?.statusAlertComponents ?? [],
+      severities: profile?.statusAlertSeverities ?? [],
+    };
+  },
+
+  async updateStatusPreferences(
+    userId: string,
+    data: {
+      enabled: boolean;
+      components: string[];
+      severities: string[];
+    },
+  ) {
+    await prisma.profile.update({
+      where: { id: userId },
+      data: {
+        statusAlertsEnabled: data.enabled,
+        statusAlertComponents: data.components,
+        statusAlertSeverities: data.severities,
+      },
+    });
+
+    return { ok: true, ...data };
+  },
+
   async deleteAccount(userId: string) {
     const profile = await prisma.profile.findUnique({
       where: { id: userId },

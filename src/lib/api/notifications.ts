@@ -35,4 +35,8 @@ export const notificationsApi = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+  clearAll: () =>
+    authenticatedRequest<{ deletedCount: number }>("/api/notifications", {
+      method: "DELETE",
+    }),
 };

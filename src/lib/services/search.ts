@@ -3,12 +3,22 @@ import type { SearchResponse, SearchResultItem } from "@/types/SearchResult";
 import { SpaceService } from "./spaces/space-service";
 
 export const SearchService = {
-  async search(userId: string, query: string): Promise<SearchResponse> {
+  async search(
+    userId: string,
+    query: string,
+    cursor?: string,
+  ): Promise<SearchResponse> {
     if (query.length < 2) {
       return { query, results: [], total: 0 };
     }
 
     const activeSpace = await SpaceService.getCurrent(userId);
+    const spaceId = activeSpace?.id ?? null;
+    const cursorDate = cursor ? new Date(cursor) : undefined;
+    const cursorFilter =
+      cursorDate && !Number.isNaN(cursorDate.getTime())
+        ? { createdAt: { lt: cursorDate } }
+        : {};
 
     const results: SearchResultItem[] = [];
 
@@ -16,7 +26,8 @@ export const SearchService = {
       await Promise.all([
         prisma.transaction.findMany({
           where: {
-            spaceId: activeSpace?.id ?? null,
+            spaceId,
+            ...cursorFilter,
             OR: [
               { description: { contains: query, mode: "insensitive" } },
               { notes: { contains: query, mode: "insensitive" } },
@@ -40,19 +51,21 @@ export const SearchService = {
             },
           },
           take: 5,
-          orderBy: { date: "desc" },
+          orderBy: { createdAt: "desc" },
         }),
         prisma.category.findMany({
           where: {
-            spaceId: activeSpace?.id ?? null,
+            spaceId,
+            ...cursorFilter,
             name: { contains: query, mode: "insensitive" },
           },
           take: 5,
-          orderBy: { name: "asc" },
+          orderBy: { createdAt: "desc" },
         }),
         prisma.budget.findMany({
           where: {
-            spaceId: activeSpace?.id ?? null,
+            spaceId,
+            ...cursorFilter,
             category: {
               name: { contains: query, mode: "insensitive" },
             },
@@ -61,10 +74,12 @@ export const SearchService = {
             category: true,
           },
           take: 5,
+          orderBy: { createdAt: "desc" },
         }),
         prisma.goal.findMany({
           where: {
-            spaceId: activeSpace?.id ?? null,
+            spaceId,
+            ...cursorFilter,
             title: { contains: query, mode: "insensitive" },
           },
           take: 5,
@@ -72,16 +87,30 @@ export const SearchService = {
         }),
         prisma.subscription.findMany({
           where: {
-            spaceId: activeSpace?.id ?? null,
+            spaceId,
+            ...cursorFilter,
             OR: [
               { merchant: { contains: query, mode: "insensitive" } },
               { billingCycle: { contains: query, mode: "insensitive" } },
             ],
           },
           take: 5,
-          orderBy: { nextPayment: "asc" },
+          orderBy: { createdAt: "desc" },
         }),
       ]);
+
+    const resultDates = [
+      ...transactions.map((item) => item.createdAt),
+      ...categories.map((item) => item.createdAt),
+      ...budgets.map((item) => item.createdAt),
+      ...goals.map((item) => item.createdAt),
+      ...subscriptions.map((item) => item.createdAt),
+    ];
+    const nextCursor = resultDates.length
+      ? resultDates
+          .reduce((min, date) => (date < min ? date : min))
+          .toISOString()
+      : undefined;
 
     results.push(
       ...transactions.map((t) => ({
@@ -129,6 +158,11 @@ export const SearchService = {
       })),
     );
 
-    return { query, results, total: results.length };
+    return {
+      query,
+      results,
+      total: results.length,
+      ...(nextCursor ? { nextCursor } : {}),
+    };
   },
 };

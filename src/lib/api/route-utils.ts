@@ -18,6 +18,10 @@ import {
   getRateLimitStatus,
   RATE_LIMIT_ENABLED,
 } from "@/lib/rate-limit";
+import {
+  createRequestContext,
+  type RequestContext,
+} from "@/lib/services/request-context";
 
 const DOMAIN_ERROR_STATUS: Record<string, number> = {
   "Category not found": 404,
@@ -126,7 +130,7 @@ export function handleApiError(error: unknown, fallbackMessage: string) {
     return response;
   }
 
-  // Handle domain-specific errors with custom status codes
+  // Handle legacy domain errors while services migrate to typed errors.
   if (error instanceof Error) {
     const status = DOMAIN_ERROR_STATUS[error.message];
     if (status) {
@@ -159,6 +163,73 @@ export function handleApiError(error: unknown, fallbackMessage: string) {
 
 export function noContent() {
   return new NextResponse(null, { status: 204 });
+}
+
+export interface AuthenticatedRouteContext<TParams = unknown> {
+  auth: User;
+  request: Request;
+  params: TParams;
+  /** Lazily resolved active-space membership for the current user. */
+  getContext: () => Promise<RequestContext>;
+}
+
+type RouteGuard = () => Promise<User | NextResponse>;
+
+export interface RouteBoundaryOptions<TParams> {
+  routeName: string;
+  /** Fallback message for unexpected errors (default: generic). */
+  fallbackMessage?: string;
+  handler: (
+    context: AuthenticatedRouteContext<TParams>,
+  ) => Promise<NextResponse>;
+}
+
+/**
+ * Shared route boundary for auth, rate limits, errors, and response headers.
+ * The guard (user or admin) is the only difference between the two wrappers.
+ */
+function withGuardedRoute<TParams = unknown>(
+  guard: RouteGuard,
+  options: RouteBoundaryOptions<TParams>,
+) {
+  return async (
+    request: Request,
+    routeContext?: { params: Promise<TParams> },
+  ): Promise<NextResponse> => {
+    const auth = await guard();
+    if (isAuthResponse(auth)) return auth;
+
+    const rateLimitResponse = await withRateLimit(auth.id, options.routeName);
+    if (rateLimitResponse) return rateLimitResponse;
+
+    try {
+      const response = await options.handler({
+        auth,
+        request,
+        params: routeContext ? await routeContext.params : ({} as TParams),
+        getContext: () => createRequestContext(auth.id),
+      });
+      return applyRateLimitHeaders(response, auth.id, options.routeName);
+    } catch (error) {
+      return handleApiError(
+        error,
+        options.fallbackMessage ?? "Request could not be completed",
+      );
+    }
+  };
+}
+
+export function withAuthenticatedRoute<TParams = unknown>(
+  options: RouteBoundaryOptions<TParams>,
+) {
+  return withGuardedRoute(requireAuth, options);
+}
+
+/** Same boundary as withAuthenticatedRoute but requires an admin profile role. */
+export function withAdminRoute<TParams = unknown>(
+  options: RouteBoundaryOptions<TParams>,
+) {
+  return withGuardedRoute(requireAdmin, options);
 }
 
 /**

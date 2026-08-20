@@ -1,13 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import {
-  applyRateLimitHeaders,
-  handleApiError,
-  isAuthResponse,
-  requireAdmin,
-  withRateLimit,
-} from "@/lib/api/route-utils";
+import { withAdminRoute } from "@/lib/api/route-utils";
 import { prisma } from "@/lib/prisma/client";
 import { ActivityService } from "@/lib/services/activities";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -21,18 +15,10 @@ const promoteSchema = z.object({
  * existing admin can call this, and the UI for it renders only for admins.
  * Records an audit activity so promotions are traceable.
  */
-export async function POST(request: Request) {
-  const auth = await requireAdmin();
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  const rateLimitResponse = await withRateLimit(auth.id, "adminPromote");
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
-  try {
+export const POST = withAdminRoute({
+  routeName: "adminPromote",
+  fallbackMessage: "Could not promote user",
+  handler: async ({ auth, request }) => {
     const body = (await request.json()) as unknown;
     const { email } = promoteSchema.parse(body);
 
@@ -90,9 +76,6 @@ export async function POST(request: Request) {
       skipSpaceFilter: true,
     });
 
-    const response = NextResponse.json({ message: "User promoted to admin" });
-    return applyRateLimitHeaders(response, auth.id, "adminPromote");
-  } catch (error) {
-    return handleApiError(error, "Could not promote user");
-  }
-}
+    return NextResponse.json({ message: "User promoted to admin" });
+  },
+});

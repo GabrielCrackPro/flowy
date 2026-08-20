@@ -8,8 +8,10 @@ import type {
   UpdateTransactionInput,
 } from "@/types/Transaction";
 import { ActivityService } from "./activities";
+import type { RequestContext } from "./request-context";
 import { SpaceService } from "./spaces/space-service";
 import { deleteReceiptIfUnreferenced } from "./storage";
+import { TransactionRepository } from "./transactions/transaction-repository";
 import { ensureUserCategory } from "./validators";
 
 type JoinTags<T> = T extends Array<{ category: infer C }> ? C : never;
@@ -48,11 +50,14 @@ function withTags<
 }
 
 export const TransactionService = {
-  async list(userId: string, filters?: TransactionFilters) {
-    const activeSpace = await SpaceService.getCurrent(userId);
-    const where: Prisma.TransactionWhereInput = {
-      spaceId: activeSpace?.id ?? null,
-    };
+  async list(
+    userId: string,
+    filters?: TransactionFilters,
+    context?: RequestContext,
+  ) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
+    const where: Prisma.TransactionWhereInput = { spaceId };
 
     if (filters?.type) {
       where.type = filters.type;
@@ -103,6 +108,38 @@ export const TransactionService = {
       }
     }
 
+    let cursorDate: Date | undefined;
+    let cursorCreatedAt: Date | undefined;
+    let cursorId: string | undefined;
+    if (filters?.cursor) {
+      const [encodedDate, encodedCreatedAt, encodedId] =
+        filters.cursor.split("|");
+      const parsedDate = new Date(encodedDate);
+      const parsedCreatedAt = new Date(encodedCreatedAt);
+      if (
+        !Number.isNaN(parsedDate.getTime()) &&
+        !Number.isNaN(parsedCreatedAt.getTime()) &&
+        encodedId
+      ) {
+        cursorDate = parsedDate;
+        cursorCreatedAt = parsedCreatedAt;
+        cursorId = encodedId;
+        where.AND = [
+          {
+            OR: [
+              { date: { lt: parsedDate } },
+              { date: parsedDate, createdAt: { lt: parsedCreatedAt } },
+              {
+                date: parsedDate,
+                createdAt: parsedCreatedAt,
+                id: { lt: encodedId },
+              },
+            ],
+          },
+        ];
+      }
+    }
+
     if (filters?.search) {
       where.OR = [
         {
@@ -129,6 +166,9 @@ export const TransactionService = {
     const sortOrder = filters?.sortOrder ?? "desc";
 
     const orderBy: Prisma.TransactionOrderByWithRelationInput[] = [];
+    if (cursorDate && cursorCreatedAt && cursorId) {
+      orderBy.push({ date: "desc" }, { createdAt: "desc" }, { id: "desc" });
+    }
 
     if (sortBy === "date") {
       orderBy.push({ date: sortOrder });
@@ -181,16 +221,19 @@ export const TransactionService = {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
+      ...(data.length > 0
+        ? {
+            nextCursor: `${data[data.length - 1].date?.toISOString() ?? ""}|${data[data.length - 1].createdAt.toISOString()}|${data[data.length - 1].id}`,
+          }
+        : {}),
     };
   },
 
-  async get(userId: string, id: string) {
-    const activeSpace = await SpaceService.getCurrent(userId);
+  async get(userId: string, id: string, context?: RequestContext) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
     const transaction = await prisma.transaction.findFirst({
-      where: {
-        id,
-        spaceId: activeSpace?.id ?? null,
-      },
+      where: { id, spaceId },
       include: {
         tags: {
           include: {
@@ -216,19 +259,24 @@ export const TransactionService = {
       : null;
   },
 
-  async create(userId: string, data: CreateTransactionInput) {
+  async create(
+    userId: string,
+    data: CreateTransactionInput,
+    context?: RequestContext,
+  ) {
     if (data.categoryIds?.length) {
       for (const categoryId of data.categoryIds) {
         await ensureUserCategory(userId, categoryId);
       }
     }
 
-    const activeSpace = await SpaceService.getCurrent(userId);
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
     const transaction = await prisma.transaction.create({
       data: {
         userId,
         updatedBy: userId,
-        spaceId: activeSpace?.id ?? null,
+        spaceId,
         type: data.type,
         amount: data.amount,
         description: data.description,
@@ -279,9 +327,15 @@ export const TransactionService = {
     return { ...withTags(transaction), budgetId: transaction.budgetId };
   },
 
-  async update(userId: string, id: string, data: UpdateTransactionInput) {
-    const activeSpace = await SpaceService.getCurrent(userId);
-    const existing = await this.get(userId, id);
+  async update(
+    userId: string,
+    id: string,
+    data: UpdateTransactionInput,
+    context?: RequestContext,
+  ) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
+    const existing = await this.get(userId, id, context);
 
     if (!existing) {
       throw new NotFoundError("Transaction not found");
@@ -294,13 +348,10 @@ export const TransactionService = {
     }
 
     const previousReceiptUrl = existing.receiptUrl;
-    const transaction = await prisma.transaction.update({
-      where: {
-        id,
-      },
+    const transaction = await TransactionRepository.updateInSpace(id, spaceId, {
       data: {
         updatedBy: userId,
-        spaceId: activeSpace?.id ?? null,
+        spaceId,
         type: data.type,
         amount: data.amount,
         description: data.description,
@@ -308,7 +359,9 @@ export const TransactionService = {
           data.categoryIds !== undefined
             ? {
                 deleteMany: {},
-                create: data.categoryIds.map((categoryId) => ({ categoryId })),
+                create: data.categoryIds.map((categoryId) => ({
+                  categoryId,
+                })),
               }
             : undefined,
         paymentMethod: data.paymentMethod,
@@ -342,6 +395,10 @@ export const TransactionService = {
       },
     });
 
+    if (!transaction) {
+      throw new NotFoundError("Transaction not found");
+    }
+
     if (
       previousReceiptUrl &&
       data.receiptUrl !== undefined &&
@@ -365,18 +422,19 @@ export const TransactionService = {
     return { ...withTags(transaction), budgetId: transaction.budgetId };
   },
 
-  async delete(userId: string, id: string) {
-    const transaction = await this.get(userId, id);
+  async delete(userId: string, id: string, context?: RequestContext) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
+    const transaction = await this.get(userId, id, context);
 
     if (!transaction) {
       throw new NotFoundError("Transaction not found");
     }
 
-    await prisma.transaction.delete({
-      where: {
-        id,
-      },
-    });
+    const deleted = await TransactionRepository.deleteInSpace(id, spaceId);
+    if (!deleted) {
+      throw new NotFoundError("Transaction not found");
+    }
 
     await cleanupReceipt(transaction.receiptUrl);
 
@@ -397,18 +455,16 @@ export const TransactionService = {
     };
   },
 
-  async bulkDelete(userId: string, ids: string[]) {
+  async bulkDelete(userId: string, ids: string[], context?: RequestContext) {
     if (!ids || ids.length === 0) {
       throw new Error("No se proporcionaron IDs para eliminar");
     }
 
     // Verify all transactions belong to the user
-    const activeSpace = await SpaceService.getCurrent(userId);
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
     const transactions = await prisma.transaction.findMany({
-      where: {
-        id: { in: ids },
-        spaceId: activeSpace?.id ?? null,
-      },
+      where: { id: { in: ids }, spaceId },
     });
 
     if (transactions.length !== ids.length) {
@@ -416,12 +472,13 @@ export const TransactionService = {
     }
 
     // Delete all transactions
-    await prisma.transaction.deleteMany({
-      where: {
-        id: { in: ids },
-        spaceId: activeSpace?.id ?? null,
-      },
-    });
+    const deletedCount = await TransactionRepository.deleteManyInSpace(
+      ids,
+      spaceId,
+    );
+    if (deletedCount !== ids.length) {
+      throw new Error("Some transactions are outside the active space");
+    }
 
     const receiptUrls = [
       ...new Set(

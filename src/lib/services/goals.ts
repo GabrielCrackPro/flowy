@@ -8,23 +8,10 @@ import type {
   UpdateGoalInput,
 } from "@/types/Goal";
 import { ActivityService } from "./activities";
+import { GoalRepository } from "./goals/goal-repository";
+import type { RequestContext } from "./request-context";
+import { goalInclude } from "./selects";
 import { SpaceService } from "./spaces/space-service";
-
-const profileIdentity = {
-  id: true,
-  name: true,
-  email: true,
-  avatarUrl: true,
-} satisfies Prisma.ProfileSelect;
-
-const goalInclude = {
-  user: {
-    select: profileIdentity,
-  },
-  updatedByProfile: {
-    select: profileIdentity,
-  },
-} satisfies Prisma.GoalInclude;
 
 type GoalResult = Prisma.GoalGetPayload<{ include: typeof goalInclude }>;
 
@@ -42,15 +29,14 @@ function serializeGoal(goal: GoalResult) {
 }
 
 export const GoalService = {
-  async list(userId: string, filters?: GoalFilters) {
+  async list(userId: string, filters?: GoalFilters, context?: RequestContext) {
     const page = filters?.page ?? 1;
     const limit = filters?.limit ?? 50;
-    const skip = (page - 1) * limit;
+    const skip = filters?.completed === undefined ? (page - 1) * limit : 0;
 
-    const activeSpace = await SpaceService.getCurrent(userId);
-    const where: Prisma.GoalWhereInput = {
-      spaceId: activeSpace?.id ?? null,
-    };
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
+    const where: Prisma.GoalWhereInput = { spaceId };
 
     const [goals, total] = await Promise.all([
       prisma.goal.findMany({
@@ -60,7 +46,7 @@ export const GoalService = {
           createdAt: "desc",
         },
         skip,
-        take: limit,
+        take: filters?.completed === undefined ? limit : undefined,
       }),
       prisma.goal.count({ where }),
     ]);
@@ -78,34 +64,44 @@ export const GoalService = {
       }
     }
 
+    const filteredTotal =
+      filters?.completed === undefined ? total : filteredGoals.length;
+    const pagedGoals =
+      filters?.completed === undefined
+        ? filteredGoals
+        : filteredGoals.slice((page - 1) * limit, page * limit);
+
     return {
-      data: filteredGoals.map(serializeGoal),
-      total,
+      data: pagedGoals.map(serializeGoal),
+      total: filteredTotal,
       page,
       limit,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(filteredTotal / limit),
     };
   },
 
-  async get(userId: string, id: string) {
-    const activeSpace = await SpaceService.getCurrent(userId);
+  async get(userId: string, id: string, context?: RequestContext) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
     const goal = await prisma.goal.findFirst({
-      where: {
-        id,
-        spaceId: activeSpace?.id ?? null,
-      },
+      where: { id, spaceId },
       include: goalInclude,
     });
     return goal ? serializeGoal(goal) : null;
   },
 
-  async create(userId: string, data: CreateGoalInput) {
-    const activeSpace = await SpaceService.getCurrent(userId);
+  async create(
+    userId: string,
+    data: CreateGoalInput,
+    context?: RequestContext,
+  ) {
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
     const goal = await prisma.goal.create({
       data: {
         userId,
         updatedBy: userId,
-        spaceId: activeSpace?.id ?? null,
+        spaceId,
         title: data.title,
         targetAmount: data.targetAmount,
         savedAmount: data.savedAmount ?? 0,
@@ -128,8 +124,13 @@ export const GoalService = {
     return serializeGoal(goal);
   },
 
-  async update(userId: string, id: string, data: UpdateGoalInput) {
-    const goal = await this.get(userId, id);
+  async update(
+    userId: string,
+    id: string,
+    data: UpdateGoalInput,
+    context?: RequestContext,
+  ) {
+    const goal = await this.get(userId, id, context);
 
     if (!goal) {
       throw new NotFoundError("Goal not found");
@@ -152,13 +153,16 @@ export const GoalService = {
       updateData.deadline = toDateOnlyDatabaseValue(data.deadline);
     }
 
-    const updatedGoal = await prisma.goal.update({
-      where: {
-        id,
-      },
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
+    const updatedGoal = await GoalRepository.updateInSpace(id, spaceId, {
       data: updateData,
       include: goalInclude,
     });
+
+    if (!updatedGoal) {
+      throw new NotFoundError("Goal not found");
+    }
 
     await ActivityService.record({
       userId,
@@ -174,18 +178,19 @@ export const GoalService = {
     return serializeGoal(updatedGoal);
   },
 
-  async delete(userId: string, id: string) {
-    const goal = await this.get(userId, id);
+  async delete(userId: string, id: string, context?: RequestContext) {
+    const goal = await this.get(userId, id, context);
 
     if (!goal) {
       throw new NotFoundError("Goal not found");
     }
 
-    await prisma.goal.delete({
-      where: {
-        id,
-      },
-    });
+    const spaceId =
+      context?.spaceId ?? (await SpaceService.getCurrent(userId))?.id ?? null;
+    const deleted = await GoalRepository.deleteInSpace(id, spaceId);
+    if (!deleted) {
+      throw new NotFoundError("Goal not found");
+    }
 
     await ActivityService.replaceEntityHistoryWithDeletion({
       userId,

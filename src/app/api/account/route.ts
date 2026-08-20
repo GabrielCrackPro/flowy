@@ -1,10 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  applyRateLimitHeaders,
-  isAuthResponse,
-  requireAuth,
-  withRateLimit,
-} from "@/lib/api/route-utils";
+import { withAuthenticatedRoute } from "@/lib/api/route-utils";
 import { ProfileService } from "@/lib/services/profiles";
 import {
   deleteAvatar,
@@ -13,19 +8,10 @@ import {
 } from "@/lib/services/storage";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export async function DELETE() {
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  const rateLimitResponse = await withRateLimit(auth.id, "account");
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
-  try {
+export const DELETE = withAuthenticatedRoute({
+  routeName: "account",
+  fallbackMessage: "Could not delete account",
+  handler: async ({ auth }) => {
     const cleanup = await ProfileService.deleteAccount(auth.id);
 
     const supabase = createAdminClient();
@@ -52,13 +38,6 @@ export async function DELETE() {
     }
     await Promise.all(cleanups);
 
-    const response = NextResponse.json({ message: "Account deleted" });
-    return applyRateLimitHeaders(response, auth.id, "account");
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { message: "Could not delete account" },
-      { status: 500 },
-    );
-  }
-}
+    return NextResponse.json({ message: "Account deleted" });
+  },
+});

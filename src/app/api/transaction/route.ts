@@ -1,12 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { ZodError } from "zod";
-import {
-  applyRateLimitHeaders,
-  handleApiError,
-  isAuthResponse,
-  requireAuth,
-  withRateLimit,
-} from "@/lib/api/route-utils";
+import { NextResponse } from "next/server";
+import { withAuthenticatedRoute } from "@/lib/api/route-utils";
 import {
   createTransactionSchema,
   paymentMethodSchema,
@@ -15,29 +8,11 @@ import {
 import { AlertsService } from "@/lib/services/alerts";
 import { TransactionService } from "@/lib/services/transactions";
 
-// Type guard for ZodError with proper type narrowing
-function isZodError(error: unknown): error is ZodError {
-  return error instanceof ZodError;
-}
-
-export async function GET(request: NextRequest) {
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  // Apply rate limiting
-  const rateLimitResponse = await withRateLimit(auth.id, "transaction");
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
-  try {
-    const searchParams = request.nextUrl.searchParams;
-
+export const GET = withAuthenticatedRoute({
+  routeName: "transaction",
+  handler: async ({ auth, request, getContext }) => {
+    const searchParams = new URL(request.url).searchParams;
     const type = searchParams.get("type");
-    const categoryId = searchParams.get("categoryId");
     const paymentMethod = searchParams.get("paymentMethod");
     const paymentMethods = paymentMethod
       ? paymentMethod
@@ -45,121 +20,81 @@ export async function GET(request: NextRequest) {
           .filter(Boolean)
           .map((method) => paymentMethodSchema.parse(method))
       : [];
-    const from = searchParams.get("from");
-    const to = searchParams.get("to");
-    const search = searchParams.get("search");
-    const recurring = searchParams.get("isRecurring");
-    const page = searchParams.get("page");
-    const limit = searchParams.get("limit");
-    const sortBy = searchParams.get("sortBy");
-    const sortOrder = searchParams.get("sortOrder");
+    const page = searchParams.get("page")
+      ? Number(searchParams.get("page"))
+      : 1;
+    const limit = searchParams.get("limit")
+      ? Number(searchParams.get("limit"))
+      : 50;
 
-    // Validate query parameters
-    const validatedPage = page ? parseInt(page, 10) : 1;
-    const validatedLimit = limit ? parseInt(limit, 10) : 50;
-
-    if (validatedPage < 1 || Number.isNaN(validatedPage)) {
+    if (!Number.isInteger(page) || page < 1) {
       return NextResponse.json(
         { message: "Invalid page number" },
         { status: 400 },
       );
     }
-
-    if (
-      validatedLimit < 1 ||
-      validatedLimit > 100 ||
-      Number.isNaN(validatedLimit)
-    ) {
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
       return NextResponse.json(
         { message: "Invalid limit. Must be between 1 and 100" },
         { status: 400 },
       );
     }
 
-    const transactions = await TransactionService.list(auth.id, {
-      type: type ? transactionTypeSchema.parse(type) : undefined,
-      categoryId: categoryId ?? undefined,
-      paymentMethod:
-        paymentMethods.length > 1 ? paymentMethods : paymentMethods[0],
-      from: from ?? undefined,
-      to: to ?? undefined,
-      search: search ?? undefined,
-      isRecurring: recurring === null ? undefined : recurring === "true",
-      page: validatedPage,
-      limit: validatedLimit,
-      sortBy: sortBy ?? undefined,
-      sortOrder:
-        sortOrder === "asc" || sortOrder === "desc" ? sortOrder : undefined,
-    });
+    return NextResponse.json(
+      await TransactionService.list(
+        auth.id,
+        {
+          type: type ? transactionTypeSchema.parse(type) : undefined,
+          categoryId: searchParams.get("categoryId") ?? undefined,
+          paymentMethod:
+            paymentMethods.length > 1 ? paymentMethods : paymentMethods[0],
+          from: searchParams.get("from") ?? undefined,
+          to: searchParams.get("to") ?? undefined,
+          search: searchParams.get("search") ?? undefined,
+          isRecurring:
+            searchParams.get("isRecurring") === null
+              ? undefined
+              : searchParams.get("isRecurring") === "true",
+          page,
+          limit,
+          cursor: searchParams.get("cursor") ?? undefined,
+          sortBy: searchParams.get("sortBy") ?? undefined,
+          sortOrder:
+            searchParams.get("sortOrder") === "asc" ||
+            searchParams.get("sortOrder") === "desc"
+              ? (searchParams.get("sortOrder") as "asc" | "desc")
+              : undefined,
+        },
+        await getContext(),
+      ),
+    );
+  },
+});
 
-    const response = NextResponse.json(transactions);
-    return applyRateLimitHeaders(response, auth.id, "transaction");
-  } catch (error) {
-    if (isZodError(error)) {
-      return NextResponse.json(
-        { message: "Invalid query parameters", errors: error.issues },
-        { status: 400 },
-      );
-    }
-    return handleApiError(error, "No se pudieron obtener las transacciones");
-  }
-}
-
-export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  // Apply rate limiting
-  const rateLimitResponse = await withRateLimit(auth.id, "transaction");
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
-  try {
+export const POST = withAuthenticatedRoute({
+  routeName: "transaction",
+  handler: async ({ auth, request, getContext }) => {
+    const context = await getContext();
     const body = await request.json();
 
-    // Check if this is a bulk delete request
     if (body.action === "bulkDelete" && Array.isArray(body.ids)) {
-      if (!body.ids || body.ids.length === 0) {
+      if (body.ids.length === 0 || body.ids.length > 100) {
         return NextResponse.json(
-          { message: "No transaction IDs provided" },
+          { message: "Provide between 1 and 100 transaction IDs" },
           { status: 400 },
         );
       }
-
-      if (body.ids.length > 100) {
-        return NextResponse.json(
-          { message: "Cannot delete more than 100 transactions at once" },
-          { status: 400 },
-        );
-      }
-
-      const result = await TransactionService.bulkDelete(auth.id, body.ids);
-      return NextResponse.json(result);
+      return NextResponse.json(
+        await TransactionService.bulkDelete(auth.id, body.ids, context),
+      );
     }
 
-    // Otherwise, it's a create transaction request
     const transaction = await TransactionService.create(
       auth.id,
       createTransactionSchema.parse(body),
+      context,
     );
-
-    await AlertsService.evaluateForUser(auth.id).catch((error) => {
-      console.error("Failed to evaluate alerts:", error);
-    });
-
-    const response = NextResponse.json(transaction, { status: 201 });
-    return applyRateLimitHeaders(response, auth.id, "transaction");
-  } catch (error) {
-    if (isZodError(error)) {
-      return NextResponse.json(
-        { message: "Invalid transaction data", errors: error.issues },
-        { status: 400 },
-      );
-    }
-    return handleApiError(error, "Could not process request");
-  }
-}
+    await AlertsService.evaluateForUser(auth.id).catch(() => undefined);
+    return NextResponse.json(transaction, { status: 201 });
+  },
+});

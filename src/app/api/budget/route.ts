@@ -1,73 +1,40 @@
-import { type NextRequest, NextResponse } from "next/server";
-
-import {
-  applyRateLimitHeaders,
-  handleApiError,
-  isAuthResponse,
-  requireAuth,
-  withRateLimit,
-} from "@/lib/api/route-utils";
+import { NextResponse } from "next/server";
+import { withAuthenticatedRoute } from "@/lib/api/route-utils";
 import { createBudgetSchema } from "@/lib/schemas";
 import { AlertsService } from "@/lib/services/alerts";
 import { BudgetService } from "@/lib/services/budgets";
 
-export async function GET(request: NextRequest) {
-  const auth = await requireAuth();
+export const GET = withAuthenticatedRoute({
+  routeName: "budget",
+  handler: async ({ auth, request, getContext }) => {
+    const searchParams = new URL(request.url).searchParams;
+    return NextResponse.json(
+      await BudgetService.list(
+        auth.id,
+        {
+          categoryId: searchParams.get("categoryId") ?? undefined,
+          month: searchParams.has("month")
+            ? Number(searchParams.get("month"))
+            : undefined,
+          year: searchParams.has("year")
+            ? Number(searchParams.get("year"))
+            : undefined,
+        },
+        await getContext(),
+      ),
+    );
+  },
+});
 
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  // Apply rate limiting
-  const rateLimitResponse = await withRateLimit(auth.id, "budget");
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
-  try {
-    const searchParams = request.nextUrl.searchParams;
-
-    const categoryId = searchParams.get("categoryId");
-    const month = searchParams.get("month");
-    const year = searchParams.get("year");
-
-    const budgets = await BudgetService.list(auth.id, {
-      categoryId: categoryId ?? undefined,
-      month: month ? Number(month) : undefined,
-      year: year ? Number(year) : undefined,
-    });
-
-    const response = NextResponse.json(budgets);
-    return applyRateLimitHeaders(response, auth.id, "budget");
-  } catch (error) {
-    return handleApiError(error, "No se pudieron obtener los presupuestos");
-  }
-}
-
-export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
-
-  if (isAuthResponse(auth)) {
-    return auth;
-  }
-
-  // Apply rate limiting
-  const rateLimitResponse = await withRateLimit(auth.id, "budget");
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
-  try {
-    const body = createBudgetSchema.parse(await request.json());
-    const budget = await BudgetService.create(auth.id, body);
-
-    await AlertsService.evaluateForUser(auth.id).catch((error) => {
-      console.error("Failed to evaluate alerts:", error);
-    });
-
-    const response = NextResponse.json(budget, { status: 201 });
-    return applyRateLimitHeaders(response, auth.id, "budget");
-  } catch (error) {
-    return handleApiError(error, "Could not create budget");
-  }
-}
+export const POST = withAuthenticatedRoute({
+  routeName: "budget",
+  handler: async ({ auth, request, getContext }) => {
+    const budget = await BudgetService.create(
+      auth.id,
+      createBudgetSchema.parse(await request.json()),
+      await getContext(),
+    );
+    await AlertsService.evaluateForUser(auth.id).catch(() => undefined);
+    return NextResponse.json(budget, { status: 201 });
+  },
+});
