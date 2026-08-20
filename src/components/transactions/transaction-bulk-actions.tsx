@@ -3,16 +3,18 @@
 import { Button } from "@components/ui";
 import { AnimatePresence, motion } from "framer-motion";
 import { Icon } from "@/components/shared";
-import { Trash2 } from "@/lib/icons";
+import { Loader2, Trash2 } from "@/lib/icons";
 
 interface TransactionBulkActionsProps {
   selectedCount: number;
+  deleting?: boolean;
   onDelete: () => void;
   t: (key: string, options?: Record<string, unknown>) => string;
 }
 
 export function TransactionBulkActions({
   selectedCount,
+  deleting = false,
   onDelete,
   t,
 }: TransactionBulkActionsProps) {
@@ -34,10 +36,14 @@ export function TransactionBulkActions({
               variant="ghost"
               size="xs"
               onClick={onDelete}
-              className="text-destructive/80 hover:text-destructive"
+              disabled={deleting}
+              className="text-destructive/80 hover:text-destructive disabled:opacity-50"
             >
-              <Icon icon={Trash2} className="size-3.5" />
-              {t("transactions.delete")}
+              <Icon
+                icon={deleting ? Loader2 : Trash2}
+                className={deleting ? "size-3.5 animate-spin" : "size-3.5"}
+              />{" "}
+              {deleting ? t("common.deleting") : t("transactions.delete")}
             </Button>
           </div>
         </motion.div>

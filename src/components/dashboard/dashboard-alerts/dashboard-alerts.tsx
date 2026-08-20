@@ -6,14 +6,17 @@ import { useNotifications } from "@hooks/useNotifications";
 import { useProfile } from "@hooks/useProfile";
 import { cn } from "@lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
+  Bell,
   CheckCircle2,
   ChevronDown,
+  ChevronRight,
   Info,
   Sparkles,
   TriangleAlert,
@@ -258,13 +261,20 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
         <Button
           variant="ghost"
           onClick={() => {
-            if (!hasAlerts) return;
+            if (!hasAlerts) {
+              router.push("/dashboard/notifications");
+              return;
+            }
             setOpen((value) => !value);
           }}
           aria-expanded={isExpanded}
           aria-controls="dashboard-alerts-panel"
           aria-label={
-            hasAlerts ? (open ? t("alerts.hide") : t("alerts.show")) : undefined
+            hasAlerts
+              ? open
+                ? t("alerts.hide")
+                : t("alerts.show")
+              : t("alerts.viewAll")
           }
           className={cn(
             "group relative flex h-auto w-full items-center gap-3.5 border-0 px-4 py-3.5 text-left transition duration-300",
@@ -277,7 +287,7 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                     "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
                     bar.hover,
                   )
-                : "cursor-default hover:bg-none hover:from-transparent hover:to-transparent dark:hover:bg-none",
+                : "cursor-pointer hover:shadow-[var(--shadow-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
           )}
         >
           <div
@@ -369,17 +379,27 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                   </span>
                 ))}
               </span>
-
+            </>
+          )}
+          <motion.span
+            animate={hasAlerts ? { rotate: open ? 180 : 0 } : undefined}
+            whileHover={hasAlerts ? undefined : { x: 3 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="relative flex size-7 shrink-0 items-center justify-center rounded-full border border-border/40 bg-background/40 text-muted-foreground shadow-sm transition-colors group-hover:border-primary/50 group-hover:text-primary"
+            aria-hidden="true"
+          >
+            {hasAlerts ? (
               <motion.span
                 animate={{ rotate: open ? 180 : 0 }}
                 transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="relative flex size-7 shrink-0 items-center justify-center rounded-full border border-border/40 bg-background/40 text-muted-foreground shadow-sm transition-colors group-hover:border-border/70 group-hover:text-foreground"
-                aria-hidden="true"
+                className="flex"
               >
                 <ChevronDown className="size-3.5" />
               </motion.span>
-            </>
-          )}
+            ) : (
+              <ChevronRight className="size-3.5" />
+            )}
+          </motion.span>
         </Button>
 
         <AnimatePresence initial={false}>
@@ -401,22 +421,31 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
                     <span className="text-xs font-medium text-muted-foreground">
                       {t("alerts.actionsLabel")}
                     </span>
-                    {alerts.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={t("alerts.dismissAll")}
-                        onClick={handleDismissAll}
-                        disabled={dismissingIds.size > 0}
-                        className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground/60 transition duration-200 hover:bg-none hover:bg-muted/60 hover:text-foreground active:scale-95 disabled:opacity-50"
+                    <span className="flex items-center gap-1.5">
+                      <Link
+                        href="/dashboard/notifications"
+                        className="flex h-7 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-medium text-muted-foreground/70 transition duration-200 hover:bg-muted/60 hover:text-foreground"
                       >
-                        {dismissingIds.size > 0 ? (
-                          <Sparkles className="size-3.5 animate-spin" />
-                        ) : (
-                          <X className="size-3.5" />
-                        )}
-                      </Button>
-                    )}
+                        <Bell className="size-3.5" />
+                        {t("alerts.viewAll")}
+                      </Link>
+                      {alerts.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t("alerts.dismissAll")}
+                          onClick={handleDismissAll}
+                          disabled={dismissingIds.size > 0}
+                          className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground/60 transition duration-200 hover:bg-none hover:bg-muted/60 hover:text-foreground active:scale-95 disabled:opacity-50"
+                        >
+                          {dismissingIds.size > 0 ? (
+                            <Sparkles className="size-3.5 animate-spin" />
+                          ) : (
+                            <X className="size-3.5" />
+                          )}
+                        </Button>
+                      )}
+                    </span>
                   </div>
                 )}
 

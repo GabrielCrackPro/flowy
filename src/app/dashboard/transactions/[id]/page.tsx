@@ -30,7 +30,9 @@ export default function TransactionDetailPage() {
   const { profile } = useProfile();
   const locale = profile?.locale ?? "es-ES";
   const activeSpaceId = profile?.activeSpaceId ?? null;
-  const { update, remove } = useTransactionApi(undefined, { enabled: false });
+  const { update, remove, isDeleting } = useTransactionApi(undefined, {
+    enabled: false,
+  });
 
   const {
     data: transaction,
@@ -248,6 +250,8 @@ export default function TransactionDetailPage() {
         confirmLabel={t("transactions.delete")}
         cancelLabel={t("transaction.cancel")}
         onConfirm={handleDelete}
+        loading={isDeleting}
+        closeOnConfirm={false}
       />
     </motion.div>
   );

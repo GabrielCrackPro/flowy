@@ -48,6 +48,7 @@ export default function GoalsPage() {
     refresh,
     isCreating,
     isUpdating,
+    isDeleting,
   } = useGoalApi();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -95,12 +96,14 @@ export default function GoalsPage() {
     handleSubmit,
     handleDelete,
     isSubmitting,
+    isDeleting: deletingInProgress,
   } = useEntityFormModal<Goal, CreateGoalInput, UpdateGoalInput>({
     create,
     update,
     remove,
     isCreating,
     isUpdating,
+    isDeleting,
   });
 
   useCreateEntityFromQuery(openCreate);
@@ -429,12 +432,16 @@ export default function GoalsPage() {
       {deleting && (
         <ConfirmDialog
           open={!!deleting}
-          onOpenChange={(open) => !open && setDeleting(null)}
+          onOpenChange={(open) => {
+            if (!open) setDeleting(null);
+          }}
           title={t("goals.deleteConfirmTitle")}
           description={t("goals.deleteConfirmDescription", {
             title: deleting.title,
           })}
-          onConfirm={() => handleDelete()}
+          loading={deletingInProgress}
+          closeOnConfirm={false}
+          onConfirm={() => void handleDelete()}
         />
       )}
       {formOpen && (

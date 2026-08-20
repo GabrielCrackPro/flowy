@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@components/ui";
 import { useProfile } from "@hooks/useProfile";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowDownRight, ArrowUpRight } from "@/lib/icons";
@@ -32,6 +33,8 @@ export interface StatsCardProps {
     label?: string;
     invert?: boolean;
   };
+  /** When set, the card becomes a link to this route. */
+  href?: string;
 }
 
 const toneAccentClasses: Record<StatsCardTone, string> = {
@@ -77,7 +80,6 @@ const toneBgClasses: Record<StatsCardTone, string> = {
   info: "from-blue-500/8 via-blue-500/[0.03] to-transparent",
   warning: "from-amber-500/8 via-amber-500/[0.03] to-transparent",
 };
-
 function resolveTone(
   explicit: StatsCardTone | undefined,
   variant: StatsCardVariant,
@@ -120,7 +122,6 @@ function getValueSizeClass(formatted: string): string {
   if (length < 16) return "text-xl sm:text-2xl";
   return "text-lg sm:text-xl";
 }
-
 export function StatsCard({
   title,
   value,
@@ -129,6 +130,7 @@ export function StatsCard({
   icon: IconComponent,
   tone: explicitTone,
   trend,
+  href,
 }: StatsCardProps) {
   const { profile } = useProfile();
   const { t } = useTranslation();
@@ -150,7 +152,7 @@ export function StatsCard({
     : true;
   const TrendIcon = trend && trend.value >= 0 ? ArrowUpRight : ArrowDownRight;
 
-  return (
+  const card = (
     <div className="group relative h-full">
       <Card
         className={cn(
@@ -306,5 +308,16 @@ export function StatsCard({
         </CardContent>
       </Card>
     </div>
+  );
+
+  if (!href) return card;
+
+  return (
+    <Link
+      href={href}
+      className="block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
+      {card}
+    </Link>
   );
 }

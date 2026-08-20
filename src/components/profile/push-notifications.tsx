@@ -1312,13 +1312,11 @@ export function PushNotificationsCard() {
                     description={t(
                       "settings.notifications.removeStaleDescription",
                     )}
-                    confirmLabel={
-                      removingStale
-                        ? t("settings.notifications.removingStale")
-                        : t("settings.notifications.removeStale")
-                    }
+                    confirmLabel={t("settings.notifications.removeStale")}
                     cancelLabel={t("common.cancel")}
                     onConfirm={() => void removeStaleDevices()}
+                    loading={removingStale}
+                    loadingLabel={t("settings.notifications.removingStale")}
                   />
                 </div>
               )}
@@ -1436,13 +1434,11 @@ export function PushNotificationsCard() {
           onOpenChange={setRemoveAllOpen}
           title={t("settings.notifications.removeAllTitle")}
           description={t("settings.notifications.removeAllDescription")}
-          confirmLabel={
-            removingAll
-              ? t("settings.notifications.removingAll")
-              : t("settings.notifications.removeAllDevices")
-          }
+          confirmLabel={t("settings.notifications.removeAllDevices")}
           cancelLabel={t("common.cancel")}
           onConfirm={() => void removeAllDevices()}
+          loading={removingAll}
+          loadingLabel={t("settings.notifications.removingAll")}
         />
       </CardContent>
     </Card>

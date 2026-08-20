@@ -13,7 +13,7 @@ import {
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useHaptic } from "@/hooks/useHaptic";
-import { TriangleAlert } from "@/lib/icons";
+import { Loader2, TriangleAlert } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { CONFIRM_TINTS, type ConfirmTint } from "./confirm-tint";
 import { Icon } from "./icon";
@@ -40,6 +40,13 @@ interface ConfirmDialogProps {
    * can close it itself (e.g. MFA unenroll). Defaults to `true`.
    */
   closeOnConfirm?: boolean;
+  /**
+   * While an async action is running: swaps the confirm label for a spinner,
+   * disables both buttons, blocks dismissal, and keeps the dialog open until
+   * the flow closes it. Label defaults to `common.deleting`.
+   */
+  loading?: boolean;
+  loadingLabel?: string;
 }
 
 const ICON_TILE_TONES = {
@@ -63,6 +70,8 @@ export function ConfirmDialog({
   confirmDisabled = false,
   cancelDisabled = false,
   closeOnConfirm = true,
+  loading = false,
+  loadingLabel,
 }: ConfirmDialogProps) {
   const { t } = useTranslation();
   const haptic = useHaptic();
@@ -74,8 +83,15 @@ export function ConfirmDialog({
   const actionClassName =
     variant === "destructive" ? "" : CONFIRM_TINTS[tint].action;
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    // A running action owns the dialog: ignore dismissal attempts (X,
+    // backdrop, Esc) so the flow can close it itself when it settles.
+    if (!nextOpen && loading) return;
+    onOpenChange(nextOpen);
+  };
+
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
@@ -95,7 +111,7 @@ export function ConfirmDialog({
         {children}
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={cancelDisabled}>
+          <AlertDialogCancel disabled={cancelDisabled || loading}>
             {cancelText}
           </AlertDialogCancel>
           <AlertDialogAction
@@ -106,10 +122,17 @@ export function ConfirmDialog({
               }
               onConfirm();
             }}
-            disabled={confirmDisabled}
+            disabled={confirmDisabled || loading}
             className={cn("gap-1.5 [&_svg]:size-4", actionClassName)}
           >
-            {confirmText}
+            {loading ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="size-4 animate-spin" />
+                {loadingLabel ?? t("common.deleting")}
+              </span>
+            ) : (
+              confirmText
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

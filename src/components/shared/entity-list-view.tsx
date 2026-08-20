@@ -159,7 +159,7 @@ export function EntityListView<T>({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.25 }}
-        className="max-[420px]:-mx-1"
+        className="max-compact:-mx-1"
       >
         <ActionBar
           ariaLabel={t("profile.actions")}

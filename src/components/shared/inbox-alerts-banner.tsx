@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Banner } from "@/components/shared/banner";
 import {
@@ -59,8 +59,16 @@ function InboxAlertStrip({
  * inbox is empty.
  */
 export function InboxAlertsBanner() {
+  const pathname = usePathname();
   const { user } = useAuth();
   const { alerts, dismiss } = useNotifications(user?.id);
+
+  // On dashboard pages the DashboardAlerts bar (with its expandable panel and
+  // link to the full notifications page) already surfaces the same alerts, so
+  // skip the strips here to avoid showing them twice.
+  const isDashboard =
+    pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  if (isDashboard) return null;
 
   const activeAlerts = alerts.filter(
     (alert) => !alert.readAt && !alert.resolvedAt,

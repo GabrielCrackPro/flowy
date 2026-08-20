@@ -11,11 +11,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "@/components/shared/toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import {
-  DEPENDENT_QUERY_KEYS,
-  SINGULAR_QUERY_KEYS,
-} from "@/lib/entity-query-keys";
 import { enqueueOfflineMutation, PENDING_SYNC_FLAG } from "@/lib/offline";
+import { invalidateEntityQueries as invalidateRegisteredEntityQueries } from "@/lib/query-invalidation";
 
 interface EntityApiConfig<T, F, C, U> {
   queryKey: string;
@@ -71,17 +68,9 @@ export function useEntityApi<T, F = undefined, C = unknown, U = unknown>({
   // queries that aggregate it, so no page keeps stale data after a mutation.
   const invalidateEntityQueries = useCallback(
     (client: typeof queryClient) => {
-      client.invalidateQueries({ queryKey: [queryKey] });
-      const singular = SINGULAR_QUERY_KEYS[queryKey];
-      if (singular) {
-        client.invalidateQueries({ queryKey: [singular] });
-      }
-
-      if (invalidateDependentQueries) {
-        (DEPENDENT_QUERY_KEYS[queryKey] ?? []).forEach((key) => {
-          client.invalidateQueries({ queryKey: [key] });
-        });
-      }
+      invalidateRegisteredEntityQueries(client, queryKey, {
+        includeDependencies: invalidateDependentQueries,
+      });
     },
     [queryKey, invalidateDependentQueries],
   );

@@ -29,10 +29,12 @@ import {
 } from "@/lib/icons";
 import { getGreetingMessage } from "@/utils/dashboard";
 import { DashboardCustomize } from "../dashboard-customize/dashboard-customize";
+import { MonthPicker } from "../month-picker/month-picker";
 
 interface DashboardHeaderProps {
   month: number;
   year: number;
+  onMonthChange: (month: number, year: number) => void;
 }
 
 function getGreetingIcon(_locale?: string) {
@@ -55,7 +57,11 @@ function getFirstName(name?: string | null) {
   return name?.trim().split(/\s+/)[0] || null;
 }
 
-export function DashboardHeader({ month, year }: DashboardHeaderProps) {
+export function DashboardHeader({
+  month,
+  year,
+  onMonthChange,
+}: DashboardHeaderProps) {
   const { profile } = useProfile();
   const { error, isLoading, isFetching, dataUpdatedAt, refetch } =
     useDashboardData(month, year);
@@ -101,7 +107,32 @@ export function DashboardHeader({ month, year }: DashboardHeaderProps) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <Skeleton loading={isLoading && profileLoading}>
-            <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+            {/* Compact title row on mobile: greeting + month picker together,
+                so the summary period never feels detached from the page title. */}
+            <div className="flex items-center justify-between gap-3 md:hidden">
+              <h1 className="flex min-w-0 items-center gap-2 text-xl font-semibold tracking-tight">
+                <span className="truncate">
+                  {getGreetingMessage(locale)}
+                  {profile && (
+                    <span className="text-muted-foreground/80">
+                      , {profileFirstName ?? t("profile.user")}
+                    </span>
+                  )}
+                </span>
+              </h1>
+              <div className="shrink-0">
+                <MonthPicker
+                  compact
+                  month={month}
+                  year={year}
+                  onChange={onMonthChange}
+                />
+              </div>
+            </div>
+
+            {/* Desktop greeting with icon + full-size picker placement handled
+                by the page's section heading. */}
+            <h1 className="hidden items-center gap-3 text-2xl font-semibold tracking-tight sm:text-3xl md:flex">
               <motion.div
                 variants={{ hidden: {}, show: {} }}
                 whileHover={{ scale: 1.1, rotate: 10 }}

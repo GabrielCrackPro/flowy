@@ -47,6 +47,7 @@ export default function BudgetsPage() {
     refresh,
     isCreating,
     isUpdating,
+    isDeleting,
   } = useBudgetApi();
 
   const { categories } = useCategoryApi();
@@ -65,12 +66,14 @@ export default function BudgetsPage() {
     handleSubmit,
     handleDelete,
     isSubmitting,
+    isDeleting: deletingInProgress,
   } = useEntityFormModal<Budget, CreateBudgetInput, UpdateBudgetInput>({
     create,
     update,
     remove,
     isCreating,
     isUpdating,
+    isDeleting,
   });
 
   useCreateEntityFromQuery(openCreate);
@@ -251,10 +254,14 @@ export default function BudgetsPage() {
 
       <ConfirmDialog
         open={!!deleting}
-        onOpenChange={() => setDeleting(null)}
+        onOpenChange={(open) => {
+          if (!open) setDeleting(null);
+        }}
         title={t("budgets.deleteTitle")}
         description={t("budgets.deleteDescription")}
-        onConfirm={handleDelete}
+        loading={deletingInProgress}
+        closeOnConfirm={false}
+        onConfirm={() => void handleDelete()}
       />
     </FinancePageShell>
   );

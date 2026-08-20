@@ -61,6 +61,7 @@ const ExpenseDistributionChart = dynamic(
 interface SectionHeadingProps {
   title: string;
   description?: string;
+  descriptionClassName?: string;
   action?: ReactNode;
   className?: string;
 }
@@ -68,6 +69,7 @@ interface SectionHeadingProps {
 function SectionHeading({
   title,
   description,
+  descriptionClassName,
   action,
   className,
 }: SectionHeadingProps) {
@@ -81,7 +83,14 @@ function SectionHeading({
       <div className="min-w-0 space-y-1">
         <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
         {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p
+            className={cn(
+              "text-sm text-muted-foreground",
+              descriptionClassName,
+            )}
+          >
+            {description}
+          </p>
         )}
       </div>
       {action}
@@ -127,6 +136,9 @@ export default function DashboardPage() {
     window.localStorage.setItem("flowy.year", String(year));
   }, [month, year]);
 
+  // Remount month-scoped cards when the period changes so they show
+  // loading skeletons instead of stale data from the previous month.
+  const monthKey = `${month}-${year}`;
   const handleMonthChange = useCallback((m: number, y: number) => {
     setMonth(m);
     setYear(y);
@@ -174,25 +186,41 @@ export default function DashboardPage() {
       case "distribution":
         return (
           <ErrorBoundary key="distribution">
-            <DistributionCard month={month} year={year} />
+            <DistributionCard
+              key={`distribution-${monthKey}`}
+              month={month}
+              year={year}
+            />
           </ErrorBoundary>
         );
       case "recentTransactions":
         return (
           <ErrorBoundary key="recentTransactions">
-            <RecentTransactionsCard month={month} year={year} />
+            <RecentTransactionsCard
+              key={`recentTransactions-${monthKey}`}
+              month={month}
+              year={year}
+            />
           </ErrorBoundary>
         );
       case "budgetProgress":
         return (
           <ErrorBoundary key="budgetProgress">
-            <BudgetProgressCard month={month} year={year} />
+            <BudgetProgressCard
+              key={`budgetProgress-${monthKey}`}
+              month={month}
+              year={year}
+            />
           </ErrorBoundary>
         );
       case "goalProgress":
         return (
           <ErrorBoundary key="goalProgress">
-            <GoalProgressCard month={month} year={year} />
+            <GoalProgressCard
+              key={`goalProgress-${monthKey}`}
+              month={month}
+              year={year}
+            />
           </ErrorBoundary>
         );
       default:
@@ -203,15 +231,22 @@ export default function DashboardPage() {
   return (
     <MfaGate>
       <div className="space-y-6 sm:space-y-8 lg:space-y-10">
-        <DashboardHeader month={month} year={year} />
+        <DashboardHeader
+          month={month}
+          year={year}
+          onMonthChange={handleMonthChange}
+        />
         <DashboardAlerts month={month} year={year} />
 
         <section className="space-y-6">
           <SectionHeading
             title={t("dashboard.financialSummary")}
             description={t("dashboard.financialSummaryDesc")}
+            descriptionClassName="hidden md:block"
             action={
-              <div className="flex flex-wrap items-center gap-2">
+              /* On mobile the month picker lives in the dashboard header next
+                 to the greeting; here it is desktop-only. */
+              <div className="hidden flex-wrap items-center gap-2 md:flex">
                 <MonthPicker
                   month={month}
                   year={year}
@@ -223,11 +258,19 @@ export default function DashboardPage() {
           {summaryOrder.map((id) =>
             id === "stats" ? (
               <ErrorBoundary key="stats">
-                <StatsCardGroup month={month} year={year} />
+                <StatsCardGroup
+                  key={`stats-${monthKey}`}
+                  month={month}
+                  year={year}
+                />
               </ErrorBoundary>
             ) : (
               <ErrorBoundary key="insights">
-                <InsightsCard month={month} year={year} />
+                <InsightsCard
+                  key={`insights-${monthKey}`}
+                  month={month}
+                  year={year}
+                />
               </ErrorBoundary>
             ),
           )}
@@ -309,7 +352,11 @@ export default function DashboardPage() {
                         </ErrorBoundary>
                       ) : (
                         <ErrorBoundary key="activity">
-                          <ActivityFeedCard month={month} year={year} />
+                          <ActivityFeedCard
+                            key={`activity-${monthKey}`}
+                            month={month}
+                            year={year}
+                          />
                         </ErrorBoundary>
                       ),
                     )}

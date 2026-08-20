@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { ConfirmDialog, EmptyState, UserAvatar } from "@/components/shared";
 import { DetailCard } from "@/components/shared/detail-card";
 import { Icon } from "@/components/shared/icon";
+import { useCloseWhenSettled } from "@/hooks/useCloseWhenSettled";
 import { useComments } from "@/hooks/useComments";
 import { useProfile } from "@/hooks/useProfile";
 import { MessageSquare, Send } from "@/lib/icons";
@@ -85,6 +86,12 @@ export function CommentsSection({
       setEditText("");
     },
     [editText, editComment],
+  );
+
+  // Keep the confirm open (spinner + disabled buttons) while the removal is
+  // in flight, then close once it settles — the toast reports the outcome.
+  const markDeleteStarted = useCloseWhenSettled(commentsBusy, () =>
+    setDeleteCommentId(null),
   );
 
   const commentAvatar = profile ? (
@@ -209,10 +216,12 @@ export function CommentsSection({
         description={t("transaction.commentDeleteConfirm")}
         confirmLabel={t("transactions.delete")}
         cancelLabel={t("transaction.cancel")}
+        loading={commentsBusy}
+        closeOnConfirm={false}
         onConfirm={() => {
           if (deleteCommentId) {
+            markDeleteStarted();
             removeComment(deleteCommentId);
-            setDeleteCommentId(null);
           }
         }}
       />

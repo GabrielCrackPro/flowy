@@ -57,6 +57,7 @@ export default function TransactionsPage() {
     detailTx,
     deleteTx,
     bulkDeleteTx,
+    bulkDeleting,
     selectedIds,
     lastRefreshedAt,
     filters,
@@ -83,6 +84,7 @@ export default function TransactionsPage() {
     loading,
     update,
     remove,
+    isDeleting,
   } = useTransactionsPage();
 
   const columns: Column<(typeof sorted)[number]>[] = useMemo(
@@ -306,7 +308,8 @@ export default function TransactionsPage() {
 
             <TransactionBulkActions
               selectedCount={selectedIds.size}
-              onDelete={handleBulkDelete}
+              deleting={bulkDeleting}
+              onDelete={() => setBulkDeleteTx(true)}
               t={t}
             />
 
@@ -373,10 +376,11 @@ export default function TransactionsPage() {
         description={t("transactions.deleteConfirm")}
         confirmLabel={t("transactions.delete")}
         cancelLabel={t("transaction.cancel")}
+        loading={isDeleting}
+        closeOnConfirm={false}
         onConfirm={() => {
           if (deleteTx) {
-            remove(deleteTx.id);
-            setDeleteTx(null);
+            void remove(deleteTx.id).then(() => setDeleteTx(null));
           }
         }}
       />
@@ -387,9 +391,13 @@ export default function TransactionsPage() {
           if (!open) setBulkDeleteTx(false);
         }}
         title={`${t("transactions.delete")} (${selectedIds.size})`}
-        description={t("transactions.deleteConfirm")}
+        description={t("transactions.deleteConfirmBulk", {
+          count: selectedIds.size,
+        })}
         confirmLabel={t("transactions.delete")}
         cancelLabel={t("transaction.cancel")}
+        loading={bulkDeleting}
+        closeOnConfirm={false}
         onConfirm={handleBulkDelete}
       />
     </FinancePageShell>

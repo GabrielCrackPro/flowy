@@ -70,6 +70,7 @@ export function buildDashboardCards(
       value: data.balance,
       variant: "currency",
       icon: Landmark,
+      href: "/dashboard/transactions",
       description:
         data.balance >= 0
           ? t("stats.incomePositive")
@@ -80,6 +81,7 @@ export function buildDashboardCards(
       value: data.incomeThisMonth,
       variant: "currency",
       icon: TrendingUp,
+      href: "/dashboard/transactions",
       tone: "positive",
       description: getMonthName(month, year, locale),
       trend:
@@ -92,6 +94,7 @@ export function buildDashboardCards(
       value: data.expensesThisMonth,
       variant: "currency",
       icon: TrendingDown,
+      href: "/dashboard/transactions",
       tone: "negative",
       description: getMonthName(month, year, locale),
       trend:
@@ -128,6 +131,7 @@ export function buildDashboardCards(
       value: data.activeSubscriptions,
       variant: "count",
       icon: Repeat2,
+      href: "/dashboard/subscriptions",
       tone: "info",
       description:
         data.activeSubscriptions === 0
@@ -139,6 +143,7 @@ export function buildDashboardCards(
       value: data.activeBudgets,
       variant: "count",
       icon: Wallet,
+      href: "/dashboard/budgets",
       tone: "info",
       description: getMonthName(month, year, locale),
     },

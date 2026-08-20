@@ -9,6 +9,7 @@ interface UseEntityFormModalOptions<C, U> {
   remove: (id: string) => Promise<unknown>;
   isCreating?: boolean;
   isUpdating?: boolean;
+  isDeleting?: boolean;
 }
 
 /**
@@ -22,6 +23,7 @@ export function useEntityFormModal<T extends { id: string }, C, U>({
   remove,
   isCreating = false,
   isUpdating = false,
+  isDeleting = false,
 }: UseEntityFormModalOptions<C, U>) {
   const { isOpen, open, close } = useModalState(false);
   const [editing, setEditing] = useState<T | null>(null);
@@ -82,5 +84,6 @@ export function useEntityFormModal<T extends { id: string }, C, U>({
     handleSubmit,
     handleDelete,
     isSubmitting: isCreating || isUpdating,
+    isDeleting,
   };
 }

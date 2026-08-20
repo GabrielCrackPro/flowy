@@ -17,6 +17,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "@/components/shared/toast";
+import { useCloseWhenSettled } from "@/hooks/useCloseWhenSettled";
 import { clearActivities } from "@/lib/api/activity";
 import {
   ArrowDownCircle,
@@ -237,8 +238,14 @@ export function ActivityFeedCard({
 
   const isEmpty = !loading && activities.length === 0;
 
+  // Keep the confirm open (spinner + disabled buttons) while the clear is
+  // in flight, then close once it settles — the toast reports the outcome.
+  const markClearStarted = useCloseWhenSettled(clearMutation.isPending, () =>
+    setConfirmOpen(false),
+  );
+
   const handleClear = async () => {
-    setConfirmOpen(false);
+    markClearStarted();
     await clearMutation.mutateAsync();
   };
 
@@ -250,7 +257,9 @@ export function ActivityFeedCard({
         title={t("activity.clearConfirmTitle")}
         description={t("activity.clearConfirmDescription")}
         confirmLabel={t("activity.clear")}
-        onConfirm={handleClear}
+        loading={clearMutation.isPending}
+        closeOnConfirm={false}
+        onConfirm={() => void handleClear()}
       />
 
       <SectionCard

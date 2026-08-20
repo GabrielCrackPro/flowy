@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { toast } from "@/components/shared/toast";
 import { pushApi } from "@/lib/api/push";
+import { isStandaloneDisplayMode } from "@/lib/breakpoints";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const SERVICE_WORKER_PATH = "/sw.js";
@@ -154,14 +155,7 @@ export function usePushNotifications({
         });
       }
 
-      const installationType =
-        window.matchMedia("(display-mode: standalone)").matches ||
-        ("standalone" in navigator &&
-          Boolean(
-            (navigator as Navigator & { standalone?: boolean }).standalone,
-          ))
-          ? "pwa"
-          : "browser";
+      const installationType = isStandaloneDisplayMode() ? "pwa" : "browser";
       await pushApi.subscribe({
         endpoint: subscription.endpoint,
         p256dh: arrayBufferToBase64Url(subscription.getKey("p256dh")),

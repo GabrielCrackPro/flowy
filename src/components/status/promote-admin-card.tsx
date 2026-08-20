@@ -226,10 +226,11 @@ export function PromoteAdminCard() {
               })
             : ""
         }
-        confirmLabel={
-          demoting ? t("status.admin.demoting") : t("status.admin.demote")
-        }
+        confirmLabel={t("status.admin.demote")}
         onConfirm={() => void confirmDemote()}
+        closeOnConfirm={false}
+        loading={demoting}
+        loadingLabel={t("status.admin.demoting")}
         variant="destructive"
       />
     </div>

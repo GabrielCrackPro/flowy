@@ -66,6 +66,7 @@ export default function CategoriesPage() {
     refresh,
     isCreating,
     isUpdating,
+    isDeleting,
   } = useCategoryApi();
 
   const { transactions: allTransactions } = useTransactionApi();
@@ -127,12 +128,14 @@ export default function CategoriesPage() {
     handleSubmit,
     handleDelete,
     isSubmitting,
+    isDeleting: deletingInProgress,
   } = useEntityFormModal<Category, CreateCategoryInput, UpdateCategoryInput>({
     create,
     update,
     remove,
     isCreating,
     isUpdating,
+    isDeleting,
   });
 
   useCreateEntityFromQuery(openCreate);
@@ -426,7 +429,9 @@ export default function CategoriesPage() {
         description={t("categories.deleteConfirm")}
         confirmLabel={t("categories.delete")}
         cancelLabel={t("transaction.cancel")}
-        onConfirm={handleDelete}
+        loading={deletingInProgress}
+        closeOnConfirm={false}
+        onConfirm={() => void handleDelete()}
       />
     </FinancePageShell>
   );

@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import {
+  isStandaloneDisplayMode,
+  STANDALONE_MEDIA_QUERY,
+} from "@/lib/breakpoints";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -15,14 +19,6 @@ function isIos(): boolean {
   return (
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-  );
-}
-
-function isStandalone(): boolean {
-  if (typeof window === "undefined") return false;
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true
   );
 }
 
@@ -66,7 +62,7 @@ export function usePwa(): UsePwaReturn {
     useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    setStandalone(isStandalone());
+    setStandalone(isStandaloneDisplayMode());
     setIos(isIos());
 
     const onBeforeInstallPrompt = (event: Event) => {
@@ -83,7 +79,7 @@ export function usePwa(): UsePwaReturn {
 
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
     window.addEventListener("appinstalled", onAppInstalled);
-    const mq = window.matchMedia("(display-mode: standalone)");
+    const mq = window.matchMedia(STANDALONE_MEDIA_QUERY);
     mq.addEventListener("change", onDisplayModeChange);
 
     return () => {
