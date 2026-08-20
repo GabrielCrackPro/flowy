@@ -2,6 +2,21 @@
   "currentVersion": "0.1.41",
   "entries": [
     {
+      "version": "0.1.41",
+      "date": "2026-08-20",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            {
+              "text": "dashboard month picker, notifications page and unified loading states (#199)",
+              "scope": "ui"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.1.40",
       "date": "2026-08-18",
       "sections": [
