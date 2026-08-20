@@ -2666,6 +2666,29 @@ paths["/api/notifications"] = {
       },
     }),
   }),
+  delete: op({
+    operationId: "notifications.clear",
+    summary: "Delete all alerts for the active space",
+    tags: ["Notifications"],
+    responses: responses({
+      200: {
+        description: "Number of deleted alerts",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                deletedCount: {
+                  type: "integer",
+                  description: "Alerts deleted",
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  }),
 };
 
 paths["/api/notifications/read"] = {

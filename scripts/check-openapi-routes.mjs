@@ -25,7 +25,10 @@ const SPEC_FILE = join(ROOT, "public", "openapi.json");
 const EXCLUDED_DIRS = new Set(["docs", "admin"]);
 
 const HTTP_METHODS = ["get", "post", "put", "patch", "delete"];
-const HANDLER_RE = /export\s+async\s+function\s+(GET|POST|PUT|PATCH|DELETE)\b/g;
+// Handlers can be declared either way: `export async function GET()` (raw
+// routes) or `export const GET = withAuthenticatedRoute(...)` (wrapped routes).
+const HANDLER_RE =
+  /export\s+(?:async\s+function\s+|const\s+)(GET|POST|PUT|PATCH|DELETE)\b/g;
 
 function collectRouteFiles(dir) {
   const files = [];
