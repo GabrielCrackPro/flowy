@@ -8,15 +8,18 @@ import {
   CardTitle,
 } from "@components/ui/card";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon, type IconProps } from "@/components/shared";
+import { ConfirmDialog, Icon, type IconProps } from "@/components/shared";
 import {
   CurrencySelect,
   LanguageSelect,
 } from "@/components/shared/preference-selects";
+import { Button } from "@/components/ui/button";
 import { useLocaleContext } from "@/context/LocaleContext";
+import { useOnboarding } from "@/context/OnboardingContext";
 import { useProfile } from "@/hooks/useProfile";
-import { Coins, Languages, Palette, Settings2 } from "@/lib/icons";
+import { Coins, Languages, Palette, RotateCcw, Settings2 } from "@/lib/icons";
 import { ThemeCustomizationSheet } from "./theme-customization-modal";
 
 function PreferenceRow({
@@ -55,7 +58,9 @@ export function PreferencesSection() {
   const { t } = useTranslation();
   const { locale, setLocale } = useLocaleContext();
   const { profile, update } = useProfile();
+  const { resetOnboarding } = useOnboarding();
   const router = useRouter();
+  const [replayOpen, setReplayOpen] = useState(false);
 
   return (
     <Card>
@@ -78,6 +83,25 @@ export function PreferencesSection() {
           title={t("settings.preferences.themeLabel")}
           hint={t("settings.preferences.themeHint")}
           control={<ThemeCustomizationSheet label />}
+        />
+
+        <PreferenceRow
+          icon={RotateCcw}
+          title={t("settings.preferences.replayOnboarding")}
+          hint={t("settings.preferences.replayOnboardingHint")}
+          control={
+            <Button
+              variant="ghost"
+              className="gap-1.5"
+              title={t("settings.preferences.replayOnboarding")}
+              onClick={() => setReplayOpen(true)}
+            >
+              <RotateCcw className="size-4" />
+              <span className="hidden sm:inline">
+                {t("settings.preferences.replayOnboarding")}
+              </span>
+            </Button>
+          }
         />
 
         <PreferenceRow
@@ -118,6 +142,19 @@ export function PreferencesSection() {
           }
         />
       </CardContent>
+
+      <ConfirmDialog
+        open={replayOpen}
+        onOpenChange={setReplayOpen}
+        title={t("settings.preferences.replayOnboarding")}
+        description={t("settings.preferences.replayOnboardingConfirm")}
+        confirmLabel={t("settings.preferences.replayOnboarding")}
+        variant="primary"
+        icon={<Icon icon={RotateCcw} className="size-5" />}
+        onConfirm={() => {
+          void resetOnboarding();
+        }}
+      />
     </Card>
   );
 }

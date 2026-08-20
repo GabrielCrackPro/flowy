@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useChangelog } from "@/context/ChangelogContext";
 import { useLocaleContext } from "@/context/LocaleContext";
+import { useOnboarding } from "@/context/OnboardingContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useSignOut } from "@/hooks/useSignOut";
 import { useTheme } from "@/hooks/useTheme";
@@ -72,6 +73,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const { profile } = useProfile();
   const { locale } = useLocaleContext();
   const { openChangelog } = useChangelog();
+  const { resetOnboarding } = useOnboarding();
   const handleSignOut = useSignOut();
 
   // NOTE: the palette deliberately does NOT intercept system back via
@@ -96,6 +98,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       navigate: (url) => router.push(url),
       toggleTheme: () => toggleTheme(),
       openChangelog,
+      resetOnboarding,
       signOut: handleSignOut,
     }),
     [
@@ -105,6 +108,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       router,
       toggleTheme,
       openChangelog,
+      resetOnboarding,
       handleSignOut,
     ],
   );

@@ -145,7 +145,15 @@ export function TransactionSidebar({
           >
             <SelectTrigger size="sm" className="w-full">
               <Icon icon={Wallet} className="size-4 text-muted-foreground" />
-              <SelectValue placeholder={t("transaction.selectBudget")} />
+              <SelectValue
+                placeholder={t("transaction.selectBudget")}
+                options={budgets.map((b) => ({
+                  value: b.id,
+                  label:
+                    b.category?.name ||
+                    t("transaction.unnamedBudget", { id: b.id }),
+                }))}
+              />
             </SelectTrigger>
             <SelectContent>
               {budgets.map((budget) => (

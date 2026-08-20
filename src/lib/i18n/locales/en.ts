@@ -582,13 +582,17 @@ export const app: AppTranslationMessages = {
     },
     preferences: {
       title: "Preferences",
-      description: "Theme, language, and currency",
+      description: "Theme, language, currency, and onboarding",
       themeLabel: "Theme",
       themeHint: "Customize colors and appearance",
       localeLabel: "Language",
       localeHint: "Interface language",
       currencyLabel: "Currency",
       currencyHint: "Used to format amounts",
+      replayOnboarding: "Replay onboarding",
+      replayOnboardingHint: "See the welcome tour again",
+      replayOnboardingConfirm:
+        "This will reset the onboarding tour so you can see it again right away.",
     },
   },
   changelog: {
@@ -1566,6 +1570,7 @@ export const app: AppTranslationMessages = {
     viewTable: "Table view",
     close: "Close",
     next: "Next",
+    getStarted: "Get started",
     yes: "Yes",
     no: "No",
     element: "Item",
@@ -1596,6 +1601,9 @@ export const app: AppTranslationMessages = {
   onboarding: {
     welcomeTitle: "Welcome to Flowy, {{name}}!",
     welcomeDescription: "Track your finances with clarity and calm.",
+    featuresTitle: "Everything you need",
+    featuresDescription:
+      "Track income and expenses, plan budgets, and save toward your goals.",
     featureAnalyticsTitle: "Smart Analytics",
     featureAnalyticsDesc: "Track income and expenses with clear charts",
     featureBudgetTitle: "Budget Control",
@@ -1609,10 +1617,12 @@ export const app: AppTranslationMessages = {
     notificationLater: "Maybe later",
     notificationNotSupported:
       "Push notifications aren't supported in this browser",
+    notificationAlreadyEnabled: "Notifications are already enabled.",
     completeTitle: "You're all set!",
     completeDescription: "Start tracking your finances right away.",
     completeCta: "Add your first transaction",
     completeExplore: "Explore dashboard",
+    completeReplayHint: "You can replay this tour anytime from Preferences.",
     skip: "Skip",
     stepOf: "Step {{current}} of {{total}}",
   },

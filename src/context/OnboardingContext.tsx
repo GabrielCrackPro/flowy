@@ -22,6 +22,8 @@ interface OnboardingContextValue {
   completeOnboarding: () => Promise<void>;
   /** Dismiss without persisting to DB (user skipped — localStorage only). */
   dismissOnboarding: () => void;
+  /** Reset onboarding state so the wizard can be replayed. */
+  resetOnboarding: () => Promise<void>;
 }
 
 const OnboardingContext = createContext<OnboardingContextValue | undefined>(
@@ -40,6 +42,14 @@ function readLocalStorage(): boolean {
 function writeLocalStorage() {
   try {
     localStorage.setItem(STORAGE_KEY, "1");
+  } catch {
+    // Storage may be unavailable in private browsing.
+  }
+}
+
+function clearLocalStorage() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
   } catch {
     // Storage may be unavailable in private browsing.
   }
@@ -81,14 +91,34 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }).catch(() => undefined);
   }, [update]);
 
+  const resetOnboarding = useCallback(async () => {
+    clearLocalStorage();
+    try {
+      await update({ onboardingCompletedAt: null });
+    } catch {
+      // Best-effort — localStorage is already cleared so the wizard will
+      // appear on next page load.
+    }
+    // Set localDone AFTER the DB update so the sync effect doesn't see a
+    // stale profile.onboardingCompletedAt and immediately re-close.
+    setLocalDone(false);
+  }, [update]);
+
   const value = useMemo(
     () => ({
       loading: profileLoading,
       needsOnboarding,
       completeOnboarding,
       dismissOnboarding,
+      resetOnboarding,
     }),
-    [profileLoading, needsOnboarding, completeOnboarding, dismissOnboarding],
+    [
+      profileLoading,
+      needsOnboarding,
+      completeOnboarding,
+      dismissOnboarding,
+      resetOnboarding,
+    ],
   );
 
   return (
