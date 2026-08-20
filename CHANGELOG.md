@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.42](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.41...flowy-v0.1.42) (2026-08-20)
+
+
+### Features
+
+* **ui:** onboarding wizard redesign with polished UX ([#203](https://github.com/GabrielCrackPro/flowy/issues/203)) ([0208608](https://github.com/GabrielCrackPro/flowy/commit/020860862bf5ce7cfd567d9b02c36b901775a14f))
+
 ## [0.1.41](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.40...flowy-v0.1.41) (2026-08-20)
 
 
