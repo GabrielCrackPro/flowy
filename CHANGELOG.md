@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.41](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.40...flowy-v0.1.41) (2026-08-20)
+
+
+### Features
+
+* **ui:** dashboard month picker, notifications page and unified loading states ([#199](https://github.com/GabrielCrackPro/flowy/issues/199)) ([efb4c8b](https://github.com/GabrielCrackPro/flowy/commit/efb4c8b7b7b52e1a8bf0b3d9a730a41ad1cbd4e9))
+
 ## [0.1.40](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.39...flowy-v0.1.40) (2026-08-18)
 
 
