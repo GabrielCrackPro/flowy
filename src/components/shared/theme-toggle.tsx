@@ -3,10 +3,10 @@
 import { Button } from "@components/ui";
 import { useTheme } from "@hooks/useTheme";
 import { cn } from "@lib/utils";
+import { Moon, Sun } from "lucide";
+import { MorphIcon } from "morphicons/react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Moon, Sun } from "@/lib/icons";
-import { Icon } from "./icon";
 
 interface ThemeToggleProps {
   className?: string;
@@ -47,10 +47,8 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     >
       {!mounted ? (
         <span className="size-4" />
-      ) : isDark ? (
-        <Icon icon={Sun} className="size-4" />
       ) : (
-        <Icon icon={Moon} className="size-4" />
+        <MorphIcon icon={isDark ? Sun : Moon} size={16} reducedMotion="user" />
       )}
     </Button>
   );

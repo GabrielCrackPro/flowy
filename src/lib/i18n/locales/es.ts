@@ -281,6 +281,9 @@ export const app: AppTranslationMessages = {
       showLanguageSelectorLabel: "Mostrar selector de idioma",
       showLanguageSelectorHint:
         "Activa esta opción para ver el cambio de idioma en la app",
+      sidebarHoverExpandLabel: "Expandir barra lateral al pasar el ratón",
+      sidebarHoverExpandHint:
+        "Expandir automáticamente la barra lateral al pasar el ratón cuando está contraída",
       save: "Guardar cambios",
       saving: "Guardando...",
       updateSuccess: "Perfil actualizado correctamente",
@@ -567,6 +570,8 @@ export const app: AppTranslationMessages = {
       deviceMobile: "{{browser}} · {{os}} móvil",
       deviceUnknown: "Dispositivo desconocido",
       deliveryHistoryTitle: "Historial de entregas",
+      clearDeliveryHistorySuccess: "Historial de entregas eliminado",
+      clearDeliveryHistoryError: "No se pudo eliminar el historial de entregas",
       delivery: {
         sent: "Entregada",
         failed: "Fallida",
@@ -596,13 +601,20 @@ export const app: AppTranslationMessages = {
     },
     preferences: {
       title: "Preferencias",
-      description: "Tema, idioma, moneda y introducción",
+      description:
+        "Personaliza tema, idioma, moneda y comportamiento de la interfaz",
       themeLabel: "Tema",
       themeHint: "Personaliza colores y apariencia",
       localeLabel: "Idioma",
       localeHint: "Idioma de la interfaz",
       currencyLabel: "Moneda",
       currencyHint: "Se usa para formatear los importes",
+      showLanguageSelectorLabel: "Mostrar selector de idioma",
+      showLanguageSelectorHint:
+        "Activa esta opción para ver el cambio de idioma en la app",
+      sidebarHoverExpandLabel: "Expandir barra lateral al pasar el ratón",
+      sidebarHoverExpandHint:
+        "Expandir automáticamente la barra lateral al pasar el ratón cuando está contraída",
       replayOnboarding: "Reiniciar introducción",
       replayOnboardingHint: "Volver a ver el tour de bienvenida",
       replayOnboardingConfirm:

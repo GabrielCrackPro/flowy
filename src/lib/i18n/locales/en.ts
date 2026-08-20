@@ -276,6 +276,9 @@ export const app: AppTranslationMessages = {
       showLanguageSelectorLabel: "Show language selector",
       showLanguageSelectorHint:
         "Enable this to display the language switcher in the app",
+      sidebarHoverExpandLabel: "Expand sidebar on hover",
+      sidebarHoverExpandHint:
+        "Automatically expand the sidebar when hovering over it while collapsed",
       save: "Save changes",
       saving: "Saving...",
       updateSuccess: "Profile updated successfully",
@@ -553,6 +556,8 @@ export const app: AppTranslationMessages = {
       deviceMobile: "{{browser}} · {{os}} mobile",
       deviceUnknown: "Unknown device",
       deliveryHistoryTitle: "Delivery history",
+      clearDeliveryHistorySuccess: "Delivery history cleared",
+      clearDeliveryHistoryError: "Could not clear delivery history",
       delivery: {
         sent: "Delivered",
         failed: "Failed",
@@ -582,13 +587,19 @@ export const app: AppTranslationMessages = {
     },
     preferences: {
       title: "Preferences",
-      description: "Theme, language, currency, and onboarding",
+      description: "Customize theme, language, currency, and UI behavior",
       themeLabel: "Theme",
       themeHint: "Customize colors and appearance",
       localeLabel: "Language",
       localeHint: "Interface language",
       currencyLabel: "Currency",
       currencyHint: "Used to format amounts",
+      showLanguageSelectorLabel: "Show language selector",
+      showLanguageSelectorHint:
+        "Enable this to display the language switcher in the app",
+      sidebarHoverExpandLabel: "Expand sidebar on hover",
+      sidebarHoverExpandHint:
+        "Automatically expand the sidebar when hovering over it while collapsed",
       replayOnboarding: "Replay onboarding",
       replayOnboardingHint: "See the welcome tour again",
       replayOnboardingConfirm:

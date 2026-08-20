@@ -2,6 +2,7 @@
 
 import { useIsFetching } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Loader2 as Loader2Data } from "lucide";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,6 +29,7 @@ import type { OverallStatus } from "@/lib/services/status";
 import { cn } from "@/lib/utils";
 import { BottomSheet } from "./bottom-sheet";
 import { Icon, type IconProps } from "./icon";
+import { LoadingIcon } from "./loading-icon";
 import { RelativeTime } from "./relative-time";
 import { SyncRetryButton } from "./sync-retry-button";
 
@@ -356,7 +358,12 @@ function StatusLegend({
       </div>
       <div className="flex items-center gap-2">
         <span className={dotWrap}>
-          <Loader2 className="size-3 animate-spin text-primary" />
+          <LoadingIcon
+            icon={Loader2Data}
+            loading
+            size={12}
+            className="text-primary"
+          />
         </span>
         <span>{t("dashboard.syncing")}</span>
       </div>

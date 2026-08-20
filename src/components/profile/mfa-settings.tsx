@@ -1,9 +1,10 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Check as CheckData } from "lucide";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ConfirmDialog, Icon } from "@/components/shared";
+import { ConfirmDialog, Icon, LoadingIcon } from "@/components/shared";
 import { MfaSetupDialog } from "@/components/shared/mfa-setup-dialog";
 import {
   OTP_CODE_LENGTH,
@@ -17,9 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useTheme } from "@/hooks/useTheme";
 import { translateMfaError } from "@/lib/auth/errors";
 import {
-  Check,
   KeyRound,
-  Loader2,
   Pencil,
   Plus,
   ShieldCheck,
@@ -481,11 +480,11 @@ export function MfaSettings() {
                         aria-label={t("settings.security.mfaRename")}
                         title={t("settings.security.mfaRename")}
                       >
-                        {renameBusy ? (
-                          <Loader2 className="size-3.5 animate-spin" />
-                        ) : (
-                          <Check className="size-3.5" />
-                        )}
+                        <LoadingIcon
+                          icon={CheckData}
+                          loading={renameBusy}
+                          size={14}
+                        />
                       </Button>
                       <Button
                         type="button"
@@ -610,16 +609,12 @@ export function MfaSettings() {
         description={t("settings.security.mfaDisableVerificationDescription")}
         icon={<Icon icon={ShieldCheck} className="size-5" />}
         confirmLabel={
-          <>
-            {removalBusy ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <X className="size-4" />
-            )}
+          <span className="inline-flex items-center gap-2">
+            <LoadingIcon icon={CheckData} loading={removalBusy} size={16} />
             {removalBusy
               ? t("settings.security.mfaDisabling")
               : t("settings.security.mfaDisable")}
-          </>
+          </span>
         }
         onConfirm={() => void removeFactor()}
         closeOnConfirm={false}

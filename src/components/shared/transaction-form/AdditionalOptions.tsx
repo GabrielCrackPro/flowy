@@ -1,7 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, ChevronUp } from "lucide";
+import { MorphIcon } from "morphicons/react";
 import { useId } from "react";
 import { Badge, Textarea } from "@/components/ui";
-import { ChevronDown, StickyNote } from "@/lib/icons";
+import { StickyNote } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { Icon } from "../icon";
 
@@ -75,12 +77,11 @@ export function AdditionalOptions({
             </motion.div>
           ) : null}
         </div>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <Icon icon={ChevronDown} className="size-4" />
-        </motion.div>
+        <MorphIcon
+          icon={isOpen ? ChevronUp : ChevronDown}
+          size={16}
+          reducedMotion="user"
+        />
       </motion.button>
       <AnimatePresence initial={false}>
         {isOpen ? (

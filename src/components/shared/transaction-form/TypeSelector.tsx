@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
+import { ArrowDownCircle, ArrowUpCircle } from "lucide";
+import { MorphIcon } from "morphicons/react";
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 import type { TransactionType } from "@/types/Transaction";
-import { ExpenseIcon, Icon, IncomeIcon } from "../icon";
 
 interface TypeSelectorProps {
   value: TransactionType;
@@ -29,7 +30,6 @@ export function TypeSelector({
       {(["EXPENSE", "INCOME"] as const).map((type) => {
         const active = value === type;
         const isExpenseType = type === "EXPENSE";
-        const IconComponent = isExpenseType ? ExpenseIcon : IncomeIcon;
         return (
           <motion.button
             key={type}
@@ -58,7 +58,12 @@ export function TypeSelector({
                 }}
               />
             ) : null}
-            <Icon icon={IconComponent} size="md" className="relative" />
+            <MorphIcon
+              icon={isExpenseType ? ArrowDownCircle : ArrowUpCircle}
+              size={16}
+              reducedMotion="user"
+              className="relative"
+            />
             <span className="relative">
               {isExpenseType ? expenseLabel : incomeLabel}
             </span>

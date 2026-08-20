@@ -34,6 +34,7 @@ export * from "./incident-banner";
 export * from "./install-app-button";
 export * from "./list-create-button";
 export * from "./list-page-loading";
+export * from "./loading-icon";
 export * from "./mfa-setup-banner";
 export * from "./not-found-page";
 export * from "./offline-banner";

@@ -2,16 +2,12 @@
 
 import { cn, formatCurrency } from "@lib/utils";
 import { motion } from "framer-motion";
+import { ArrowDownCircle, ArrowUpCircle } from "lucide";
+import { MorphIcon } from "morphicons/react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { parseDateOnly } from "@/lib/date-only";
-import {
-  ArrowDownCircle,
-  ArrowUpCircle,
-  Calendar,
-  Repeat2,
-  Wallet,
-} from "@/lib/icons";
+import { Calendar, Repeat2, Wallet } from "@/lib/icons";
 import type { Category } from "@/types/Category";
 import type { Transaction, TransactionType } from "@/types/Transaction";
 import { PAYMENT_METHOD_KEY } from "@/utils/constants";
@@ -19,6 +15,7 @@ import { AnimatedGradient } from "./animated-gradient";
 import { BottomSheet } from "./bottom-sheet";
 import { EntityAudit } from "./entity-audit";
 import { CategoryIcon, Icon } from "./icon";
+import { LoadingIcon } from "./loading-icon";
 import { PaymentMethodIcon } from "./payment-method-icon";
 import { TagBadge } from "./tag-badge";
 
@@ -146,9 +143,10 @@ export function TransactionDetailModal({
         (isIncome ? t("transaction.income") : t("transaction.expense"))
       }
       icon={
-        <Icon
+        <MorphIcon
           icon={isIncome ? ArrowUpCircle : ArrowDownCircle}
-          className="size-5"
+          size={20}
+          reducedMotion="user"
         />
       }
       iconGradient={
@@ -258,51 +256,54 @@ export function TransactionDetailModal({
                 : "bg-gradient-to-br from-rose-500 to-rose-600 text-white dark:from-rose-600 dark:to-rose-700",
             )}
           >
-            {isIncome ? (
-              <Icon icon={ArrowUpCircle} className="size-6" />
-            ) : (
-              <Icon icon={ArrowDownCircle} className="size-6" />
-            )}
+            <MorphIcon
+              icon={isIncome ? ArrowUpCircle : ArrowDownCircle}
+              size={24}
+              reducedMotion="user"
+            />
           </motion.div>
         </div>
 
         <div className="mt-5 flex items-center gap-2">
-          <div className="grid flex-1 grid-cols-2 gap-1 rounded-xl bg-white/60 p-1 ring-1 ring-black/5 dark:bg-black/20">
+          <div className="grid flex-1 grid-cols-2 gap-1 rounded-xl bg-muted/30 p-1 ring-1 ring-border/30">
             {(["EXPENSE", "INCOME"] as const).map((type) => {
               const active = isIncome === (type === "INCOME");
               const isExpenseType = type === "EXPENSE";
-              const IconComponent = isExpenseType
-                ? ArrowDownCircle
-                : ArrowUpCircle;
+              const disabled = !onUpdate || updating;
+
               return (
                 <motion.button
                   key={type}
                   type="button"
-                  disabled={!onUpdate || updating}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  disabled={disabled}
+                  whileHover={disabled ? undefined : { scale: 1.02 }}
+                  whileTap={disabled ? undefined : { scale: 0.98 }}
                   onClick={handleToggleType}
                   className={cn(
-                    "relative flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition",
+                    "relative flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-semibold transition-all duration-200",
+                    disabled && "cursor-not-allowed opacity-50",
                     active
                       ? isExpenseType
-                        ? "text-rose-600 dark:text-rose-400"
-                        : "text-emerald-600 dark:text-emerald-400"
-                      : "text-muted-foreground/50 hover:text-foreground",
+                        ? "bg-rose-500/10 text-rose-600 shadow-sm ring-1 ring-rose-500/20 dark:text-rose-400"
+                        : "bg-emerald-500/10 text-emerald-600 shadow-sm ring-1 ring-emerald-500/20 dark:text-emerald-400"
+                      : "text-muted-foreground/60 hover:bg-muted/50 hover:text-foreground",
                   )}
                 >
-                  {active ? (
-                    <motion.span
-                      layoutId="sheet-type-bg"
-                      className="absolute inset-0 rounded-lg bg-card shadow-sm ring-1 ring-border/20"
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 32,
-                      }}
+                  {updating && active ? (
+                    <LoadingIcon
+                      icon={isExpenseType ? ArrowDownCircle : ArrowUpCircle}
+                      loading
+                      size={14}
+                      className="relative"
                     />
-                  ) : null}
-                  <Icon icon={IconComponent} className="relative size-3.5" />
+                  ) : (
+                    <MorphIcon
+                      icon={isExpenseType ? ArrowDownCircle : ArrowUpCircle}
+                      size={14}
+                      reducedMotion="user"
+                      className="relative"
+                    />
+                  )}
                   <span className="relative">
                     {isExpenseType
                       ? t("transactions.expenses")
@@ -312,15 +313,6 @@ export function TransactionDetailModal({
               );
             })}
           </div>
-          {updating && (
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="size-3 shrink-0"
-            >
-              <span className="block size-3 rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
-            </motion.div>
-          )}
         </div>
       </motion.div>
 

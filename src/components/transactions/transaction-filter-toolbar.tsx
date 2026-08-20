@@ -10,7 +10,9 @@ import {
 } from "@components/shared";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
-import { ChevronDown, Filter } from "@/lib/icons";
+import { ChevronDown, ChevronUp } from "lucide";
+import { MorphIcon } from "morphicons/react";
+import { Filter } from "@/lib/icons";
 import type { Transaction } from "@/types/Transaction";
 import type { FilterField } from "@/types/ui";
 import { NewTransaction } from "../dashboard/new-transaction/new-transaction";
@@ -84,13 +86,13 @@ export function TransactionFilterToolbar({
     >
       <Icon icon={Filter} className="size-4" />
       <span>{t("transactions.filterBtn")}</span>
-      <motion.span
-        animate={{ rotate: filterOpen ? 180 : 0 }}
-        transition={{ duration: 0.2 }}
-        className="hidden sm:flex"
-      >
-        <Icon icon={ChevronDown} className="size-3.5" />
-      </motion.span>
+      <span className="hidden sm:flex">
+        <MorphIcon
+          icon={filterOpen ? ChevronUp : ChevronDown}
+          size={14}
+          reducedMotion="user"
+        />
+      </span>
       {activeFilterCount > 0 && (
         <span
           title={t("filters.activeCount", { count: activeFilterCount })}

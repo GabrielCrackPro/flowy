@@ -9,11 +9,13 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon, type IconProps } from "@/components/shared";
 import { Button } from "@/components/ui";
+import { usePreferences } from "@/hooks/usePreferences";
 import {
   ArrowUpDown,
   Droplet,
@@ -47,6 +49,8 @@ type SidebarStateContextValue = {
   collapsed: boolean;
   setCollapsed: (next: boolean) => void;
   toggleCollapsed: () => void;
+  hovered: boolean;
+  setHovered: (next: boolean) => void;
 };
 
 const SidebarStateContext = createContext<SidebarStateContextValue | null>(
@@ -60,6 +64,8 @@ export function useSidebarState() {
       collapsed: false,
       setCollapsed: () => {},
       toggleCollapsed: () => {},
+      hovered: false,
+      setHovered: () => {},
     };
   }
   return ctx;
@@ -79,6 +85,7 @@ export function SidebarContent({
   const pathname = usePathname();
   const state = useSidebarState();
   const collapsed = variant === "desktop" ? state.collapsed : false;
+  const hovered = variant === "desktop" ? state.hovered : false;
   const { t } = useTranslation();
 
   const nav: NavSection[] = useMemo(
@@ -144,8 +151,8 @@ export function SidebarContent({
     <div className={cn("flex h-full w-full flex-col bg-card", className)}>
       <div
         className={cn(
-          "flex shrink-0 items-center border-b border-border/30 transition-[padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          collapsed && variant === "desktop"
+          "flex shrink-0 items-center border-b border-border/30 transition-[padding] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
+          collapsed && !hovered && variant === "desktop"
             ? "flex-col gap-1.5 px-2 py-1.5"
             : "justify-between px-4 py-4",
         )}
@@ -155,7 +162,7 @@ export function SidebarContent({
           onClick={onNavigate}
           className={cn(
             "flex items-center min-w-0 group/logo",
-            collapsed && variant === "desktop"
+            collapsed && !hovered && variant === "desktop"
               ? "justify-center w-full"
               : "gap-3",
           )}
@@ -163,7 +170,9 @@ export function SidebarContent({
           <motion.div
             className={cn(
               "flex shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20 transition duration-300",
-              collapsed && variant === "desktop" ? "size-9" : "size-10",
+              collapsed && !hovered && variant === "desktop"
+                ? "size-9"
+                : "size-10",
             )}
             whileHover={{ scale: 1.05, rotate: 5 }}
             whileTap={{ scale: 0.95 }}
@@ -178,11 +187,11 @@ export function SidebarContent({
             className="min-w-0 overflow-hidden"
             initial={{ opacity: 0, x: -12 }}
             animate={{
-              opacity: collapsed ? 0 : 1,
-              x: collapsed ? -12 : 0,
-              width: collapsed ? 0 : "auto",
+              opacity: collapsed && !hovered ? 0 : 1,
+              x: collapsed && !hovered ? -12 : 0,
+              width: collapsed && !hovered ? 0 : "auto",
             }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
           >
             <h1 className="text-lg font-bold tracking-tight leading-none bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Flowy
@@ -216,14 +225,14 @@ export function SidebarContent({
       </div>
 
       <SpaceSwitcher
-        collapsed={collapsed && variant === "desktop"}
+        collapsed={collapsed && !hovered && variant === "desktop"}
         onNavigate={onNavigate}
       />
 
       <nav
         className={cn(
-          "sidebar-scrollbar flex-1 min-h-0 w-full scroll-smooth overflow-y-auto transition-[padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          collapsed && variant === "desktop"
+          "sidebar-scrollbar flex-1 min-h-0 w-full scroll-smooth overflow-y-auto transition-[padding] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
+          collapsed && !hovered && variant === "desktop"
             ? "px-0 py-3 space-y-1"
             : "px-2.5 py-3 space-y-5",
         )}
@@ -234,12 +243,12 @@ export function SidebarContent({
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: sectionIndex * 0.05 }}
-            className="space-y-1 transition-[margin-top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="space-y-1 transition-[margin-top] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
           >
             <div
               className={cn(
                 "px-3 transition duration-300 overflow-hidden",
-                collapsed && variant === "desktop"
+                collapsed && !hovered && variant === "desktop"
                   ? "max-h-0 opacity-0"
                   : cn(
                       "max-h-12 opacity-100",
@@ -256,7 +265,7 @@ export function SidebarContent({
                 <span className="h-px flex-1 bg-gradient-to-r from-border/50 to-transparent" />
               </div>
             </div>
-            {collapsed && variant === "desktop" ? (
+            {collapsed && !hovered && variant === "desktop" ? (
               <div className="mx-auto my-2.5 h-px w-7 rounded-full bg-gradient-to-r from-border/80 via-border/60 to-border/80" />
             ) : null}
 
@@ -278,7 +287,7 @@ export function SidebarContent({
                       label={item.label}
                       icon={item.icon}
                       active={active}
-                      collapsed={collapsed && variant === "desktop"}
+                      collapsed={collapsed && !hovered && variant === "desktop"}
                       onClick={onNavigate}
                       badge={item.badge}
                       expandDelay={itemIndex * 25}
@@ -298,13 +307,13 @@ export function SidebarContent({
 
       <div className="shrink-0 border-t border-border/30">
         <AnimatePresence initial={false} mode="popLayout">
-          {!(collapsed && variant === "desktop") ? (
+          {!(collapsed && !hovered && variant === "desktop") ? (
             <motion.div
               key="cta-expanded"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
               className="p-3 pb-0 pt-3"
             >
               <NewTransaction
@@ -318,7 +327,7 @@ export function SidebarContent({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.85 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
               className="p-3 pb-0 pt-3"
             >
               <Button
@@ -346,12 +355,14 @@ export function SidebarContent({
 
         <div
           className={cn(
-            collapsed && variant === "desktop" ? "py-1" : "px-3 py-2",
+            collapsed && !hovered && variant === "desktop"
+              ? "py-1"
+              : "px-3 py-2",
           )}
         >
           <SidebarProfile
             variant={variant}
-            collapsed={collapsed && variant === "desktop"}
+            collapsed={collapsed && !hovered && variant === "desktop"}
             onNavigate={onNavigate}
             className="border-t-0"
           />
@@ -372,7 +383,15 @@ function getInitialCollapsed(): boolean {
 
 export function Sidebar() {
   const { t } = useTranslation();
+  const { get } = usePreferences();
   const [collapsed, setCollapsed] = useState(getInitialCollapsed);
+  const [hovered, setHovered] = useState(false);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check if sidebar hover expand is enabled in profile (default: true)
+  const sidebarHoverExpand = get("sidebarHoverExpand");
+
   const toggleCollapsed = useCallback(() => {
     setCollapsed((c) => {
       const next = !c;
@@ -383,6 +402,40 @@ export function Sidebar() {
       }
       return next;
     });
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    if (!collapsed || !sidebarHoverExpand) return;
+    // Clear any pending leave timeout
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+      leaveTimeoutRef.current = null;
+    }
+    // Expand after a small delay to avoid accidental expansion
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHovered(true);
+    }, 200);
+  }, [collapsed, sidebarHoverExpand]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!collapsed) return;
+    // Clear any pending enter timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    // Collapse after a small delay to allow moving to content
+    leaveTimeoutRef.current = setTimeout(() => {
+      setHovered(false);
+    }, 300);
+  }, [collapsed]);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+      if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current);
+    };
   }, []);
 
   // Cmd/Ctrl + B toggles the sidebar (standard dashboard shortcut)
@@ -403,18 +456,29 @@ export function Sidebar() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [toggleCollapsed]);
 
+  // Reset hover state when sidebar is expanded via button/shortcut
+  useEffect(() => {
+    if (!collapsed) {
+      setHovered(false);
+    }
+  }, [collapsed]);
+
+  const isExpanded = collapsed ? hovered : false;
+
   // The sidebar is the desktop navigation surface for both web and installed
   // PWA. Mobile viewports hide it via CSS (md:flex) and use the bottom nav bar
   // instead, so browser and PWA look identical on every screen size.
   return (
     <SidebarStateContext.Provider
-      value={{ collapsed, setCollapsed, toggleCollapsed }}
+      value={{ collapsed, setCollapsed, toggleCollapsed, hovered, setHovered }}
     >
       <aside
         id="sidebar"
-        style={{ width: collapsed ? "4.5rem" : "18rem" }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={{ width: isExpanded ? "18rem" : collapsed ? "4.5rem" : "18rem" }}
         className={cn(
-          "hidden h-screen shrink-0 border-r border-border/50 bg-card shadow-[8px_0_24px_-24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex",
+          "hidden h-screen shrink-0 border-r border-border/50 bg-card backdrop-blur-xl shadow-[8px_0_24px_-24px_rgba(0,0,0,0.45)] transition-[width] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:flex",
         )}
         aria-label={t("nav.mainAriaLabel")}
       >

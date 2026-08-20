@@ -1,11 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Plus } from "lucide";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui";
-import { Loader2, Plus } from "@/lib/icons";
 import { cn } from "@/lib/utils";
-import { Icon } from "../icon";
+import { LoadingIcon } from "../loading-icon";
 
 export function FormActions({
   embedded = false,
@@ -57,19 +57,14 @@ export function FormActions({
               : "bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700",
           )}
         >
-          {busy ? (
-            <span className="inline-flex items-center gap-2">
-              <Icon icon={Loader2} className="size-4 animate-spin" />
-              {t("transaction.saving")}
-            </span>
-          ) : (
-            <>
-              <Icon icon={Plus} className="size-4" />
-              {mode === "edit"
+          <span className="inline-flex items-center gap-2">
+            <LoadingIcon icon={Plus} loading={busy} size={16} />
+            {busy
+              ? t("transaction.saving")
+              : mode === "edit"
                 ? t("transaction.saveChanges")
                 : t("transaction.save")}
-            </>
-          )}
+          </span>
         </Button>
       </motion.div>
     </motion.div>

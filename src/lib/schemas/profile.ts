@@ -5,7 +5,15 @@ export const updateProfileSchema = z.object({
   avatarUrl: z.string().url().optional().nullable(),
   currency: z.string().trim().min(3).max(8).optional(),
   locale: z.string().trim().min(2).max(10).optional(),
-  showLanguageSelector: z.boolean().optional(),
+  preferences: z
+    .object({
+      showLanguageSelector: z.boolean().optional(),
+      sidebarHoverExpand: z.boolean().optional(),
+      statusAlertsEnabled: z.boolean().optional(),
+      statusAlertComponents: z.array(z.string()).optional(),
+      statusAlertSeverities: z.array(z.string()).optional(),
+    })
+    .optional(),
   dashboardCards: z.array(z.string()).optional().nullable(),
   dashboardOrder: z.array(z.string()).optional().nullable(),
   onboardingCompletedAt: z.string().datetime().optional().nullable(),

@@ -3,6 +3,7 @@
 import {
   Alert,
   Icon,
+  LoadingIcon,
   RelativeTime,
   Skeleton,
   toast,
@@ -13,20 +14,13 @@ import { useDashboardData } from "@hooks/useDashboardData";
 import { useProfile } from "@hooks/useProfile";
 import { cn } from "@lib/utils";
 import { motion } from "framer-motion";
+import { RefreshCcw as RefreshData } from "lucide";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { classifyError, RateLimitError } from "@/lib/errors/error-types";
-import {
-  Calendar,
-  Loader2,
-  Moon,
-  RefreshCcw,
-  RotateCcw,
-  Sun,
-  Sunset,
-} from "@/lib/icons";
+import { Calendar, Moon, RotateCcw, Sun, Sunset } from "@/lib/icons";
 import { getGreetingMessage } from "@/utils/dashboard";
 import { DashboardCustomize } from "../dashboard-customize/dashboard-customize";
 import { MonthPicker } from "../month-picker/month-picker";
@@ -170,7 +164,12 @@ export function DashboardHeader({
                   >
                     {isFetching ? (
                       <>
-                        <Loader2 className="size-3 shrink-0 animate-spin" />
+                        <LoadingIcon
+                          icon={RefreshData}
+                          loading
+                          size={12}
+                          className="shrink-0"
+                        />
                         <span className="truncate">
                           {t("dashboard.updating")}
                         </span>
@@ -234,9 +233,10 @@ export function DashboardHeader({
                   aria-busy={isFetching}
                   className="flex h-7 shrink-0 cursor-pointer items-center justify-center rounded-full px-1.5 text-xs font-medium text-muted-foreground/70 transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 sm:px-2"
                 >
-                  <Icon
-                    icon={RefreshCcw}
-                    className={cn("size-3.5", isFetching && "animate-spin")}
+                  <LoadingIcon
+                    icon={RefreshData}
+                    loading={isFetching}
+                    size={14}
                   />
                 </motion.button>
               </div>

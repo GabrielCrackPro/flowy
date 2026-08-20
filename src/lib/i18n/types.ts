@@ -261,6 +261,8 @@ export type AppTranslationMessages = {
       avatarError: string;
       showLanguageSelectorLabel: string;
       showLanguageSelectorHint: string;
+      sidebarHoverExpandLabel: string;
+      sidebarHoverExpandHint: string;
       save: string;
       saving: string;
       updateSuccess: string;
@@ -507,6 +509,8 @@ export type AppTranslationMessages = {
       deviceMobile: string;
       deviceUnknown: string;
       deliveryHistoryTitle: string;
+      clearDeliveryHistorySuccess: string;
+      clearDeliveryHistoryError: string;
       delivery: {
         sent: string;
         failed: string;
@@ -542,6 +546,10 @@ export type AppTranslationMessages = {
       localeHint: string;
       currencyLabel: string;
       currencyHint: string;
+      showLanguageSelectorLabel: string;
+      showLanguageSelectorHint: string;
+      sidebarHoverExpandLabel: string;
+      sidebarHoverExpandHint: string;
       replayOnboarding: string;
       replayOnboardingHint: string;
       replayOnboardingConfirm: string;

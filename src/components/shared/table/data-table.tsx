@@ -11,6 +11,11 @@ import {
 import { cn } from "@lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ChevronDown as ChevronDownData,
+  ChevronUp as ChevronUpData,
+} from "lucide";
+import { MorphIcon } from "morphicons/react";
+import {
   type ReactNode,
   useCallback,
   useEffect,
@@ -429,12 +434,11 @@ export function DataTable<T>({
                 className="flex h-8 items-center gap-1.5 rounded-lg border border-border/30 bg-card pl-2.5 pr-2 text-xs font-medium text-muted-foreground/80 transition duration-200 hover:border-border/50 hover:bg-muted/30 hover:text-foreground focus:border-ring focus:ring-2 focus:ring-primary/20 shadow-sm"
               >
                 {pageSize}
-                <motion.div
-                  animate={{ rotate: pageSizeOpen ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Icon icon={ChevronDown} className="size-3.5" />
-                </motion.div>
+                <MorphIcon
+                  icon={pageSizeOpen ? ChevronUpData : ChevronDownData}
+                  size={14}
+                  reducedMotion="user"
+                />
               </motion.button>
               <AnimatePresence>
                 {pageSizeOpen && (

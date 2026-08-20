@@ -1,7 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Plus, X } from "lucide";
 import type { LucideIcon } from "lucide-react";
+import { MorphIcon } from "morphicons/react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,15 +20,7 @@ import { useGoalApi } from "@/hooks/api/useGoalApi";
 import { useSubscriptionApi } from "@/hooks/api/useSubscriptionApi";
 import { useHideOnScroll } from "@/hooks/useHideOnScroll";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import {
-  ArrowUpDown,
-  Plus,
-  Repeat2,
-  Tag,
-  Target,
-  Wallet,
-  X,
-} from "@/lib/icons";
+import { ArrowUpDown, Repeat2, Tag, Target, Wallet } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import type { CreateBudgetInput, UpdateBudgetInput } from "@/types/Budget";
 import type {
@@ -302,18 +296,7 @@ function PwaFabContent() {
             transition={{ duration: 0.25, type: "spring", stiffness: 260 }}
             className="relative flex size-8 items-center justify-center rounded-full bg-primary-foreground/10"
           >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={open ? "close" : "add"}
-                initial={{ opacity: 0, scale: 0.5, rotate: open ? -45 : 45 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                exit={{ opacity: 0, scale: 0.5, rotate: open ? 45 : -45 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.16 }}
-                className="flex items-center justify-center"
-              >
-                <Icon icon={open ? X : Plus} className="size-6" />
-              </motion.span>
-            </AnimatePresence>
+            <MorphIcon icon={open ? X : Plus} size={24} reducedMotion="user" />
           </motion.span>
         </motion.button>
       </motion.div>

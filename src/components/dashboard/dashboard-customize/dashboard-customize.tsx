@@ -2,9 +2,10 @@
 
 import { Button, Switch } from "@components/ui";
 import { Reorder, useDragControls } from "framer-motion";
+import { Check as CheckData, RotateCcw as RotateData } from "lucide";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon, type IconProps } from "@/components/shared";
+import { Icon, type IconProps, LoadingIcon } from "@/components/shared";
 import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { toast } from "@/components/shared/toast";
 import { useDashboardOrder } from "@/hooks/useDashboardOrder";
@@ -26,10 +27,8 @@ import {
   Info,
   LayoutGrid,
   Lightbulb,
-  Loader2,
   Receipt,
   Repeat2,
-  RotateCcw,
   Target,
   Wallet,
 } from "@/lib/icons";
@@ -136,9 +135,11 @@ function CardReorderRow({
       </div>
 
       {pending ? (
-        <Icon
-          icon={Loader2}
-          className="size-4 shrink-0 animate-spin text-muted-foreground"
+        <LoadingIcon
+          icon={CheckData}
+          loading
+          size={16}
+          className="shrink-0 text-muted-foreground"
           aria-hidden
         />
       ) : null}
@@ -287,10 +288,7 @@ export function DashboardCustomize({
             disabled={busy}
             className="h-11 w-full sm:h-10 sm:w-auto sm:px-3"
           >
-            <Icon
-              icon={bulkBusy ? Loader2 : RotateCcw}
-              className={cn("size-4", bulkBusy && "animate-spin")}
-            />
+            <LoadingIcon icon={RotateData} loading={bulkBusy} size={16} />
             {t("dashboard.customizeReset")}
           </Button>
         }

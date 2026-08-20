@@ -1,11 +1,12 @@
 "use client";
 
+import { Plus as PlusData } from "lucide";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared/icon";
+import { Icon, LoadingIcon } from "@/components/shared";
 import { Button, Input, Switch } from "@/components/ui";
 import { useSpaces } from "@/hooks/useSpaces";
-import { Loader2, Plus, X } from "@/lib/icons";
+import { Plus, X } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface SpaceCreateFormProps {
@@ -98,11 +99,7 @@ export function SpaceCreateForm({
           disabled={!name.trim() || create.isPending}
           className="h-10 w-full gap-1.5"
         >
-          {create.isPending ? (
-            <Icon icon={Loader2} className="size-4 animate-spin" />
-          ) : (
-            <Icon icon={Plus} className="size-4" />
-          )}
+          <LoadingIcon icon={PlusData} loading={create.isPending} size={16} />
           {t("profile.spaces.create")}
         </Button>
       </form>
@@ -142,11 +139,7 @@ export function SpaceCreateForm({
           disabled={!name.trim() || create.isPending}
           className="h-11 shrink-0 gap-1.5"
         >
-          {create.isPending ? (
-            <Icon icon={Loader2} className="size-4 animate-spin" />
-          ) : (
-            <Icon icon={Plus} className="size-4" />
-          )}
+          <LoadingIcon icon={PlusData} loading={create.isPending} size={16} />
           {t("profile.spaces.create")}
         </Button>
       </div>

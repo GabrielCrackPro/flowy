@@ -1,7 +1,8 @@
 "use client";
 
+import { Check as CheckData } from "lucide";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared";
+import { Icon, LoadingIcon } from "@/components/shared";
 import {
   CurrencySelect,
   LanguageSelect,
@@ -10,11 +11,10 @@ import { toast } from "@/components/shared/toast";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { useLocaleContext } from "@/context/LocaleContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useReactForm } from "@/hooks/useReactForm";
-import { AtSign, Check, Languages, Loader2, UserRound, X } from "@/lib/icons";
+import { AtSign, UserRound, X } from "@/lib/icons";
 import { updateProfileSchema } from "@/lib/schemas/profile";
 import type { Profile } from "@/types/Profile";
 import { AvatarUploader } from "./avatar-uploader";
@@ -39,7 +39,6 @@ export function ProfileForm({
       avatarUrl: profile.avatarUrl,
       currency: profile.currency || "USD",
       locale: profile.locale || "es",
-      showLanguageSelector: profile.showLanguageSelector ?? true,
     },
     schema: updateProfileSchema,
     onSubmit: async (values) => {
@@ -48,7 +47,6 @@ export function ProfileForm({
         avatarUrl: values.avatarUrl || null,
         currency: values.currency,
         locale: values.locale,
-        showLanguageSelector: values.showLanguageSelector,
       });
       toast.success(t("settings.profile.updateSuccess"));
       onSuccess?.();
@@ -122,27 +120,6 @@ export function ProfileForm({
             />
           </FormField>
         </div>
-
-        <div className="rounded-xl bg-muted/25 p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <Icon icon={Languages} className="size-4" />
-                {t("settings.profile.showLanguageSelectorLabel")}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {t("settings.profile.showLanguageSelectorHint")}
-              </p>
-            </div>
-            <Switch
-              checked={form.values.showLanguageSelector}
-              onCheckedChange={(checked) => {
-                form.handleValueChange("showLanguageSelector")(checked);
-              }}
-              aria-label={t("settings.profile.showLanguageSelectorLabel")}
-            />
-          </div>
-        </div>
       </div>
 
       {form.error && (
@@ -170,17 +147,12 @@ export function ProfileForm({
           disabled={form.busy}
           className="w-full gap-1.5 sm:w-auto"
         >
-          {form.busy ? (
-            <>
-              <Icon icon={Loader2} className="size-4 animate-spin" />
-              {t("settings.profile.saving")}
-            </>
-          ) : (
-            <>
-              <Icon icon={Check} className="size-4" />
-              {t("settings.profile.save")}
-            </>
-          )}
+          <span className="inline-flex items-center gap-1.5">
+            <LoadingIcon icon={CheckData} loading={form.busy} size={16} />
+            {form.busy
+              ? t("settings.profile.saving")
+              : t("settings.profile.save")}
+          </span>
         </Button>
       </div>
     </form>

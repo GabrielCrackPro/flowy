@@ -1,20 +1,14 @@
 "use client";
 
+import { Check as CheckData, RotateCcw as RotateData } from "lucide";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BottomSheet } from "@/components/shared/bottom-sheet";
+import { LoadingIcon } from "@/components/shared/loading-icon";
 import { toast } from "@/components/shared/toast";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
-import {
-  AlertTriangle,
-  Check,
-  Loader2,
-  Palette,
-  RotateCcw,
-  Sparkles,
-  X,
-} from "@/lib/icons";
+import { AlertTriangle, Palette, Sparkles, X } from "@/lib/icons";
 import { ColorPicker } from "./color-picker";
 import { ThemePreview } from "./theme-preview";
 
@@ -237,11 +231,7 @@ export function ThemeCustomizationSheet({
             disabled={saving}
             className="h-11 w-full sm:h-10 sm:w-auto sm:px-3"
           >
-            {saving ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <RotateCcw className="size-4" />
-            )}
+            <LoadingIcon icon={RotateData} loading={saving} size={16} />
             {t("settings.theme.resetToDefaults")}
           </Button>
         }
@@ -262,11 +252,7 @@ export function ThemeCustomizationSheet({
             disabled={saving || !hasChanges}
             className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 sm:h-10 sm:w-auto sm:min-w-28"
           >
-            {saving ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Check className="size-4" />
-            )}
+            <LoadingIcon icon={CheckData} loading={saving} size={16} />
             {saving ? t("common.saving") : t("settings.theme.saveChanges")}
           </Button>
         }

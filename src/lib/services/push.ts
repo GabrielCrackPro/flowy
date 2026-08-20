@@ -264,20 +264,21 @@ export const PushService = {
       where: { id: { in: userIds } },
       select: {
         id: true,
-        statusAlertsEnabled: true,
-        statusAlertComponents: true,
-        statusAlertSeverities: true,
+        preferences: true,
       },
     });
     const prefsByUser = new Map(
-      profiles.map((p) => [
-        p.id,
-        {
-          enabled: p.statusAlertsEnabled,
-          components: p.statusAlertComponents,
-          severities: p.statusAlertSeverities,
-        },
-      ]),
+      profiles.map((p) => {
+        const prefs = (p.preferences as Record<string, unknown>) ?? {};
+        return [
+          p.id,
+          {
+            enabled: (prefs.statusAlertsEnabled as boolean) ?? true,
+            components: (prefs.statusAlertComponents as string[]) ?? [],
+            severities: (prefs.statusAlertSeverities as string[]) ?? [],
+          },
+        ];
+      }),
     );
 
     let sent = 0;
@@ -485,5 +486,12 @@ export const PushService = {
       ...delivery,
       createdAt: delivery.createdAt.toISOString(),
     }));
+  },
+
+  async clearDeliveryHistory(userId: string) {
+    await prisma.pushDelivery.deleteMany({
+      where: { userId },
+    });
+    return { ok: true };
   },
 };

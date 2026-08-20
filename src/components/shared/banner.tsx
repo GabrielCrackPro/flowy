@@ -12,6 +12,7 @@ import {
   TriangleAlert,
   X,
 } from "@/lib/icons";
+import { LoadingIcon } from "./loading-icon";
 
 export type BannerSeverity = "danger" | "warning" | "success" | "info";
 export type BannerVariant = "card" | "strip";
@@ -109,6 +110,8 @@ interface BannerProps {
   actionIcon?: LucideIcon;
   /** Shows a spinner in the action button and disables it (e.g. enabling push). */
   actionBusy?: boolean;
+  /** Lucide data icon for the action button (for LoadingIcon morph). Falls back to actionIcon. */
+  actionIconData?: Parameters<typeof LoadingIcon>[0]["icon"];
   /** Strip only: extra content pinned to the end of the row (e.g. sync status). */
   trailing?: ReactNode;
   onAction?: () => void;
@@ -165,6 +168,7 @@ function StripBanner({
   actionLabel,
   actionIcon,
   actionBusy,
+  actionIconData,
   trailing,
   onAction,
   onDismiss,
@@ -178,6 +182,7 @@ function StripBanner({
   actionLabel?: string;
   actionIcon?: LucideIcon;
   actionBusy?: boolean;
+  actionIconData?: Parameters<typeof LoadingIcon>[0]["icon"];
   trailing?: ReactNode;
   onAction?: () => void;
   onDismiss?: () => void;
@@ -237,7 +242,9 @@ function StripBanner({
               style.button,
             )}
           >
-            {actionBusy ? (
+            {actionBusy && actionIconData ? (
+              <LoadingIcon icon={actionIconData} loading size={14} />
+            ) : actionBusy ? (
               <Loader2 aria-hidden className="size-3.5 animate-spin" />
             ) : ActionIcon ? (
               <ActionIcon className="size-3.5" />
@@ -279,6 +286,7 @@ export function Banner({
   actionLabel,
   actionIcon,
   actionBusy,
+  actionIconData,
   trailing,
   onAction,
   onBodyClick,
@@ -300,6 +308,7 @@ export function Banner({
         actionLabel={actionLabel}
         actionIcon={actionIcon}
         actionBusy={actionBusy}
+        actionIconData={actionIconData}
         trailing={trailing}
         onAction={onAction}
         onDismiss={onDismiss}

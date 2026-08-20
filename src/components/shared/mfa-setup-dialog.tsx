@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Check as CheckData } from "lucide";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BottomSheet } from "@/components/shared/bottom-sheet";
@@ -21,7 +22,6 @@ import {
   ChevronLeft,
   Copy,
   KeyRound,
-  Loader2,
   ShieldCheck,
   Smartphone,
   X,
@@ -39,6 +39,7 @@ import {
   type SetupState,
   StyledQrCode,
 } from "../profile/mfa-settings";
+import { LoadingIcon } from "./loading-icon";
 
 interface MfaSetupDialogProps {
   open: boolean;
@@ -323,15 +324,10 @@ export function MfaSetupDialog({
               disabled={busy || code.length !== OTP_CODE_LENGTH}
               className="h-12 w-full gap-2 font-semibold shadow-md shadow-primary/20 sm:h-10 sm:w-auto sm:min-w-28"
             >
-              {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-              {busy ? (
-                t("settings.security.mfaVerifying")
-              ) : (
-                <>
-                  <Check className="size-4" />
-                  {t("settings.security.mfaVerify")}
-                </>
-              )}
+              <LoadingIcon icon={CheckData} loading={busy} size={16} />
+              {busy
+                ? t("settings.security.mfaVerifying")
+                : t("settings.security.mfaVerify")}
             </Button>
           )
         ) : undefined
@@ -559,7 +555,7 @@ export function MfaSetupDialog({
       ) : (
         <div className="space-y-5" aria-busy="true">
           <div className="flex items-center gap-3 rounded-xl bg-muted/30 p-4 text-sm text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" />
+            <LoadingIcon icon={CheckData} loading size={16} />
             {t("settings.security.mfaEnrolling")}
           </div>
           <FormAlert message={error} variant="error" />

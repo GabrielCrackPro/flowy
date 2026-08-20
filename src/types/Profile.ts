@@ -1,3 +1,5 @@
+import type { ProfilePreferences } from "./ProfilePreferences";
+
 export interface Profile {
   id: string;
   email: string | null;
@@ -5,7 +7,7 @@ export interface Profile {
   avatarUrl: string | null;
   currency: string;
   locale: string;
-  showLanguageSelector: boolean;
+  preferences: ProfilePreferences;
   activeSpaceId: string | null;
   dashboardCards: string[] | null;
   dashboardOrder: string[] | null;

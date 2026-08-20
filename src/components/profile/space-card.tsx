@@ -1,18 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { CheckCircle2 as CheckData } from "lucide";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared";
+import { Icon, LoadingIcon } from "@/components/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { SpaceSummary } from "@/lib/api/space";
 import {
   CalendarDays,
-  CheckCircle2,
   Copy,
   Crown,
   KeyRound,
-  Loader2,
   LogOut,
   Pencil,
   UserMinus,
@@ -340,11 +339,11 @@ export function SpaceCard({
               onClick={onActivate}
               disabled={activatePending}
             >
-              {activatePending ? (
-                <Icon icon={Loader2} className="size-4 animate-spin" />
-              ) : (
-                <Icon icon={CheckCircle2} className="size-4" />
-              )}
+              <LoadingIcon
+                icon={CheckData}
+                loading={activatePending}
+                size={16}
+              />
               {t("profile.spaces.activate")}
             </Button>
           ) : null}

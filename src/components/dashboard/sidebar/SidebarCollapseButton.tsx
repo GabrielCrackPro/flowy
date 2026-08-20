@@ -1,10 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { PanelLeftClose, PanelLeftOpen } from "lucide";
+import { MorphIcon } from "morphicons/react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@/components/shared";
-import { PanelLeftClose, PanelLeftOpen } from "@/lib/icons";
 import { cn, isMacPlatform } from "@/lib/utils";
 import { SidebarTooltip } from "./SidebarTooltip";
 
@@ -24,7 +24,9 @@ export function SidebarCollapseButton({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [target, setTarget] = useState<HTMLElement | null>(null);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
   const { t } = useTranslation();
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     setTarget(buttonRef.current);
@@ -49,24 +51,44 @@ export function SidebarCollapseButton({
           onToggle();
         }}
         onMouseEnter={() => setTooltipOpen(true)}
-        onMouseLeave={() => setTooltipOpen(false)}
+        onMouseLeave={() => {
+          setTooltipOpen(false);
+          setIsPressed(false);
+        }}
         onFocus={() => setTooltipOpen(true)}
         onBlur={() => setTooltipOpen(false)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.92 }}
+        onMouseDown={() => setIsPressed(true)}
+        onMouseUp={() => setIsPressed(false)}
+        whileHover={prefersReducedMotion ? undefined : { scale: 1.08 }}
+        whileTap={prefersReducedMotion ? undefined : { scale: 0.92 }}
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-xl border outline-none transition duration-200 focus-visible:ring-3 focus-visible:ring-ring/50",
+          "group relative flex shrink-0 items-center justify-center rounded-xl border outline-none transition-all duration-300 focus-visible:ring-3 focus-visible:ring-ring/50",
           collapsed ? "size-8" : "size-9",
-          collapsed
-            ? "border-border/40 bg-muted/30 text-muted-foreground hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
-            : "border-border/40 bg-card/50 text-foreground/60 shadow-sm hover:border-primary/50 hover:bg-primary/10 hover:text-primary hover:shadow-md",
+          // Base state
+          "border-border/40 bg-muted/20 text-muted-foreground",
+          // Hover state - subtle glow effect
+          "hover:border-primary/40 hover:bg-primary/8 hover:text-primary hover:shadow-[0_0_12px_-2px_hsl(var(--primary)/0.2)]",
+          // Active/pressed state
+          isPressed && "scale-95 bg-primary/12 border-primary/50",
           className,
         )}
       >
-        <Icon
+        {/* Subtle background glow on hover */}
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/0 to-primary/0 transition-all duration-300 group-hover:from-primary/5 group-hover:to-primary/0" />
+
+        <MorphIcon
           icon={collapsed ? PanelLeftOpen : PanelLeftClose}
-          className="size-4 shrink-0"
+          size={16}
+          reducedMotion="user"
+          className="relative z-10"
         />
+
+        {/* Tooltip hint for keyboard shortcut */}
+        {!collapsed && (
+          <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center rounded border border-border/30 bg-background/80 px-0.5 py-px text-[0.5rem] font-medium tabular-nums text-muted-foreground/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            {isMac ? "⌘" : "⌃"}
+          </span>
+        )}
       </motion.button>
 
       <SidebarTooltip

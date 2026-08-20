@@ -153,6 +153,15 @@ export const ProfileService = {
       throw new Error("Profile not found");
     }
 
+    // Merge incoming preferences with existing ones
+    const incomingPrefs = (data as UpdateProfileInput).preferences;
+    const mergedPrefs = incomingPrefs
+      ? {
+          ...(profile.preferences as Record<string, unknown>),
+          ...incomingPrefs,
+        }
+      : undefined;
+
     return prisma.profile.update({
       where: { id },
       data: {
@@ -160,7 +169,7 @@ export const ProfileService = {
         avatarUrl: (data as UpdateProfileInput).avatarUrl,
         currency: (data as UpdateProfileInput).currency,
         locale: (data as UpdateProfileInput).locale,
-        showLanguageSelector: (data as UpdateProfileInput).showLanguageSelector,
+        preferences: mergedPrefs as never,
         dashboardCards: nullableJson(
           (data as UpdateProfileInput).dashboardCards,
         ),
@@ -218,16 +227,16 @@ export const ProfileService = {
     const profile = await prisma.profile.findUnique({
       where: { id: userId },
       select: {
-        statusAlertsEnabled: true,
-        statusAlertComponents: true,
-        statusAlertSeverities: true,
+        preferences: true,
       },
     });
 
+    const prefs = (profile?.preferences as Record<string, unknown>) ?? {};
+
     return {
-      enabled: profile?.statusAlertsEnabled ?? true,
-      components: profile?.statusAlertComponents ?? [],
-      severities: profile?.statusAlertSeverities ?? [],
+      enabled: (prefs.statusAlertsEnabled as boolean) ?? true,
+      components: (prefs.statusAlertComponents as string[]) ?? [],
+      severities: (prefs.statusAlertSeverities as string[]) ?? [],
     };
   },
 
@@ -239,12 +248,23 @@ export const ProfileService = {
       severities: string[];
     },
   ) {
+    // Fetch existing preferences to merge
+    const profile = await prisma.profile.findUnique({
+      where: { id: userId },
+      select: { preferences: true },
+    });
+    const existingPrefs =
+      (profile?.preferences as Record<string, unknown>) ?? {};
+
     await prisma.profile.update({
       where: { id: userId },
       data: {
-        statusAlertsEnabled: data.enabled,
-        statusAlertComponents: data.components,
-        statusAlertSeverities: data.severities,
+        preferences: {
+          ...existingPrefs,
+          statusAlertsEnabled: data.enabled,
+          statusAlertComponents: data.components,
+          statusAlertSeverities: data.severities,
+        },
       },
     });
 

@@ -1,7 +1,10 @@
 "use client";
 
 import { Select as SelectPrimitive } from "@base-ui/react/select";
+import { ChevronDown, ChevronUp } from "lucide";
+import { MorphIcon } from "morphicons/react";
 import type * as React from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/shared/icon";
 import {
   CONTROL_DISABLED,
@@ -82,8 +85,30 @@ function SelectTrigger({
 }: SelectPrimitive.Trigger.Props & {
   size?: "sm" | "default";
 }) {
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  // Track aria-expanded changes to drive the MorphIcon
+  useEffect(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+
+    const observer = new MutationObserver(() => {
+      setExpanded(el.getAttribute("aria-expanded") === "true");
+    });
+
+    observer.observe(el, {
+      attributes: true,
+      attributeFilter: ["aria-expanded"],
+    });
+    setExpanded(el.getAttribute("aria-expanded") === "true");
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <SelectPrimitive.Trigger
+      ref={triggerRef}
       data-slot="select-trigger"
       data-size={size}
       className={cn(
@@ -103,9 +128,11 @@ function SelectTrigger({
       {children}
       <SelectPrimitive.Icon
         render={
-          <Icon
-            icon={ChevronDownIcon}
-            className="pointer-events-none size-4 transition-transform duration-200 group-aria-expanded:rotate-180"
+          <MorphIcon
+            icon={expanded ? ChevronUp : ChevronDown}
+            size={16}
+            reducedMotion="user"
+            className="pointer-events-none"
           />
         }
       />

@@ -1,5 +1,6 @@
 import { authenticatedRequest } from "@/lib/api/client";
 import type { Profile } from "@/types/Profile";
+import type { ProfilePreferences } from "@/types/ProfilePreferences";
 
 export type UpdateProfileInput = Partial<
   Pick<
@@ -8,7 +9,6 @@ export type UpdateProfileInput = Partial<
     | "avatarUrl"
     | "currency"
     | "locale"
-    | "showLanguageSelector"
     | "dashboardCards"
     | "dashboardOrder"
     | "primaryColor"
@@ -16,7 +16,9 @@ export type UpdateProfileInput = Partial<
     | "accentColor"
     | "onboardingCompletedAt"
   >
->;
+> & {
+  preferences?: Partial<ProfilePreferences>;
+};
 
 export function ensureProfile() {
   return authenticatedRequest<Profile>("/api/profile", {

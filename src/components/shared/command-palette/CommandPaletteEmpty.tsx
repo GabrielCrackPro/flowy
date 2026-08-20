@@ -1,9 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ChevronRight, Loader2, SearchIcon } from "@/lib/icons";
+import { Search as SearchData } from "lucide";
+import { ChevronRight, SearchIcon } from "@/lib/icons";
 import type { IconProps } from "../icon";
 import { Icon } from "../icon";
+import { LoadingIcon } from "../loading-icon";
 
 interface CommandPaletteSuggestion {
   label: string;
@@ -48,7 +50,12 @@ export function CommandPaletteEmpty({
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col items-center gap-3 px-6 py-12 text-center sm:py-14"
       >
-        <Icon icon={Loader2} className="size-5 animate-spin text-primary" />
+        <LoadingIcon
+          icon={SearchData}
+          loading
+          size={20}
+          className="text-primary"
+        />
         <p className="text-sm text-muted-foreground/60">
           {t("search.searching")}
         </p>

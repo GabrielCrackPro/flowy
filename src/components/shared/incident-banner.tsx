@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence } from "framer-motion";
+import { Activity as ActivityData } from "lucide";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -142,6 +143,7 @@ export function IncidentBanner() {
             }
             actionLabel={t("status.incidentBanner.action")}
             actionIcon={Activity}
+            actionIconData={ActivityData}
             onAction={() => router.push("/status")}
             onDismiss={ownDismissHidden ? undefined : () => dismiss(latest.id)}
             dismissLabel={t("common.close")}

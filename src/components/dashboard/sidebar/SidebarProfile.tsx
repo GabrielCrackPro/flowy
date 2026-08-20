@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
 import { motion } from "framer-motion";
+import { ChevronDown, ChevronUp } from "lucide";
+import { MorphIcon } from "morphicons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,7 +20,6 @@ import { ConfirmDialog, Icon, Skeleton, UserAvatar } from "@/components/shared";
 import { useProfile } from "@/hooks/useProfile";
 import { useSignOut } from "@/hooks/useSignOut";
 import {
-  ChevronUp,
   LogOut,
   Settings2,
   TriangleAlert,
@@ -177,9 +178,11 @@ export function SidebarProfile({
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="shrink-0 overflow-hidden"
           >
-            <Icon
-              icon={ChevronUp}
-              className="size-4 text-muted-foreground transition duration-200 group-data-[open]:rotate-180 group-hover:-translate-y-0.5 group-hover:text-foreground"
+            <MorphIcon
+              icon={open ? ChevronDown : ChevronUp}
+              size={16}
+              reducedMotion="user"
+              className="text-muted-foreground transition-colors duration-200 group-hover:text-foreground"
             />
           </motion.span>
         </DropdownMenuTrigger>

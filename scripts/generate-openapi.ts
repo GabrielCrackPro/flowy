@@ -2937,6 +2937,29 @@ paths["/api/push-delivery-history"] = {
       },
     }),
   }),
+  delete: op({
+    operationId: "pushDeliveries.clear",
+    summary: "Clear push delivery history",
+    description:
+      "Deletes all push delivery records for the authenticated user.",
+    tags: ["Push"],
+    responses: responses({
+      200: {
+        description: "History cleared",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                ok: { type: "boolean" },
+              },
+              required: ["ok"],
+            },
+          },
+        },
+      },
+    }),
+  }),
 };
 
 paths["/api/push-preferences"] = {

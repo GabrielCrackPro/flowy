@@ -1,15 +1,16 @@
 "use client";
 
+import { Crown as CrownData } from "lucide";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { ConfirmDialog, LoadingIcon } from "@/components/shared";
 import { toast } from "@/components/shared/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { authenticatedRequest } from "@/lib/api/client";
-import { Crown, Loader2, ShieldCheck, UserMinus } from "@/lib/icons";
+import { Crown, ShieldCheck, UserMinus } from "@/lib/icons";
 
 interface AdminRecord {
   id: string;
@@ -150,11 +151,7 @@ export function PromoteAdminCard() {
           disabled={busy || !email.trim()}
           className="h-9 shrink-0 gap-1.5 px-3"
         >
-          {busy ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <Crown className="size-3.5" />
-          )}
+          <LoadingIcon icon={CrownData} loading={busy} size={14} />
           {busy ? t("status.admin.promoting") : t("status.admin.promote")}
         </Button>
       </div>
@@ -163,7 +160,7 @@ export function PromoteAdminCard() {
       <div className="mt-4 space-y-1.5">
         {loadingAdmins ? (
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className="size-3 animate-spin" />
+            <LoadingIcon icon={CrownData} loading size={12} />
             {t("common.loading")}
           </p>
         ) : (

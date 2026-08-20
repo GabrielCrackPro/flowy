@@ -6,6 +6,11 @@ import { useNotifications } from "@hooks/useNotifications";
 import { useProfile } from "@hooks/useProfile";
 import { cn } from "@lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
+import {
+  ChevronDown as ChevronDownData,
+  ChevronUp as ChevronUpData,
+} from "lucide";
+import { MorphIcon } from "morphicons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,7 +20,6 @@ import {
   ArrowRight,
   Bell,
   CheckCircle2,
-  ChevronDown,
   ChevronRight,
   Info,
   Sparkles,
@@ -382,20 +386,16 @@ export function DashboardAlerts({ month, year }: DashboardAlertsProps) {
             </>
           )}
           <motion.span
-            animate={hasAlerts ? { rotate: open ? 180 : 0 } : undefined}
             whileHover={hasAlerts ? undefined : { x: 3 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
             className="relative flex size-7 shrink-0 items-center justify-center rounded-full border border-border/40 bg-background/40 text-muted-foreground shadow-sm transition-colors group-hover:border-primary/50 group-hover:text-primary"
             aria-hidden="true"
           >
             {hasAlerts ? (
-              <motion.span
-                animate={{ rotate: open ? 180 : 0 }}
-                transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="flex"
-              >
-                <ChevronDown className="size-3.5" />
-              </motion.span>
+              <MorphIcon
+                icon={open ? ChevronUpData : ChevronDownData}
+                size={14}
+                reducedMotion="user"
+              />
             ) : (
               <ChevronRight className="size-3.5" />
             )}
