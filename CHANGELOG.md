@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.44](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.43...flowy-v0.1.44) (2026-08-22)
+
+
+### Features
+
+* **assistant:** implement AI chat assistant with persistence and preferences ([#211](https://github.com/GabrielCrackPro/flowy/issues/211)) ([de2b036](https://github.com/GabrielCrackPro/flowy/commit/de2b03685e0ac5c08398e0c437ab5e6ecf060613))
+
 ## [0.1.43](https://github.com/GabrielCrackPro/flowy/compare/flowy-v0.1.42...flowy-v0.1.43) (2026-08-20)
 
 
