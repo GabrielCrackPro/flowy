@@ -3265,6 +3265,238 @@ paths["/api/account/password"] = {
   }),
 };
 
+// --- Assistant ---
+schemas["AssistantConversation"] = {
+  type: "object",
+  description: "An AI assistant conversation scoped to the active space.",
+  properties: {
+    id: { ...UUID, description: "Conversation UUID" },
+    title: {
+      type: "string",
+      description: "Conversation title (auto-set from first message)",
+    },
+    createdAt: {
+      type: "string",
+      format: "date-time",
+      description: "Creation timestamp (ISO 8601)",
+    },
+    updatedAt: {
+      type: "string",
+      format: "date-time",
+      description: "Last update timestamp (ISO 8601)",
+    },
+    _count: {
+      type: "object",
+      properties: {
+        messages: { type: "integer", description: "Number of messages" },
+      },
+    },
+  },
+  required: ["id", "title", "createdAt", "updatedAt"],
+};
+
+schemas["AssistantConversationMessage"] = {
+  type: "object",
+  description: "A single message in an assistant conversation.",
+  properties: {
+    id: { ...UUID, description: "Message UUID" },
+    role: {
+      type: "string",
+      enum: ["user", "assistant"],
+      description: "Message role",
+    },
+    content: { type: "string", description: "Message text content" },
+    createdAt: {
+      type: "string",
+      format: "date-time",
+      description: "Creation timestamp (ISO 8601)",
+    },
+  },
+  required: ["id", "role", "content", "createdAt"],
+};
+
+schemas["AssistantConversationWithMessages"] = {
+  type: "object",
+  description: "A conversation with its messages included.",
+  allOf: [{ $ref: "#/components/schemas/AssistantConversation" }],
+  properties: {
+    messages: {
+      type: "array",
+      items: ref("AssistantConversationMessage"),
+      description: "Messages in chronological order",
+    },
+  },
+};
+
+schemas["CreateAssistantConversationRequest"] = {
+  type: "object",
+  properties: {
+    title: {
+      type: "string",
+      maxLength: 120,
+      description: "Optional conversation title",
+    },
+  },
+};
+
+schemas["UpdateAssistantConversationRequest"] = {
+  type: "object",
+  properties: {
+    title: {
+      type: "string",
+      maxLength: 120,
+      description: "New conversation title",
+    },
+  },
+  required: ["title"],
+};
+
+paths["/api/assistant"] = {
+  post: op({
+    operationId: "assistant.chat",
+    summary: "Send a message to the AI assistant",
+    description:
+      "Streams an AI response using the configured provider (Gemini). Supports tool calling for financial data queries.",
+    tags: ["Assistant"],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              messages: {
+                type: "array",
+                items: { type: "object" },
+                minItems: 1,
+                description:
+                  "AI SDK UI messages (with parts, not legacy content)",
+              },
+              conversationId: {
+                type: "string",
+                format: "uuid",
+                description: "Optional conversation UUID for persistence",
+              },
+            },
+            required: ["messages"],
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "Streaming AI response",
+        content: {
+          "text/event-stream": {
+            schema: {
+              type: "string",
+              description: "Server-sent events stream",
+            },
+          },
+        },
+      },
+      400: { $ref: "#/components/responses/BadRequest" },
+      401: { $ref: "#/components/responses/Unauthorized" },
+      429: { $ref: "#/components/responses/RateLimited" },
+      503: {
+        description: "AI provider not configured",
+        content: { "application/json": { schema: ref("Error") } },
+      },
+      500: { $ref: "#/components/responses/ServerError" },
+    },
+    rateLimit: RATE.entity,
+  }),
+};
+
+paths["/api/assistant/conversations"] = {
+  get: op({
+    operationId: "assistant.conversations.list",
+    summary: "List assistant conversations",
+    description:
+      "Returns all conversations for the active space, ordered by most recent.",
+    tags: ["Assistant"],
+    responses: responses(
+      {
+        200: {
+          description: "Conversation list",
+          content: {
+            "application/json": {
+              schema: {
+                type: "array",
+                items: ref("AssistantConversation"),
+              },
+            },
+          },
+        },
+      },
+      { rateLimited: true },
+    ),
+    rateLimit: RATE.entity,
+  }),
+  post: op({
+    operationId: "assistant.conversations.create",
+    summary: "Create a new conversation",
+    description: "Creates an empty conversation in the active space.",
+    tags: ["Assistant"],
+    requestBody: reqBody("CreateAssistantConversationRequest"),
+    responses: responses(
+      {
+        200: {
+          description: "Created conversation",
+          content: {
+            "application/json": { schema: ref("AssistantConversation") },
+          },
+        },
+      },
+      { rateLimited: true },
+    ),
+    rateLimit: RATE.entity,
+  }),
+  patch: op({
+    operationId: "assistant.conversations.update",
+    summary: "Rename a conversation",
+    description: "Updates the conversation title.",
+    tags: ["Assistant"],
+    parameters: [
+      qp("id", { type: "string", format: "uuid" }, "Conversation UUID"),
+    ],
+    requestBody: reqBody("UpdateAssistantConversationRequest"),
+    responses: responses(
+      {
+        200: {
+          description: "Updated",
+          content: {
+            "application/json": { schema: ref("SuccessResponse") },
+          },
+        },
+      },
+      { notFound: true, rateLimited: true },
+    ),
+    rateLimit: RATE.entity,
+  }),
+  delete: op({
+    operationId: "assistant.conversations.delete",
+    summary: "Delete a conversation",
+    description:
+      "Deletes a specific conversation (with id) or all conversations (without id).",
+    tags: ["Assistant"],
+    parameters: [
+      qp(
+        "id",
+        { type: "string", format: "uuid" },
+        "Conversation UUID (omit to delete all)",
+      ),
+    ],
+    responses: responses(
+      {
+        204: { description: "Deleted" },
+      },
+      { notFound: true, rateLimited: true },
+    ),
+    rateLimit: RATE.entity,
+  }),
+};
+
 // --- Cron & health ---
 paths["/api/cron/alerts"] = {
   post: op({
