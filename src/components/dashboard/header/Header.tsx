@@ -2,6 +2,7 @@
 
 import {
   AppLogo,
+  AssistantPanel,
   CommandPalette,
   Icon,
   type IconProps,
@@ -17,10 +18,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SpaceSwitcherPill } from "@/components/shared/space-switcher-pill";
+import { useFlags } from "@/hooks/useFlags";
+import { usePreferences } from "@/hooks/usePreferences";
 import {
   ArrowUpDown,
   ChevronRight,
   Home,
+  MessageSquare,
   Repeat2,
   SearchIcon,
   Tag,
@@ -88,6 +92,11 @@ export function Header() {
   const { t } = useTranslation();
   const crumbs = useMemo(() => buildCrumbs(pathname, t), [pathname, t]);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const { get } = usePreferences();
+  const { assistantEnabled: assistantFlag } = useFlags();
+  const userAssistantEnabled = get("assistantEnabled");
+  const assistantEnabled = assistantFlag && userAssistantEnabled;
 
   // Global ⌘K / Ctrl+K toggle + "/" to open (matches the hint in Search.tsx)
   useEffect(() => {
@@ -210,6 +219,18 @@ export function Header() {
             </Button>
           </motion.div>
 
+          {assistantEnabled && (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("assistant.title")}
+              className="rounded-xl text-muted-foreground/80 hover:bg-muted/60 hover:text-foreground"
+              onClick={() => setAssistantOpen(true)}
+            >
+              <Icon icon={MessageSquare} className="size-4" />
+            </Button>
+          )}
+
           <SyncingIndicator className="max-md:text-muted-foreground/80 max-md:hover:bg-muted/60 max-md:hover:text-foreground" />
 
           <InstallAppButton className="max-md:text-muted-foreground/80 max-md:hover:bg-muted/60 max-md:hover:text-foreground" />
@@ -225,7 +246,14 @@ export function Header() {
         </div>
       </div>
 
-      <CommandPalette open={searchOpen} onOpenChange={setSearchOpen} />
+      <CommandPalette
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        openAssistant={() => setAssistantOpen(true)}
+      />
+      {assistantEnabled && (
+        <AssistantPanel open={assistantOpen} onOpenChange={setAssistantOpen} />
+      )}
     </motion.header>
   );
 }

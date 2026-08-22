@@ -300,7 +300,16 @@ export const app: AppTranslationMessages = {
       deleteAccountHint: "This action is permanent and removes your app data",
       deleteAccountConfirmTitle: "Delete your account?",
       deleteAccountConfirmDescription:
-        "This action cannot be undone. Your profile will be removed and your session will end.",
+        "This action cannot be undone. The following data will be permanently deleted:",
+      deleteAccountItemProfile: "Your profile and account settings",
+      deleteAccountItemTransactions: "All transactions and receipts",
+      deleteAccountItemBudgets: "All budgets and spending limits",
+      deleteAccountItemGoals: "All savings goals and progress",
+      deleteAccountItemSubscriptions: "All tracked subscriptions",
+      deleteAccountItemSpaces: "Personal spaces (shared spaces transferred)",
+      deleteAccountItemAssistant: "All AI assistant conversations",
+      deleteAccountConfirmHint: "Type {{word}} to confirm this action",
+      deleteAccountConfirmWord: "DELETE",
       deleteAccountError: "Could not delete the account",
       currentSession: "Current session",
       currentSessionHint:
@@ -574,6 +583,10 @@ export const app: AppTranslationMessages = {
         "no-budgets": "No budgets set",
       },
     },
+    assistant: {
+      title: "AI Assistant",
+      description: "Configure the AI chat assistant settings",
+    },
     about: {
       title: "About Flowy",
       description: "App version and latest changes",
@@ -604,6 +617,14 @@ export const app: AppTranslationMessages = {
       replayOnboardingHint: "See the welcome tour again",
       replayOnboardingConfirm:
         "This will reset the onboarding tour so you can see it again right away.",
+      assistantEnabledLabel: "Enable AI assistant",
+      assistantEnabledHint: "Show the AI chat assistant in the app",
+      assistantStoreHistoryLabel: "Store conversation history",
+      assistantStoreHistoryHint: "Save assistant conversations to review later",
+      assistantClearHistory: "Clear all conversations",
+      assistantClearHistoryHint: "Delete all saved assistant conversations",
+      assistantClearHistoryConfirm:
+        "This will permanently delete all your assistant conversations. This action cannot be undone.",
     },
   },
   changelog: {
@@ -1063,6 +1084,13 @@ export const app: AppTranslationMessages = {
     comments: "Comments",
     commentsEmpty: "No comments yet",
     commentPlaceholder: "Add a comment...",
+    markdownActions: "Markdown formatting",
+    markdownBold: "Bold",
+    markdownItalic: "Italic",
+    markdownCode: "Code",
+    markdownList: "Bulleted list",
+    markdownPreview: "Preview",
+    markdownEdit: "Edit",
     reply: "Reply",
     replyPlaceholder: "Write a reply...",
     cancelReply: "Cancel reply",
@@ -1636,6 +1664,40 @@ export const app: AppTranslationMessages = {
     completeReplayHint: "You can replay this tour anytime from Preferences.",
     skip: "Skip",
     stepOf: "Step {{current}} of {{total}}",
+  },
+  assistant: {
+    title: "Flowy Assistant",
+    placeholder: "Ask anything about your finances...",
+    composerHint: "Shift + Enter for a new line",
+    send: "Send message",
+    copyResponse: "Copy response",
+    copiedResponse: "Response copied",
+    stop: "Stop generating",
+    newConversation: "New conversation",
+    history: "History",
+    noHistory: "No saved conversations yet.",
+    deleteConversation: "Delete conversation",
+    renameConversation: "Rename conversation",
+    regenerate: "Regenerate",
+    thinking: "Thinking...",
+    emptyTitle: "Your financial assistant",
+    emptyDescription:
+      "Ask me about your spending, budgets, goals, subscriptions, or savings rate. I can only answer from your actual data.",
+    suggestions: {
+      monthlyOverview: "How are my finances this month?",
+      subscriptions: "Which subscriptions can I reduce?",
+      budgets: "Any budgets close to their limit?",
+      savingsRate: "What's my savings rate?",
+    },
+    disclaimer: "Flowy Assistant can make mistakes. Verify important numbers.",
+    errorGeneric: "Something went wrong. Please try again.",
+    errorHint: "Try again in a moment or ask a different question.",
+    rateLimited: "Too many requests. Please wait a moment.",
+    notConfigured:
+      "The AI assistant is not configured. Contact your administrator.",
+    quotaExceeded:
+      "The AI service has no available quota. Add billing or credits to your OpenAI API project, then try again.",
+    openFromPalette: "Ask Flowy Assistant",
   },
 };
 

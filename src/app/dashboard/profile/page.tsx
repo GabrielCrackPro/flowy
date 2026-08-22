@@ -2,6 +2,7 @@
 
 import { BackHeader } from "@components/dashboard";
 import {
+  AssistantPreferences,
   PreferencesSection,
   ProfileForm,
   SettingsNav,
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/card";
 import { useChangelog } from "@/context/ChangelogContext";
 import { useLocaleContext } from "@/context/LocaleContext";
+import { useFlags } from "@/hooks/useFlags";
 import { useProfile } from "@/hooks/useProfile";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import {
@@ -123,6 +125,7 @@ export default function SettingsPage() {
   const { profile, loading } = useProfile();
   const { checked: pushChecked, subscribed } = usePushNotifications();
   const { openChangelog } = useChangelog();
+  const { assistantEnabled: assistantFlag } = useFlags();
   const [editing, setEditing] = useState(false);
 
   const hasCustomTheme = Boolean(
@@ -325,22 +328,30 @@ export default function SettingsPage() {
             <PreferencesSection />
           </div>
 
-          <Card id="spaces" className="scroll-mt-20">
-            <CardHeader>
-              <div className="flex items-start gap-3">
-                <SectionIcon icon={Users} />
-                <div className="min-w-0">
-                  <CardTitle>{t("profile.spaces.title")}</CardTitle>
-                  <CardDescription>
-                    {t("profile.spaces.description")}
-                  </CardDescription>
+          {assistantFlag && (
+            <div id="assistant" className="scroll-mt-20">
+              <AssistantPreferences />
+            </div>
+          )}
+
+          <div id="spaces" className="scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-start gap-3">
+                  <SectionIcon icon={Users} />
+                  <div className="min-w-0">
+                    <CardTitle>{t("profile.spaces.title")}</CardTitle>
+                    <CardDescription>
+                      {t("profile.spaces.description")}
+                    </CardDescription>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <SpaceManager />
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                <SpaceManager />
+              </CardContent>
+            </Card>
+          </div>
 
           <div id="notifications" className="scroll-mt-20">
             <PushNotificationsCard />

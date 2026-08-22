@@ -27,6 +27,7 @@ export interface CommandContext {
   navigate: (url: string) => void;
   toggleTheme: () => void;
   openChangelog: () => void;
+  openAssistant: () => void;
   resetOnboarding: () => void | Promise<void>;
   signOut: () => void | Promise<void>;
 }
@@ -234,6 +235,19 @@ function registerBuiltInCommands() {
       labelKey: "search.whatsNew",
       keywordKeys: ["search.whatsNew"],
       execute: ({ openChangelog }) => openChangelog(),
+      showChevron: true,
+    },
+    {
+      id: "ask-assistant",
+      group: "actions",
+      icon: Sparkles,
+      labelKey: "assistant.openFromPalette",
+      keywordKeys: [
+        "assistant.openFromPalette",
+        "assistant.title",
+        "assistant.emptyTitle",
+      ],
+      execute: ({ openAssistant }) => openAssistant(),
       showChevron: true,
     },
     {

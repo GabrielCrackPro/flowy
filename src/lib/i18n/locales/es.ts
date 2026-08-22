@@ -306,7 +306,16 @@ export const app: AppTranslationMessages = {
         "Esta acción es permanente y borra tus datos de la aplicación",
       deleteAccountConfirmTitle: "¿Eliminar tu cuenta?",
       deleteAccountConfirmDescription:
-        "Esta acción no se puede deshacer. Se borrará tu perfil y tu sesión se cerrará.",
+        "Esta acción no se puede deshacer. Los siguientes datos se eliminarán permanentemente:",
+      deleteAccountItemProfile: "Tu perfil y configuración de cuenta",
+      deleteAccountItemTransactions: "Todas las transacciones y recibos",
+      deleteAccountItemBudgets: "Todos los presupuestos y límites de gasto",
+      deleteAccountItemGoals: "Todas las metas de ahorro y progreso",
+      deleteAccountItemSubscriptions: "Todas las suscripciones rastreadas",
+      deleteAccountItemSpaces: "Espacios personales (compartidos transferidos)",
+      deleteAccountItemAssistant: "Todas las conversaciones del asistente IA",
+      deleteAccountConfirmHint: "Escribe {{word}} para confirmar esta acción",
+      deleteAccountConfirmWord: "ELIMINAR",
       deleteAccountError: "No se pudo eliminar la cuenta",
       currentSession: "Sesión actual",
       currentSessionHint:
@@ -588,6 +597,10 @@ export const app: AppTranslationMessages = {
         "no-budgets": "Sin presupuestos",
       },
     },
+    assistant: {
+      title: "Asistente IA",
+      description: "Configurar los ajustes del chat de asistente IA",
+    },
     about: {
       title: "Acerca de Flowy",
       description: "Versión de la app y últimos cambios",
@@ -619,6 +632,16 @@ export const app: AppTranslationMessages = {
       replayOnboardingHint: "Volver a ver el tour de bienvenida",
       replayOnboardingConfirm:
         "Esto reiniciará el tour de introducción para que puedas verlo de nuevo al momento.",
+      assistantEnabledLabel: "Habilitar asistente IA",
+      assistantEnabledHint: "Mostrar el chat de asistente IA en la aplicación",
+      assistantStoreHistoryLabel: "Guardar historial de conversaciones",
+      assistantStoreHistoryHint:
+        "Guardar conversaciones del asistente para revisarlas después",
+      assistantClearHistory: "Borrar todas las conversaciones",
+      assistantClearHistoryHint:
+        "Eliminar todas las conversaciones guardadas del asistente",
+      assistantClearHistoryConfirm:
+        "Esto eliminará permanentemente todas tus conversaciones del asistente. Esta acción no se puede deshacer.",
     },
   },
   changelog: {
@@ -1083,6 +1106,13 @@ export const app: AppTranslationMessages = {
     comments: "Comentarios",
     commentsEmpty: "Sin comentarios",
     commentPlaceholder: "Añade un comentario...",
+    markdownActions: "Formato Markdown",
+    markdownBold: "Negrita",
+    markdownItalic: "Cursiva",
+    markdownCode: "Código",
+    markdownList: "Lista con viñetas",
+    markdownPreview: "Vista previa",
+    markdownEdit: "Editar",
     reply: "Responder",
     replyPlaceholder: "Escribe una respuesta...",
     cancelReply: "Cancelar respuesta",
@@ -1665,6 +1695,41 @@ export const app: AppTranslationMessages = {
     completeReplayHint: "Puedes repetir este tour desde Preferencias.",
     skip: "Omitir",
     stepOf: "Paso {{current}} de {{total}}",
+  },
+  assistant: {
+    title: "Asistente Flowy",
+    placeholder: "Pregunta sobre tus finanzas...",
+    composerHint: "Mayús + Enter para una nueva línea",
+    send: "Enviar mensaje",
+    copyResponse: "Copiar respuesta",
+    copiedResponse: "Respuesta copiada",
+    stop: "Detener",
+    newConversation: "Nueva conversación",
+    history: "Historial",
+    noHistory: "Aún no hay conversaciones guardadas.",
+    deleteConversation: "Eliminar conversación",
+    renameConversation: "Renombrar conversación",
+    regenerate: "Regenerar",
+    thinking: "Pensando...",
+    emptyTitle: "Tu asistente financiero",
+    emptyDescription:
+      "Pregúntame sobre tus gastos, presupuestos, metas, suscripciones o tasa de ahorro. Solo respondo con tus datos reales.",
+    suggestions: {
+      monthlyOverview: "¿Cómo van mis finanzas este mes?",
+      subscriptions: "¿Qué suscripciones puedo reducir?",
+      budgets: "¿Hay presupuestos cerca de su límite?",
+      savingsRate: "¿Cuál es mi tasa de ahorro?",
+    },
+    disclaimer:
+      "El asistente puede equivocarse. Verifica las cifras importantes.",
+    errorGeneric: "Algo salió mal. Intenta de nuevo.",
+    errorHint: "Intenta de nuevo en un momento o haz otra pregunta.",
+    rateLimited: "Demasiadas peticiones. Espera un momento.",
+    notConfigured:
+      "El asistente de IA no está configurado. Contacta al administrador.",
+    quotaExceeded:
+      "El servicio de IA no tiene cuota disponible. Añade facturación o créditos a tu proyecto de API de OpenAI y vuelve a intentarlo.",
+    openFromPalette: "Preguntar al asistente",
   },
 };
 

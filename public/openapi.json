@@ -3799,6 +3799,283 @@
         }
       }
     },
+    "/api/assistant": {
+      "post": {
+        "operationId": "assistant.chat",
+        "summary": "Send a message to the AI assistant",
+        "tags": [
+          "Assistant"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Streaming AI response",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "description": "Server-sent events stream"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "description": "AI provider not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Streams an AI response using the configured provider (Gemini). Supports tool calling for financial data queries.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    },
+                    "minItems": 1,
+                    "description": "AI SDK UI messages (with parts, not legacy content)"
+                  },
+                  "conversationId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Optional conversation UUID for persistence"
+                  }
+                },
+                "required": [
+                  "messages"
+                ]
+              }
+            }
+          }
+        },
+        "x-flowy-rate-limit": "20 requests / 120s"
+      }
+    },
+    "/api/assistant/conversations": {
+      "get": {
+        "operationId": "assistant.conversations.list",
+        "summary": "List assistant conversations",
+        "tags": [
+          "Assistant"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversation list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssistantConversation"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Returns all conversations for the active space, ordered by most recent.",
+        "x-flowy-rate-limit": "20 requests / 120s"
+      },
+      "post": {
+        "operationId": "assistant.conversations.create",
+        "summary": "Create a new conversation",
+        "tags": [
+          "Assistant"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created conversation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantConversation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Creates an empty conversation in the active space.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssistantConversationRequest"
+              }
+            }
+          }
+        },
+        "x-flowy-rate-limit": "20 requests / 120s"
+      },
+      "patch": {
+        "operationId": "assistant.conversations.update",
+        "summary": "Rename a conversation",
+        "tags": [
+          "Assistant"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Updates the conversation title.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Conversation UUID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssistantConversationRequest"
+              }
+            }
+          }
+        },
+        "x-flowy-rate-limit": "20 requests / 120s"
+      },
+      "delete": {
+        "operationId": "assistant.conversations.delete",
+        "summary": "Delete a conversation",
+        "tags": [
+          "Assistant"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "Deletes a specific conversation (with id) or all conversations (without id).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Conversation UUID (omit to delete all)"
+          }
+        ],
+        "x-flowy-rate-limit": "20 requests / 120s"
+      }
+    },
     "/api/cron/alerts": {
       "post": {
         "operationId": "cron.alerts",
@@ -7233,6 +7510,12 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "assistantEnabled": {
+                "type": "boolean"
+              },
+              "assistantStoreHistory": {
+                "type": "boolean"
               }
             },
             "additionalProperties": false
@@ -7318,6 +7601,119 @@
             "description": "CSS color used for accents"
           }
         }
+      },
+      "AssistantConversation": {
+        "type": "object",
+        "description": "An AI assistant conversation scoped to the active space.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Conversation UUID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Conversation title (auto-set from first message)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp (ISO 8601)"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp (ISO 8601)"
+          },
+          "_count": {
+            "type": "object",
+            "properties": {
+              "messages": {
+                "type": "integer",
+                "description": "Number of messages"
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AssistantConversationMessage": {
+        "type": "object",
+        "description": "A single message in an assistant conversation.",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Uuid",
+            "description": "Message UUID"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ],
+            "description": "Message role"
+          },
+          "content": {
+            "type": "string",
+            "description": "Message text content"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp (ISO 8601)"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "content",
+          "createdAt"
+        ]
+      },
+      "AssistantConversationWithMessages": {
+        "type": "object",
+        "description": "A conversation with its messages included.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AssistantConversation"
+          }
+        ],
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssistantConversationMessage"
+            },
+            "description": "Messages in chronological order"
+          }
+        }
+      },
+      "CreateAssistantConversationRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Optional conversation title"
+          }
+        }
+      },
+      "UpdateAssistantConversationRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "New conversation title"
+          }
+        },
+        "required": [
+          "title"
+        ]
       }
     },
     "responses": {

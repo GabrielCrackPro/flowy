@@ -4,6 +4,7 @@ import { createContext, type ReactNode } from "react";
 
 export interface Flags {
   oauthEnabled: boolean;
+  assistantEnabled: boolean;
 }
 
 export const FlagsContext = createContext<Flags | null>(null);

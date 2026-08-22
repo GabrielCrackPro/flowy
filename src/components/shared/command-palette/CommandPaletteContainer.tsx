@@ -10,12 +10,14 @@ interface CommandPaletteContainerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: ReactNode;
+  desktopSideSheet?: boolean;
 }
 
 export function CommandPaletteContainer({
   open,
   onOpenChange,
   children,
+  desktopSideSheet = false,
 }: CommandPaletteContainerProps) {
   const isMobile = useIsMobile();
   const { offset, swipeHandlers } = useBottomSheetSwipe({
@@ -49,10 +51,20 @@ export function CommandPaletteContainer({
                   ? { duration: 0.28, ease: [0.22, 1, 0.36, 1] }
                   : { duration: 0.2, ease: [0.16, 1, 0.3, 1] }
             }
-            className="fixed inset-x-0 bottom-0 z-[60] w-full sm:bottom-auto sm:left-1/2 sm:top-24 sm:max-w-xl sm:-translate-x-1/2 sm:px-4"
+            className={
+              desktopSideSheet
+                ? "fixed inset-x-0 bottom-0 z-[60] w-full sm:inset-y-0 sm:right-0 sm:bottom-auto sm:left-auto sm:top-0 sm:max-w-md sm:translate-x-0"
+                : "fixed inset-x-0 bottom-0 z-[60] w-full sm:bottom-auto sm:left-1/2 sm:top-24 sm:max-w-xl sm:-translate-x-1/2 sm:px-4"
+            }
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="max-h-[min(88dvh,720px)] overflow-hidden rounded-t-3xl border border-b-0 border-border/50 bg-background pb-[env(safe-area-inset-bottom,0px)] ring-4 ring-black/5 sm:rounded-2xl sm:border-b sm:pb-0 sm:ring-4">
+            <div
+              className={
+                desktopSideSheet
+                  ? "max-h-[min(88dvh,720px)] sm:h-full overflow-hidden rounded-t-3xl border border-b-0 border-border/50 bg-background pb-[env(safe-area-inset-bottom,0px)] ring-4 ring-black/5 sm:rounded-none sm:border-y-0 sm:border-r-0 sm:pb-0 sm:ring-0"
+                  : "max-h-[min(88dvh,720px)] overflow-hidden rounded-t-3xl border border-b-0 border-border/50 bg-background pb-[env(safe-area-inset-bottom,0px)] ring-4 ring-black/5 sm:rounded-2xl sm:border-b sm:pb-0 sm:ring-4"
+              }
+            >
               <div
                 {...swipeHandlers}
                 aria-hidden="true"

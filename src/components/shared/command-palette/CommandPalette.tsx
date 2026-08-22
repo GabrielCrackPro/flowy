@@ -64,9 +64,14 @@ const sectionLabels: Record<SearchResultItem["type"], string> = {
 interface CommandPaletteProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  openAssistant?: () => void;
 }
 
-export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
+export function CommandPalette({
+  open,
+  onOpenChange,
+  openAssistant,
+}: CommandPaletteProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const { isDark, toggleTheme } = useTheme();
@@ -98,6 +103,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       navigate: (url) => router.push(url),
       toggleTheme: () => toggleTheme(),
       openChangelog,
+      openAssistant: openAssistant ?? (() => {}),
       resetOnboarding,
       signOut: handleSignOut,
     }),
@@ -108,6 +114,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       router,
       toggleTheme,
       openChangelog,
+      openAssistant,
       resetOnboarding,
       handleSignOut,
     ],

@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 import { UserAvatar } from "@/components/shared";
 import { Icon } from "@/components/shared/icon";
 import { Button } from "@/components/ui";
@@ -173,14 +174,22 @@ export function CommentRow({
               </span>
             )}
           </div>
-          <p
+          <div
             className={cn(
-              "mt-1 leading-relaxed text-foreground/85",
+              "mt-1 leading-relaxed text-foreground/85 [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.9em] [&_li]:ml-4 [&_li]:list-disc [&_ol]:space-y-1 [&_p]:mb-1.5 [&_p:last-child]:mb-0 [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-muted [&_pre]:p-2.5 [&_pre]:text-xs [&_strong]:font-semibold [&_ul]:space-y-1",
               compact ? "text-[13px]" : "text-sm",
             )}
           >
-            {comment.content}
-          </p>
+            <ReactMarkdown
+              components={{
+                a: ({ node: _node, ...props }) => (
+                  <a {...props} target="_blank" rel="noreferrer" />
+                ),
+              }}
+            >
+              {comment.content}
+            </ReactMarkdown>
+          </div>
         </div>
 
         <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">

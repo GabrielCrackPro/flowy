@@ -14,6 +14,10 @@ export interface ProfilePreferences {
   statusAlertComponents: string[];
   /** Which severity levels to alert on. Empty = all. */
   statusAlertSeverities: string[];
+  /** Enable the AI chat assistant. */
+  assistantEnabled: boolean;
+  /** Store assistant conversation history in the database. */
+  assistantStoreHistory: boolean;
 }
 
 export const DEFAULT_PREFERENCES: ProfilePreferences = {
@@ -22,4 +26,6 @@ export const DEFAULT_PREFERENCES: ProfilePreferences = {
   statusAlertsEnabled: true,
   statusAlertComponents: [],
   statusAlertSeverities: [],
+  assistantEnabled: true,
+  assistantStoreHistory: true,
 };

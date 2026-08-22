@@ -283,6 +283,15 @@ export type AppTranslationMessages = {
       deleteAccountHint: string;
       deleteAccountConfirmTitle: string;
       deleteAccountConfirmDescription: string;
+      deleteAccountItemProfile: string;
+      deleteAccountItemTransactions: string;
+      deleteAccountItemBudgets: string;
+      deleteAccountItemGoals: string;
+      deleteAccountItemSubscriptions: string;
+      deleteAccountItemSpaces: string;
+      deleteAccountItemAssistant: string;
+      deleteAccountConfirmHint: string;
+      deleteAccountConfirmWord: string;
       deleteAccountError: string;
       currentSession: string;
       currentSessionHint: string;
@@ -527,6 +536,10 @@ export type AppTranslationMessages = {
         "no-budgets": string;
       };
     };
+    assistant: {
+      title: string;
+      description: string;
+    };
     about: {
       title: string;
       description: string;
@@ -553,6 +566,13 @@ export type AppTranslationMessages = {
       replayOnboarding: string;
       replayOnboardingHint: string;
       replayOnboardingConfirm: string;
+      assistantEnabledLabel: string;
+      assistantEnabledHint: string;
+      assistantStoreHistoryLabel: string;
+      assistantStoreHistoryHint: string;
+      assistantClearHistory: string;
+      assistantClearHistoryHint: string;
+      assistantClearHistoryConfirm: string;
     };
   };
   changelog: {
@@ -972,6 +992,13 @@ export type AppTranslationMessages = {
     comments: string;
     commentsEmpty: string;
     commentPlaceholder: string;
+    markdownActions: string;
+    markdownBold: string;
+    markdownItalic: string;
+    markdownCode: string;
+    markdownList: string;
+    markdownPreview: string;
+    markdownEdit: string;
     reply: string;
     replyPlaceholder: string;
     cancelReply: string;
@@ -1514,6 +1541,37 @@ export type AppTranslationMessages = {
     completeReplayHint: string;
     skip: string;
     stepOf: string;
+  };
+  assistant: {
+    title: string;
+    placeholder: string;
+    composerHint: string;
+    send: string;
+    copyResponse: string;
+    copiedResponse: string;
+    stop: string;
+    newConversation: string;
+    history: string;
+    noHistory: string;
+    deleteConversation: string;
+    renameConversation: string;
+    regenerate: string;
+    thinking: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    suggestions: {
+      monthlyOverview: string;
+      subscriptions: string;
+      budgets: string;
+      savingsRate: string;
+    };
+    disclaimer: string;
+    errorGeneric: string;
+    errorHint: string;
+    rateLimited: string;
+    notConfigured: string;
+    quotaExceeded: string;
+    openFromPalette: string;
   };
 };
 
