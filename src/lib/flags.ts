@@ -18,3 +18,18 @@ export const oauthEnabled = flag<boolean>({
   ],
   adapter: vercelAdapter,
 });
+
+/**
+ * Gates the AI chat assistant. Off by default — enable per-environment from
+ * the Vercel Flags dashboard once AI_PROVIDER_API_KEY is configured.
+ */
+export const assistantEnabled = flag<boolean>({
+  key: "assistant-enabled",
+  description: "Enables the in-app AI chat assistant",
+  defaultValue: false,
+  options: [
+    { value: false, label: "Off" },
+    { value: true, label: "On" },
+  ],
+  adapter: vercelAdapter,
+});

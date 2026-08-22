@@ -12,6 +12,8 @@ export const updateProfileSchema = z.object({
       statusAlertsEnabled: z.boolean().optional(),
       statusAlertComponents: z.array(z.string()).optional(),
       statusAlertSeverities: z.array(z.string()).optional(),
+      assistantEnabled: z.boolean().optional(),
+      assistantStoreHistory: z.boolean().optional(),
     })
     .optional(),
   dashboardCards: z.array(z.string()).optional().nullable(),

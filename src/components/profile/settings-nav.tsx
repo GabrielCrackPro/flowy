@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Icon, type IconProps } from "@/components/shared";
+import { useFlags } from "@/hooks/useFlags";
 import {
   Bell,
   Droplet,
+  MessageSquare,
   Settings2,
   Shield,
   UserRound,
@@ -14,16 +16,23 @@ import {
 } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
-const SECTIONS: Array<{
+const BASE_SECTIONS: Array<{
   id: string;
   icon: IconProps["icon"];
   labelKey: string;
+  requiresFlag?: boolean;
 }> = [
   { id: "profile", icon: UserRound, labelKey: "settings.profile.title" },
   {
     id: "preferences",
     icon: Settings2,
     labelKey: "settings.preferences.title",
+  },
+  {
+    id: "assistant",
+    icon: MessageSquare,
+    labelKey: "settings.assistant.title",
+    requiresFlag: true,
   },
   { id: "spaces", icon: Users, labelKey: "profile.spaces.title" },
   { id: "notifications", icon: Bell, labelKey: "settings.notifications.title" },
@@ -98,7 +107,11 @@ function useScrollSpy(ids: string[], offset = 140) {
  */
 export function SettingsNav() {
   const { t } = useTranslation();
-  const ids = SECTIONS.map((section) => section.id);
+  const { assistantEnabled: assistantFlag } = useFlags();
+  const sections = BASE_SECTIONS.filter(
+    (section) => !section.requiresFlag || assistantFlag,
+  );
+  const ids = sections.map((section) => section.id);
   const activeId = useScrollSpy(ids);
 
   const scrollTo = (id: string) => {
@@ -120,7 +133,7 @@ export function SettingsNav() {
     >
       <div className="-mx-1 overflow-hidden rounded-2xl border border-border/40 bg-muted/20 p-1 lg:mx-0 lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
         <ul className="flex min-w-max gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:min-w-0 lg:flex-col lg:gap-1 lg:overflow-visible lg:px-0 lg:pb-0">
-          {SECTIONS.map((section) => {
+          {sections.map((section) => {
             const isActive = activeId === section.id;
             return (
               <li key={section.id} className="shrink-0 lg:min-w-0">

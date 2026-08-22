@@ -1,15 +1,25 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { type FormEvent, useCallback, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import ReactMarkdown from "react-markdown";
 import { ConfirmDialog, EmptyState, UserAvatar } from "@/components/shared";
 import { DetailCard } from "@/components/shared/detail-card";
 import { Icon } from "@/components/shared/icon";
 import { useCloseWhenSettled } from "@/hooks/useCloseWhenSettled";
 import { useComments } from "@/hooks/useComments";
 import { useProfile } from "@/hooks/useProfile";
-import { MessageSquare, Send } from "@/lib/icons";
+import {
+  Bold,
+  Code2,
+  Eye,
+  EyeOff,
+  Italic,
+  List,
+  MessageSquare,
+  Send,
+} from "@/lib/icons";
 import type { Comment } from "@/types/Comment";
 import { CommentRow } from "./comment-row";
 
@@ -32,6 +42,8 @@ export function CommentsSection({
   } = useComments(entityType, entityId);
 
   const [commentText, setCommentText] = useState("");
+  const [previewComment, setPreviewComment] = useState(false);
+  const commentInputRef = useRef<HTMLInputElement>(null);
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -62,8 +74,33 @@ export function CommentsSection({
       if (!text) return;
       await addComment(text);
       setCommentText("");
+      setPreviewComment(false);
     },
     [commentText, addComment],
+  );
+
+  const applyMarkdown = useCallback(
+    (prefix: string, suffix = "") => {
+      const input = commentInputRef.current;
+      if (!input) return;
+      const start = input.selectionStart ?? commentText.length;
+      const end = input.selectionEnd ?? start;
+      const selected = commentText.slice(start, end);
+      const inserted = `${prefix}${selected}${suffix}`;
+      const next = `${commentText.slice(0, start)}${inserted}${commentText.slice(end)}`;
+      setCommentText(next);
+      requestAnimationFrame(() => {
+        input.focus();
+        if (selected) {
+          const cursor = start + inserted.length;
+          input.setSelectionRange(cursor, cursor);
+        } else {
+          const cursor = start + prefix.length;
+          input.setSelectionRange(cursor, cursor);
+        }
+      });
+    },
+    [commentText],
   );
 
   const handleAddReply = useCallback(
@@ -98,6 +135,9 @@ export function CommentsSection({
     <UserAvatar profile={profile} size="sm" className="size-8 text-[10px]" />
   ) : (
     <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted" />
+  );
+  const markdownLink = (props: React.ComponentProps<"a">) => (
+    <a {...props} target="_blank" rel="noreferrer" />
   );
 
   return (
@@ -184,25 +224,101 @@ export function CommentsSection({
           className="mt-5 flex items-start gap-3"
         >
           {commentAvatar}
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border/60 bg-muted/20 py-1.5 pl-3.5 pr-1.5 transition focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10">
-            <input
-              type="text"
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder={t("transaction.commentPlaceholder")}
-              className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/30"
-            />
-            <button
-              type="submit"
-              disabled={!commentText.trim() || commentsBusy}
-              className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-20"
-            >
-              {commentsBusy ? (
-                <span className="size-3 animate-spin rounded-full border-[1.5px] border-current border-t-transparent" />
-              ) : (
-                <Icon icon={Send} className="size-3.5" />
+          <div className="min-w-0 flex-1 space-y-1 rounded-xl border border-border/60 bg-muted/20 p-1.5 transition focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10">
+            <div className="flex items-center justify-between gap-2 px-1">
+              <div className="flex items-center gap-0.5">
+                {[
+                  {
+                    icon: Bold,
+                    key: "markdownBold",
+                    prefix: "**",
+                    suffix: "**",
+                  },
+                  {
+                    icon: Italic,
+                    key: "markdownItalic",
+                    prefix: "*",
+                    suffix: "*",
+                  },
+                  {
+                    icon: Code2,
+                    key: "markdownCode",
+                    prefix: "`",
+                    suffix: "`",
+                  },
+                  { icon: List, key: "markdownList", prefix: "- ", suffix: "" },
+                ].map(({ icon: IconComponent, key, prefix, suffix }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-label={t(`transaction.${key}`)}
+                    title={t(`transaction.${key}`)}
+                    onClick={() => applyMarkdown(prefix, suffix)}
+                    className="flex size-7 items-center justify-center rounded-md text-muted-foreground/60 transition hover:bg-muted hover:text-foreground"
+                  >
+                    <Icon icon={IconComponent} className="size-3.5" />
+                  </button>
+                ))}
+              </div>
+              {commentText.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setPreviewComment((value) => !value)}
+                  aria-label={
+                    previewComment
+                      ? t("transaction.markdownEdit")
+                      : t("transaction.markdownPreview")
+                  }
+                  aria-pressed={previewComment}
+                  title={
+                    previewComment
+                      ? t("transaction.markdownEdit")
+                      : t("transaction.markdownPreview")
+                  }
+                  className="flex size-7 items-center justify-center rounded-md text-muted-foreground/60 transition hover:bg-muted hover:text-foreground"
+                >
+                  <Icon
+                    icon={previewComment ? EyeOff : Eye}
+                    className="size-3.5"
+                  />
+                </button>
               )}
-            </button>
+            </div>
+            <div className="flex items-center gap-2 py-0.5 pl-2">
+              {previewComment && commentText.trim() ? (
+                <div className="min-h-10 flex-1 px-2 py-2 text-sm text-foreground/85 [&_a]:text-primary [&_a]:underline [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_li]:ml-4 [&_li]:list-disc [&_p]:mb-1.5 [&_p:last-child]:mb-0 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-muted [&_pre]:p-2 [&_ul]:space-y-1">
+                  {commentText.trim() ? (
+                    <ReactMarkdown components={{ a: markdownLink }}>
+                      {commentText}
+                    </ReactMarkdown>
+                  ) : (
+                    <span className="text-muted-foreground/40">
+                      {t("transaction.commentPlaceholder")}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <input
+                  ref={commentInputRef}
+                  type="text"
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder={t("transaction.commentPlaceholder")}
+                  className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/30"
+                />
+              )}
+              <button
+                type="submit"
+                disabled={!commentText.trim() || commentsBusy}
+                className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-20"
+              >
+                {commentsBusy ? (
+                  <span className="size-3 animate-spin rounded-full border-[1.5px] border-current border-t-transparent" />
+                ) : (
+                  <Icon icon={Send} className="size-3.5" />
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>

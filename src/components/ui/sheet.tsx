@@ -284,7 +284,7 @@ export function SheetContent({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             onClick={() => setOpen(false)}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[65] bg-black/60 backdrop-blur-sm"
           />
 
           <motion.div
@@ -302,7 +302,7 @@ export function SheetContent({
                 : { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
             }
             className={cn(
-              "fixed z-50 bg-background outline-none",
+              "fixed z-[70] bg-background outline-none",
               effectiveSide === "bottom"
                 ? cn(bottomPosition, "rounded-t-3xl border-x-0")
                 : sidePosition[effectiveSide],

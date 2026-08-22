@@ -179,9 +179,7 @@ export interface RouteBoundaryOptions<TParams> {
   routeName: string;
   /** Fallback message for unexpected errors (default: generic). */
   fallbackMessage?: string;
-  handler: (
-    context: AuthenticatedRouteContext<TParams>,
-  ) => Promise<NextResponse>;
+  handler: (context: AuthenticatedRouteContext<TParams>) => Promise<Response>;
 }
 
 /**
@@ -195,7 +193,7 @@ function withGuardedRoute<TParams = unknown>(
   return async (
     request: Request,
     routeContext?: { params: Promise<TParams> },
-  ): Promise<NextResponse> => {
+  ): Promise<Response> => {
     const auth = await guard();
     if (isAuthResponse(auth)) return auth;
 
@@ -265,10 +263,10 @@ export async function withRateLimit(
  * @returns Response with rate limit headers
  */
 export function applyRateLimitHeaders(
-  response: NextResponse,
+  response: Response,
   identifier: string,
   routeName: string,
-): NextResponse {
+): Response {
   // Skip rate limit headers if disabled
   if (!RATE_LIMIT_ENABLED) {
     return response;

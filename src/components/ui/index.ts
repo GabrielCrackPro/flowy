@@ -4,6 +4,7 @@ export * from "./button";
 export * from "./calendar";
 export * from "./card";
 export * from "./chart";
+export * from "./chat-bubble";
 export * from "./checkbox";
 export * from "./control-styles";
 export * from "./dialog";

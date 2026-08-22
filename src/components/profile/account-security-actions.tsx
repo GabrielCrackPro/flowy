@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { signOutAndClear } from "@/hooks/useSignOut";
 import { deleteAccount } from "@/lib/api/account";
@@ -36,6 +37,7 @@ export function AccountSecurityActions() {
   const [signOutAllOpen, setSignOutAllOpen] = useState(false);
   const [signingOutAll, setSigningOutAll] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   const formatDate = (value: string | null | undefined) => {
     if (!value) return t("settings.security.noDate");
@@ -86,7 +88,7 @@ export function AccountSecurityActions() {
       <Card>
         <CardHeader>
           <div className="flex items-start gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/10 text-primary">
+            <span className="flex size-6 shrink-0 items-center justify-center text-muted-foreground">
               <Icon icon={Shield} className="size-4" />
             </span>
             <div className="min-w-0">
@@ -221,7 +223,10 @@ export function AccountSecurityActions() {
 
       <ConfirmDialog
         open={deleteOpen}
-        onOpenChange={setDeleteOpen}
+        onOpenChange={(open) => {
+          setDeleteOpen(open);
+          if (!open) setDeleteConfirmText("");
+        }}
         title={t("settings.security.deleteAccountConfirmTitle")}
         description={t("settings.security.deleteAccountConfirmDescription")}
         confirmLabel={
@@ -231,9 +236,59 @@ export function AccountSecurityActions() {
         }
         cancelLabel={t("common.cancel")}
         onConfirm={() => void handleDeleteAccount()}
+        confirmDisabled={
+          deleteConfirmText !==
+            t("settings.security.deleteAccountConfirmWord") || deletingAccount
+        }
         icon={<Icon icon={ShieldAlert} className="size-5" />}
         variant="destructive"
-      />
+      >
+        <ul className="space-y-1.5 text-sm text-muted-foreground">
+          <li className="flex items-start gap-2">
+            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-destructive/60" />
+            {t("settings.security.deleteAccountItemProfile")}
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-destructive/60" />
+            {t("settings.security.deleteAccountItemTransactions")}
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-destructive/60" />
+            {t("settings.security.deleteAccountItemBudgets")}
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-destructive/60" />
+            {t("settings.security.deleteAccountItemGoals")}
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-destructive/60" />
+            {t("settings.security.deleteAccountItemSubscriptions")}
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-destructive/60" />
+            {t("settings.security.deleteAccountItemSpaces")}
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-destructive/60" />
+            {t("settings.security.deleteAccountItemAssistant")}
+          </li>
+        </ul>
+        <div className="space-y-2 pt-2">
+          <p className="text-sm text-muted-foreground">
+            {t("settings.security.deleteAccountConfirmHint", {
+              word: t("settings.security.deleteAccountConfirmWord"),
+            })}
+          </p>
+          <Input
+            autoFocus
+            value={deleteConfirmText}
+            onChange={(e) => setDeleteConfirmText(e.target.value)}
+            placeholder={t("settings.security.deleteAccountConfirmWord")}
+            className="border-destructive/50 focus-visible:ring-destructive/50"
+            aria-label={t("settings.security.deleteAccountConfirmHint")}
+          />
+        </div>
+      </ConfirmDialog>
     </>
   );
 }

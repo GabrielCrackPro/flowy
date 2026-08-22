@@ -4,6 +4,7 @@ export * from "./animated-component";
 export * from "./animated-gradient";
 export * from "./animated-number";
 export * from "./app-logo";
+export * from "./assistant";
 export * from "./banner";
 export * from "./bottom-sheet";
 export * from "./card-motion";

@@ -164,6 +164,12 @@ export const DEFAULT_RATE_LIMITS: Record<string, RateLimitConfig> = {
     window: getEnvNumber("RATE_LIMIT_PUSH_DELIVERY_HISTORY_WINDOW", 120 * 1000),
   },
 
+  // AI assistant — tight limit to control LLM costs
+  assistant: {
+    requests: getEnvNumber("RATE_LIMIT_ASSISTANT_REQUESTS", 10),
+    window: getEnvNumber("RATE_LIMIT_ASSISTANT_WINDOW", 120 * 1000),
+  },
+
   // Default limit for unconfigured routes
   default: {
     requests: getEnvNumber("RATE_LIMIT_DEFAULT_REQUESTS", 150),
@@ -266,11 +272,11 @@ export function createRateLimitResponse(
 }
 
 export function addRateLimitHeaders(
-  response: NextResponse,
+  response: Response,
   remaining: number,
   resetTime: number,
   limit: number,
-): NextResponse {
+): Response {
   response.headers.set("X-RateLimit-Limit", limit.toString());
   response.headers.set("X-RateLimit-Remaining", remaining.toString());
   response.headers.set("X-RateLimit-Reset", new Date(resetTime).toISOString());

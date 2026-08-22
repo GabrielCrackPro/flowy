@@ -7233,6 +7233,12 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "assistantEnabled": {
+                "type": "boolean"
+              },
+              "assistantStoreHistory": {
+                "type": "boolean"
               }
             },
             "additionalProperties": false

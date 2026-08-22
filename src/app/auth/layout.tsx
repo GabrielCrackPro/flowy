@@ -134,7 +134,9 @@ async function AuthContent({ children }: { children: React.ReactNode }) {
 
             <div className="flex min-h-0 w-full items-center lg:min-h-[540px]">
               <AuthPageTransition>
-                <FlagsProvider flags={{ oauthEnabled: oauth }}>
+                <FlagsProvider
+                  flags={{ oauthEnabled: oauth, assistantEnabled: false }}
+                >
                   {children}
                 </FlagsProvider>
               </AuthPageTransition>
